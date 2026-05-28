@@ -1,6 +1,47 @@
+# =====================
+# Dependencies
+# =====================
 vendor/
-.env
+backend/vendor/
 node_modules/
-docker/mysql/
-*.log
+
+# =====================
+# Environment files
+# =====================
+.env
+
+# =====================
+# OS files
+# =====================
 .DS_Store
+Thumbs.db
+
+# =====================
+# Logs
+# =====================
+*.log
+
+# =====================
+# Docker
+# =====================
+docker/mysql/
+
+# =====================
+# CodeIgniter writable
+# =====================
+backend/writable/cache/*
+backend/writable/logs/*
+backend/writable/session/*
+backend/writable/uploads/*
+!backend/writable/index.html
+
+# =====================
+# IDE
+# =====================
+.vscode/
+.idea/
+
+# =====================
+# Composer (optional)
+# =====================
+composer.lock

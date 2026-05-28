@@ -1,0 +1,9 @@
+</div> <!-- end content -->
+    </div> <!-- end row -->
+</div> <!-- end container -->
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>
