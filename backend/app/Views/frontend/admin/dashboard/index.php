@@ -123,9 +123,14 @@ $chartCanvasWidth = max(560, count($chartSource) * 92);
                             <td><span class="badge badge-soft"><?= esc($log['action'] ?? '') ?></span></td>
                             <td><span class="activity-meta activity-summary"><?= esc($log['description'] ?? '') ?></span></td>
                             <td class="text-center">
-                                <button class="btn btn-outline-primary icon-btn" type="button" data-bs-toggle="modal" data-bs-target="#dashboardLogModal" data-log='<?= esc(json_encode($payload, JSON_UNESCAPED_SLASHES), 'attr') ?>'>
-                                    <i class="fa-regular fa-eye"></i>
-                                </button>
+                        <button
+                            class="btn btn-outline-primary icon-btn"
+                            type="button"
+                            data-bs-toggle="modal"
+                            data-bs-target="#logModal"
+                            data-log='<?= htmlspecialchars(json_encode($payload), ENT_QUOTES, 'UTF-8') ?>'>
+                            <i class="fa-regular fa-eye"></i>
+                        </button>
                             </td>
                         </tr>
                     <?php endforeach; ?>
