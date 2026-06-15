@@ -27,6 +27,16 @@
 # app.CSPEnabled = false
 
 #--------------------------------------------------------------------
+# SSO
+#--------------------------------------------------------------------
+
+# SSO_GOOGLE_CLIENT_ID =480458121048-bp4n2rmm13trgkjejp39i96dvaagmbvc.apps.googleusercontent.com
+# SSO_GOOGLE_CLIENT_SECRET =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
+# SSO_GOOGLE_REDIRECT_URI = http://localhost:8080/auth/google/callback
+# SSO_GOOGLE_HOSTED_DOMAIN =
+# SSO_GOOGLE_ALLOWED_ROLES = admin,director_general,ict_planner,employee
+
+#--------------------------------------------------------------------
 # DATABASE
 #--------------------------------------------------------------------
 

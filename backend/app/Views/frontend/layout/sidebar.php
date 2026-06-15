@@ -8,13 +8,10 @@ $dashboardPath = match ($roleSlug) {
 };
 ?>
 <aside class="app-sidebar">
-    <div class="brand d-flex align-items-center gap-2">
-        <div class="brand-mark">
-            <i class="fa-solid fa-database"></i>
-        </div>
+    <div class="brand">
         <div class="brand-text">
-            <div class="title">ISSP</div>
-            <div class="sub">Management System</div>
+            <div class="title">ICT Management System</div>
+            <br>
         </div>
     </div>
 

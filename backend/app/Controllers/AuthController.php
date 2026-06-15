@@ -3,7 +3,6 @@
 namespace App\Controllers;
 
 use App\Models\AuditLogModel;
-use App\Models\RoleModel;
 use App\Models\UserModel;
 use Config\Services;
 use Throwable;
@@ -48,6 +47,7 @@ class AuthController extends BaseController
 
         return redirect()->to(site_url($this->dashboardPathForRole((string) ($user['role_slug'] ?? 'employee'))));
     }
+
 
     public function logout()
     {
@@ -110,13 +110,25 @@ class AuthController extends BaseController
         }
 
         if (! $this->googleProfileAllowed($profile)) {
-            return redirect()->to(site_url('login'))->with('error', 'This Google account is not allowed to sign in.');
+            return redirect()->to(site_url('login'))->with('error', 'Your Google account is not allowed to sign in.');
         }
 
-        $user = $this->findOrCreateGoogleUser($profile);
+        $user = $this->findGoogleUser($profile);
 
-        if ($user === null || $user['status'] !== 'active') {
-            return redirect()->to(site_url('login'))->with('error', 'Your account is inactive. Please contact the administrator.');
+        if ($user === null) {
+            return redirect()->to(site_url('login'))->with('error', 'No pre-registered account was found for this Google email. Please contact the administrator.');
+        }
+
+        if ($user['status'] !== 'active') {
+            return redirect()->to(site_url('login'))->with('error', 'Your account is inactive. Please contact the administrator to reactivate it.');
+        }
+
+        if (! $this->googleEmailVerified($profile)) {
+            return redirect()->to(site_url('login'))->with('error', 'Your Google email is not verified.');
+        }
+
+        if (! $this->googleRoleAllowed((string) ($user['role_slug'] ?? ''))) {
+            return redirect()->to(site_url('login'))->with('error', 'Your role is not allowed to sign in with Google.');
         }
 
         $this->startUserSession($user, 'google');
@@ -186,40 +198,44 @@ class AuthController extends BaseController
         return $profileDomain === $allowedDomain;
     }
 
-    private function findOrCreateGoogleUser(array $profile): ?array
+    private function googleEmailVerified(array $profile): bool
+    {
+        return filter_var($profile['email_verified'] ?? false, FILTER_VALIDATE_BOOL);
+    }
+
+    private function findGoogleUser(array $profile): ?array
     {
         $userModel = new UserModel();
         $email = strtolower(trim((string) $profile['email']));
-        $user = $userModel->findByEmailWithRole($email);
-        $now = date('Y-m-d H:i:s');
-
-        $payload = [
-            'name'           => $profile['name'] ?? $email,
-            'email'          => $email,
-            'sso_provider'   => 'google',
-            'sso_subject'    => $profile['sub'] ?? null,
-            'email_verified' => ! empty($profile['email_verified']) ? 1 : 0,
-            'last_login_at'  => $now,
-        ];
-        $payload += $this->nameColumns($payload['name']);
-
-        if ($user === null) {
-            $role = (new RoleModel())->where('slug', 'employee')->first();
-
-            if ($role === null) {
-                return null;
-            }
-
-            $payload['role_id'] = $role['id'];
-            $payload['status'] = 'active';
-            $userModel->insert($payload);
-
-            return $userModel->findByEmailWithRole($email);
-        }
-
-        $userModel->update($user['id'], $payload);
 
         return $userModel->findByEmailWithRole($email);
+    }
+
+    private function googleRoleAllowed(string $roleSlug): bool
+    {
+        $allowedRoles = $this->googleAllowedRoles();
+
+        if ($allowedRoles === []) {
+            return true;
+        }
+
+        return in_array($roleSlug, $allowedRoles, true);
+    }
+
+    private function googleAllowedRoles(): array
+    {
+        $configured = strtolower((string) env('SSO_GOOGLE_ALLOWED_ROLES'));
+
+        if ($configured === '') {
+            return ['admin', 'director_general', 'ict_planner', 'employee'];
+        }
+
+        $roles = array_filter(array_map(
+            static fn (string $role): string => trim($role),
+            preg_split('/\s*,\s*/', $configured) ?: []
+        ));
+
+        return array_values(array_unique($roles));
     }
 
     private function startUserSession(array $user, string $provider): void
@@ -254,27 +270,6 @@ class AuthController extends BaseController
             'description' => $description,
             'created_at'  => date('Y-m-d H:i:s'),
         ]);
-    }
-
-    private function nameColumns(string $name): array
-    {
-        $parts = preg_split('/\s+/', trim($name)) ?: [];
-
-        if (count($parts) <= 1) {
-            return [
-                'first_name'     => $name,
-                'last_name'      => 'User',
-                'middle_initial' => null,
-            ];
-        }
-
-        $lastName = array_pop($parts);
-
-        return [
-            'first_name'     => implode(' ', $parts),
-            'last_name'      => $lastName,
-            'middle_initial' => null,
-        ];
     }
 
     private function dashboardPathForRole(string $roleSlug): string

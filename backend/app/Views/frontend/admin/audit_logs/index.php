@@ -28,11 +28,9 @@ $logPayload = static function (array $log): array {
             <h2 class="panel-title">Audit Logs</h2>
             <p class="panel-subtitle">Review user activity and system changes.</p>
         </div>
-        <form class="d-flex align-items-center toolbar-form" method="get" action="<?= site_url('admin/audit-logs') ?>">
-            <input class="form-control form-control-sm" name="q" value="<?= esc($query ?? '') ?>" placeholder="Search Activity" style="width: 220px;">
-            <button class="btn btn-outline-primary" type="submit">
-                <i class="fa-solid fa-magnifying-glass"></i>
-            </button>
+        <form class="d-flex align-items-center toolbar-form audit-toolbar" method="get" action="<?= site_url('admin/audit-logs') ?>">
+            <input class="form-control form-control-sm" name="q" value="<?= esc($query ?? '') ?>" placeholder="Search Activity">
+            <input class="form-control form-control-sm" name="date" type="date" value="<?= esc($date ?? '') ?>">
         </form>
     </div>
 
@@ -79,4 +77,14 @@ $logPayload = static function (array $log): array {
 
 <?= $this->section('scripts') ?>
 <?= $this->include('frontend/layout/log_modal_script', ['modalId' => 'viewLogModal', 'prefix' => 'log']) ?>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const form = document.querySelector('form[action="<?= site_url('admin/audit-logs') ?>"]');
+    const dateInput = form ? form.querySelector('input[name="date"]') : null;
+
+    if (dateInput) {
+        dateInput.addEventListener('change', () => form.submit());
+    }
+});
+</script>
 <?= $this->endSection() ?>
