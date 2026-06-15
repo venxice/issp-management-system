@@ -1,6 +1,6 @@
-<?= $this->include('layout/header') ?>
-<?= $this->include('layout/alerts') ?>
+<?= $this->extend('frontend/layout/app') ?>
 
+<?= $this->section('content') ?>
 <?php
 $roles = $roles ?? [];
 $departments = $departments ?? [];
@@ -35,7 +35,7 @@ $userPayload = static function (array $user): array {
         </div>
 
         <div class="d-flex flex-wrap align-items-center justify-content-end toolbar-form">
-            <form class="d-flex flex-wrap align-items-center toolbar-form" method="get" action="<?= site_url('users') ?>">
+            <form class="d-flex flex-wrap align-items-center toolbar-form" method="get" action="<?= site_url('admin/users') ?>">
                 <input class="form-control form-control-sm" name="q" value="<?= esc($query ?? '') ?>" placeholder="Search Users" style="width: 168px;">
                 <select class="form-select form-select-sm" name="role" style="width: 150px;">
                     <option value="">All Roles</option>
@@ -103,22 +103,10 @@ $userPayload = static function (array $user): array {
                     </td>
                     <td class="text-center">
                         <div class="d-inline-flex gap-1">
-                            <button
-                                class="btn btn-outline-primary icon-btn"
-                                type="button"
-                                data-bs-toggle="modal"
-                                data-bs-target="#viewUserModal"
-                                data-user='<?= esc(json_encode($payload, JSON_UNESCAPED_SLASHES), 'attr') ?>'
-                            >
+                            <button class="btn btn-outline-primary icon-btn" type="button" data-bs-toggle="modal" data-bs-target="#viewUserModal" data-user='<?= esc(json_encode($payload, JSON_UNESCAPED_SLASHES), 'attr') ?>'>
                                 <i class="fa-regular fa-eye"></i>
                             </button>
-                            <button
-                                class="btn btn-outline-primary icon-btn"
-                                type="button"
-                                data-bs-toggle="modal"
-                                data-bs-target="#editUserModal"
-                                data-user='<?= esc(json_encode($payload, JSON_UNESCAPED_SLASHES), 'attr') ?>'
-                            >
+                            <button class="btn btn-outline-primary icon-btn" type="button" data-bs-toggle="modal" data-bs-target="#editUserModal" data-user='<?= esc(json_encode($payload, JSON_UNESCAPED_SLASHES), 'attr') ?>'>
                                 <i class="fa-regular fa-pen-to-square"></i>
                             </button>
                         </div>
@@ -137,72 +125,25 @@ $userPayload = static function (array $user): array {
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <div>
-                    <h5 class="modal-title">Add New User</h5>
-                </div>
+                <div><h5 class="modal-title">Add New User</h5></div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form id="addUserForm" action="<?= site_url('users') ?>" method="post">
+            <form id="addUserForm" action="<?= site_url('admin/users') ?>" method="post">
                 <?= csrf_field() ?>
-                <input type="hidden" name="name" value="">
                 <div class="modal-body modal-form-grid">
-                    <div class="row g-2">
-                        <div class="col-md-4">
-                            <label class="form-label" for="add_first_name">First Name</label>
-                            <input class="form-control" id="add_first_name" name="first_name" placeholder="Enter First Name" required>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label" for="add_last_name">Last Name</label>
-                            <input class="form-control" id="add_last_name" name="last_name" placeholder="Enter Last Name" required>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label" for="add_middle_initial">Middle Initial</label>
-                            <input class="form-control" id="add_middle_initial" name="middle_initial" placeholder="J">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label" for="add_email">Email Address</label>
-                            <input class="form-control" id="add_email" name="email" type="email" placeholder="name@example.com" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label" for="add_department_id">Division</label>
-                            <select class="form-select" id="add_department_id" name="department_id">
-                                <option value="">Select Division</option>
-                                <?php foreach ($departments as $department): ?>
-                                    <option value="<?= esc($department['id']) ?>"><?= esc($department['name']) ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label" for="add_role_id">Role</label>
-                            <select class="form-select" id="add_role_id" name="role_id" required>
-                                <option value="">Select Role</option>
-                                <?php foreach ($roles as $role): ?>
-                                    <option value="<?= esc($role['id']) ?>"><?= esc($role['name']) ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label" for="add_status">Status</label>
-                            <select class="form-select" id="add_status" name="status" required>
-                                <option value="active">Active</option>
-                                <option value="inactive">Inactive</option>
-                            </select>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label" for="add_password">Password</label>
-                            <input class="form-control" id="add_password" name="password" type="password" autocomplete="new-password" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label" for="add_password_confirmation">Confirm Password</label>
-                            <input class="form-control" id="add_password_confirmation" name="password_confirmation" type="password" autocomplete="new-password" required>
-                        </div>
-                    </div>
+                    <?= $this->include('frontend/admin/users/_fields', [
+                        'prefix' => 'add',
+                        'user' => [],
+                        'roles' => $roles,
+                        'departments' => $departments,
+                        'isEdit' => false,
+                        'passwordRequired' => true,
+                        'showPasswordHelp' => false,
+                    ]) ?>
                 </div>
                 <div class="modal-footer justify-content-between">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button class="btn btn-primary" type="submit">
-                        <i class="fa-solid fa-user-plus me-2"></i> Add
-                    </button>
+                    <button class="btn btn-primary" type="submit"><i class="fa-solid fa-user-plus me-2"></i> Add</button>
                 </div>
             </form>
         </div>
@@ -213,9 +154,7 @@ $userPayload = static function (array $user): array {
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <div>
-                    <h5 class="modal-title">User Details</h5>
-                </div>
+                <div><h5 class="modal-title">User Details</h5></div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -246,82 +185,33 @@ $userPayload = static function (array $user): array {
             </div>
             <div class="modal-footer justify-content-between">
                 <button type="button" class="btn btn-outline-danger d-none" id="view-user-deactivate">Deactivate</button>
-                <a class="btn btn-primary" href="#" id="view-user-edit">
-                    <i class="fa-solid fa-pen-to-square me-2"></i> Edit User
-                </a>
+                <a class="btn btn-primary" href="#" id="view-user-edit"><i class="fa-solid fa-pen-to-square me-2"></i> Edit User</a>
             </div>
         </div>
     </div>
 </div>
 
-<form id="viewDeactivateForm" method="post" class="d-none">
-    <?= csrf_field() ?>
-</form>
+<form id="viewDeactivateForm" method="post" class="d-none"><?= csrf_field() ?></form>
 
 <div class="modal fade" id="editUserModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <div>
-                    <h5 class="modal-title">Edit User</h5>
-                </div>
+                <div><h5 class="modal-title">Edit User</h5></div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="editUserForm" method="post">
                 <?= csrf_field() ?>
-                <input type="hidden" name="name" value="">
                 <div class="modal-body modal-form-grid">
-                    <div class="row g-2">
-                        <div class="col-md-4">
-                            <label class="form-label" for="edit_first_name">First Name</label>
-                            <input class="form-control" id="edit_first_name" name="first_name" required>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label" for="edit_last_name">Last Name</label>
-                            <input class="form-control" id="edit_last_name" name="last_name" required>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label" for="edit_middle_initial">Middle Initial</label>
-                            <input class="form-control" id="edit_middle_initial" name="middle_initial">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label" for="edit_email">Email Address</label>
-                            <input class="form-control" id="edit_email" name="email" type="email" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label" for="edit_department_id">Division</label>
-                            <select class="form-select" id="edit_department_id" name="department_id">
-                                <option value="">Select Division</option>
-                                <?php foreach ($departments as $department): ?>
-                                    <option value="<?= esc($department['id']) ?>"><?= esc($department['name']) ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label" for="edit_role_id">Role</label>
-                            <select class="form-select" id="edit_role_id" name="role_id" required>
-                                <option value="">Select Role</option>
-                                <?php foreach ($roles as $role): ?>
-                                    <option value="<?= esc($role['id']) ?>"><?= esc($role['name']) ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label" for="edit_status">Status</label>
-                            <select class="form-select" id="edit_status" name="status" required>
-                                <option value="active">Active</option>
-                                <option value="inactive">Inactive</option>
-                            </select>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label" for="edit_password">New Password</label>
-                            <input class="form-control" id="edit_password" name="password" type="password" autocomplete="new-password">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label" for="edit_password_confirmation">Confirm Password</label>
-                            <input class="form-control" id="edit_password_confirmation" name="password_confirmation" type="password" autocomplete="new-password">
-                        </div>
-                    </div>
+                    <?= $this->include('frontend/admin/users/_fields', [
+                        'prefix' => 'edit',
+                        'user' => [],
+                        'roles' => $roles,
+                        'departments' => $departments,
+                        'isEdit' => true,
+                        'passwordRequired' => false,
+                        'showPasswordHelp' => true,
+                    ]) ?>
                 </div>
                 <div class="px-3 pb-2">
                     <button class="btn btn-link text-danger text-decoration-none p-0 d-none" type="button" id="editDeactivateButton">
@@ -330,75 +220,19 @@ $userPayload = static function (array $user): array {
                 </div>
                 <div class="modal-footer justify-content-between">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button class="btn btn-primary" type="submit">
-                        <i class="fa-solid fa-floppy-disk me-2"></i> Update
-                    </button>
+                    <button class="btn btn-primary" type="submit"><i class="fa-solid fa-floppy-disk me-2"></i> Update</button>
                 </div>
             </form>
-            <form id="editDeactivateForm" method="post" class="d-none">
-                <?= csrf_field() ?>
-            </form>
+            <form id="editDeactivateForm" method="post" class="d-none"><?= csrf_field() ?></form>
         </div>
     </div>
 </div>
+<?= $this->endSection() ?>
 
+<?= $this->section('scripts') ?>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    const joinName = (first, middle, last) => [first, middle, last].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
     const toText = (value, fallback = '-') => (value && String(value).trim() !== '' ? String(value) : fallback);
-
-    const bindFullName = (form) => {
-        const first = form.querySelector('[name="first_name"]');
-        const middle = form.querySelector('[name="middle_initial"]');
-        const last = form.querySelector('[name="last_name"]');
-        const full = form.querySelector('[name="name"]');
-
-        const sync = () => {
-            full.value = joinName(first.value, middle.value, last.value);
-        };
-
-        [first, middle, last].forEach((input) => input.addEventListener('input', sync));
-        sync();
-    };
-
-    bindFullName(document.getElementById('addUserForm'));
-    bindFullName(document.getElementById('editUserForm'));
-
-    const addPassword = document.getElementById('add_password');
-    const addPasswordConfirmation = document.getElementById('add_password_confirmation');
-    const editPassword = document.getElementById('edit_password');
-    const editPasswordConfirmation = document.getElementById('edit_password_confirmation');
-
-    const validatePasswords = (password, confirmation) => {
-        if ((password.value !== '' || confirmation.value !== '') && password.value !== confirmation.value) {
-            confirmation.setCustomValidity('Passwords do not match.');
-        } else {
-            confirmation.setCustomValidity('');
-        }
-    };
-
-    [addPassword, addPasswordConfirmation].forEach((input) => {
-        input.addEventListener('input', () => validatePasswords(addPassword, addPasswordConfirmation));
-    });
-    [editPassword, editPasswordConfirmation].forEach((input) => {
-        input.addEventListener('input', () => validatePasswords(editPassword, editPasswordConfirmation));
-    });
-
-    document.getElementById('addUserForm').addEventListener('submit', (event) => {
-        validatePasswords(addPassword, addPasswordConfirmation);
-        if (! addPasswordConfirmation.checkValidity()) {
-            event.preventDefault();
-            addPasswordConfirmation.reportValidity();
-        }
-    });
-
-    document.getElementById('editUserForm').addEventListener('submit', (event) => {
-        validatePasswords(editPassword, editPasswordConfirmation);
-        if (! editPasswordConfirmation.checkValidity()) {
-            event.preventDefault();
-            editPasswordConfirmation.reportValidity();
-        }
-    });
 
     const formatDateTime = (value) => {
         if (! value) {
@@ -440,9 +274,9 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('view-user-last-login').textContent = formatDateTime(user.last_login_at);
         document.getElementById('view-user-created').textContent = formatDateTime(user.created_at);
         document.getElementById('view-user-updated').textContent = formatDateTime(user.updated_at);
-        document.getElementById('view-user-edit').href = `<?= site_url('users') ?>/` + user.id + `/edit`;
+        document.getElementById('view-user-edit').href = `<?= site_url('admin/users') ?>/` + user.id + `/edit`;
         viewDeactivateButton.classList.toggle('d-none', user.status !== 'active');
-        viewDeactivateForm.action = `<?= site_url('users') ?>/` + user.id + `/deactivate`;
+        viewDeactivateForm.action = `<?= site_url('admin/users') ?>/` + user.id + `/deactivate`;
     });
 
     viewDeactivateButton.addEventListener('click', () => {
@@ -456,15 +290,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     editModal.addEventListener('show.bs.modal', (event) => {
         const user = JSON.parse(event.relatedTarget.getAttribute('data-user'));
-
         const fullName = (user.name || '').trim();
         const parts = fullName.split(/\s+/);
         const firstName = user.first_name || parts[0] || '';
         const lastName = user.last_name || parts.slice(1).join(' ') || '';
         const middleInitial = user.middle_initial || '';
 
-        editForm.action = `<?= site_url('users') ?>/` + user.id;
-        editForm.querySelector('[name="name"]').value = fullName;
+        editForm.action = `<?= site_url('admin/users') ?>/` + user.id;
         editForm.querySelector('[name="first_name"]').value = firstName;
         editForm.querySelector('[name="last_name"]').value = lastName;
         editForm.querySelector('[name="middle_initial"]').value = middleInitial;
@@ -476,8 +308,7 @@ document.addEventListener('DOMContentLoaded', () => {
         editForm.querySelector('[name="password_confirmation"]').value = '';
         editDeactivateButton.classList.toggle('d-none', user.status !== 'active');
 
-        const deactivateAction = `<?= site_url('users') ?>/` + user.id + `/deactivate`;
-        editDeactivateForm.action = deactivateAction;
+        editDeactivateForm.action = `<?= site_url('admin/users') ?>/` + user.id + `/deactivate`;
     });
 
     editDeactivateButton.addEventListener('click', () => {
@@ -485,5 +316,4 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 </script>
-
-<?= $this->include('layout/footer') ?>
+<?= $this->endSection() ?>

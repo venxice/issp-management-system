@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Controllers;
+namespace App\Controllers\Admin;
 
+use App\Controllers\BaseController;
 use App\Models\AuditLogModel;
 use App\Models\DepartmentModel;
 use App\Models\RoleModel;
@@ -37,7 +38,7 @@ class UsersController extends BaseController
             $builder->where('users.status', $status);
         }
 
-        return view('users/index', [
+        return view('frontend/admin/users/index', [
             'title' => 'User Management',
             'active' => 'users',
             'users' => $builder->orderBy('users.created_at', 'DESC')->findAll(),
@@ -51,7 +52,7 @@ class UsersController extends BaseController
 
     public function create()
     {
-        return view('users/form', [
+        return view('frontend/admin/users/form', [
             'title' => 'Create User',
             'active' => 'users',
             'user' => null,
@@ -63,7 +64,9 @@ class UsersController extends BaseController
     public function store()
     {
         $rules = [
-            'name' => 'required|min_length[2]|max_length[120]',
+            'first_name' => 'required|min_length[2]|max_length[80]',
+            'last_name' => 'required|min_length[2]|max_length[80]',
+            'middle_initial' => 'permit_empty|max_length[10]',
             'email' => 'required|valid_email|is_unique[users.email]',
             'password' => 'required|min_length[8]',
             'password_confirmation' => 'required_with[password]|matches[password]',
@@ -81,7 +84,7 @@ class UsersController extends BaseController
         $id = (new UserModel())->insert($payload, true);
         $this->writeLog('user.created', 'Created user #' . $id . ' (' . $payload['email'] . ').');
 
-        return redirect()->to(site_url('users'))->with('success', 'User account created.');
+        return redirect()->to(site_url('admin/users'))->with('success', 'User account created.');
     }
 
     public function edit(int $id)
@@ -89,10 +92,10 @@ class UsersController extends BaseController
         $user = (new UserModel())->find($id);
 
         if ($user === null) {
-            return redirect()->to(site_url('users'))->with('error', 'User not found.');
+            return redirect()->to(site_url('admin/users'))->with('error', 'User not found.');
         }
 
-        return view('users/form', [
+        return view('frontend/admin/users/form', [
             'title' => 'Edit User',
             'active' => 'users',
             'user' => $user,
@@ -107,11 +110,13 @@ class UsersController extends BaseController
         $user = $userModel->find($id);
 
         if ($user === null) {
-            return redirect()->to(site_url('users'))->with('error', 'User not found.');
+            return redirect()->to(site_url('admin/users'))->with('error', 'User not found.');
         }
 
         $rules = [
-            'name' => 'required|min_length[2]|max_length[120]',
+            'first_name' => 'required|min_length[2]|max_length[80]',
+            'last_name' => 'required|min_length[2]|max_length[80]',
+            'middle_initial' => 'permit_empty|max_length[10]',
             'email' => 'required|valid_email|is_unique[users.email,id,' . $id . ']',
             'password' => 'permit_empty|min_length[8]',
             'password_confirmation' => 'required_with[password]|matches[password]',
@@ -137,26 +142,26 @@ class UsersController extends BaseController
         $userModel->update($id, $payload);
         $this->writeLog('user.updated', 'Updated user #' . $id . ' (' . $payload['email'] . ').');
 
-        return redirect()->to(site_url('users'))->with('success', 'User account updated.');
+        return redirect()->to(site_url('admin/users'))->with('success', 'User account updated.');
     }
 
     public function deactivate(int $id)
     {
         if ((int) session()->get('user_id') === $id) {
-            return redirect()->to(site_url('users'))->with('error', 'You cannot deactivate your own account.');
+            return redirect()->to(site_url('admin/users'))->with('error', 'You cannot deactivate your own account.');
         }
 
         $userModel = new UserModel();
         $user = $userModel->find($id);
 
         if ($user === null) {
-            return redirect()->to(site_url('users'))->with('error', 'User not found.');
+            return redirect()->to(site_url('admin/users'))->with('error', 'User not found.');
         }
 
         $userModel->update($id, ['status' => 'inactive']);
         $this->writeLog('user.deactivated', 'Deactivated user #' . $id . ' (' . $user['email'] . ').');
 
-        return redirect()->to(site_url('users'))->with('success', 'User account deactivated.');
+        return redirect()->to(site_url('admin/users'))->with('success', 'User account deactivated.');
     }
 
     private function userPayload(): array

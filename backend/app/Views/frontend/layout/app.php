@@ -17,8 +17,6 @@ $active = $active ?? '';
             --panel: #ffffff;
             --line: #d7dce4;
             --nav: #1e2740;
-            --nav-soft: #3f5474;
-            --nav-light: #5d7495;
             --muted: #6b7280;
             --brand: #4f6584;
             --brand-dark: #344863;
@@ -327,86 +325,37 @@ $active = $active ?? '';
         }
 
         .dashboard-chart {
-            padding: 10px 12px 10px;
+            padding: 8px 10px 10px;
         }
 
         .dashboard-chart__frame {
             border: 1px solid #e2e6ec;
             border-radius: 6px;
-            padding: 8px 8px 6px;
+            padding: 8px 10px 8px;
             background: #fff;
             box-shadow: inset 0 1px 0 rgba(15, 23, 42, .02);
         }
 
-        .chart-area {
-            min-height: 148px;
+        .division-chart-wrap {
+            width: 100%;
             display: flex;
-            align-items: flex-end;
-            gap: 12px;
-            padding: 8px 4px 2px;
+            justify-content: center;
         }
 
-        .chart-column {
-            flex: 1 1 0;
-            min-width: 0;
+        .dashboard-chart__scroll {
+            width: 100%;
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding-bottom: 4px;
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 6px;
+            justify-content: center;
         }
 
-        .chart-bar {
-            width: 14px;
-            max-width: 14px;
-            min-height: 16px;
-            border-radius: 4px;
-            background: #4f6180;
-            align-self: center;
-            margin: 0 auto;
-            box-shadow: 0 1px 0 rgba(15, 23, 42, .08);
-        }
-
-        .chart-column:nth-child(2n) .chart-bar {
-            background: #6a7f9b;
-        }
-
-        .chart-column:nth-child(3n) .chart-bar {
-            background: #344560;
-        }
-
-        .chart-label {
-            font-size: .62rem;
-            line-height: 1;
-            color: var(--muted);
-            letter-spacing: 0;
-            text-align: center;
-        }
-
-        .chart-value {
-            font-size: .68rem;
-            line-height: 1;
-            color: #4f6180;
-            font-weight: 700;
-        }
-
-        .dashboard-table .table {
-            font-size: .72rem;
-            table-layout: fixed;
-        }
-
-        .dashboard-table .table > :not(caption) > * > * {
-            padding: 5px 8px;
-            line-height: 1.1;
-        }
-
-        .dashboard-table .table thead th {
-            background: #536783;
-            padding-top: 8px;
-            padding-bottom: 8px;
-        }
-
-        .dashboard-table tbody td {
-            vertical-align: middle;
+        .division-chart-canvas-wrap {
+            position: relative;
+            width: 100%;
+            min-width: 100%;
+            height: 240px;
         }
 
         .toolbar-form {
@@ -562,17 +511,6 @@ $active = $active ?? '';
             font-size: .66rem;
         }
 
-        .activity-action {
-            width: 20px;
-            height: 20px;
-            display: inline-grid;
-            place-items: center;
-            border-radius: 50%;
-            border: 1px solid #cfd6e1;
-            color: #5c6f8a;
-            background: #fff;
-        }
-
         .activity-meta {
             font-size: .7rem;
             color: var(--muted);
@@ -620,27 +558,6 @@ $active = $active ?? '';
             font-weight: 600;
             line-height: 1.15;
             letter-spacing: 0;
-        }
-
-        .btn-primary {
-            --bs-btn-bg: var(--brand-dark);
-            --bs-btn-border-color: var(--brand-dark);
-            --bs-btn-hover-bg: #24334d;
-            --bs-btn-hover-border-color: #24334d;
-        }
-
-        .btn-outline-primary {
-            --bs-btn-color: var(--brand-dark);
-            --bs-btn-border-color: #c7cfdb;
-            --bs-btn-hover-bg: #edf2f7;
-            --bs-btn-hover-border-color: #b6c2d5;
-            --bs-btn-hover-color: var(--brand-dark);
-        }
-
-        .badge-soft {
-            background: #edf2f7;
-            color: var(--brand-dark);
-            border: 1px solid #d8e0ea;
         }
 
         .badge {
@@ -704,10 +621,11 @@ $active = $active ?? '';
             }
         }
     </style>
+    <?= $this->renderSection('styles') ?>
 </head>
 <body>
 <div class="app-layout">
-    <?= $this->include('layout/sidebar') ?>
+    <?= $this->include('frontend/layout/sidebar') ?>
     <main class="app-main">
         <header class="topbar">
             <div class="title-wrap">
@@ -721,3 +639,11 @@ $active = $active ?? '';
             </div>
         </header>
         <div class="content-wrap">
+            <?= $this->renderSection('content') ?>
+        </div>
+    </main>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<?= $this->renderSection('scripts') ?>
+</body>
+</html>

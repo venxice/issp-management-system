@@ -13,10 +13,10 @@ class AuthController extends BaseController
     public function loginForm()
     {
         if (session()->get('is_logged_in')) {
-            return redirect()->to(site_url('dashboard'));
+            return redirect()->to(site_url($this->dashboardPathForRole((string) session()->get('role_slug'))));
         }
 
-        return view('auth/login', [
+        return view('frontend/auth/login', [
             'title' => 'Login',
             'googleEnabled' => $this->googleSsoConfigured(),
         ]);
@@ -46,7 +46,7 @@ class AuthController extends BaseController
 
         $this->startUserSession($user, 'password');
 
-        return redirect()->to(site_url('dashboard'));
+        return redirect()->to(site_url($this->dashboardPathForRole((string) ($user['role_slug'] ?? 'employee'))));
     }
 
     public function logout()
@@ -121,7 +121,7 @@ class AuthController extends BaseController
 
         $this->startUserSession($user, 'google');
 
-        return redirect()->to(site_url('dashboard'))->with('success', 'Signed in with Google.');
+        return redirect()->to(site_url($this->dashboardPathForRole((string) ($user['role_slug'] ?? 'employee'))))->with('success', 'Signed in with Google.');
     }
 
     private function googleSsoConfigured(): bool
@@ -275,5 +275,16 @@ class AuthController extends BaseController
             'last_name'      => $lastName,
             'middle_initial' => null,
         ];
+    }
+
+    private function dashboardPathForRole(string $roleSlug): string
+    {
+        return match ($roleSlug) {
+            'admin' => 'admin/dashboard',
+            'director_general' => 'director-general/dashboard',
+            'ict_planner' => 'ict-planner/dashboard',
+            'employee' => 'employee/dashboard',
+            default => 'dashboard',
+        };
     }
 }
