@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Controllers;
+namespace App\Controllers\Admin;
 
+use App\Controllers\BaseController;
 use App\Models\AuditLogModel;
 
 class AuditLogsController extends BaseController
@@ -19,7 +20,7 @@ class AuditLogsController extends BaseController
                 ->groupEnd();
         }
 
-        return view('audit_logs/index', [
+        return view('frontend/admin/audit_logs/index', [
             'title' => 'Audit Logs',
             'active' => 'audit',
             'query' => $query,

@@ -25,9 +25,23 @@ class AuthSeeder extends Seeder
         ], $now);
 
         $this->upsertRole([
+            'name'        => 'Director General',
+            'slug'        => 'director_general',
+            'description' => 'Views consolidated planning and management summaries.',
+            'is_system'   => 1,
+        ], $now);
+
+        $this->upsertRole([
             'name'        => 'Employee',
             'slug'        => 'employee',
             'description' => 'Encodes assigned ISSP tasks and submissions.',
+            'is_system'   => 1,
+        ], $now);
+
+        $this->upsertRole([
+            'name'        => 'ICT Planner',
+            'slug'        => 'ict_planner',
+            'description' => 'Manages ICT planning data, monitoring, and technical coordination.',
             'is_system'   => 1,
         ], $now);
 
