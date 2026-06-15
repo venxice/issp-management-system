@@ -55,6 +55,13 @@ This system is designed to centralize and streamline ISSP preparation, consolida
 - System audit trail for accountability
 - Notification system for updates and alerts
 
+### Authentication & Access
+- Password login/logout with CodeIgniter sessions stored in MySQL
+- Role-based access control for administrator-only pages
+- User and role management screens
+- Google SSO support through OAuth 2.0 environment settings
+- Default development administrator seeded from environment values
+
 ---
 
 ## System Architecture
@@ -88,3 +95,33 @@ issp-management-system/
 ├── .env.example          # Environment configuration template
 └── README.md
 ```
+
+---
+
+## Local Auth Setup
+
+Start the stack, run the identity migration, and seed the default roles/admin account:
+
+```bash
+docker compose up -d --build
+docker compose exec app php spark migrate
+docker compose exec app php spark db:seed AuthSeeder
+```
+
+Default development login:
+
+- Email: `admin@issp.test`
+- Password: `Admin@12345`
+
+Override those values in `.env` with `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD`, and `SEED_ADMIN_NAME` before seeding.
+
+For Google SSO, create OAuth credentials in Google Cloud and set:
+
+```dotenv
+SSO_GOOGLE_CLIENT_ID=
+SSO_GOOGLE_CLIENT_SECRET=
+SSO_GOOGLE_REDIRECT_URI=http://localhost:8080/auth/google/callback
+SSO_GOOGLE_HOSTED_DOMAIN=
+```
+
+Leave `SSO_GOOGLE_HOSTED_DOMAIN` empty to allow any Google account, or set it to your organization domain.
