@@ -97,7 +97,7 @@ $userPayload = static function (array $user): array {
                         <?php endif; ?>
                     </td>
                     <td>
-                        <span class="badge <?= $user['status'] === 'active' ? 'text-bg-success' : 'text-bg-secondary' ?>">
+                        <span class="badge <?= strtolower($user['status']) === 'active' ? 'bg-success text-white' : 'bg-danger text-white' ?>">
                             <?= esc(ucfirst($user['status'])) ?>
                         </span>
                     </td>
