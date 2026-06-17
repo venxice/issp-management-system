@@ -10,7 +10,6 @@ $prefix = $prefix ?? 'log';
     border: 1px solid #e9ecef;
 }
 
-/* HEADER (BLUE RESTORED) */
 .log-modal .modal-header {
     background: #536783;
     border-bottom: none;
@@ -36,7 +35,6 @@ $prefix = $prefix ?? 'log';
     padding: 22px;
 }
 
-/* USER HEADER */
 .log-modal .user-header {
     margin-bottom: 18px;
     padding-bottom: 14px;
@@ -55,7 +53,6 @@ $prefix = $prefix ?? 'log';
     margin-top: 3px;
 }
 
-/* GRID */
 .log-modal .detail-grid {
     display: grid;
     grid-template-columns: 170px 1fr;
@@ -75,7 +72,6 @@ $prefix = $prefix ?? 'log';
     word-break: break-word;
 }
 
-/* SECTION */
 .log-modal .section-title {
     font-size: .75rem;
     font-weight: 700;
@@ -103,13 +99,11 @@ $prefix = $prefix ?? 'log';
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
         <div class="modal-content">
 
-            <!-- HEADER -->
             <div class="modal-header">
                 <h5 class="modal-title">User Activity Log</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
 
-            <!-- BODY -->
             <div class="modal-body">
 
                 <div class="user-header">
@@ -120,7 +114,6 @@ $prefix = $prefix ?? 'log';
                 <div class="detail-grid">
                     <div class="key">ID</div><div class="val" id="<?= esc($prefix) ?>-id">-</div>
                     <div class="key">Email</div><div class="val" id="<?= esc($prefix) ?>-email-field">-</div>
-                    <div class="key">Contact</div><div class="val" id="<?= esc($prefix) ?>-contact">-</div>
                     <div class="key">Role</div><div class="val" id="<?= esc($prefix) ?>-role">-</div>
                     <div class="key">Position</div><div class="val" id="<?= esc($prefix) ?>-position">-</div>
                     <div class="key">Division</div><div class="val" id="<?= esc($prefix) ?>-division">-</div>
@@ -143,6 +136,6 @@ $prefix = $prefix ?? 'log';
 
             </div>
 
-        </div>
-    </div>
-</div>
+         </div>
+     </div>
+ </div>

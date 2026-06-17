@@ -6,6 +6,7 @@ $showPasswordHelp = (bool) ($showPasswordHelp ?? $isEdit);
 $user = $user ?? [];
 $roles = $roles ?? [];
 $departments = $departments ?? [];
+$positions = $positions ?? [];
 
 $fieldId = static function (string $field) use ($prefix): string {
     return $prefix !== '' ? $prefix . '_' . $field : $field;
@@ -14,20 +15,20 @@ $fieldId = static function (string $field) use ($prefix): string {
 <div class="row g-2">
     <div class="col-md-4">
         <label class="form-label fw-semibold" for="<?= esc($fieldId('first_name')) ?>">First Name</label>
-        <input class="form-control" id="<?= esc($fieldId('first_name')) ?>" name="first_name" value="<?= esc(old('first_name', $user['first_name'] ?? '')) ?>" placeholder="Enter first name" required>
+        <input class="form-control" id="<?= esc($fieldId('first_name')) ?>" name="first_name" value="<?= esc(old('first_name', $user['first_name'] ?? '')) ?>" placeholder="Given name (e.g., Juan)" required>
     </div>
     <div class="col-md-4">
         <label class="form-label fw-semibold" for="<?= esc($fieldId('last_name')) ?>">Last Name</label>
-        <input class="form-control" id="<?= esc($fieldId('last_name')) ?>" name="last_name" value="<?= esc(old('last_name', $user['last_name'] ?? '')) ?>" placeholder="Enter last name" required>
+        <input class="form-control" id="<?= esc($fieldId('last_name')) ?>" name="last_name" value="<?= esc(old('last_name', $user['last_name'] ?? '')) ?>" placeholder="Family name (e.g., Dela Cruz)" required>
     </div>
     <div class="col-md-4">
         <label class="form-label fw-semibold" for="<?= esc($fieldId('middle_initial')) ?>">Middle Initial</label>
-        <input class="form-control" id="<?= esc($fieldId('middle_initial')) ?>" name="middle_initial" value="<?= esc(old('middle_initial', $user['middle_initial'] ?? '')) ?>" placeholder="J">
+        <input class="form-control" id="<?= esc($fieldId('middle_initial')) ?>" name="middle_initial" value="<?= esc(old('middle_initial', $user['middle_initial'] ?? '')) ?>" placeholder="Optional (e.g., M)">
     </div>
 
     <div class="col-md-6">
         <label class="form-label fw-semibold" for="<?= esc($fieldId('email')) ?>">Email Address</label>
-        <input class="form-control" id="<?= esc($fieldId('email')) ?>" name="email" type="email" value="<?= esc(old('email', $user['email'] ?? '')) ?>" required>
+        <input class="form-control" id="<?= esc($fieldId('email')) ?>" name="email" type="email" value="<?= esc(old('email', $user['email'] ?? '')) ?>" placeholder="user@example.gov.ph" required>
     </div>
     <div class="col-md-6">
         <label class="form-label fw-semibold" for="<?= esc($fieldId('status')) ?>">Status</label>
@@ -52,6 +53,18 @@ $fieldId = static function (string $field) use ($prefix): string {
         </select>
     </div>
     <div class="col-md-6">
+        <label class="form-label fw-semibold" for="<?= esc($fieldId('position')) ?>">Position</label>
+        <select class="form-select" id="<?= esc($fieldId('position')) ?>" name="position">
+            <option value="">Select position</option>
+            <?php foreach ($positions ?? [] as $pos): ?>
+                <?php $selectedPos = (string) old('position', $user['position'] ?? '') === (string) $pos; ?>
+                <option value="<?= esc($pos) ?>" <?= $selectedPos ? 'selected' : '' ?>><?= esc($pos) ?></option>
+            <?php endforeach; ?>
+        </select>
+    </div>
+
+    <!-- Division full width below role/position -->
+    <div class="col-md-12">
         <label class="form-label fw-semibold" for="<?= esc($fieldId('department_id')) ?>">Division</label>
         <select class="form-select" id="<?= esc($fieldId('department_id')) ?>" name="department_id">
             <option value="">No division</option>
@@ -66,13 +79,15 @@ $fieldId = static function (string $field) use ($prefix): string {
 
     <div class="col-md-6">
         <label class="form-label fw-semibold" for="<?= esc($fieldId('password')) ?>"><?= $isEdit ? 'New Password' : 'Password' ?></label>
-        <input class="form-control" id="<?= esc($fieldId('password')) ?>" name="password" type="password" autocomplete="new-password" <?= $passwordRequired ? 'required' : '' ?>>
-        <?php if ($showPasswordHelp): ?>
-            <div class="form-text">Leave blank to keep the current password.</div>
+        <input class="form-control" id="<?= esc($fieldId('password')) ?>" name="password" type="password" autocomplete="new-password" placeholder="At least 8 characters">
+        <?php if ($isEdit): ?>
+            <div class="form-text">Leave blank to keep the current password. Only enter a value if you want to change it.</div>
+        <?php elseif ($showPasswordHelp): ?>
+            <div class="form-text">Password is required for new user accounts.</div>
         <?php endif; ?>
     </div>
     <div class="col-md-6">
         <label class="form-label fw-semibold" for="<?= esc($fieldId('password_confirmation')) ?>">Confirm Password</label>
-        <input class="form-control" id="<?= esc($fieldId('password_confirmation')) ?>" name="password_confirmation" type="password" autocomplete="new-password" <?= $passwordRequired ? 'required' : '' ?>>
+        <input class="form-control" id="<?= esc($fieldId('password_confirmation')) ?>" name="password_confirmation" type="password" autocomplete="new-password" placeholder="Repeat the password">
     </div>
 </div>

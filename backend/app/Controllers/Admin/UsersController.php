@@ -38,15 +38,44 @@ class UsersController extends BaseController
             $builder->where('users.status', $status);
         }
 
+        // fetch users
+        $users = $builder->orderBy('users.created_at', 'DESC')->findAll();
+
+        // load positions rows
+        $posRows = db_connect()->table('positions')->select('id, name')->orderBy('name')->get()->getResultArray();
+        $posById = [];
+        foreach ($posRows as $r) {
+            $posById[(int) ($r['id'] ?? 0)] = $r['name'] ?? '';
+        }
+
+        foreach ($users as &$u) {
+            if (isset($u['position_id']) && $u['position_id'] !== null && $u['position_id'] !== '') {
+                $pid = (int) $u['position_id'];
+                if (isset($posById[$pid]) && ($u['position'] ?? '') !== $posById[$pid]) {
+                    $u['position'] = $posById[$pid];
+                }
+            } else {
+                if (isset($u['position']) && is_numeric($u['position'])) {
+                    $pid = (int) $u['position'];
+                    if (isset($posById[$pid])) {
+                        $u['position'] = $posById[$pid];
+                    }
+                }
+            }
+        }
+        unset($u);
+
         return view('frontend/admin/users/index', [
             'title' => 'User Management',
             'active' => 'users',
-            'users' => $builder->orderBy('users.created_at', 'DESC')->findAll(),
+            'users' => $users,
             'query' => $query,
             'roleFilter' => $role,
             'statusFilter' => $status,
             'roles' => (new RoleModel())->orderBy('name')->findAll(),
             'departments' => (new DepartmentModel())->orderBy('name')->findAll(),
+            // load positions from positions table (positions.name)
+            'positions' => array_map(fn($r) => $r['name'] ?? '', $posRows),
         ]);
     }
 
@@ -58,6 +87,7 @@ class UsersController extends BaseController
             'user' => null,
             'roles' => (new RoleModel())->orderBy('name')->findAll(),
             'departments' => (new DepartmentModel())->orderBy('name')->findAll(),
+            'positions' => array_map(fn($r) => $r['name'] ?? '', db_connect()->table('positions')->select('name')->orderBy('name')->get()->getResultArray()),
         ]);
     }
 
@@ -101,6 +131,7 @@ class UsersController extends BaseController
             'user' => $user,
             'roles' => (new RoleModel())->orderBy('name')->findAll(),
             'departments' => (new DepartmentModel())->orderBy('name')->findAll(),
+            'positions' => array_map(fn($r) => $r['name'] ?? '', db_connect()->table('positions')->select('name')->orderBy('name')->get()->getResultArray()),
         ]);
     }
 
@@ -164,6 +195,21 @@ class UsersController extends BaseController
         return redirect()->to(site_url('admin/users'))->with('success', 'User account deactivated.');
     }
 
+    public function reactivate(int $id)
+    {
+        $userModel = new UserModel();
+        $user = $userModel->find($id);
+
+        if ($user === null) {
+            return redirect()->to(site_url('admin/users'))->with('error', 'User not found.');
+        }
+
+        $userModel->update($id, ['status' => 'active']);
+        $this->writeLog('user.reactivated', 'Reactivated user #' . $id . ' (' . $user['email'] . ').');
+
+        return redirect()->to(site_url('admin/users'))->with('success', 'User account reactivated.');
+    }
+
     private function userPayload(): array
     {
         $firstName = trim((string) $this->request->getPost('first_name'));
@@ -171,6 +217,7 @@ class UsersController extends BaseController
         $middleInitial = trim((string) $this->request->getPost('middle_initial'));
         $departmentId = $this->request->getPost('department_id');
         $name = trim((string) $this->request->getPost('name'));
+        $position = trim((string) $this->request->getPost('position'));
 
         if ($firstName !== '' || $lastName !== '' || $middleInitial !== '') {
             $nameParts = array_filter([
@@ -189,6 +236,7 @@ class UsersController extends BaseController
             'email' => strtolower(trim((string) $this->request->getPost('email'))),
             'role_id' => (int) $this->request->getPost('role_id'),
             'department_id' => $departmentId === '' ? null : (int) $departmentId,
+            'position' => $position === '' ? null : $position,
             'status' => (string) $this->request->getPost('status'),
             'first_name' => $firstName !== '' ? $firstName : $derivedNames['first_name'],
             'last_name' => $lastName !== '' ? $lastName : $derivedNames['last_name'],

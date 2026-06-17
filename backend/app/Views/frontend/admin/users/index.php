@@ -12,6 +12,7 @@ $userPayload = static function (array $user): array {
         'first_name' => $user['first_name'] ?? '',
         'last_name' => $user['last_name'] ?? '',
         'middle_initial' => $user['middle_initial'] ?? '',
+        'position' => $user['position_id'] ?? '',
         'email' => $user['email'] ?? '',
         'role_id' => $user['role_id'] ?? '',
         'role_name' => $user['role_name'] ?? '',
@@ -30,7 +31,7 @@ $userPayload = static function (array $user): array {
 <section class="panel">
     <div class="panel-header d-flex flex-wrap gap-3 align-items-center justify-content-between">
         <div>
-            <h2 class="panel-title">Users List</h2>
+            <h2 class="panel-title">User Management</h2>
             <p class="panel-subtitle">Manage local and SSO-enabled user accounts.</p>
         </div>
 
@@ -50,9 +51,7 @@ $userPayload = static function (array $user): array {
                     <option value="active" <?= ($statusFilter ?? '') === 'active' ? 'selected' : '' ?>>Active</option>
                     <option value="inactive" <?= ($statusFilter ?? '') === 'inactive' ? 'selected' : '' ?>>Inactive</option>
                 </select>
-                <button class="btn btn-outline-primary" type="submit" aria-label="Search users">
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                </button>
+                <!-- Search button removed: form will submit automatically on select changes or Enter -->
             </form>
 
             <button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#addUserModal">
@@ -81,10 +80,7 @@ $userPayload = static function (array $user): array {
                 <tr>
                     <td><?= esc($user['id']) ?></td>
                     <td>
-                        <div class="fw-semibold"><?= esc($user['name']) ?></div>
-                        <div class="small text-muted-strong">
-                            <?= esc(trim(($user['first_name'] ?? '') . ' ' . ($user['last_name'] ?? ''))) ?>
-                        </div>
+                        <div><?= esc($user['name']) ?></div>
                     </td>
                     <td><?= esc($user['email']) ?></td>
                     <td><?= esc($user['role_name'] ?? 'Unassigned') ?></td>
@@ -103,7 +99,7 @@ $userPayload = static function (array $user): array {
                     </td>
                     <td class="text-center">
                         <div class="d-inline-flex gap-1">
-                            <button class="btn btn-outline-primary icon-btn" type="button" data-bs-toggle="modal" data-bs-target="#viewUserModal" data-user='<?= esc(json_encode($payload, JSON_UNESCAPED_SLASHES), 'attr') ?>'>
+                            <button class="btn btn-outline-primary icon-btn view-user-btn" type="button" data-user='<?= esc(json_encode($payload, JSON_UNESCAPED_SLASHES), 'attr') ?>'>
                                 <i class="fa-regular fa-eye"></i>
                             </button>
                             <button class="btn btn-outline-primary icon-btn" type="button" data-bs-toggle="modal" data-bs-target="#editUserModal" data-user='<?= esc(json_encode($payload, JSON_UNESCAPED_SLASHES), 'attr') ?>'>
@@ -136,6 +132,7 @@ $userPayload = static function (array $user): array {
                         'user' => [],
                         'roles' => $roles,
                         'departments' => $departments,
+                        'positions' => $positions ?? [],
                         'isEdit' => false,
                         'passwordRequired' => true,
                         'showPasswordHelp' => false,
@@ -150,46 +147,7 @@ $userPayload = static function (array $user): array {
     </div>
 </div>
 
-<div class="modal fade" id="viewUserModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div><h5 class="modal-title">User Details</h5></div>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="d-flex align-items-center gap-3 mb-3">
-                    <div class="brand-mark flex-shrink-0" style="width: 42px; height: 42px; background: #e9eef5; color: #526784;">
-                        <i class="fa-solid fa-user"></i>
-                    </div>
-                    <div>
-                        <div class="fw-semibold" id="view-user-name">-</div>
-                        <div class="activity-meta" id="view-user-email">-</div>
-                    </div>
-                </div>
-                <div class="detail-list">
-                    <div class="key">ID</div><div class="val" id="view-user-id">-</div>
-                    <div class="key">First Name</div><div class="val" id="view-user-first-name">-</div>
-                    <div class="key">Last Name</div><div class="val" id="view-user-last-name">-</div>
-                    <div class="key">Middle Initial</div><div class="val" id="view-user-middle-initial">-</div>
-                    <div class="key">Email Address</div><div class="val" id="view-user-email-field">-</div>
-                    <div class="key">Role</div><div class="val" id="view-user-role">-</div>
-                    <div class="key">Division</div><div class="val" id="view-user-division">-</div>
-                    <div class="key">Status</div><div class="val" id="view-user-status">-</div>
-                    <div class="key">Sign-in</div><div class="val" id="view-user-signin">-</div>
-                    <div class="key">Verified</div><div class="val" id="view-user-verified">-</div>
-                    <div class="key">Last Login</div><div class="val" id="view-user-last-login">-</div>
-                    <div class="key">Created</div><div class="val" id="view-user-created">-</div>
-                    <div class="key">Updated</div><div class="val" id="view-user-updated">-</div>
-                </div>
-            </div>
-            <div class="modal-footer justify-content-between">
-                <button type="button" class="btn btn-outline-danger d-none" id="view-user-deactivate">Deactivate</button>
-                <a class="btn btn-primary" href="#" id="view-user-edit"><i class="fa-solid fa-pen-to-square me-2"></i> Edit User</a>
-            </div>
-        </div>
-    </div>
-</div>
+<?= $this->include('frontend/layout/user_detail_modal', ['modalId' => 'viewUserModal', 'prefix' => 'view-user', 'showEdit' => true]) ?>
 
 <form id="viewDeactivateForm" method="post" class="d-none"><?= csrf_field() ?></form>
 
@@ -208,12 +166,16 @@ $userPayload = static function (array $user): array {
                         'user' => [],
                         'roles' => $roles,
                         'departments' => $departments,
+                        'positions' => $positions ?? [],
                         'isEdit' => true,
                         'passwordRequired' => false,
                         'showPasswordHelp' => true,
                     ]) ?>
                 </div>
                 <div class="px-3 pb-2">
+                    <button class="btn btn-link text-success text-decoration-none p-0 d-none me-3" type="button" id="editReactivateButton">
+                        <i class="fa-solid fa-user-check me-1"></i> Reactivate account
+                    </button>
                     <button class="btn btn-link text-danger text-decoration-none p-0 d-none" type="button" id="editDeactivateButton">
                         <i class="fa-solid fa-user-slash me-1"></i> Deactivate account
                     </button>
@@ -224,6 +186,7 @@ $userPayload = static function (array $user): array {
                 </div>
             </form>
             <form id="editDeactivateForm" method="post" class="d-none"><?= csrf_field() ?></form>
+            <form id="editReactivateForm" method="post" class="d-none"><?= csrf_field() ?></form>
         </div>
     </div>
 </div>
@@ -232,6 +195,18 @@ $userPayload = static function (array $user): array {
 <?= $this->section('scripts') ?>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+    const form = document.querySelector('form[action="<?= site_url('admin/users') ?>"]');
+    if (form) {
+        form.addEventListener('change', (e) => {
+            if (e.target.matches('select')) {
+                form.submit();
+            }
+        });
+        form.addEventListener('submit', (e) => {
+            // allow normal submit on Enter
+        });
+    }
+
     const toText = (value, fallback = '-') => (value && String(value).trim() !== '' ? String(value) : fallback);
 
     const formatDateTime = (value) => {
@@ -253,43 +228,99 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    const viewModal = document.getElementById('viewUserModal');
-    const viewDeactivateButton = document.getElementById('view-user-deactivate');
-    const viewDeactivateForm = document.getElementById('viewDeactivateForm');
-    viewModal.addEventListener('show.bs.modal', (event) => {
-        const user = JSON.parse(event.relatedTarget.getAttribute('data-user'));
+    document.addEventListener('click', (e) => {
+        const btn = e.target.closest('button.view-user-btn');
+        if (! btn) return;
+        const payload = btn.getAttribute('data-user') || btn.dataset.user || '{}';
+        let user = {};
+        try { user = JSON.parse(payload); } catch (err) { user = {}; }
 
-        document.getElementById('view-user-name').textContent = toText(user.name);
-        document.getElementById('view-user-email').textContent = toText(user.email);
-        document.getElementById('view-user-id').textContent = toText(user.id);
-        document.getElementById('view-user-first-name').textContent = toText(user.first_name);
-        document.getElementById('view-user-last-name').textContent = toText(user.last_name);
-        document.getElementById('view-user-middle-initial').textContent = toText(user.middle_initial);
-        document.getElementById('view-user-email-field').textContent = toText(user.email);
-        document.getElementById('view-user-role').textContent = toText(user.role_name);
-        document.getElementById('view-user-division').textContent = toText(user.department_name);
-        document.getElementById('view-user-status').textContent = toText(user.status ? user.status.charAt(0).toUpperCase() + user.status.slice(1) : '');
-        document.getElementById('view-user-signin').textContent = user.sso_provider ? `${user.sso_provider.charAt(0).toUpperCase() + user.sso_provider.slice(1)} SSO` : 'Password';
-        document.getElementById('view-user-verified').textContent = user.email_verified ? 'Yes' : 'No';
-        document.getElementById('view-user-last-login').textContent = formatDateTime(user.last_login_at);
-        document.getElementById('view-user-created').textContent = formatDateTime(user.created_at);
-        document.getElementById('view-user-updated').textContent = formatDateTime(user.updated_at);
-        document.getElementById('view-user-edit').href = `<?= site_url('admin/users') ?>/` + user.id + `/edit`;
-        viewDeactivateButton.classList.toggle('d-none', user.status !== 'active');
-        viewDeactivateForm.action = `<?= site_url('admin/users') ?>/` + user.id + `/deactivate`;
-    });
+        let modalEl = document.getElementById('viewUserModal') || document.querySelector('.log-modal');
+        if (! modalEl) {
+            console.error('viewUserModal element not found');
+            return;
+        }
 
-    viewDeactivateButton.addEventListener('click', () => {
-        viewDeactivateForm.submit();
+        const focused = document.activeElement;
+        if (focused && focused !== document.body) try { focused.blur(); } catch (e) { /* ignore */ }
+
+        if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+            document.querySelectorAll('.modal.show').forEach((m) => {
+                try {
+                    const inst = bootstrap.Modal.getInstance(m);
+                    if (inst) inst.hide();
+                } catch (err) {
+                }
+            });
+        }
+
+        const set = (key, val) => { const el = document.getElementById('view-user-' + key); if (! el) return; el.textContent = (val === undefined || val === null || String(val).trim() === '') ? '-' : String(val); };
+
+        set('user', user.name || '-');
+        set('email', user.email || '-');
+        set('email-field', user.email || '-');
+        set('id', user.id || '-');
+        set('role', user.role_name || '-');
+        set('position', user.position || '-');
+        set('division', user.department_name || '-');
+        set('status', user.status || '-');
+        set('created', user.created_at ? formatDateTime(user.created_at) : '-');
+        set('updated', user.updated_at ? formatDateTime(user.updated_at) : '-');
+
+        const headerEdit = document.getElementById('view-user-edit-header');
+        if (headerEdit) {
+            headerEdit.onclick = () => {
+                const modalEdit = document.getElementById('editUserModal');
+                if (! modalEdit) return;
+                try { modalEdit.dataset.user = JSON.stringify(user); } catch (e) { /* ignore */ }
+                if (typeof bootstrap === 'undefined' || ! bootstrap.Modal) { console.error('Bootstrap Modal not available'); return; }
+                const bs = bootstrap.Modal.getOrCreateInstance(modalEdit);
+                bs.show();
+                try { const close = modalEdit.querySelector('.btn-close'); if (close) close.focus(); } catch (e) { /* ignore */ }
+            };
+        }
+
+        if (typeof bootstrap === 'undefined' || ! bootstrap.Modal) {
+            console.error('Bootstrap Modal not available');
+            return;
+        }
+        const instance = bootstrap.Modal.getOrCreateInstance(modalEl);
+        instance.show();
+        try {
+            const closeBtn = modalEl.querySelector('.btn-close');
+            if (closeBtn) closeBtn.focus();
+        } catch (e) {}
     });
 
     const editModal = document.getElementById('editUserModal');
     const editForm = document.getElementById('editUserForm');
     const editDeactivateButton = document.getElementById('editDeactivateButton');
     const editDeactivateForm = document.getElementById('editDeactivateForm');
+    const editReactivateButton = document.getElementById('editReactivateButton');
+    const editReactivateForm = document.getElementById('editReactivateForm');
 
     editModal.addEventListener('show.bs.modal', (event) => {
-        const user = JSON.parse(event.relatedTarget.getAttribute('data-user'));
+        let user = null;
+        try {
+            if (event.relatedTarget && typeof event.relatedTarget.getAttribute === 'function') {
+                const attr = event.relatedTarget.getAttribute('data-user');
+                if (attr) user = JSON.parse(attr);
+            }
+        } catch (e) {
+            user = null;
+        }
+
+        if (! user) {
+            try {
+                const data = (document.getElementById('editUserModal') && document.getElementById('editUserModal').dataset.user) || document.getElementById('editUserModal').getAttribute('data-user') || '{}';
+                user = JSON.parse(data);
+            } catch (e) {
+                user = null;
+            }
+        }
+
+        if (! user) return;
+
         const fullName = (user.name || '').trim();
         const parts = fullName.split(/\s+/);
         const firstName = user.first_name || parts[0] || '';
@@ -303,17 +334,151 @@ document.addEventListener('DOMContentLoaded', () => {
         editForm.querySelector('[name="email"]').value = user.email || '';
         editForm.querySelector('[name="role_id"]').value = user.role_id || '';
         editForm.querySelector('[name="department_id"]').value = user.department_id || '';
+        const posField = editForm.querySelector('[name="position"]');
+        if (posField) {
+            try { posField.value = user.position || ''; } catch (e) { /* ignore */ }
+        }
         editForm.querySelector('[name="status"]').value = user.status || 'active';
         editForm.querySelector('[name="password"]').value = '';
         editForm.querySelector('[name="password_confirmation"]').value = '';
         editDeactivateButton.classList.toggle('d-none', user.status !== 'active');
+        editReactivateButton.classList.toggle('d-none', user.status === 'active');
 
         editDeactivateForm.action = `<?= site_url('admin/users') ?>/` + user.id + `/deactivate`;
+        editReactivateForm.action = `<?= site_url('admin/users') ?>/` + user.id + `/reactivate`;
     });
 
     editDeactivateButton.addEventListener('click', () => {
         editDeactivateForm.submit();
     });
+
+    editReactivateButton.addEventListener('click', () => {
+        editReactivateForm.submit();
+    });
+
+    const addForm = document.getElementById('addUserForm');
+    const editFormElement = document.getElementById('editUserForm');
+
+    const validateForm = (form) => {
+        if (! form) return true;
+        const email = form.querySelector('[name="email"]');
+        const pwd = form.querySelector('[name="password"]');
+        const pwdc = form.querySelector('[name="password_confirmation"]');
+
+        if (email && email.value.trim() !== '') {
+            const re = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+            if (! re.test(email.value.trim())) {
+                showValidationModal(['Please enter a valid email address.']);
+                email.focus();
+                return false;
+            }
+        }
+
+        if (pwd && pwdc) {
+            if (form.id === 'addUserForm' && pwd.value.trim() === '') {
+                showValidationModal(['Password is required for new users.']);
+                pwd.focus();
+                return false;
+            }
+            if (pwd.value !== pwdc.value) {
+                showValidationModal(['Password and confirmation do not match.']);
+                pwd.focus();
+                return false;
+            }
+            if (pwd.value !== '' && pwd.value.length < 8) {
+                showValidationModal(['Password must be at least 8 characters.']);
+                pwd.focus();
+                return false;
+            }
+        }
+
+        return true;
+    };
+
+    const showValidationModal = (messages) => {
+        const list = document.getElementById('validationModalList');
+        if (list) {
+            list.innerHTML = '';
+            messages.forEach((msg) => {
+                const li = document.createElement('li');
+                li.textContent = msg;
+                list.appendChild(li);
+            });
+        }
+
+        const modal = new bootstrap.Modal(document.getElementById('validationModal'));
+        modal.show();
+    };
+
+    let pendingSubmitForm = null;
+    const confirmModalEl = document.getElementById('confirmSubmitModal');
+    const confirmModal = confirmModalEl ? new bootstrap.Modal(confirmModalEl) : null;
+    const confirmMessageEl = document.getElementById('confirmSubmitMessage');
+    const confirmButton = document.getElementById('confirmSubmitButton');
+
+    const openConfirm = (form, message) => {
+        pendingSubmitForm = form;
+        if (confirmMessageEl) confirmMessageEl.textContent = message || 'Are you sure?';
+        if (confirmModal) confirmModal.show();
+    };
+
+    if (confirmButton) {
+        confirmButton.addEventListener('click', () => {
+            if (! pendingSubmitForm) return;
+            pendingSubmitForm.submit();
+            pendingSubmitForm = null;
+            if (confirmModal) confirmModal.hide();
+        });
+    }
+
+    if (addForm) {
+        addForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (! validateForm(addForm)) return;
+            openConfirm(addForm, 'Are you sure you want to add this user?');
+        });
+    }
+
+    if (editFormElement) {
+        editFormElement.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (! validateForm(editFormElement)) return;
+            openConfirm(editFormElement, 'Are you sure you want to update this user?');
+        });
+    }
 });
 </script>
+<div class="modal fade" id="validationModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Please fix the following</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <ul id="validationModalList" class="mb-0"></ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="confirmSubmitModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-sm modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Confirm</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p id="confirmSubmitMessage">Are you sure?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="confirmSubmitButton">Confirm</button>
+      </div>
+    </div>
+  </div>
+</div>
 <?= $this->endSection() ?>
