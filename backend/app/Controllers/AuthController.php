@@ -262,14 +262,20 @@ class AuthController extends BaseController
         $this->writeLog((int) $user['id'], 'login', 'User signed in using ' . $provider . '.');
     }
 
-    private function writeLog(?int $userId, string $action, string $description): void
+    private function writeLog(?int $userId, string $action, string $description, array $extra = []): void
     {
-        (new AuditLogModel())->insert([
+        $request = \Config\Services::request();
+        $insert = array_merge([
             'user_id'     => $userId,
             'action'      => $action,
             'description' => $description,
             'created_at'  => date('Y-m-d H:i:s'),
-        ]);
+            'page_url'    => (string) $request->getURI(),
+            'user_agent'  => (string) $request->getUserAgent(),
+            'ip_address'  => (string) $request->getIPAddress(),
+        ], $extra);
+
+        (new \App\Models\AuditLogModel())->insert($insert);
     }
 
     private function dashboardPathForRole(string $roleSlug): string

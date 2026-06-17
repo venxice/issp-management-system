@@ -12,12 +12,12 @@ $logPayload = static function (array $log): array {
         'role_name' => $log['role_name'] ?? '',
         'user_email' => $log['user_email'] ?? '',
         'department_name' => $log['department_name'] ?? '',
-        'page_url' => '-',
-        'user_agent' => '-',
-        'ip_address' => '-',
-        'contact_number' => '-',
-        'position' => $log['role_name'] ?? '',
-        'new_data' => '-',
+        'page_url' => $log['page_url'] ?? '-',
+        'user_agent' => $log['user_agent'] ?? '-',
+        'ip_address' => $log['ip_address'] ?? '-',
+        'contact_number' => $log['contact_number'] ?? '-',
+        'position' => $log['position'] ?? '',
+        'new_data' => $log['new_data'] ?? '-',
     ];
 };
 ?>
@@ -55,7 +55,7 @@ $logPayload = static function (array $log): array {
                     <td><?= esc($log['created_at'] ?? '') ?></td>
                     <td><?= esc($log['user_name'] ?? 'System') ?></td>
                     <td><?= esc($log['role_name'] ?? 'Unknown') ?></td>
-                    <td><span class="badge badge-soft"><?= esc($log['action'] ?? '') ?></span></td>
+                    <td><span class="badge badge-soft"><?= esc(str_replace('.', ' ', $log['action'] ?? '')) ?></span></td>
                     <td><span class="activity-meta activity-summary"><?= esc($log['description'] ?? '') ?></span></td>
                     <td class="text-center">
                         <button class="btn btn-outline-primary icon-btn" type="button" data-bs-toggle="modal" data-bs-target="#viewLogModal" data-log='<?= esc(json_encode($payload, JSON_UNESCAPED_SLASHES), 'attr') ?>'>

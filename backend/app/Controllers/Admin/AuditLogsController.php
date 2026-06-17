@@ -31,12 +31,52 @@ class AuditLogsController extends BaseController
             'active' => 'audit',
             'query' => $query,
             'date' => $date,
-            'logs' => $logs->select('logs.*, users.name AS user_name, users.email AS user_email, roles.name AS role_name, departments.name AS department_name')
+            'logs' => $logs->select('logs.*, logs.page_url, logs.user_agent, logs.ip_address, logs.new_data, logs.contact_number, logs.position, users.name AS user_name, users.email AS user_email, roles.name AS role_name, departments.name AS department_name')
                 ->join('users', 'users.id = logs.user_id', 'left')
                 ->join('roles', 'roles.id = users.role_id', 'left')
                 ->join('departments', 'departments.id = users.department_id', 'left')
+                ->whereNotIn('logs.action', ['login', 'logout'])
                 ->orderBy('logs.created_at', 'DESC')
                 ->findAll(25),
         ]);
+    }
+
+    public function json($id = null)
+    {
+        $id = (int) $id;
+        if ($id <= 0) {
+            return $this->response->setStatusCode(400)->setJSON(['error' => 'Invalid id']);
+        }
+
+        $logs = new AuditLogModel();
+        $log = $logs->select('logs.*, logs.page_url, logs.user_agent, logs.ip_address, logs.new_data, logs.contact_number, logs.position, users.name AS user_name, users.email AS user_email, roles.name AS role_name, departments.name AS department_name')
+            ->join('users', 'users.id = logs.user_id', 'left')
+            ->join('roles', 'roles.id = users.role_id', 'left')
+            ->join('departments', 'departments.id = users.department_id', 'left')
+            ->where('logs.id', $id)
+            ->first();
+
+        if (! $log) {
+            return $this->response->setStatusCode(404)->setJSON(['error' => 'Log not found']);
+        }
+
+        $payload = [
+            'id' => $log['id'] ?? '',
+            'action' => $log['action'] ?? '',
+            'description' => $log['description'] ?? '',
+            'created_at' => $log['created_at'] ?? '',
+            'user_name' => $log['user_name'] ?? '',
+            'role_name' => $log['role_name'] ?? '',
+            'user_email' => $log['user_email'] ?? '',
+            'department_name' => $log['department_name'] ?? '',
+            'page_url' => $log['page_url'] ?? '-',
+            'user_agent' => $log['user_agent'] ?? '-',
+            'ip_address' => $log['ip_address'] ?? '-',
+            'contact_number' => $log['contact_number'] ?? '-',
+            'position' => $log['position'] ?? '',
+            'new_data' => $log['new_data'] ?? '-',
+        ];
+
+        return $this->response->setJSON($payload);
     }
 }

@@ -23,6 +23,7 @@ $routes->group('admin', ['filter' => 'role:admin'], static function (RouteCollec
     $routes->get('users/(:num)/edit', 'Admin\UsersController::edit/$1');
     $routes->post('users/(:num)', 'Admin\UsersController::update/$1');
     $routes->post('users/(:num)/deactivate', 'Admin\UsersController::deactivate/$1');
+    $routes->post('users/(:num)/reactivate', 'Admin\UsersController::reactivate/$1');
 
     $routes->get('audit-logs', 'Admin\AuditLogsController::index');
 });
@@ -34,6 +35,7 @@ $routes->group('', ['filter' => 'role:admin'], static function (RouteCollection 
     $routes->get('users/(:num)/edit', 'Admin\UsersController::edit/$1');
     $routes->post('users/(:num)', 'Admin\UsersController::update/$1');
     $routes->post('users/(:num)/deactivate', 'Admin\UsersController::deactivate/$1');
+    $routes->post('users/(:num)/reactivate', 'Admin\UsersController::reactivate/$1');
 
     $routes->get('audit-logs', 'Admin\AuditLogsController::index');
 });

@@ -36,7 +36,13 @@ class DashboardController extends BaseController
                     ->orWhere('roles.slug', 'ict_planner')
                 ->groupEnd()
                 ->countAllResults(),
-            'recentLogs'     => $auditLogModel->recent(),
+            'recentLogs'     => (new AuditLogModel())->select('logs.*, logs.page_url, logs.user_agent, logs.ip_address, logs.new_data, logs.contact_number, logs.position, users.name AS user_name, users.email AS user_email, roles.name AS role_name, departments.name AS department_name')
+                ->join('users', 'users.id = logs.user_id', 'left')
+                ->join('roles', 'roles.id = users.role_id', 'left')
+                ->join('departments', 'departments.id = users.department_id', 'left')
+                ->whereNotIn('logs.action', ['login', 'logout'])
+                ->orderBy('logs.created_at', 'DESC')
+                ->findAll(10),
             'divisionStats'  => $divisionStats,
         ]);
     }
