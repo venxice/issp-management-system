@@ -23,11 +23,9 @@ $logPayload = static function (array $log): array {
 ?>
 
 <section class="panel">
-    <div class="panel-header d-flex flex-wrap gap-3 align-items-center justify-content-between">
-        <div>
-            <h2 class="panel-title">Audit Logs</h2>
-            <p class="panel-subtitle">Review user activity and system changes.</p>
-        </div>
+    <div class="panel-header">
+        <h2 class="panel-title">User Activity</h2>
+        <p class="panel-subtitle">Review user activity and system changes.</p>
         <form class="d-flex align-items-center toolbar-form audit-toolbar" method="get" action="<?= site_url('admin/audit-logs') ?>">
             <input class="form-control form-control-sm" name="q" value="<?= esc($query ?? '') ?>" placeholder="Search Activity">
             <input class="form-control form-control-sm" name="date" type="date" value="<?= esc($date ?? '') ?>">
@@ -70,6 +68,54 @@ $logPayload = static function (array $log): array {
             </tbody>
         </table>
     </div>
+
+    <?php if ($pager && $total > $perPage): ?>
+    <div class="d-flex justify-content-between align-items-center mt-3">
+        <div class="text-muted">
+            Showing <?= ($currentPage - 1) * $perPage + 1 ?> to <?= min($currentPage * $perPage, $total) ?> of <?= $total ?> entries
+        </div>
+        <nav>
+            <ul class="pagination mb-0">
+                <?php if ($currentPage > 1): ?>
+                <li class="page-item">
+                    <a class="page-link" href="<?= site_url('admin/audit-logs') ?>?<?= http_build_query(array_filter(['q' => $query, 'date' => $date, 'page' => $currentPage - 1])) ?>">Previous</a>
+                </li>
+                <?php endif; ?>
+                
+                <?php 
+                $totalPages = (int) ceil($total / $perPage);
+                $startPage = max(1, $currentPage - 2);
+                $endPage = min($totalPages, $currentPage + 2);
+                
+                if ($startPage > 1): ?>
+                    <li class="page-item"><a class="page-link" href="<?= site_url('admin/audit-logs') ?>?<?= http_build_query(array_filter(['q' => $query, 'date' => $date, 'page' => 1])) ?>">1</a></li>
+                    <?php if ($startPage > 2): ?>
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                    <?php endif; ?>
+                <?php endif; ?>
+
+                <?php for ($i = $startPage; $i <= $endPage; $i++): ?>
+                    <li class="page-item <?= $i === $currentPage ? 'active' : '' ?>">
+                        <a class="page-link" href="<?= site_url('admin/audit-logs') ?>?<?= http_build_query(array_filter(['q' => $query, 'date' => $date, 'page' => $i])) ?>"><?= $i ?></a>
+                    </li>
+                <?php endfor; ?>
+
+                <?php if ($endPage < $totalPages): ?>
+                    <?php if ($endPage < $totalPages - 1): ?>
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                    <?php endif; ?>
+                    <li class="page-item"><a class="page-link" href="<?= site_url('admin/audit-logs') ?>?<?= http_build_query(array_filter(['q' => $query, 'date' => $date, 'page' => $totalPages])) ?>"><?= $totalPages ?></a></li>
+                <?php endif; ?>
+
+                <?php if ($currentPage < $totalPages): ?>
+                <li class="page-item">
+                    <a class="page-link" href="<?= site_url('admin/audit-logs') ?>?<?= http_build_query(array_filter(['q' => $query, 'date' => $date, 'page' => $currentPage + 1])) ?>">Next</a>
+                </li>
+                <?php endif; ?>
+            </ul>
+        </nav>
+    </div>
+    <?php endif; ?>
 </section>
 
 <?= $this->include('frontend/layout/log_modal', ['modalId' => 'viewLogModal', 'prefix' => 'log']) ?>

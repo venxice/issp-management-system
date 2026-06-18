@@ -11,6 +11,9 @@ class AuditLogsController extends BaseController
     {
         $query = trim((string) $this->request->getGet('q'));
         $date = trim((string) $this->request->getGet('date'));
+        $page = (int) ($this->request->getGet('page') ?? 1);
+        $perPage = 25;
+
         $logs = new AuditLogModel();
 
         if ($query !== '') {
@@ -26,18 +29,28 @@ class AuditLogsController extends BaseController
                 ->where('logs.created_at <=', $date . ' 23:59:59');
         }
 
+        $builder = $logs->select('logs.*, logs.page_url, logs.user_agent, logs.ip_address, logs.new_data, logs.contact_number, logs.position, users.name AS user_name, users.email AS user_email, roles.name AS role_name, departments.name AS department_name')
+            ->join('users', 'users.id = logs.user_id', 'left')
+            ->join('roles', 'roles.id = users.role_id', 'left')
+            ->join('departments', 'departments.id = users.department_id', 'left')
+            ->whereNotIn('logs.action', ['login', 'logout'])
+            ->orderBy('logs.created_at', 'DESC');
+
+        $total = $builder->countAllResults(false);
+        $logsData = $builder->paginate($perPage, 'default', $page);
+
+        $pager = $logs->pager;
+
         return view('frontend/admin/audit_logs/index', [
             'title' => 'Audit Logs',
             'active' => 'audit',
             'query' => $query,
             'date' => $date,
-            'logs' => $logs->select('logs.*, logs.page_url, logs.user_agent, logs.ip_address, logs.new_data, logs.contact_number, logs.position, users.name AS user_name, users.email AS user_email, roles.name AS role_name, departments.name AS department_name')
-                ->join('users', 'users.id = logs.user_id', 'left')
-                ->join('roles', 'roles.id = users.role_id', 'left')
-                ->join('departments', 'departments.id = users.department_id', 'left')
-                ->whereNotIn('logs.action', ['login', 'logout'])
-                ->orderBy('logs.created_at', 'DESC')
-                ->findAll(25),
+            'logs' => $logsData,
+            'pager' => $pager,
+            'total' => $total,
+            'perPage' => $perPage,
+            'currentPage' => $page,
         ]);
     }
 

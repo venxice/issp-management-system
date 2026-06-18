@@ -53,21 +53,22 @@ $fieldId = static function (string $field) use ($prefix): string {
         </select>
     </div>
     <div class="col-md-6">
-        <label class="form-label fw-semibold" for="<?= esc($fieldId('position')) ?>">Position</label>
-        <select class="form-select" id="<?= esc($fieldId('position')) ?>" name="position">
+        <label class="form-label fw-semibold" for="<?= esc($fieldId('position_id')) ?>">Position</label>
+        <select class="form-select" id="<?= esc($fieldId('position_id')) ?>" name="position_id" required>
             <option value="">Select position</option>
-            <?php foreach ($positions ?? [] as $pos): ?>
-                <?php $selectedPos = (string) old('position', $user['position'] ?? '') === (string) $pos; ?>
-                <option value="<?= esc($pos) ?>" <?= $selectedPos ? 'selected' : '' ?>><?= esc($pos) ?></option>
+            <?php foreach ($positions ?? [] as $position): ?>
+                <?php $selectedPosition = (string) old('position_id', $user['position_id'] ?? '') === (string) $position['id']; ?>
+                <option value="<?= esc($position['id']) ?>" <?= $selectedPosition ? 'selected' : '' ?>>
+                    <?= esc($position['name']) ?>
+                </option>
             <?php endforeach; ?>
         </select>
     </div>
 
-    <!-- Division full width below role/position -->
     <div class="col-md-12">
         <label class="form-label fw-semibold" for="<?= esc($fieldId('department_id')) ?>">Division</label>
-        <select class="form-select" id="<?= esc($fieldId('department_id')) ?>" name="department_id">
-            <option value="">No division</option>
+        <select class="form-select" id="<?= esc($fieldId('department_id')) ?>" name="department_id" required>
+            <option value="">Select division</option>
             <?php foreach ($departments as $department): ?>
                 <?php $selectedDepartment = (string) old('department_id', $user['department_id'] ?? '') === (string) $department['id']; ?>
                 <option value="<?= esc($department['id']) ?>" <?= $selectedDepartment ? 'selected' : '' ?>>
@@ -77,17 +78,49 @@ $fieldId = static function (string $field) use ($prefix): string {
         </select>
     </div>
 
+    <?php if ($isEdit): ?>
+    <div class="col-12">
+        <hr>
+        <small class="text-muted">Password editing is optional - you can update other fields without changing the password</small>
+        <hr>
+    </div>
+    <?php endif; ?>
+
     <div class="col-md-6">
-        <label class="form-label fw-semibold" for="<?= esc($fieldId('password')) ?>"><?= $isEdit ? 'New Password' : 'Password' ?></label>
-        <input class="form-control" id="<?= esc($fieldId('password')) ?>" name="password" type="password" autocomplete="new-password" placeholder="At least 8 characters">
+        <label class="form-label fw-semibold" for="<?= esc($fieldId('password')) ?>">
+            <?= $isEdit ? 'New Password <span class="text-muted fw-normal">(Optional)</span>' : 'Password' ?>
+        </label>
+
+        <input class="form-control"
+            id="<?= esc($fieldId('password')) ?>"
+            name="password"
+            type="password"
+            autocomplete="new-password"
+            placeholder="<?= $isEdit ? 'Leave blank to keep current password' : 'At least 8 characters' ?>"
+            <?= $passwordRequired ? 'required' : '' ?>>
+
         <?php if ($isEdit): ?>
-            <div class="form-text">Leave blank to keep the current password. Only enter a value if you want to change it.</div>
-        <?php elseif ($showPasswordHelp): ?>
-            <div class="form-text">Password is required for new user accounts.</div>
+        <div class="form-text text-info">
+            <i class="fa-solid fa-info-circle me-1"></i> Only edit password if you want to change it
+        </div>
+        <?php else: ?>
+        <div class="form-text">
+            Password editing is optional - you can update other fields without changing the password
+        </div>
         <?php endif; ?>
     </div>
+
     <div class="col-md-6">
-        <label class="form-label fw-semibold" for="<?= esc($fieldId('password_confirmation')) ?>">Confirm Password</label>
-        <input class="form-control" id="<?= esc($fieldId('password_confirmation')) ?>" name="password_confirmation" type="password" autocomplete="new-password" placeholder="Repeat the password">
+        <label class="form-label fw-semibold" for="<?= esc($fieldId('password_confirmation')) ?>">
+            <?= $isEdit ? 'Confirm New Password' : 'Confirm Password' ?>
+        </label>
+
+        <input class="form-control"
+            id="<?= esc($fieldId('password_confirmation')) ?>"
+            name="password_confirmation"
+            type="password"
+            autocomplete="new-password"
+            placeholder="<?= $isEdit ? 'Leave blank to keep current password' : 'Confirm password' ?>"
+            <?= $passwordRequired ? 'required' : '' ?>>
     </div>
 </div>
