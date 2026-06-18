@@ -12,7 +12,8 @@ $userPayload = static function (array $user): array {
         'first_name' => $user['first_name'] ?? '',
         'last_name' => $user['last_name'] ?? '',
         'middle_initial' => $user['middle_initial'] ?? '',
-        'position' => $user['position_id'] ?? '',
+        'position_id' => $user['position_id'] ?? '',
+        'position_name' => $user['position_name'] ?? '',
         'email' => $user['email'] ?? '',
         'role_id' => $user['role_id'] ?? '',
         'role_name' => $user['role_name'] ?? '',
@@ -29,13 +30,10 @@ $userPayload = static function (array $user): array {
 ?>
 
 <section class="panel">
-    <div class="panel-header d-flex flex-wrap gap-3 align-items-center justify-content-between">
-        <div>
-            <h2 class="panel-title">User Management</h2>
-            <p class="panel-subtitle">Manage local and SSO-enabled user accounts.</p>
-        </div>
-
-        <div class="d-flex flex-wrap align-items-center justify-content-end toolbar-form">
+    <div class="panel-header">
+        <h2 class="panel-title">User List</h2>
+        <p class="panel-subtitle">Manage user accounts.</p>
+        <div class="d-flex flex-wrap align-items-center gap-2 justify-content-end ms-auto">
             <form class="d-flex flex-wrap align-items-center toolbar-form" method="get" action="<?= site_url('admin/users') ?>">
                 <input class="form-control form-control-sm" name="q" value="<?= esc($query ?? '') ?>" placeholder="Search Users" style="width: 168px;">
                 <select class="form-select form-select-sm" name="role" style="width: 150px;">
@@ -51,7 +49,6 @@ $userPayload = static function (array $user): array {
                     <option value="active" <?= ($statusFilter ?? '') === 'active' ? 'selected' : '' ?>>Active</option>
                     <option value="inactive" <?= ($statusFilter ?? '') === 'inactive' ? 'selected' : '' ?>>Inactive</option>
                 </select>
-                <!-- Search button removed: form will submit automatically on select changes or Enter -->
             </form>
 
             <button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#addUserModal">
@@ -69,7 +66,6 @@ $userPayload = static function (array $user): array {
                 <th>Email</th>
                 <th>Role</th>
                 <th>Division</th>
-                <th>Sign-in</th>
                 <th>Status</th>
                 <th class="text-center" style="width: 92px;">Action</th>
             </tr>
@@ -85,13 +81,6 @@ $userPayload = static function (array $user): array {
                     <td><?= esc($user['email']) ?></td>
                     <td><?= esc($user['role_name'] ?? 'Unassigned') ?></td>
                     <td><?= esc($user['department_name'] ?? 'No division') ?></td>
-                    <td>
-                        <?php if (! empty($user['sso_provider'])): ?>
-                            <span class="badge badge-soft"><?= esc(ucfirst($user['sso_provider'])) ?> SSO</span>
-                        <?php else: ?>
-                            <span class="badge badge-soft">Password</span>
-                        <?php endif; ?>
-                    </td>
                     <td>
                         <span class="badge <?= strtolower($user['status']) === 'active' ? 'bg-success text-white' : 'bg-danger text-white' ?>">
                             <?= esc(ucfirst($user['status'])) ?>
@@ -110,11 +99,59 @@ $userPayload = static function (array $user): array {
                 </tr>
             <?php endforeach; ?>
             <?php if ($users === []): ?>
-                <tr><td colspan="8" class="text-center text-muted-strong py-4">No users found.</td></tr>
+                <tr><td colspan="7" class="text-center text-muted-strong py-4">No users found.</td></tr>
             <?php endif; ?>
             </tbody>
         </table>
     </div>
+
+    <?php if ($pager && $total > $perPage): ?>
+    <div class="d-flex justify-content-between align-items-center mt-3">
+        <div class="text-muted">
+            Showing <?= ($currentPage - 1) * $perPage + 1 ?> to <?= min($currentPage * $perPage, $total) ?> of <?= $total ?> entries
+        </div>
+        <nav>
+            <ul class="pagination mb-0">
+                <?php if ($currentPage > 1): ?>
+                <li class="page-item">
+                    <a class="page-link" href="<?= site_url('admin/users') ?>?<?= http_build_query(array_filter(['q' => $query, 'role' => $roleFilter, 'status' => $statusFilter, 'page' => $currentPage - 1])) ?>">Previous</a>
+                </li>
+                <?php endif; ?>
+                
+                <?php 
+                $totalPages = (int) ceil($total / $perPage);
+                $startPage = max(1, $currentPage - 2);
+                $endPage = min($totalPages, $currentPage + 2);
+                
+                if ($startPage > 1): ?>
+                    <li class="page-item"><a class="page-link" href="<?= site_url('admin/users') ?>?<?= http_build_query(array_filter(['q' => $query, 'role' => $roleFilter, 'status' => $statusFilter, 'page' => 1])) ?>">1</a></li>
+                    <?php if ($startPage > 2): ?>
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                    <?php endif; ?>
+                <?php endif; ?>
+
+                <?php for ($i = $startPage; $i <= $endPage; $i++): ?>
+                    <li class="page-item <?= $i === $currentPage ? 'active' : '' ?>">
+                        <a class="page-link" href="<?= site_url('admin/users') ?>?<?= http_build_query(array_filter(['q' => $query, 'role' => $roleFilter, 'status' => $statusFilter, 'page' => $i])) ?>"><?= $i ?></a>
+                    </li>
+                <?php endfor; ?>
+
+                <?php if ($endPage < $totalPages): ?>
+                    <?php if ($endPage < $totalPages - 1): ?>
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                    <?php endif; ?>
+                    <li class="page-item"><a class="page-link" href="<?= site_url('admin/users') ?>?<?= http_build_query(array_filter(['q' => $query, 'role' => $roleFilter, 'status' => $statusFilter, 'page' => $totalPages])) ?>"><?= $totalPages ?></a></li>
+                <?php endif; ?>
+
+                <?php if ($currentPage < $totalPages): ?>
+                <li class="page-item">
+                    <a class="page-link" href="<?= site_url('admin/users') ?>?<?= http_build_query(array_filter(['q' => $query, 'role' => $roleFilter, 'status' => $statusFilter, 'page' => $currentPage + 1])) ?>">Next</a>
+                </li>
+                <?php endif; ?>
+            </ul>
+        </nav>
+    </div>
+    <?php endif; ?>
 </section>
 
 <div class="modal fade" id="addUserModal" tabindex="-1" aria-hidden="true">
@@ -122,7 +159,6 @@ $userPayload = static function (array $user): array {
         <div class="modal-content">
             <div class="modal-header">
                 <div><h5 class="modal-title">Add New User</h5></div>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="addUserForm" action="<?= site_url('admin/users') ?>" method="post">
                 <?= csrf_field() ?>
@@ -156,9 +192,8 @@ $userPayload = static function (array $user): array {
         <div class="modal-content">
             <div class="modal-header">
                 <div><h5 class="modal-title">Edit User</h5></div>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form id="editUserForm" method="post">
+            <form id="editUserForm" method="post" novalidate>
                 <?= csrf_field() ?>
                 <div class="modal-body modal-form-grid">
                     <?= $this->include('frontend/admin/users/_fields', [
@@ -203,7 +238,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
         form.addEventListener('submit', (e) => {
-            // allow normal submit on Enter
         });
     }
 
@@ -261,7 +295,7 @@ document.addEventListener('DOMContentLoaded', () => {
         set('email-field', user.email || '-');
         set('id', user.id || '-');
         set('role', user.role_name || '-');
-        set('position', user.position || '-');
+        set('position', user.position_name || '-');
         set('division', user.department_name || '-');
         set('status', user.status || '-');
         set('created', user.created_at ? formatDateTime(user.created_at) : '-');
@@ -334,9 +368,9 @@ document.addEventListener('DOMContentLoaded', () => {
         editForm.querySelector('[name="email"]').value = user.email || '';
         editForm.querySelector('[name="role_id"]').value = user.role_id || '';
         editForm.querySelector('[name="department_id"]').value = user.department_id || '';
-        const posField = editForm.querySelector('[name="position"]');
+        const posField = editForm.querySelector('[name="position_id"]');
         if (posField) {
-            try { posField.value = user.position || ''; } catch (e) { /* ignore */ }
+            try { posField.value = user.position_id || ''; } catch (e) { /* ignore */ }
         }
         editForm.querySelector('[name="status"]').value = user.status || 'active';
         editForm.querySelector('[name="password"]').value = '';
@@ -358,57 +392,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const addForm = document.getElementById('addUserForm');
     const editFormElement = document.getElementById('editUserForm');
-
-    const validateForm = (form) => {
-        if (! form) return true;
-        const email = form.querySelector('[name="email"]');
-        const pwd = form.querySelector('[name="password"]');
-        const pwdc = form.querySelector('[name="password_confirmation"]');
-
-        if (email && email.value.trim() !== '') {
-            const re = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
-            if (! re.test(email.value.trim())) {
-                showValidationModal(['Please enter a valid email address.']);
-                email.focus();
-                return false;
-            }
-        }
-
-        if (pwd && pwdc) {
-            if (form.id === 'addUserForm' && pwd.value.trim() === '') {
-                showValidationModal(['Password is required for new users.']);
-                pwd.focus();
-                return false;
-            }
-            if (pwd.value !== pwdc.value) {
-                showValidationModal(['Password and confirmation do not match.']);
-                pwd.focus();
-                return false;
-            }
-            if (pwd.value !== '' && pwd.value.length < 8) {
-                showValidationModal(['Password must be at least 8 characters.']);
-                pwd.focus();
-                return false;
-            }
-        }
-
-        return true;
-    };
-
-    const showValidationModal = (messages) => {
-        const list = document.getElementById('validationModalList');
-        if (list) {
-            list.innerHTML = '';
-            messages.forEach((msg) => {
-                const li = document.createElement('li');
-                li.textContent = msg;
-                list.appendChild(li);
-            });
-        }
-
-        const modal = new bootstrap.Modal(document.getElementById('validationModal'));
-        modal.show();
-    };
 
     let pendingSubmitForm = null;
     const confirmModalEl = document.getElementById('confirmSubmitModal');
@@ -434,7 +417,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (addForm) {
         addForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            if (! validateForm(addForm)) return;
             openConfirm(addForm, 'Are you sure you want to add this user?');
         });
     }
@@ -442,34 +424,107 @@ document.addEventListener('DOMContentLoaded', () => {
     if (editFormElement) {
         editFormElement.addEventListener('submit', (e) => {
             e.preventDefault();
-            if (! validateForm(editFormElement)) return;
+
+            // Custom validation for edit form
+            const firstName = editFormElement.querySelector('[name="first_name"]');
+            const lastName = editFormElement.querySelector('[name="last_name"]');
+            const email = editFormElement.querySelector('[name="email"]');
+            const roleId = editFormElement.querySelector('[name="role_id"]');
+            const positionId = editFormElement.querySelector('[name="position_id"]');
+            const departmentId = editFormElement.querySelector('[name="department_id"]');
+            const status = editFormElement.querySelector('[name="status"]');
+            const password = editFormElement.querySelector('[name="password"]');
+            const confirmPassword = editFormElement.querySelector('[name="password_confirmation"]');
+
+            let isValid = true;
+            let firstInvalidField = null;
+
+            // Validate required fields
+            if (!firstName || !firstName.value || firstName.value.trim() === '') {
+                isValid = false;
+                firstInvalidField = firstInvalidField || firstName;
+            }
+            if (!lastName || !lastName.value || lastName.value.trim() === '') {
+                isValid = false;
+                firstInvalidField = firstInvalidField || lastName;
+            }
+            if (!email || !email.value || email.value.trim() === '') {
+                isValid = false;
+                firstInvalidField = firstInvalidField || email;
+            }
+            if (!roleId || !roleId.value) {
+                isValid = false;
+                firstInvalidField = firstInvalidField || roleId;
+            }
+            if (!positionId || !positionId.value) {
+                isValid = false;
+                firstInvalidField = firstInvalidField || positionId;
+            }
+            if (!departmentId || !departmentId.value) {
+                isValid = false;
+                firstInvalidField = firstInvalidField || departmentId;
+            }
+            if (!status || !status.value) {
+                isValid = false;
+                firstInvalidField = firstInvalidField || status;
+            }
+
+            // Password is optional - only validate if provided
+            if (password && password.value && password.value.trim() !== '') {
+                // Check password requirements
+                const requirements = [];
+                if (password.value.length < 8) {
+                    requirements.push('8+ characters');
+                }
+                if (!/[A-Z]/.test(password.value)) {
+                    requirements.push('uppercase letter');
+                }
+                if (!/[a-z]/.test(password.value)) {
+                    requirements.push('lowercase letter');
+                }
+                if (!/[0-9]/.test(password.value)) {
+                    requirements.push('number');
+                }
+                if (!/[!@#$%^&*(),.?":{}|<>]/.test(password.value)) {
+                    requirements.push('special character');
+                }
+
+                if (requirements.length > 0) {
+                    alert('Password must contain: ' + requirements.join(', '));
+                    if (firstInvalidField) firstInvalidField.focus();
+                    return;
+                }
+
+                // If password is provided, confirmation is required
+                if (!confirmPassword || !confirmPassword.value || confirmPassword.value.trim() === '') {
+                    alert('Please confirm your password');
+                    if (confirmPassword) confirmPassword.focus();
+                    return;
+                }
+
+                if (password.value !== confirmPassword.value) {
+                    alert('Passwords do not match');
+                    if (confirmPassword) confirmPassword.focus();
+                    return;
+                }
+            }
+
+            if (!isValid) {
+                alert('Please fill in all required fields');
+                if (firstInvalidField) firstInvalidField.focus();
+                return;
+            }
+
             openConfirm(editFormElement, 'Are you sure you want to update this user?');
         });
     }
 });
 </script>
-<div class="modal fade" id="validationModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-sm modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Please fix the following</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <ul id="validationModalList" class="mb-0"></ul>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
-            </div>
-        </div>
-    </div>
-</div>
 <div class="modal fade" id="confirmSubmitModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-sm modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">Confirm</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <p id="confirmSubmitMessage">Are you sure?</p>

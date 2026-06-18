@@ -3,9 +3,6 @@
 <?= $this->section('content') ?>
 <?php
 $chartSource = $divisionStats ?? [];
-$chartLabels = [];
-$chartValues = [];
-$chartColors = [];
 $logPayload = static function (array $log): array {
     return [
         'id' => $log['id'] ?? '',
@@ -24,39 +21,28 @@ $logPayload = static function (array $log): array {
         'new_data' => $log['new_data'] ?? '-',
     ];
 };
-
-foreach ($chartSource as $item) {
-    $chartLabels[] = (string) ($item['name'] ?? 'Unassigned');
-    $chartValues[] = (int) ($item['total'] ?? 0);
-}
-
-$chartColors = array_map(static function (int $index): string {
-    return $index % 2 === 0 ? 'rgba(79, 97, 128, 0.92)' : 'rgba(96, 114, 145, 0.92)';
-}, array_keys($chartValues));
-
-$chartCanvasWidth = max(560, count($chartSource) * 92);
 ?>
 
-<div class="row g-2 mb-2">
-    <div class="col-md-6 col-xl-3">
+<div class="row g-3 mb-3">
+    <div class="col-6 col-md-4 col-lg-3 col-xl-3">
         <div class="stat-card">
             <div><div class="label">Total Users</div><div class="value"><?= esc($totalUsers) ?></div></div>
             <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
         </div>
     </div>
-    <div class="col-md-6 col-xl-3">
+    <div class="col-6 col-md-4 col-lg-3 col-xl-3">
         <div class="stat-card stat-card-alt">
             <div><div class="label">Active Users</div><div class="value"><?= esc($activeUsers) ?></div></div>
             <div class="stat-icon"><i class="fa-solid fa-user-check"></i></div>
         </div>
     </div>
-    <div class="col-md-6 col-xl-3">
+    <div class="col-6 col-md-4 col-lg-3 col-xl-3">
         <div class="stat-card stat-card-soft">
             <div><div class="label">Employees</div><div class="value"><?= esc($totalEmployees) ?></div></div>
             <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
         </div>
     </div>
-    <div class="col-md-6 col-xl-3">
+    <div class="col-6 col-md-4 col-lg-3 col-xl-3">
         <div class="stat-card stat-card-muted">
             <div><div class="label">Technical Staff</div><div class="value"><?= esc($technicalStaff) ?></div></div>
             <div class="stat-icon"><i class="fa-solid fa-user-gear"></i></div>
@@ -64,24 +50,53 @@ $chartCanvasWidth = max(560, count($chartSource) * 92);
     </div>
 </div>
 
-<div class="row g-2">
+<div class="row g-0">
     <div class="col-12">
         <section class="panel">
-            <div class="panel-header d-flex align-items-center justify-content-between">
-                <div>
-                    <h2 class="panel-title">Users per Division</h2>
-                    <p class="panel-subtitle">Distribution of user accounts across divisions.</p>
-                </div>
+            <div class="panel-header" style="border-bottom: none;">
+                <h2 class="panel-title">Users per Division</h2>
+                <p class="panel-subtitle">Distribution of user accounts across divisions.</p>
             </div>
             <div class="dashboard-chart">
                 <div class="dashboard-chart__frame">
                     <?php if ($chartSource !== []): ?>
-                        <div class="dashboard-chart__scroll">
-                            <div class="division-chart-wrap">
-                                <div class="division-chart-canvas-wrap" style="width: <?= esc($chartCanvasWidth) ?>px;">
-                                    <canvas id="divisionChart" height="220"></canvas>
-                                </div>
+                        <?php 
+                        $maxValue = max(array_column($chartSource, 'total'));
+                        // Create reference lines based on actual user counts (1, 2, 3, ..., up to max value)
+                        $referenceLines = range(1, $maxValue);
+                        // Chart dimensions and padding
+                        $chartHeight = 200;
+                        $topPadding = 20;
+                        $bottomPadding = 30;
+                        $availableHeight = $chartHeight - $topPadding - $bottomPadding;
+                        ?>
+                        <div class="css-bar-chart">
+                            <div class="css-bar-chart__background">
+                                <?php foreach ($referenceLines as $ref): ?>
+                                    <?php 
+                                    // Calculate position: (ref/maxValue) represents the proportion within the available height
+                                    // Then add bottom padding offset
+                                    $bottomPosition = (($ref / $maxValue) * ($availableHeight / $chartHeight) * 100) + (($bottomPadding / $chartHeight) * 100);
+                                    ?>
+                                    <div class="css-bar-chart__reference-line" style="bottom: <?= $bottomPosition ?>%;">
+                                        <span class="css-bar-chart__reference-label"><?= $ref ?></span>
+                                    </div>
+                                <?php endforeach; ?>
                             </div>
+                            <?php foreach ($chartSource as $index => $item):
+                                $value = (int) ($item['total'] ?? 0);
+                                $percentage = $maxValue > 0 ? ($value / $maxValue) * 100 : 0;
+                                $color = $index % 2 === 0 ? 'rgba(79, 97, 128, 0.92)' : 'rgba(96, 114, 145, 0.92)';
+                            ?>
+                                <div class="css-bar-chart__item">
+                                    <div class="css-bar-chart__bar" style="height: <?= esc($percentage) ?>%; background: <?= esc($color) ?>;" data-division="<?= esc($item['name'] ?? 'Unassigned') ?>" data-count="<?= esc($value) ?>">
+                                        <div class="css-bar-chart__tooltip">
+                                            <div class="css-bar-chart__tooltip-division"><?= esc($item['name'] ?? 'Unassigned') ?></div>
+                                            <div class="css-bar-chart__tooltip-count"><?= esc($value) ?> users</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
                         </div>
                     <?php else: ?>
                         <div class="w-100 text-center text-muted-strong py-4">No division data available.</div>
@@ -92,14 +107,12 @@ $chartCanvasWidth = max(560, count($chartSource) * 92);
     </div>
 
     <div class="col-12">
-        <section class="panel">
-            <div class="panel-header d-flex align-items-center justify-content-between">
-                <div>
-                    <h2 class="panel-title">Recent Activity</h2>
-                    <p class="panel-subtitle">Latest security and administration events.</p>
-                </div>
+        <section class="panel mb-0" style="margin-bottom: -8px;">
+            <div class="panel-header">
+                <h2 class="panel-title">Recent Activity</h2>
+                <p class="panel-subtitle">Latest user activity and system changes.</p>
             </div>
-            <div class="table-responsive">
+            <div class="table-responsive mb-0">
                 <table class="table align-middle mb-0">
                     <thead>
                     <tr>
@@ -143,34 +156,6 @@ $chartCanvasWidth = max(560, count($chartSource) * 92);
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 <?= $this->include('frontend/layout/log_modal_script', ['modalId' => 'viewLogModal', 'prefix' => 'log']) ?>
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    const canvas = document.getElementById('divisionChart');
-    if (! canvas || ! window.Chart) {
-        return;
-    }
 
-    const labels = <?= json_encode($chartLabels, JSON_UNESCAPED_SLASHES) ?>;
-    const values = <?= json_encode($chartValues, JSON_UNESCAPED_SLASHES) ?>;
-    const colors = <?= json_encode($chartColors, JSON_UNESCAPED_SLASHES) ?>;
-
-    new Chart(canvas, {
-        type: 'bar',
-        data: { labels, datasets: [{ label: 'Users', data: values, backgroundColor: colors, borderColor: colors, borderWidth: 1, borderRadius: 4, barThickness: 22, maxBarThickness: 28, categoryPercentage: 0.58, barPercentage: 0.72 }] },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            animation: false,
-            plugins: { legend: { display: false }, tooltip: { callbacks: { label: (context) => ` Users: ${context.parsed.y}`, title: (items) => items[0] ? `Division: ${items[0].label}` : '' } } },
-            scales: {
-                x: { grid: { display: false }, ticks: { color: '#6b7280', maxRotation: 15, minRotation: 0, autoSkip: false, padding: 8 }, offset: true },
-                y: { beginAtZero: true, ticks: { precision: 0, color: '#6b7280', padding: 8, stepSize: 1 }, grid: { color: 'rgba(15, 23, 42, .07)' }, max: Math.max(...values, 0) + 1 },
-            },
-            layout: { padding: { top: 6, right: 8, bottom: 10, left: 8 } },
-        },
-    });
-});
-</script>
 <?= $this->endSection() ?>

@@ -7,9 +7,13 @@ $active = $active ?? '';
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+    <meta http-equiv="Cache-Control" content="post-check=0, pre-check=0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="Sat, 26 Jul 1997 05:00:00 GMT">
     <title><?= esc($title) ?> | ISSP Management System</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css?v=2" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css?v=2" rel="stylesheet">
     <style>
         :root {
             --ink: #1f2a3a;
@@ -59,29 +63,113 @@ $active = $active ?? '';
             inset: 0 auto 0 0;
             z-index: 30;
             box-shadow: 1px 0 0 rgba(15, 23, 42, .08);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .app-sidebar.sidebar-closed {
+            transform: translateX(-100%);
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 29;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .sidebar-overlay.active {
+            display: block;
+            opacity: 1;
+        }
+
+        body.sidebar-open {
+            overflow: hidden;
+        }
+
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1.25rem;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 6px;
+            transition: background-color 0.2s ease;
+        }
+
+        .menu-toggle:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-close {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.25rem;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 6px;
+            transition: background-color 0.2s ease;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sidebar-close:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
         }
 
         .brand {
-            padding: 22px 14px 18px;
-            border-bottom: 1px solid rgba(255, 255, 255, .08);
+            padding: 18px 12px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,.08);
+            margin-bottom: 8px;
+            position: relative;
         }
 
-        .brand-text {
-            min-width: 0;
+        .brand-logo {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 10px;
+            border-radius: 12px;
+            background: rgba(255,255,255,.10);
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .brand-text .title {
-            font-size: .98rem;
-            line-height: 1.1;
-            font-weight: 600;
-            letter-spacing: 0;
-            text-transform: none;
+        .brand-logo i {
+            font-size: 20px;
+            color: #fff;
         }
 
-        .brand-text .sub {
-            font-size: .76rem;
-            color: rgba(255, 255, 255, .66);
-            letter-spacing: 0;
+        .brand-subtitle {
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: .8px;
+            color: rgba(255,255,255,.65);
+            margin-bottom: 2px;
+            line-height: 1.3;
+        }
+
+        .brand-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #fff;
+            line-height: 1.2;
+        }
+
+        .brand-description {
+            margin-top: 4px;
+            font-size: 10px;
+            color: rgba(255,255,255,.75);
         }
 
         .sidebar-nav {
@@ -182,6 +270,10 @@ $active = $active ?? '';
             box-shadow: 0 1px 0 rgba(15, 23, 42, .08), 0 8px 24px rgba(15, 23, 42, .08);
         }
 
+        .title-wrap {
+            flex: 1;
+        }
+
         .user-chip {
             display: flex;
             align-items: center;
@@ -246,13 +338,13 @@ $active = $active ?? '';
         }
 
         .stat-card {
-            min-height: 74px;
-            padding: 12px 13px;
+            min-height: 88px;
+            padding: 16px 18px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 12px;
-            border-radius: 10px;
+            gap: 14px;
+            border-radius: 12px;
             box-shadow: 0 10px 22px rgba(15, 23, 42, .08);
             color: #fff;
             background: linear-gradient(180deg, #526783 0%, #44566f 100%);
@@ -272,79 +364,225 @@ $active = $active ?? '';
         }
 
         .stat-card .label {
-            font-size: .72rem;
-            color: rgba(255, 255, 255, .78);
-            margin-bottom: 5px;
-            line-height: 1.1;
+            font-size: .8rem;
+            color: rgba(255, 255, 255, .82);
+            margin-bottom: 6px;
+            line-height: 1.15;
             text-transform: uppercase;
-            letter-spacing: .03em;
+            letter-spacing: .04em;
         }
 
         .stat-card .value {
-            font-size: 1.36rem;
-            line-height: 1;
+            font-size: 1.52rem;
+            line-height: 1.05;
             font-weight: 700;
             letter-spacing: 0;
         }
 
         .stat-icon {
-            width: 30px;
-            height: 30px;
+            width: 38px;
+            height: 38px;
             border-radius: 50%;
             display: grid;
             place-items: center;
             flex-shrink: 0;
             background: rgba(255, 255, 255, .92);
             color: #4e627f;
-            font-size: .9rem;
+            font-size: 1rem;
             box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .2);
         }
 
         .dashboard-chart {
-            padding: 12px;
+            padding: 10px;
         }
 
         .dashboard-chart__frame {
             border: 1px solid #e2e6ec;
             border-radius: 10px;
-            padding: 12px 12px 10px;
+            padding: 10px 12px 20px;
             background: #fff;
             box-shadow: inset 0 1px 0 rgba(15, 23, 42, .02), 0 8px 18px rgba(15, 23, 42, .04);
+            overflow: visible;
         }
 
-        .division-chart-wrap {
-            width: 100%;
+        .css-bar-chart {
             display: flex;
+            align-items: flex-end;
             justify-content: center;
-        }
-
-        .dashboard-chart__scroll {
+            gap: 12px;
+            height: 200px;
+            padding: 20px 60px 30px 60px;
             width: 100%;
             overflow-x: auto;
-            overflow-y: hidden;
-            padding-bottom: 4px;
-            display: flex;
-            justify-content: center;
+            overflow-y: visible;
+            position: relative;
         }
 
-        .division-chart-canvas-wrap {
+        .css-bar-chart__background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .css-bar-chart__reference-line {
+            position: absolute;
+            left: 0;
+            right: 0;
+            border-top: 1px dashed rgba(15, 23, 42, 0.2);
+            pointer-events: none;
+        }
+
+        .css-bar-chart__reference-label {
+            position: absolute;
+            right: 4px;
+            transform: translateY(-50%);
+            font-size: 10px;
+            color: rgba(15, 23, 42, 0.5);
+            background: #fff;
+            padding: 2px 4px;
+            border-radius: 2px;
+            white-space: nowrap;
+            line-height: 1;
+        }
+
+        .css-bar-chart__item {
+            flex: 0 0 auto;
+            width: 48px;
+            height: 100%;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
             position: relative;
+            z-index: 1;
+        }
+
+        .css-bar-chart__item:hover {
+            z-index: 100;
+        }
+
+        .css-bar-chart__bar {
             width: 100%;
-            min-width: 100%;
-            height: 240px;
+            border-radius: 6px 6px 0 0;
+            transition: height 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .css-bar-chart__bar:hover {
+            opacity: 0.8;
+        }
+
+        .css-bar-chart__tooltip {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(15, 23, 42, 0.95);
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s ease, visibility 0.2s ease;
+            pointer-events: none;
+            z-index: 99999;
+            min-width: 100px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+        }
+
+
+
+        .css-bar-chart__bar:hover .css-bar-chart__tooltip {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .css-bar-chart__tooltip-division {
+            font-weight: 600;
+            margin-bottom: 2px;
+            font-size: 13px;
+        }
+
+        .css-bar-chart__tooltip-count {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 11px;
         }
 
         .toolbar-form {
-            gap: 6px;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .toolbar-form input,
+        .toolbar-form select {
+            flex-shrink: 0;
         }
 
         .toolbar-form .form-control,
         .toolbar-form .form-select {
+            max-width: 180px;
             height: 28px;
             min-height: 28px;
             padding-top: 0;
             padding-bottom: 0;
             font-size: .72rem;
+        }
+
+        .pagination {
+            margin: 0;
+            gap: 4px;
+        }
+
+        .pagination .page-link {
+            border: 1px solid #d9e0ea;
+            color: #1b2434;
+            background: #fff;
+            font-size: .75rem;
+            padding: 6px 10px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            line-height: 1.2;
+        }
+
+        .pagination .page-link:hover {
+            background: #eef2f6;
+            border-color: #1b2434;
+            color: #1b2434;
+        }
+
+        .pagination .page-item.active .page-link {
+            background: #1b2434;
+            border-color: #1b2434;
+            color: #fff;
+        }
+
+        .pagination .page-item.disabled .page-link {
+            background: #f8f9fa;
+            border-color: #e9ecef;
+            color: #6c757d;
+        }
+
+        .d-flex.justify-content-between.align-items-center.mt-3 {
+            margin-top: 12px !important;
+            padding: 8px 20px;
+            max-width: 100%;
+        }
+
+        .d-flex.justify-content-between.align-items-center.mt-3 > .text-muted {
+            flex-shrink: 0;
+            padding-right: 8px;
+        }
+
+        .d-flex.justify-content-between.align-items-center.mt-3 > nav {
+            flex-shrink: 0;
+            padding-left: 8px;
         }
 
         .toolbar-form .btn {
@@ -587,18 +825,21 @@ $active = $active ?? '';
         }
 
         @media (max-width: 991px) {
-            .app-layout {
-                display: block;
+            .app-sidebar {
+                transform: translateX(-100%);
+                width: 280px;
             }
 
-            .app-sidebar {
-                width: 100%;
-                position: static;
-                inset: auto;
+            .app-sidebar.sidebar-open {
+                transform: translateX(0);
             }
 
             .app-main {
                 margin-left: 0;
+            }
+
+            .menu-toggle {
+                display: block;
             }
 
             .content-wrap {
@@ -608,6 +849,156 @@ $active = $active ?? '';
             .topbar {
                 position: sticky;
             }
+
+            .brand {
+                padding: 20px 12px;
+            }
+
+            .sidebar-nav {
+                padding: 16px;
+            }
+
+            .app-sidebar .nav-link {
+                padding: 12px 16px;
+                font-size: .9rem;
+            }
+
+            .stat-card {
+                min-height: 80px;
+                padding: 14px 16px;
+                gap: 12px;
+            }
+
+            .stat-card .label {
+                font-size: .75rem;
+                margin-bottom: 4px;
+            }
+
+            .stat-card .value {
+                font-size: 1.4rem;
+            }
+
+            .stat-icon {
+                width: 34px;
+                height: 34px;
+                font-size: .95rem;
+            }
+
+            .toolbar-form .form-control,
+            .toolbar-form .form-select {
+                max-width: 150px;
+            }
+
+            .pagination .page-link {
+                padding: 5px 8px;
+                font-size: .7rem;
+            }
+
+            .d-flex.justify-content-between.align-items-center.mt-3 {
+                margin-top: 8px !important;
+                padding: 8px 14px;
+            }
+
+            .d-flex.justify-content-between.align-items-center.mt-3 > .text-muted {
+                padding-right: 6px;
+            }
+
+            .d-flex.justify-content-between.align-items-center.mt-3 > nav {
+                padding-left: 6px;
+            }
+
+            .css-bar-chart {
+                gap: 8px;
+                padding: 20px 50px 25px 50px;
+                height: 180px;
+            }
+
+            .css-bar-chart__item {
+                width: 40px;
+            }
+        }
+
+        @media (max-width: 575px) {
+            .stat-card {
+                min-height: 72px;
+                padding: 12px 14px;
+                gap: 10px;
+            }
+
+            .stat-card .label {
+                font-size: .7rem;
+                margin-bottom: 4px;
+            }
+
+            .stat-card .value {
+                font-size: 1.25rem;
+            }
+
+            .stat-icon {
+                width: 30px;
+                height: 30px;
+                font-size: .85rem;
+            }
+
+            .toolbar-form {
+                gap: 6px;
+            }
+
+            .toolbar-form .form-control,
+            .toolbar-form .form-select {
+                max-width: 120px;
+                font-size: .68rem;
+            }
+
+            .panel-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .panel-header .toolbar-form {
+                width: 100%;
+                margin-top: 8px;
+            }
+
+            .pagination {
+                gap: 2px;
+            }
+
+            .pagination .page-link {
+                padding: 4px 6px;
+                font-size: .65rem;
+            }
+
+            .d-flex.justify-content-between.align-items-center.mt-3 {
+                flex-direction: column;
+                gap: 8px;
+                align-items: flex-start;
+                margin-top: 6px !important;
+                padding: 8px 8px;
+            }
+
+            .d-flex.justify-content-between.align-items-center.mt-3 > .text-muted {
+                padding-right: 0;
+            }
+
+            .d-flex.justify-content-between.align-items-center.mt-3 > nav {
+                padding-left: 0;
+                width: 100%;
+            }
+
+            .d-flex.justify-content-between.align-items-center.mt-3 .pagination {
+                justify-content: center;
+            }
+
+            .css-bar-chart {
+                gap: 6px;
+                padding: 20px 40px 20px 40px;
+                height: 160px;
+            }
+
+            .css-bar-chart__item {
+                width: 32px;
+            }
         }
     </style>
     <?= $this->renderSection('styles') ?>
@@ -615,10 +1006,16 @@ $active = $active ?? '';
 <body>
 <div class="app-layout">
     <?= $this->include('frontend/layout/sidebar') ?>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
     <main class="app-main">
         <header class="topbar">
-            <div class="title-wrap">
-                <div class="page-title"><?= esc($title) ?></div>
+            <div class="d-flex align-items-center gap-3">
+                <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <div class="title-wrap">
+                    <div class="page-title"><?= esc($title) ?></div>
+                </div>
             </div>
             <div class="user-chip">
                 <div class="meta d-none d-sm-block">
@@ -632,7 +1029,112 @@ $active = $active ?? '';
         </div>
     </main>
 </div>
+
+<!-- Logout Confirmation Modal -->
+<div class="modal fade" id="logoutConfirmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fa-solid fa-right-from-bracket me-2"></i>Confirm Logout</h5>
+            </div>
+            <div class="modal-body">
+                <p class="mb-0">Are you sure you want to log out?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirmLogoutButton">Logout</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Sidebar Toggle Functionality
+    const menuToggle = document.getElementById('menuToggle');
+    const sidebar = document.querySelector('.app-sidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+    function toggleSidebar() {
+        sidebar.classList.toggle('sidebar-open');
+        sidebarOverlay.classList.toggle('active');
+        document.body.classList.toggle('sidebar-open');
+
+        // Update menu icon
+        const icon = menuToggle.querySelector('i');
+        if (sidebar.classList.contains('sidebar-open')) {
+            icon.classList.remove('fa-bars');
+            icon.classList.add('fa-xmark');
+        } else {
+            icon.classList.remove('fa-xmark');
+            icon.classList.add('fa-bars');
+        }
+    }
+
+    function closeSidebar() {
+        sidebar.classList.remove('sidebar-open');
+        sidebarOverlay.classList.remove('active');
+        document.body.classList.remove('sidebar-open');
+
+        // Reset menu icon
+        const icon = menuToggle.querySelector('i');
+        icon.classList.remove('fa-xmark');
+        icon.classList.add('fa-bars');
+    }
+
+    if (menuToggle && sidebar && sidebarOverlay) {
+        menuToggle.addEventListener('click', toggleSidebar);
+        sidebarOverlay.addEventListener('click', closeSidebar);
+
+        // Add close button functionality
+        const sidebarClose = document.getElementById('sidebarClose');
+        if (sidebarClose) {
+            sidebarClose.addEventListener('click', closeSidebar);
+        }
+    }
+
+    // Close sidebar when clicking on nav links (mobile)
+    const navLinks = document.querySelectorAll('.sidebar-nav .nav-link');
+    navLinks.forEach(link => {
+        link.addEventListener('click', function() {
+            if (window.innerWidth <= 991) {
+                closeSidebar();
+            }
+        });
+    });
+
+    // Handle window resize
+    window.addEventListener('resize', function() {
+        if (window.innerWidth > 991) {
+            closeSidebar();
+        }
+    });
+
+    // Logout Confirmation Modal
+    const logoutButton = document.getElementById('logoutButton');
+    const logoutForm = document.getElementById('logoutForm');
+    const logoutConfirmModal = document.getElementById('logoutConfirmModal');
+    const confirmLogoutButton = document.getElementById('confirmLogoutButton');
+
+    if (logoutButton && logoutForm && logoutConfirmModal && confirmLogoutButton) {
+        let logoutModalInstance;
+
+        logoutButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            logoutModalInstance = new bootstrap.Modal(logoutConfirmModal);
+            logoutModalInstance.show();
+        });
+
+        confirmLogoutButton.addEventListener('click', function() {
+            if (logoutModalInstance) {
+                logoutModalInstance.hide();
+            }
+            logoutForm.submit();
+        });
+    }
+});
+</script>
 <?= $this->renderSection('scripts') ?>
 </body>
 </html>

@@ -40,7 +40,7 @@ class AuthController extends BaseController
             || empty($user['password'])
             || ! password_verify((string) $this->request->getPost('password'), $user['password'])
         ) {
-            return redirect()->back()->withInput()->with('error', 'Invalid email or password.');
+            return redirect()->back()->withInput()->with('error', 'Invalid email or password');
         }
 
         $this->startUserSession($user, 'password');
@@ -57,13 +57,27 @@ class AuthController extends BaseController
 
         session()->destroy();
 
-        return redirect()->to(site_url('login'))->with('success', 'You have been signed out.');
+        if (isset($_COOKIE)) {
+            foreach ($_COOKIE as $key => $value) {
+                if (strpos($key, 'ci_session') !== false) {
+                    setcookie($key, '', time() - 3600, '/');
+                }
+            }
+        }
+
+        $response = redirect()->to(site_url('login'))->with('success', 'Successfully signed out');
+        $response->setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+        $response->setHeader('Cache-Control', 'post-check=0, pre-check=0', false);
+        $response->setHeader('Pragma', 'no-cache');
+        $response->setHeader('Expires', 'Sat, 26 Jul 1997 05:00:00 GMT');
+
+        return $response;
     }
 
     public function googleRedirect()
     {
         if (! $this->googleSsoConfigured()) {
-            return redirect()->to(site_url('login'))->with('error', 'Google SSO is not configured yet.');
+            return redirect()->to(site_url('login'))->with('error', 'Google SSO is not configured yet');
         }
 
         $state = bin2hex(random_bytes(32));
@@ -84,7 +98,7 @@ class AuthController extends BaseController
     public function googleCallback()
     {
         if ($this->request->getGet('error')) {
-            return redirect()->to(site_url('login'))->with('error', 'Google sign-in was cancelled.');
+            return redirect()->to(site_url('login'))->with('error', 'Google sign-in was cancelled');
         }
 
         $state = (string) $this->request->getGet('state');
@@ -92,13 +106,13 @@ class AuthController extends BaseController
         session()->remove('google_oauth_state');
 
         if ($state === '' || $expectedState === '' || ! hash_equals($expectedState, $state)) {
-            return redirect()->to(site_url('login'))->with('error', 'The Google sign-in session expired. Please try again.');
+            return redirect()->to(site_url('login'))->with('error', 'Google sign-in session expired');
         }
 
         $code = (string) $this->request->getGet('code');
 
         if ($code === '') {
-            return redirect()->to(site_url('login'))->with('error', 'Google did not return an authorization code.');
+            return redirect()->to(site_url('login'))->with('error', 'Google authorization failed');
         }
 
         try {
@@ -106,34 +120,34 @@ class AuthController extends BaseController
         } catch (Throwable $exception) {
             log_message('error', 'Google SSO failed: {message}', ['message' => $exception->getMessage()]);
 
-            return redirect()->to(site_url('login'))->with('error', 'Google sign-in failed. Please try again.');
+            return redirect()->to(site_url('login'))->with('error', 'Google sign-in failed');
         }
 
         if (! $this->googleProfileAllowed($profile)) {
-            return redirect()->to(site_url('login'))->with('error', 'Your Google account is not allowed to sign in.');
+            return redirect()->to(site_url('login'))->with('error', 'Your Google account is not allowed');
         }
 
         $user = $this->findGoogleUser($profile);
 
         if ($user === null) {
-            return redirect()->to(site_url('login'))->with('error', 'No pre-registered account was found for this Google email. Please contact the administrator.');
+            return redirect()->to(site_url('login'))->with('error', 'No account found for this Google email');
         }
 
         if ($user['status'] !== 'active') {
-            return redirect()->to(site_url('login'))->with('error', 'Your account is inactive. Please contact the administrator to reactivate it.');
+            return redirect()->to(site_url('login'))->with('error', 'Your account is inactive');
         }
 
         if (! $this->googleEmailVerified($profile)) {
-            return redirect()->to(site_url('login'))->with('error', 'Your Google email is not verified.');
+            return redirect()->to(site_url('login'))->with('error', 'Google email is not verified');
         }
 
         if (! $this->googleRoleAllowed((string) ($user['role_slug'] ?? ''))) {
-            return redirect()->to(site_url('login'))->with('error', 'Your role is not allowed to sign in with Google.');
+            return redirect()->to(site_url('login'))->with('error', 'Your role is not allowed for Google sign-in');
         }
 
         $this->startUserSession($user, 'google');
 
-        return redirect()->to(site_url($this->dashboardPathForRole((string) ($user['role_slug'] ?? 'employee'))))->with('success', 'Signed in with Google.');
+        return redirect()->to(site_url($this->dashboardPathForRole((string) ($user['role_slug'] ?? 'employee'))))->with('success', 'Successfully signed in');
     }
 
     private function googleSsoConfigured(): bool

@@ -28,7 +28,7 @@
                 <?= csrf_field() ?>
                 <div>
                     <label class="form-label fw-semibold" for="email">Email</label>
-                    <input class="form-control" id="email" name="email" type="email" value="<?= esc(old('email')) ?>" placeholder="name@company.com" autocomplete="email" required>
+                    <input class="form-control" id="email" name="email" type="email" value="<?= esc(old('email')) ?>" placeholder="Enter your registered emailfi" autocomplete="email" required>
                 </div>
 
                 <div>
@@ -59,7 +59,6 @@
 
             <p class="small text-secondary mt-2 mb-0">
                 Google sign-in only works for accounts already created by the administrator.
-                If your email is not registered or your account is inactive, login will be blocked.
             </p>
         </div>
     </div>

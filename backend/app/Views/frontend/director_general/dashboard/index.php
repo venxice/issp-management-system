@@ -85,11 +85,9 @@ $summaryLogs = $recentLogs ?? [];
 
     <div class="col-12">
         <section class="panel">
-            <div class="panel-header d-flex align-items-center justify-content-between">
-                <div>
-                    <h2 class="panel-title">Recent Activity</h2>
-                    <p class="panel-subtitle">Latest records for executive review.</p>
-                </div>
+            <div class="panel-header">
+                <h2 class="panel-title">Recent Activity</h2>
+                <p class="panel-subtitle">Latest records for executive review.</p>
             </div>
             <div class="table-responsive">
                 <table class="table align-middle mb-0">
