@@ -122,7 +122,7 @@ SSO_GOOGLE_CLIENT_ID=
 SSO_GOOGLE_CLIENT_SECRET=
 SSO_GOOGLE_REDIRECT_URI=http://localhost:8080/auth/google/callback
 SSO_GOOGLE_HOSTED_DOMAIN=
-SSO_GOOGLE_ALLOWED_ROLES=admin,director_general,ict_planner,employee
+SSO_GOOGLE_ALLOWED_ROLES=admin,director_general,department_head,ict_planner,employee
 ```
 
 Leave `SSO_GOOGLE_HOSTED_DOMAIN` empty to allow any Google account, or set it to your organization domain.

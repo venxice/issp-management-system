@@ -101,11 +101,11 @@ $fieldId = static function (string $field) use ($prefix): string {
 
         <?php if ($isEdit): ?>
         <div class="form-text text-info">
-            <i class="fa-solid fa-info-circle me-1"></i> Only edit password if you want to change it
+            <i class="fa-solid fa-info-circle me-1"></i> Not required, only change when needed
         </div>
         <?php else: ?>
         <div class="form-text">
-            Password editing is optional - you can update other fields without changing the password
+            Required: 8+ characters, uppercase, lowercase, number, special character (!@#$%^&* etc.)
         </div>
         <?php endif; ?>
     </div>
