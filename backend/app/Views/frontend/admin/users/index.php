@@ -393,6 +393,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const addForm = document.getElementById('addUserForm');
     const editFormElement = document.getElementById('editUserForm');
 
+    console.log('Forms found:', {
+        addForm: !!addForm,
+        editFormElement: !!editFormElement
+    });
+
     let pendingSubmitForm = null;
     const confirmModalEl = document.getElementById('confirmSubmitModal');
     const confirmModal = confirmModalEl ? new bootstrap.Modal(confirmModalEl) : null;
@@ -414,15 +419,230 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Reset add form when modal is shown and hidden
+    const addUserModal = document.getElementById('addUserModal');
+    if (addUserModal) {
+        addUserModal.addEventListener('show.bs.modal', () => {
+            if (addForm) {
+                addForm.reset();
+                // Clear any password feedback
+                addForm.querySelectorAll('.password-requirements, .password-match-status').forEach(el => el.remove());
+            }
+        });
+        addUserModal.addEventListener('hidden.bs.modal', () => {
+            if (addForm) {
+                addForm.reset();
+                // Clear any password feedback
+                addForm.querySelectorAll('.password-requirements, .password-match-status').forEach(el => el.remove());
+            }
+        });
+    }
+
     if (addForm) {
         addForm.addEventListener('submit', (e) => {
+            console.log('Add User Form submitted');
             e.preventDefault();
+
+            // Custom validation for add form - scoped to this form only
+            const firstName = addForm.querySelector('[name="first_name"]');
+            const lastName = addForm.querySelector('[name="last_name"]');
+            const email = addForm.querySelector('[name="email"]');
+            const roleId = addForm.querySelector('[name="role_id"]');
+            const positionId = addForm.querySelector('[name="position_id"]');
+            const departmentId = addForm.querySelector('[name="department_id"]');
+            const status = addForm.querySelector('[name="status"]');
+            const password = addForm.querySelector('[name="password"]');
+            const confirmPassword = addForm.querySelector('[name="password_confirmation"]');
+
+            console.log('Add form elements found:', {
+                firstName: !!firstName,
+                lastName: !!lastName,
+                email: !!email,
+                roleId: !!roleId,
+                positionId: !!positionId,
+                departmentId: !!departmentId,
+                status: !!status,
+                password: !!password,
+                confirmPassword: !!confirmPassword
+            });
+
+            let isValid = true;
+            let firstInvalidField = null;
+
+            // Validate required fields
+            if (!firstName || !firstName.value || firstName.value.trim() === '') {
+                isValid = false;
+                firstInvalidField = firstInvalidField || firstName;
+            }
+            if (!lastName || !lastName.value || lastName.value.trim() === '') {
+                isValid = false;
+                firstInvalidField = firstInvalidField || lastName;
+            }
+            if (!email || !email.value || email.value.trim() === '') {
+                isValid = false;
+                firstInvalidField = firstInvalidField || email;
+            }
+            if (!roleId || !roleId.value) {
+                isValid = false;
+                firstInvalidField = firstInvalidField || roleId;
+            }
+            if (!positionId || !positionId.value) {
+                isValid = false;
+                firstInvalidField = firstInvalidField || positionId;
+            }
+            if (!departmentId || !departmentId.value) {
+                isValid = false;
+                firstInvalidField = firstInvalidField || departmentId;
+            }
+            if (!status || !status.value) {
+                isValid = false;
+                firstInvalidField = firstInvalidField || status;
+            }
+
+            // Password is required for new users
+            if (!password || !password.value || password.value.trim() === '') {
+                alert('Password is required');
+                if (password) password.focus();
+                return;
+            }
+
+            // Check password requirements
+            const requirements = [];
+            if (password.value.length < 8) {
+                requirements.push('8+ characters');
+            }
+            if (!/[A-Z]/.test(password.value)) {
+                requirements.push('uppercase letter');
+            }
+            if (!/[a-z]/.test(password.value)) {
+                requirements.push('lowercase letter');
+            }
+            if (!/[0-9]/.test(password.value)) {
+                requirements.push('number');
+            }
+            if (!/[!@#$%^&*(),.?":{}|<>]/.test(password.value)) {
+                requirements.push('special character');
+            }
+
+            if (requirements.length > 0) {
+                showValidationModal('Password must contain: ' + requirements.join(', '));
+                if (password) password.focus();
+                return;
+            }
+
+            // Password confirmation is required
+            if (!confirmPassword || !confirmPassword.value || confirmPassword.value.trim() === '') {
+                alert('Please confirm your password');
+                if (confirmPassword) confirmPassword.focus();
+                return;
+            }
+
+            // Check if passwords match
+            console.log('Password match check:', password.value, '===', confirmPassword.value, '=', password.value === confirmPassword.value);
+            if (password.value !== confirmPassword.value) {
+                alert('Passwords do not match');
+                if (confirmPassword) confirmPassword.focus();
+                return;
+            }
+
+            if (!isValid) {
+                alert('Please fill in all required fields');
+                if (firstInvalidField) firstInvalidField.focus();
+                return;
+            }
+
             openConfirm(addForm, 'Are you sure you want to add this user?');
+        });
+
+        // Real-time password feedback for add form
+        const addPasswordInput = addForm.querySelector('[name="password"]');
+        if (addPasswordInput) {
+            addPasswordInput.addEventListener('input', function() {
+                const password = this.value;
+                const requirements = [];
+
+                if (password.length > 0 && password.length < 8) {
+                    requirements.push('8+ characters');
+                }
+                if (password.length > 0 && !/[A-Z]/.test(password)) {
+                    requirements.push('uppercase');
+                }
+                if (password.length > 0 && !/[a-z]/.test(password)) {
+                    requirements.push('lowercase');
+                }
+                if (password.length > 0 && !/[0-9]/.test(password)) {
+                    requirements.push('number');
+                }
+                if (password.length > 0 && !/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+                    requirements.push('special character');
+                }
+
+                const existingHelp = this.parentNode.querySelector('.password-requirements');
+                if (existingHelp) {
+                    existingHelp.remove();
+                }
+
+                if (requirements.length > 0) {
+                    const helpDiv = document.createElement('div');
+                    helpDiv.className = 'password-requirements text-muted small';
+                    helpDiv.style.marginTop = '4px';
+                    helpDiv.textContent = 'Missing: ' + requirements.join(', ');
+                    this.parentNode.appendChild(helpDiv);
+                }
+            });
+        }
+
+        const addConfirmPasswordInput = addForm.querySelector('[name="password_confirmation"]');
+        if (addConfirmPasswordInput) {
+            addConfirmPasswordInput.addEventListener('input', function() {
+                const confirmPassword = this.value;
+                const password = addForm.querySelector('[name="password"]').value;
+
+                const existingHelp = this.parentNode.querySelector('.password-match-status');
+                if (existingHelp) {
+                    existingHelp.remove();
+                }
+
+                if (confirmPassword.length > 0) {
+                    const helpDiv = document.createElement('div');
+                    helpDiv.className = 'password-match-status small';
+                    helpDiv.style.marginTop = '4px';
+
+                    if (password === confirmPassword) {
+                        helpDiv.textContent = '✓ Passwords match';
+                        helpDiv.style.color = '#198754';
+                    } else {
+                        helpDiv.textContent = '✗ Passwords do not match';
+                        helpDiv.style.color = '#dc3545';
+                    }
+
+                    this.parentNode.appendChild(helpDiv);
+                }
+            });
+        }
+    }
+
+    // Reset edit form when modal is shown and hidden to prevent content mixing
+    const editUserModal = document.getElementById('editUserModal');
+    if (editUserModal) {
+        editUserModal.addEventListener('show.bs.modal', () => {
+            if (editFormElement) {
+                // Clear any password feedback
+                editFormElement.querySelectorAll('.password-requirements, .password-match-status').forEach(el => el.remove());
+            }
+        });
+        editUserModal.addEventListener('hidden.bs.modal', () => {
+            if (editFormElement) {
+                editFormElement.reset();
+                // Clear any password feedback
+                editFormElement.querySelectorAll('.password-requirements, .password-match-status').forEach(el => el.remove());
+            }
         });
     }
 
     if (editFormElement) {
         editFormElement.addEventListener('submit', (e) => {
+            console.log('Edit User Form submitted');
             e.preventDefault();
 
             // Custom validation for edit form
@@ -435,6 +655,18 @@ document.addEventListener('DOMContentLoaded', () => {
             const status = editFormElement.querySelector('[name="status"]');
             const password = editFormElement.querySelector('[name="password"]');
             const confirmPassword = editFormElement.querySelector('[name="password_confirmation"]');
+
+            console.log('Edit form elements found:', {
+                firstName: !!firstName,
+                lastName: !!lastName,
+                email: !!email,
+                roleId: !!roleId,
+                positionId: !!positionId,
+                departmentId: !!departmentId,
+                status: !!status,
+                password: !!password,
+                confirmPassword: !!confirmPassword
+            });
 
             let isValid = true;
             let firstInvalidField = null;
@@ -490,7 +722,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 if (requirements.length > 0) {
-                    alert('Password must contain: ' + requirements.join(', '));
+                    showValidationModal('Password must contain: ' + requirements.join(', '));
                     if (firstInvalidField) firstInvalidField.focus();
                     return;
                 }
@@ -502,6 +734,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
 
+                console.log('Edit password match check:', password.value, '===', confirmPassword.value, '=', password.value === confirmPassword.value);
                 if (password.value !== confirmPassword.value) {
                     alert('Passwords do not match');
                     if (confirmPassword) confirmPassword.focus();
@@ -517,9 +750,99 @@ document.addEventListener('DOMContentLoaded', () => {
 
             openConfirm(editFormElement, 'Are you sure you want to update this user?');
         });
+
+        // Real-time password feedback for edit form
+        const editPasswordInput = editFormElement.querySelector('[name="password"]');
+        if (editPasswordInput) {
+            editPasswordInput.addEventListener('input', function() {
+                const password = this.value;
+                const requirements = [];
+
+                if (password.length > 0 && password.length < 8) {
+                    requirements.push('8+ characters');
+                }
+                if (password.length > 0 && !/[A-Z]/.test(password)) {
+                    requirements.push('uppercase');
+                }
+                if (password.length > 0 && !/[a-z]/.test(password)) {
+                    requirements.push('lowercase');
+                }
+                if (password.length > 0 && !/[0-9]/.test(password)) {
+                    requirements.push('number');
+                }
+                if (password.length > 0 && !/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+                    requirements.push('special character');
+                }
+
+                const existingHelp = this.parentNode.querySelector('.password-requirements');
+                if (existingHelp) {
+                    existingHelp.remove();
+                }
+
+                if (requirements.length > 0) {
+                    const helpDiv = document.createElement('div');
+                    helpDiv.className = 'password-requirements text-muted small';
+                    helpDiv.style.marginTop = '4px';
+                    helpDiv.textContent = 'Missing: ' + requirements.join(', ');
+                    this.parentNode.appendChild(helpDiv);
+                }
+            });
+        }
+
+        const editConfirmPasswordInput = editFormElement.querySelector('[name="password_confirmation"]');
+        if (editConfirmPasswordInput) {
+            editConfirmPasswordInput.addEventListener('input', function() {
+                const confirmPassword = this.value;
+                const password = editFormElement.querySelector('[name="password"]').value;
+
+                const existingHelp = this.parentNode.querySelector('.password-match-status');
+                if (existingHelp) {
+                    existingHelp.remove();
+                }
+
+                if (confirmPassword.length > 0) {
+                    const helpDiv = document.createElement('div');
+                    helpDiv.className = 'password-match-status small';
+                    helpDiv.style.marginTop = '4px';
+
+                    if (password === confirmPassword) {
+                        helpDiv.textContent = '✓ Passwords match';
+                        helpDiv.style.color = '#198754';
+                    } else {
+                        helpDiv.textContent = '✗ Passwords do not match';
+                        helpDiv.style.color = '#dc3545';
+                    }
+
+                    this.parentNode.appendChild(helpDiv);
+                }
+            });
+        }
+
+        // Validation modal function
+        function showValidationModal(message) {
+            const validationModal = new bootstrap.Modal(document.getElementById('validationModal'));
+            document.getElementById('validationMessage').textContent = message;
+            validationModal.show();
+        }
     }
 });
 </script>
+<div class="modal fade" id="validationModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-sm modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Validation Error</h5>
+      </div>
+      <div class="modal-body">
+        <p id="validationMessage">Please correct the following errors:</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="modal fade" id="confirmSubmitModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-sm modal-dialog-centered">
     <div class="modal-content">

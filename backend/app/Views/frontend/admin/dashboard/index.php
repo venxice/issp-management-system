@@ -62,9 +62,7 @@ $logPayload = static function (array $log): array {
                     <?php if ($chartSource !== []): ?>
                         <?php 
                         $maxValue = max(array_column($chartSource, 'total'));
-                        // Create reference lines based on actual user counts (1, 2, 3, ..., up to max value)
                         $referenceLines = range(1, $maxValue);
-                        // Chart dimensions and padding
                         $chartHeight = 200;
                         $topPadding = 20;
                         $bottomPadding = 30;
@@ -74,8 +72,6 @@ $logPayload = static function (array $log): array {
                             <div class="css-bar-chart__background">
                                 <?php foreach ($referenceLines as $ref): ?>
                                     <?php 
-                                    // Calculate position: (ref/maxValue) represents the proportion within the available height
-                                    // Then add bottom padding offset
                                     $bottomPosition = (($ref / $maxValue) * ($availableHeight / $chartHeight) * 100) + (($bottomPadding / $chartHeight) * 100);
                                     ?>
                                     <div class="css-bar-chart__reference-line" style="bottom: <?= $bottomPosition ?>%;">
