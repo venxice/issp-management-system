@@ -36,18 +36,13 @@ $userPayload = static function (array $user): array {
         <div class="d-flex flex-wrap align-items-center gap-2 justify-content-end ms-auto">
             <form class="d-flex flex-wrap align-items-center toolbar-form" method="get" action="<?= site_url('admin/users') ?>">
                 <input class="form-control form-control-sm" name="q" value="<?= esc($query ?? '') ?>" placeholder="Search Users" style="width: 168px;">
-                <select class="form-select form-select-sm" name="role" style="width: 150px;">
-                    <option value="">All Roles</option>
-                    <?php foreach ($roles as $role): ?>
-                        <option value="<?= esc($role['slug']) ?>" <?= ($roleFilter ?? '') === $role['slug'] ? 'selected' : '' ?>>
-                            <?= esc($role['name']) ?>
+                <select class="form-select form-select-sm" name="department" style="width: 150px;">
+                    <option value="">All Division</option>
+                    <?php foreach ($departments as $department): ?>
+                        <option value="<?= esc($department['id']) ?>" <?= ($departmentFilter ?? '') === $department['id'] ? 'selected' : '' ?>>
+                            <?= esc($department['name']) ?>
                         </option>
                     <?php endforeach; ?>
-                </select>
-                <select class="form-select form-select-sm" name="status" style="width: 140px;">
-                    <option value="">All Status</option>
-                    <option value="active" <?= ($statusFilter ?? '') === 'active' ? 'selected' : '' ?>>Active</option>
-                    <option value="inactive" <?= ($statusFilter ?? '') === 'inactive' ? 'selected' : '' ?>>Inactive</option>
                 </select>
             </form>
 
@@ -114,7 +109,7 @@ $userPayload = static function (array $user): array {
             <ul class="pagination mb-0">
                 <?php if ($currentPage > 1): ?>
                 <li class="page-item">
-                    <a class="page-link" href="<?= site_url('admin/users') ?>?<?= http_build_query(array_filter(['q' => $query, 'role' => $roleFilter, 'status' => $statusFilter, 'page' => $currentPage - 1])) ?>">Previous</a>
+                    <a class="page-link" href="<?= site_url('admin/users') ?>?<?= http_build_query(array_filter(['q' => $query, 'department' => $departmentFilter, 'page' => $currentPage - 1])) ?>">Previous</a>
                 </li>
                 <?php endif; ?>
                 
@@ -124,7 +119,7 @@ $userPayload = static function (array $user): array {
                 $endPage = min($totalPages, $currentPage + 2);
                 
                 if ($startPage > 1): ?>
-                    <li class="page-item"><a class="page-link" href="<?= site_url('admin/users') ?>?<?= http_build_query(array_filter(['q' => $query, 'role' => $roleFilter, 'status' => $statusFilter, 'page' => 1])) ?>">1</a></li>
+                    <li class="page-item"><a class="page-link" href="<?= site_url('admin/users') ?>?<?= http_build_query(array_filter(['q' => $query, 'department' => $departmentFilter, 'page' => 1])) ?>">1</a></li>
                     <?php if ($startPage > 2): ?>
                     <li class="page-item disabled"><span class="page-link">...</span></li>
                     <?php endif; ?>
@@ -132,7 +127,7 @@ $userPayload = static function (array $user): array {
 
                 <?php for ($i = $startPage; $i <= $endPage; $i++): ?>
                     <li class="page-item <?= $i === $currentPage ? 'active' : '' ?>">
-                        <a class="page-link" href="<?= site_url('admin/users') ?>?<?= http_build_query(array_filter(['q' => $query, 'role' => $roleFilter, 'status' => $statusFilter, 'page' => $i])) ?>"><?= $i ?></a>
+                        <a class="page-link" href="<?= site_url('admin/users') ?>?<?= http_build_query(array_filter(['q' => $query, 'department' => $departmentFilter, 'page' => $i])) ?>"><?= $i ?></a>
                     </li>
                 <?php endfor; ?>
 
@@ -140,12 +135,12 @@ $userPayload = static function (array $user): array {
                     <?php if ($endPage < $totalPages - 1): ?>
                     <li class="page-item disabled"><span class="page-link">...</span></li>
                     <?php endif; ?>
-                    <li class="page-item"><a class="page-link" href="<?= site_url('admin/users') ?>?<?= http_build_query(array_filter(['q' => $query, 'role' => $roleFilter, 'status' => $statusFilter, 'page' => $totalPages])) ?>"><?= $totalPages ?></a></li>
+                    <li class="page-item"><a class="page-link" href="<?= site_url('admin/users') ?>?<?= http_build_query(array_filter(['q' => $query, 'department' => $departmentFilter, 'page' => $totalPages])) ?>"><?= $totalPages ?></a></li>
                 <?php endif; ?>
 
                 <?php if ($currentPage < $totalPages): ?>
                 <li class="page-item">
-                    <a class="page-link" href="<?= site_url('admin/users') ?>?<?= http_build_query(array_filter(['q' => $query, 'role' => $roleFilter, 'status' => $statusFilter, 'page' => $currentPage + 1])) ?>">Next</a>
+                    <a class="page-link" href="<?= site_url('admin/users') ?>?<?= http_build_query(array_filter(['q' => $query, 'department' => $departmentFilter, 'page' => $currentPage + 1])) ?>">Next</a>
                 </li>
                 <?php endif; ?>
             </ul>
@@ -207,14 +202,7 @@ $userPayload = static function (array $user): array {
                         'showPasswordHelp' => true,
                     ]) ?>
                 </div>
-                <div class="px-3 pb-2">
-                    <button class="btn btn-link text-success text-decoration-none p-0 d-none me-3" type="button" id="editReactivateButton">
-                        <i class="fa-solid fa-user-check me-1"></i> Reactivate account
-                    </button>
-                    <button class="btn btn-link text-danger text-decoration-none p-0 d-none" type="button" id="editDeactivateButton">
-                        <i class="fa-solid fa-user-slash me-1"></i> Deactivate account
-                    </button>
-                </div>
+
                 <div class="modal-footer justify-content-between">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button class="btn btn-primary" type="submit"><i class="fa-solid fa-floppy-disk me-2"></i> Update</button>
@@ -300,19 +288,6 @@ document.addEventListener('DOMContentLoaded', () => {
         set('status', user.status || '-');
         set('created', user.created_at ? formatDateTime(user.created_at) : '-');
         set('updated', user.updated_at ? formatDateTime(user.updated_at) : '-');
-
-        const headerEdit = document.getElementById('view-user-edit-header');
-        if (headerEdit) {
-            headerEdit.onclick = () => {
-                const modalEdit = document.getElementById('editUserModal');
-                if (! modalEdit) return;
-                try { modalEdit.dataset.user = JSON.stringify(user); } catch (e) { /* ignore */ }
-                if (typeof bootstrap === 'undefined' || ! bootstrap.Modal) { console.error('Bootstrap Modal not available'); return; }
-                const bs = bootstrap.Modal.getOrCreateInstance(modalEdit);
-                bs.show();
-                try { const close = modalEdit.querySelector('.btn-close'); if (close) close.focus(); } catch (e) { /* ignore */ }
-            };
-        }
 
         if (typeof bootstrap === 'undefined' || ! bootstrap.Modal) {
             console.error('Bootstrap Modal not available');

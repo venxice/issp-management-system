@@ -10,7 +10,7 @@ class AuditLogsController extends BaseController
     public function index()
     {
         $query = trim((string) $this->request->getGet('q'));
-        $date = trim((string) $this->request->getGet('date'));
+        $dateRange = trim((string) $this->request->getGet('date_range'));
         $page = (int) ($this->request->getGet('page') ?? 1);
         $perPage = 25;
 
@@ -24,15 +24,25 @@ class AuditLogsController extends BaseController
                 ->groupEnd();
         }
 
-        if ($date !== '') {
-            $logs->where('logs.created_at >=', $date . ' 00:00:00')
-                ->where('logs.created_at <=', $date . ' 23:59:59');
+        if ($dateRange !== '') {
+            $dates = explode(' to ', $dateRange);
+            if (count($dates) === 2) {
+                $startDate = trim($dates[0]);
+                $endDate = trim($dates[1]);
+                $logs->where('logs.created_at >=', $startDate . ' 00:00:00')
+                    ->where('logs.created_at <=', $endDate . ' 23:59:59');
+            } elseif (count($dates) === 1) {
+                $singleDate = trim($dates[0]);
+                $logs->where('logs.created_at >=', $singleDate . ' 00:00:00')
+                    ->where('logs.created_at <=', $singleDate . ' 23:59:59');
+            }
         }
 
-        $builder = $logs->select('logs.*, logs.page_url, logs.user_agent, logs.ip_address, logs.new_data, logs.contact_number, logs.position, users.name AS user_name, users.email AS user_email, roles.name AS role_name, departments.name AS department_name')
+        $builder = $logs->select('logs.*, logs.page_url, logs.user_agent, logs.ip_address, logs.new_data, logs.contact_number, logs.position, users.name AS user_name, users.email AS user_email, roles.name AS role_name, departments.name AS department_name, positions.name AS position_name')
             ->join('users', 'users.id = logs.user_id', 'left')
             ->join('roles', 'roles.id = users.role_id', 'left')
             ->join('departments', 'departments.id = users.department_id', 'left')
+            ->join('positions', 'positions.id = users.position_id', 'left')
             ->whereNotIn('logs.action', ['login', 'logout'])
             ->orderBy('logs.created_at', 'DESC');
 
@@ -45,7 +55,7 @@ class AuditLogsController extends BaseController
             'title' => 'Audit Logs',
             'active' => 'audit',
             'query' => $query,
-            'date' => $date,
+            'date_range' => $dateRange,
             'logs' => $logsData,
             'pager' => $pager,
             'total' => $total,
@@ -62,10 +72,11 @@ class AuditLogsController extends BaseController
         }
 
         $logs = new AuditLogModel();
-        $log = $logs->select('logs.*, logs.page_url, logs.user_agent, logs.ip_address, logs.new_data, logs.contact_number, logs.position, users.name AS user_name, users.email AS user_email, roles.name AS role_name, departments.name AS department_name')
+        $log = $logs->select('logs.*, logs.page_url, logs.user_agent, logs.ip_address, logs.new_data, logs.contact_number, logs.position, users.name AS user_name, users.email AS user_email, roles.name AS role_name, departments.name AS department_name, positions.name AS position_name')
             ->join('users', 'users.id = logs.user_id', 'left')
             ->join('roles', 'roles.id = users.role_id', 'left')
             ->join('departments', 'departments.id = users.department_id', 'left')
+            ->join('positions', 'positions.id = users.position_id', 'left')
             ->where('logs.id', $id)
             ->first();
 
@@ -86,7 +97,7 @@ class AuditLogsController extends BaseController
             'user_agent' => $log['user_agent'] ?? '-',
             'ip_address' => $log['ip_address'] ?? '-',
             'contact_number' => $log['contact_number'] ?? '-',
-            'position' => $log['position'] ?? '',
+            'position' => $log['position_name'] ?? '',
             'new_data' => $log['new_data'] ?? '-',
         ];
 

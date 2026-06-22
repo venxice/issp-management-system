@@ -32,9 +32,6 @@ $showEdit = $showEdit ?? false;
                     <div>
                         <div class="d-flex align-items-center gap-2">
                             <div class="user-name" id="<?= esc($prefix) ?>-user">-</div>
-                            <button type="button" class="btn btn-sm btn-outline-primary p-1" id="<?= esc($prefix) ?>-edit-header" aria-label="Edit user">
-                                <i class="fa-solid fa-pen-to-square"></i>
-                            </button>
                         </div>
                         <div class="user-meta mt-1" id="<?= esc($prefix) ?>-email">-</div>
                     </div>

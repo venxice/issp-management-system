@@ -14,6 +14,7 @@ $active = $active ?? '';
     <title><?= esc($title) ?> | ISSP Management System</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css?v=2" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css?v=2" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
     <style>
         :root {
             --ink: #1f2a3a;
@@ -182,7 +183,7 @@ $active = $active ?? '';
         .app-sidebar .nav-link {
             color: rgba(255, 255, 255, .76);
             background: transparent;
-            border-radius: 10px;
+            border-radius: 0;
             padding: 10px 12px;
             margin-bottom: 6px;
             font-size: .82rem;
@@ -221,7 +222,7 @@ $active = $active ?? '';
         }
 
         .sidebar-logout {
-            border-radius: 10px;
+            border-radius: 0;
             color: rgba(255, 255, 255, .72) !important;
             background: transparent;
             border: 0;
@@ -748,11 +749,157 @@ $active = $active ?? '';
             display: block;
             max-width: 100%;
             white-space: normal;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
+            word-wrap: break-word;
+        }
+
+        .table {
+            table-layout: auto;
+            width: 100%;
+        }
+
+        .table th,
+        .table td {
+            white-space: nowrap;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        @media (max-width: 768px) {
+            .table-responsive {
+                overflow-x: scroll;
+            }
+
+            .table {
+                table-layout: auto;
+                width: 100%;
+            }
+
+            .table.table-users th,
+            .table.table-users td,
+            .table.table-logs th,
+            .table.table-logs td {
+                width: auto !important;
+            }
+
+            .table.table-users th:nth-child(1),
+            .table.table-users td:nth-child(1),
+            .table.table-logs th:nth-child(1),
+            .table.table-logs td:nth-child(1) {
+                width: 80px !important;
+                min-width: 80px;
+            }
+
+            .table.table-users th:nth-child(7),
+            .table.table-users td:nth-child(7) {
+                width: 140px !important;
+                min-width: 140px;
+            }
+
+            .table.table-logs th:nth-child(8),
+            .table.table-logs td:nth-child(8) {
+                width: 72px !important;
+                min-width: 72px;
+            }
+        }
+
+        .table th:not(:first-child):not(:last-child),
+        .table td:not(:first-child):not(:last-child) {
+            text-align: left;
+        }
+
+        /* User Management Table (7 columns) */
+        .table.table-users th:nth-child(1),
+        .table.table-users td:nth-child(1) {
+            width: 80px;
+            min-width: 80px;
+        }
+
+        .table.table-users th:nth-child(2),
+        .table.table-users td:nth-child(2) {
+            width: 12%;
+            min-width: 100px;
+        }
+
+        .table.table-users th:nth-child(3),
+        .table.table-users td:nth-child(3) {
+            width: 12%;
+            min-width: 120px;
+        }
+
+        .table.table-users th:nth-child(4),
+        .table.table-users td:nth-child(4) {
+            width: 8%;
+            min-width: 80px;
+        }
+
+        .table.table-users th:nth-child(5),
+        .table.table-users td:nth-child(5) {
+            width: 45%;
+            min-width: 380px;
+        }
+
+        .table.table-users th:nth-child(6),
+        .table.table-users td:nth-child(6) {
+            width: 4%;
+            min-width: 55px;
+        }
+
+        .table.table-users th:nth-child(7),
+        .table.table-users td:nth-child(7) {
+            width: 140px;
+            min-width: 140px;
+        }
+
+        /* Audit Logs / Dashboard Tables (8 columns) */
+        .table.table-logs th:nth-child(1),
+        .table.table-logs td:nth-child(1) {
+            width: 72px;
+            min-width: 72px;
+        }
+
+        .table.table-logs th:nth-child(2),
+        .table.table-logs td:nth-child(2) {
+            width: 14%;
+            min-width: 130px;
+        }
+
+        .table.table-logs th:nth-child(3),
+        .table.table-logs td:nth-child(3) {
+            width: 14%;
+            min-width: 120px;
+        }
+
+        .table.table-logs th:nth-child(4),
+        .table.table-logs td:nth-child(4) {
+            width: 12%;
+            min-width: 90px;
+        }
+
+        .table.table-logs th:nth-child(5),
+        .table.table-logs td:nth-child(5) {
+            width: 12%;
+            min-width: 100px;
+        }
+
+        .table.table-logs th:nth-child(6),
+        .table.table-logs td:nth-child(6) {
+            width: 20%;
+            min-width: 180px;
+        }
+
+        .table.table-logs th:nth-child(7),
+        .table.table-logs td:nth-child(7) {
+            width: 14%;
+            min-width: 120px;
+        }
+
+        .table.table-logs th:nth-child(8),
+        .table.table-logs td:nth-child(8) {
+            width: 72px;
+            min-width: 72px;
         }
 
         .table {
@@ -1005,7 +1152,7 @@ $active = $active ?? '';
 </head>
 <body>
 <div class="app-layout">
-    <?= $this->include('frontend/layout/sidebar') ?>
+    <?= $this->include('frontend/layout/sidebar/sidebar') ?>
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
     <main class="app-main">
         <header class="topbar">
@@ -1049,6 +1196,7 @@ $active = $active ?? '';
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Sidebar Toggle Functionality

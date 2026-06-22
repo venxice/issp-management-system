@@ -28,10 +28,11 @@ class AuditLogModel extends Model
 
     public function recent(int $limit = 10): array
     {
-        return $this->select('logs.*, logs.page_url, logs.user_agent, logs.ip_address, logs.new_data, logs.contact_number, logs.position, users.name AS user_name, users.email AS user_email, roles.name AS role_name, departments.name AS department_name')
+        return $this->select('logs.*, logs.page_url, logs.user_agent, logs.ip_address, logs.new_data, logs.contact_number, logs.position, users.name AS user_name, users.email AS user_email, roles.name AS role_name, departments.name AS department_name, positions.name AS position_name')
             ->join('users', 'users.id = logs.user_id', 'left')
             ->join('roles', 'roles.id = users.role_id', 'left')
             ->join('departments', 'departments.id = users.department_id', 'left')
+            ->join('positions', 'positions.id = users.position_id', 'left')
             ->orderBy('logs.created_at', 'DESC')
             ->findAll($limit);
     }
