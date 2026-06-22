@@ -49,12 +49,9 @@ $showEdit = $showEdit ?? false;
                     <div class="key">Status</div><div class="val" id="<?= esc($prefix) ?>-status">-</div>
                     <div class="key">Created</div><div class="val" id="<?= esc($prefix) ?>-created">-</div>
                     <div class="key">Updated</div><div class="val" id="<?= esc($prefix) ?>-updated">-</div>
+                </div>
 
             </div>
-
-</div>
-</div>
-            
 
             <?php if ($showEdit): ?>
             <div class="modal-footer justify-content-between">

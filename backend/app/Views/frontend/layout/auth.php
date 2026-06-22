@@ -6,6 +6,10 @@ $title = $title ?? 'ISSP Management System';
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+    <meta http-equiv="Cache-Control" content="post-check=0, pre-check=0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="Sat, 26 Jul 1997 05:00:00 GMT">
     <title><?= esc($title) ?> | ISSP Management System</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
@@ -25,24 +29,25 @@ $title = $title ?? 'ISSP Management System';
             color: var(--ink);
             font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
             background:
-                radial-gradient(circle at 20% 20%, rgba(141, 161, 189, .28), transparent 28%),
-                radial-gradient(circle at 80% 0%, rgba(92, 109, 141, .2), transparent 24%),
-                linear-gradient(180deg, #111827 0%, #f5f6f8 82%);
+                radial-gradient(circle at 20% 20%, rgba(79, 101, 132, .16), transparent 26%),
+                radial-gradient(circle at 80% 0%, rgba(79, 101, 132, .12), transparent 22%),
+                linear-gradient(180deg, #eef2f6 0%, #f5f5f5 68%, #eef1f5 100%);
         }
 
         .auth-shell {
             min-height: 100vh;
             display: grid;
             place-items: center;
-            padding: 36px 18px;
+            padding: 34px 18px;
         }
 
         .auth-heading {
-            color: #ffffff;
+            color: #1f2a3a;
             text-align: center;
-            font-size: clamp(2rem, 4vw, 3rem);
+            font-size: clamp(1.8rem, 3vw, 2.35rem);
             font-weight: 800;
-            margin-bottom: 34px;
+            letter-spacing: -.02em;
+            margin-bottom: 22px;
         }
 
         .auth-heading span {
@@ -50,27 +55,113 @@ $title = $title ?? 'ISSP Management System';
         }
 
         .auth-card {
-            width: min(720px, 100%);
-            min-height: 520px;
+            width: min(980px, 100%);
+            min-height: 560px;
             overflow: hidden;
-            background: var(--panel);
-            border: 1px solid rgba(255, 255, 255, .08);
-            border-radius: 14px;
-            box-shadow: 0 24px 70px rgba(20, 29, 45, .34);
+            background: #ffffff;
+            border: 1px solid #dfe4ea;
+            border-radius: 10px;
+            box-shadow: 0 18px 48px rgba(31, 42, 58, .12);
+            display: grid;
+            grid-template-columns: 1fr 1.15fr;
+        }
+
+        .auth-intro {
+            padding: clamp(34px, 5vw, 56px);
+            background:
+                linear-gradient(180deg, rgba(79, 101, 132, .98), rgba(52, 72, 99, .98)),
+                radial-gradient(circle at top right, rgba(255, 255, 255, .12), transparent 35%);
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 24px;
+        }
+
+        .auth-intro .eyebrow {
+            display: inline-flex;
+            align-self: flex-start;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 12px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, .12);
+            font-size: .72rem;
+            font-weight: 700;
+            letter-spacing: .02em;
+            text-transform: uppercase;
+        }
+
+        .auth-intro h2 {
+            font-size: clamp(1.5rem, 3vw, 2.15rem);
+            line-height: 1.1;
+            font-weight: 800;
+            margin: 14px 0 12px;
+            letter-spacing: -.02em;
+        }
+
+        .auth-intro p {
+            margin: 0;
+            max-width: 32ch;
+            color: rgba(255, 255, 255, .84);
+            font-size: .92rem;
+            line-height: 1.55;
+        }
+
+        .auth-intro .feature-list {
+            display: grid;
+            gap: 10px;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .auth-intro .feature-list li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: .88rem;
+            color: rgba(255, 255, 255, .9);
+        }
+
+        .auth-intro .feature-list i {
+            color: #d8e2ef;
         }
 
         .auth-form-wrap {
-            color: #ffffff;
-            padding: clamp(36px, 6vw, 64px);
+            color: #1f2a3a;
+            padding: clamp(32px, 5vw, 54px);
             display: flex;
             flex-direction: column;
             justify-content: center;
+            background:
+                linear-gradient(180deg, #ffffff 0%, #fbfcfe 100%);
+        }
+
+        .auth-form-wrap h2 {
+            font-size: 1.5rem;
+            line-height: 1.15;
+            letter-spacing: -.02em;
+        }
+
+        .auth-subtitle {
+            color: #6b7280;
+            font-size: .88rem;
+            margin-top: 6px;
+            margin-bottom: 24px;
         }
 
         .form-control {
-            min-height: 54px;
+            min-height: 46px;
             border-radius: 8px;
             border-color: var(--line);
+            box-shadow: none;
+            font-size: .92rem;
+        }
+
+        .form-control:focus {
+            border-color: var(--brand);
+            box-shadow: 0 0 0 .2rem rgba(79, 101, 132, .12);
         }
 
         .password-wrap {
@@ -84,15 +175,16 @@ $title = $title ?? 'ISSP Management System';
             transform: translateY(-50%);
             border: 0;
             background: transparent;
-            color: #111827;
+            color: #6b7280;
         }
 
         .btn-login {
-            min-height: 54px;
+            min-height: 46px;
             border-radius: 8px;
             background: var(--brand);
             border-color: var(--brand);
             font-weight: 700;
+            box-shadow: 0 10px 18px rgba(79, 101, 132, .16);
         }
 
         .btn-login:hover {
@@ -117,22 +209,28 @@ $title = $title ?? 'ISSP Management System';
         }
 
         .google-btn {
-            min-height: 50px;
-            border-radius: 999px;
-            color: #ffffff;
-            border-color: rgba(255, 255, 255, .55);
+            min-height: 46px;
+            border-radius: 8px;
+            color: #1f2a3a;
+            border-color: #d7dce4;
             font-weight: 700;
+            background: #ffffff;
         }
 
         .google-btn:hover {
-            color: #ffffff;
-            border-color: #ffffff;
-            background: rgba(255, 255, 255, .08);
+            color: #1f2a3a;
+            border-color: #c7cfdb;
+            background: #f8fafc;
         }
 
-        @media (max-width: 860px) {
+        @media (max-width: 991.98px) {
             .auth-card {
                 min-height: auto;
+                grid-template-columns: 1fr;
+            }
+
+            .auth-intro {
+                gap: 14px;
             }
         }
     </style>

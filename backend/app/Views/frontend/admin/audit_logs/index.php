@@ -12,41 +12,43 @@ $logPayload = static function (array $log): array {
         'role_name' => $log['role_name'] ?? '',
         'user_email' => $log['user_email'] ?? '',
         'department_name' => $log['department_name'] ?? '',
-        'page_url' => '-',
-        'user_agent' => '-',
-        'ip_address' => '-',
-        'contact_number' => '-',
-        'position' => $log['role_name'] ?? '',
-        'new_data' => '-',
+        'page_url' => $log['page_url'] ?? '-',
+        'user_agent' => $log['user_agent'] ?? '-',
+        'ip_address' => $log['ip_address'] ?? '-',
+        'contact_number' => $log['contact_number'] ?? '-',
+        'position' => $log['position_name'] ?? '',
+        'new_data' => $log['new_data'] ?? '-',
     ];
 };
 ?>
 
 <section class="panel">
-    <div class="panel-header d-flex flex-wrap gap-3 align-items-center justify-content-between">
-        <div>
-            <h2 class="panel-title">Audit Logs</h2>
-            <p class="panel-subtitle">Review user activity and system changes.</p>
-        </div>
-        <form class="d-flex align-items-center toolbar-form" method="get" action="<?= site_url('admin/audit-logs') ?>">
-            <input class="form-control form-control-sm" name="q" value="<?= esc($query ?? '') ?>" placeholder="Search Activity" style="width: 220px;">
-            <button class="btn btn-outline-primary" type="submit">
-                <i class="fa-solid fa-magnifying-glass"></i>
-            </button>
+    <div class="panel-header">
+        <h2 class="panel-title">User Activity</h2>
+        <p class="panel-subtitle">Review user activity and system changes.</p>
+        <form class="d-flex align-items-center toolbar-form audit-toolbar" method="get" action="<?= site_url('admin/audit-logs') ?>">
+            <input class="form-control form-control-sm" name="q" value="<?= esc($query ?? '') ?>" placeholder="Search Activity">
+            <div class="position-relative date-range-picker-wrapper">
+                <input class="form-control form-control-sm" name="date_range" type="text" value="<?= esc($date_range ?? '') ?>" placeholder="" id="dateRangePicker" readonly>
+                <button type="button" class="date-picker-icon-btn" id="datePickerToggleBtn">
+                    <i class="fa-solid fa-calendar-days"></i>
+                </button>
+            </div>
         </form>
     </div>
 
     <div class="table-responsive">
-        <table class="table align-middle mb-0">
+        <table class="table table-logs align-middle mb-0">
             <thead>
             <tr>
-                <th style="width: 72px;">ID</th>
+                <th>ID</th>
                 <th>Date / Time</th>
                 <th>User</th>
                 <th>Role</th>
                 <th>Activity</th>
                 <th>Description</th>
-                <th class="text-center" style="width: 72px;">Action</th>
+                <th>IP Address</th>
+                <th class="text-center">Action</th>
             </tr>
             </thead>
             <tbody>
@@ -57,8 +59,9 @@ $logPayload = static function (array $log): array {
                     <td><?= esc($log['created_at'] ?? '') ?></td>
                     <td><?= esc($log['user_name'] ?? 'System') ?></td>
                     <td><?= esc($log['role_name'] ?? 'Unknown') ?></td>
-                    <td><span class="badge badge-soft"><?= esc($log['action'] ?? '') ?></span></td>
+                    <td><span class="badge badge-soft"><?= esc(str_replace('.', ' ', $log['action'] ?? '')) ?></span></td>
                     <td><span class="activity-meta activity-summary"><?= esc($log['description'] ?? '') ?></span></td>
+                    <td><span class="activity-meta"><?= esc($log['ip_address'] ?? '-') ?></span></td>
                     <td class="text-center">
                         <button class="btn btn-outline-primary icon-btn" type="button" data-bs-toggle="modal" data-bs-target="#viewLogModal" data-log='<?= esc(json_encode($payload, JSON_UNESCAPED_SLASHES), 'attr') ?>'>
                             <i class="fa-regular fa-eye"></i>
@@ -67,11 +70,59 @@ $logPayload = static function (array $log): array {
                 </tr>
             <?php endforeach; ?>
             <?php if ($logs === []): ?>
-                <tr><td colspan="7" class="text-center text-muted-strong py-4">No log entries found.</td></tr>
+                <tr><td colspan="8" class="text-center text-muted-strong py-4">No log entries found.</td></tr>
             <?php endif; ?>
             </tbody>
         </table>
     </div>
+
+    <?php if ($pager && $total > $perPage): ?>
+    <div class="d-flex justify-content-between align-items-center mt-3">
+        <div class="text-muted">
+            Showing <?= ($currentPage - 1) * $perPage + 1 ?> to <?= min($currentPage * $perPage, $total) ?> of <?= $total ?> entries
+        </div>
+        <nav>
+            <ul class="pagination mb-0">
+                <?php if ($currentPage > 1): ?>
+                <li class="page-item">
+                    <a class="page-link" href="<?= site_url('admin/audit-logs') ?>?<?= http_build_query(array_filter(['q' => $query, 'date_range' => $date_range, 'page' => $currentPage - 1])) ?>">Previous</a>
+                </li>
+                <?php endif; ?>
+
+                <?php
+                $totalPages = (int) ceil($total / $perPage);
+                $startPage = max(1, $currentPage - 2);
+                $endPage = min($totalPages, $currentPage + 2);
+
+                if ($startPage > 1): ?>
+                    <li class="page-item"><a class="page-link" href="<?= site_url('admin/audit-logs') ?>?<?= http_build_query(array_filter(['q' => $query, 'date_range' => $date_range, 'page' => 1])) ?>">1</a></li>
+                    <?php if ($startPage > 2): ?>
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                    <?php endif; ?>
+                <?php endif; ?>
+
+                <?php for ($i = $startPage; $i <= $endPage; $i++): ?>
+                    <li class="page-item <?= $i === $currentPage ? 'active' : '' ?>">
+                        <a class="page-link" href="<?= site_url('admin/audit-logs') ?>?<?= http_build_query(array_filter(['q' => $query, 'date_range' => $date_range, 'page' => $i])) ?>"><?= $i ?></a>
+                    </li>
+                <?php endfor; ?>
+
+                <?php if ($endPage < $totalPages): ?>
+                    <?php if ($endPage < $totalPages - 1): ?>
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                    <?php endif; ?>
+                    <li class="page-item"><a class="page-link" href="<?= site_url('admin/audit-logs') ?>?<?= http_build_query(array_filter(['q' => $query, 'date_range' => $date_range, 'page' => $totalPages])) ?>"><?= $totalPages ?></a></li>
+                <?php endif; ?>
+
+                <?php if ($currentPage < $totalPages): ?>
+                <li class="page-item">
+                    <a class="page-link" href="<?= site_url('admin/audit-logs') ?>?<?= http_build_query(array_filter(['q' => $query, 'date_range' => $date_range, 'page' => $currentPage + 1])) ?>">Next</a>
+                </li>
+                <?php endif; ?>
+            </ul>
+        </nav>
+    </div>
+    <?php endif; ?>
 </section>
 
 <?= $this->include('frontend/layout/log_modal', ['modalId' => 'viewLogModal', 'prefix' => 'log']) ?>

@@ -122,6 +122,19 @@ SSO_GOOGLE_CLIENT_ID=
 SSO_GOOGLE_CLIENT_SECRET=
 SSO_GOOGLE_REDIRECT_URI=http://localhost:8080/auth/google/callback
 SSO_GOOGLE_HOSTED_DOMAIN=
+SSO_GOOGLE_ALLOWED_ROLES=admin,director_general,department_head,ict_planner,employee
 ```
 
 Leave `SSO_GOOGLE_HOSTED_DOMAIN` empty to allow any Google account, or set it to your organization domain.
+Leave `SSO_GOOGLE_ALLOWED_ROLES` empty to allow all existing roles, or list only the roles that may use Google sign-in.
+
+Google Cloud setup:
+
+1. Create or select a Google Cloud project.
+2. Configure the OAuth consent screen.
+3. Create OAuth credentials and choose `Web application`.
+4. Add your redirect URI exactly as used by the app, for example `http://localhost:8080/auth/google/callback`.
+5. Copy the client ID and client secret into `.env`.
+6. Make sure the app URL in `app.baseURL` matches the site you are testing on.
+
+The login flow uses the authorization code flow, so the redirect URI must match exactly or Google will reject the callback.

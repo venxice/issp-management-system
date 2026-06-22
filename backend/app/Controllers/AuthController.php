@@ -3,7 +3,6 @@
 namespace App\Controllers;
 
 use App\Models\AuditLogModel;
-use App\Models\RoleModel;
 use App\Models\UserModel;
 use Config\Services;
 use Throwable;
@@ -41,13 +40,14 @@ class AuthController extends BaseController
             || empty($user['password'])
             || ! password_verify((string) $this->request->getPost('password'), $user['password'])
         ) {
-            return redirect()->back()->withInput()->with('error', 'Invalid email or password.');
+            return redirect()->back()->withInput()->with('error', 'Invalid email or password');
         }
 
         $this->startUserSession($user, 'password');
 
         return redirect()->to(site_url($this->dashboardPathForRole((string) ($user['role_slug'] ?? 'employee'))));
     }
+
 
     public function logout()
     {
@@ -57,13 +57,27 @@ class AuthController extends BaseController
 
         session()->destroy();
 
-        return redirect()->to(site_url('login'))->with('success', 'You have been signed out.');
+        if (isset($_COOKIE)) {
+            foreach ($_COOKIE as $key => $value) {
+                if (strpos($key, 'ci_session') !== false) {
+                    setcookie($key, '', time() - 3600, '/');
+                }
+            }
+        }
+
+        $response = redirect()->to(site_url('login'))->with('success', 'Successfully signed out');
+        $response->setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+        $response->setHeader('Cache-Control', 'post-check=0, pre-check=0', false);
+        $response->setHeader('Pragma', 'no-cache');
+        $response->setHeader('Expires', 'Sat, 26 Jul 1997 05:00:00 GMT');
+
+        return $response;
     }
 
     public function googleRedirect()
     {
         if (! $this->googleSsoConfigured()) {
-            return redirect()->to(site_url('login'))->with('error', 'Google SSO is not configured yet.');
+            return redirect()->to(site_url('login'))->with('error', 'Google SSO is not configured yet');
         }
 
         $state = bin2hex(random_bytes(32));
@@ -84,7 +98,7 @@ class AuthController extends BaseController
     public function googleCallback()
     {
         if ($this->request->getGet('error')) {
-            return redirect()->to(site_url('login'))->with('error', 'Google sign-in was cancelled.');
+            return redirect()->to(site_url('login'))->with('error', 'Google sign-in was cancelled');
         }
 
         $state = (string) $this->request->getGet('state');
@@ -92,13 +106,13 @@ class AuthController extends BaseController
         session()->remove('google_oauth_state');
 
         if ($state === '' || $expectedState === '' || ! hash_equals($expectedState, $state)) {
-            return redirect()->to(site_url('login'))->with('error', 'The Google sign-in session expired. Please try again.');
+            return redirect()->to(site_url('login'))->with('error', 'Google sign-in session expired');
         }
 
         $code = (string) $this->request->getGet('code');
 
         if ($code === '') {
-            return redirect()->to(site_url('login'))->with('error', 'Google did not return an authorization code.');
+            return redirect()->to(site_url('login'))->with('error', 'Google authorization failed');
         }
 
         try {
@@ -106,22 +120,34 @@ class AuthController extends BaseController
         } catch (Throwable $exception) {
             log_message('error', 'Google SSO failed: {message}', ['message' => $exception->getMessage()]);
 
-            return redirect()->to(site_url('login'))->with('error', 'Google sign-in failed. Please try again.');
+            return redirect()->to(site_url('login'))->with('error', 'Google sign-in failed');
         }
 
         if (! $this->googleProfileAllowed($profile)) {
-            return redirect()->to(site_url('login'))->with('error', 'This Google account is not allowed to sign in.');
+            return redirect()->to(site_url('login'))->with('error', 'Your Google account is not allowed');
         }
 
-        $user = $this->findOrCreateGoogleUser($profile);
+        $user = $this->findGoogleUser($profile);
 
-        if ($user === null || $user['status'] !== 'active') {
-            return redirect()->to(site_url('login'))->with('error', 'Your account is inactive. Please contact the administrator.');
+        if ($user === null) {
+            return redirect()->to(site_url('login'))->with('error', 'No account found for this Google email');
+        }
+
+        if ($user['status'] !== 'active') {
+            return redirect()->to(site_url('login'))->with('error', 'Your account is inactive');
+        }
+
+        if (! $this->googleEmailVerified($profile)) {
+            return redirect()->to(site_url('login'))->with('error', 'Google email is not verified');
+        }
+
+        if (! $this->googleRoleAllowed((string) ($user['role_slug'] ?? ''))) {
+            return redirect()->to(site_url('login'))->with('error', 'Your role is not allowed for Google sign-in');
         }
 
         $this->startUserSession($user, 'google');
 
-        return redirect()->to(site_url($this->dashboardPathForRole((string) ($user['role_slug'] ?? 'employee'))))->with('success', 'Signed in with Google.');
+        return redirect()->to(site_url($this->dashboardPathForRole((string) ($user['role_slug'] ?? 'employee'))))->with('success', 'Successfully signed in');
     }
 
     private function googleSsoConfigured(): bool
@@ -186,40 +212,44 @@ class AuthController extends BaseController
         return $profileDomain === $allowedDomain;
     }
 
-    private function findOrCreateGoogleUser(array $profile): ?array
+    private function googleEmailVerified(array $profile): bool
+    {
+        return filter_var($profile['email_verified'] ?? false, FILTER_VALIDATE_BOOL);
+    }
+
+    private function findGoogleUser(array $profile): ?array
     {
         $userModel = new UserModel();
         $email = strtolower(trim((string) $profile['email']));
-        $user = $userModel->findByEmailWithRole($email);
-        $now = date('Y-m-d H:i:s');
-
-        $payload = [
-            'name'           => $profile['name'] ?? $email,
-            'email'          => $email,
-            'sso_provider'   => 'google',
-            'sso_subject'    => $profile['sub'] ?? null,
-            'email_verified' => ! empty($profile['email_verified']) ? 1 : 0,
-            'last_login_at'  => $now,
-        ];
-        $payload += $this->nameColumns($payload['name']);
-
-        if ($user === null) {
-            $role = (new RoleModel())->where('slug', 'employee')->first();
-
-            if ($role === null) {
-                return null;
-            }
-
-            $payload['role_id'] = $role['id'];
-            $payload['status'] = 'active';
-            $userModel->insert($payload);
-
-            return $userModel->findByEmailWithRole($email);
-        }
-
-        $userModel->update($user['id'], $payload);
 
         return $userModel->findByEmailWithRole($email);
+    }
+
+    private function googleRoleAllowed(string $roleSlug): bool
+    {
+        $allowedRoles = $this->googleAllowedRoles();
+
+        if ($allowedRoles === []) {
+            return true;
+        }
+
+        return in_array($roleSlug, $allowedRoles, true);
+    }
+
+    private function googleAllowedRoles(): array
+    {
+        $configured = strtolower((string) env('SSO_GOOGLE_ALLOWED_ROLES'));
+
+        if ($configured === '') {
+            return ['admin', 'director_general', 'department_head', 'ict_planner', 'employee'];
+        }
+
+        $roles = array_filter(array_map(
+            static fn (string $role): string => trim($role),
+            preg_split('/\s*,\s*/', $configured) ?: []
+        ));
+
+        return array_values(array_unique($roles));
     }
 
     private function startUserSession(array $user, string $provider): void
@@ -246,35 +276,20 @@ class AuthController extends BaseController
         $this->writeLog((int) $user['id'], 'login', 'User signed in using ' . $provider . '.');
     }
 
-    private function writeLog(?int $userId, string $action, string $description): void
+    private function writeLog(?int $userId, string $action, string $description, array $extra = []): void
     {
-        (new AuditLogModel())->insert([
+        $request = \Config\Services::request();
+        $insert = array_merge([
             'user_id'     => $userId,
             'action'      => $action,
             'description' => $description,
             'created_at'  => date('Y-m-d H:i:s'),
-        ]);
-    }
+            'page_url'    => (string) $request->getURI(),
+            'user_agent'  => (string) $request->getUserAgent(),
+            'ip_address'  => (string) $request->getIPAddress(),
+        ], $extra);
 
-    private function nameColumns(string $name): array
-    {
-        $parts = preg_split('/\s+/', trim($name)) ?: [];
-
-        if (count($parts) <= 1) {
-            return [
-                'first_name'     => $name,
-                'last_name'      => 'User',
-                'middle_initial' => null,
-            ];
-        }
-
-        $lastName = array_pop($parts);
-
-        return [
-            'first_name'     => implode(' ', $parts),
-            'last_name'      => $lastName,
-            'middle_initial' => null,
-        ];
+        (new \App\Models\AuditLogModel())->insert($insert);
     }
 
     private function dashboardPathForRole(string $roleSlug): string
@@ -284,7 +299,7 @@ class AuthController extends BaseController
             'director_general' => 'director-general/dashboard',
             'ict_planner' => 'ict-planner/dashboard',
             'employee' => 'employee/dashboard',
-            default => 'dashboard',
+            default => 'employee/dashboard',
         };
     }
 }
