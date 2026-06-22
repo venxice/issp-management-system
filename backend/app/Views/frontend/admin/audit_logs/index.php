@@ -79,4 +79,135 @@ $logPayload = static function (array $log): array {
 
 <?= $this->section('scripts') ?>
 <?= $this->include('frontend/layout/log_modal_script', ['modalId' => 'viewLogModal', 'prefix' => 'log']) ?>
+<style>
+.date-range-picker-wrapper {
+    width: 42px;
+    flex-shrink: 0;
+}
+
+.date-range-picker-wrapper input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.date-picker-icon-btn {
+    background: #4f6584;
+    border: none;
+    color: #fff;
+    width: 38px;
+    height: 28px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    transition: background-color 0.2s ease;
+}
+
+.date-picker-icon-btn:hover {
+    background: #344863;
+}
+
+.date-picker-icon-btn i {
+    font-size: 0.8rem;
+}
+
+.flatpickr-calendar {
+    font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    border: 1px solid #d9e0ea;
+    border-radius: 10px;
+    box-shadow: 0 12px 26px rgba(15, 23, 42, .1);
+}
+
+.flatpickr-day.selected,
+.flatpickr-day.startRange,
+.flatpickr-day.endRange,
+.flatpickr-day.selected.inRange,
+.flatpickr-day.startRange.inRange,
+.flatpickr-day.endRange.inRange,
+.flatpickr-day.selected:focus,
+.flatpickr-day.startRange:focus,
+.flatpickr-day.endRange:focus,
+.flatpickr-day.selected:hover,
+.flatpickr-day.startRange:hover,
+.flatpickr-day.endRange:hover,
+.flatpickr-day.selected.prevMonthDay,
+.flatpickr-day.startRange.prevMonthDay,
+.flatpickr-day.endRange.prevMonthDay,
+.flatpickr-day.selected.nextMonthDay,
+.flatpickr-day.startRange.nextMonthDay,
+.flatpickr-day.endRange.nextMonthDay {
+    background: #4f6584;
+    border-color: #4f6584;
+}
+
+.flatpickr-day.inRange,
+.flatpickr-day.prevMonthDay.inRange,
+.flatpickr-day.nextMonthDay.inRange,
+.flatpickr-day.today.inRange,
+.flatpickr-day.prevMonthDay.today.inRange,
+.flatpickr-day.nextMonthDay.today.inRange,
+.flatpickr-day:hover,
+.flatpickr-day.prevMonthDay:hover,
+.flatpickr-day.nextMonthDay:hover,
+.flatpickr-day:focus,
+.flatpickr-day.prevMonthDay:focus,
+.flatpickr-day.nextMonthDay:focus {
+    background: rgba(79, 101, 132, 0.15);
+    border-color: rgba(79, 101, 132, 0.15);
+}
+
+.flatpickr-months .flatpickr-month,
+.flatpickr-current-month .flatpickr-monthDropdown-months,
+.flatpickr-current-month input.cur-year {
+    font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 600;
+}
+
+.flatpickr-weekday {
+    font-weight: 600;
+}
+
+.flatpickr-day.today {
+    border-color: #4f6584;
+}
+</style>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const form = document.querySelector('form[action="<?= site_url('admin/audit-logs') ?>"]');
+    const dateRangeInput = document.getElementById('dateRangePicker');
+    const datePickerToggleBtn = document.getElementById('datePickerToggleBtn');
+
+    if (dateRangeInput) {
+        const fp = flatpickr(dateRangeInput, {
+            mode: 'range',
+            dateFormat: 'Y-m-d',
+            position: 'auto',
+            static: false,
+            // Target the icon button wrapper so the calendar appears right under it
+            positionElement: datePickerToggleBtn, 
+            onChange: function(selectedDates, dateStr, instance) {
+                // Automatically submit the filter form once both Start and End dates are selected
+                if (selectedDates.length === 2) {
+                    form.submit();
+                }
+            }
+        });
+
+        // Toggle button logic: Opens if closed, closes if clicked again while open
+        if (datePickerToggleBtn && fp) {
+            datePickerToggleBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                if (fp.isOpen) {
+                    fp.close();
+                } else {
+                    fp.open();
+                }
+            });
+        }
+    }
+});
+</script>
 <?= $this->endSection() ?>

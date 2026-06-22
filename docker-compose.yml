@@ -28,7 +28,7 @@ services:
       - issp_network
 
   phpmyadmin:
-    image: arm64v8/phpmyadmin
+    image: phpmyadmin:latest
     container_name: issp_phpmyadmin
     restart: always
     ports:
