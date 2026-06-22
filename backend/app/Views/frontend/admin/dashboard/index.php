@@ -17,7 +17,7 @@ $logPayload = static function (array $log): array {
         'user_agent' => $log['user_agent'] ?? '-',
         'ip_address' => $log['ip_address'] ?? '-',
         'contact_number' => $log['contact_number'] ?? '-',
-        'position' => $log['position'] ?? '',
+        'position' => $log['position_name'] ?? '',
         'new_data' => $log['new_data'] ?? '-',
     ];
 };
@@ -38,14 +38,14 @@ $logPayload = static function (array $log): array {
     </div>
     <div class="col-6 col-md-4 col-lg-3 col-xl-3">
         <div class="stat-card stat-card-soft">
-            <div><div class="label">Employees</div><div class="value"><?= esc($totalEmployees) ?></div></div>
-            <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
+            <div><div class="label">Inactive Users</div><div class="value"><?= esc($inactiveUsers) ?></div></div>
+            <div class="stat-icon"><i class="fa-solid fa-user-slash"></i></div>
         </div>
     </div>
     <div class="col-6 col-md-4 col-lg-3 col-xl-3">
         <div class="stat-card stat-card-muted">
-            <div><div class="label">Technical Staff</div><div class="value"><?= esc($technicalStaff) ?></div></div>
-            <div class="stat-icon"><i class="fa-solid fa-user-gear"></i></div>
+            <div><div class="label">Employees</div><div class="value"><?= esc($totalEmployees) ?></div></div>
+            <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
         </div>
     </div>
 </div>
@@ -109,16 +109,17 @@ $logPayload = static function (array $log): array {
                 <p class="panel-subtitle">Latest user activity and system changes.</p>
             </div>
             <div class="table-responsive mb-0">
-                <table class="table align-middle mb-0">
+                <table class="table table-logs align-middle mb-0">
                     <thead>
                     <tr>
-                        <th style="width: 72px;">ID</th>
+                        <th>ID</th>
                         <th>Date / Time</th>
                         <th>User</th>
                         <th>Role</th>
                         <th>Activity</th>
                         <th>Description</th>
-                        <th class="text-center" style="width: 72px;">Action</th>
+                        <th>IP Address</th>
+                        <th class="text-center">Action</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -131,6 +132,7 @@ $logPayload = static function (array $log): array {
                             <td><?= esc($log['role_name'] ?? 'Unknown') ?></td>
                             <td><span class="badge badge-soft"><?= esc(str_replace('.', ' ', $log['action'] ?? '')) ?></span></td>
                             <td><span class="activity-meta activity-summary"><?= esc($log['description'] ?? '') ?></span></td>
+                            <td><span class="activity-meta"><?= esc($log['ip_address'] ?? '-') ?></span></td>
                             <td class="text-center">
                                 <button class="btn btn-outline-primary icon-btn" type="button" data-bs-toggle="modal" data-bs-target="#viewLogModal" data-log='<?= esc(json_encode($payload, JSON_UNESCAPED_SLASHES), "attr") ?>'>
                                     <i class="fa-regular fa-eye"></i>
@@ -139,7 +141,7 @@ $logPayload = static function (array $log): array {
                         </tr>
                     <?php endforeach; ?>
                     <?php if ($recentLogs === []): ?>
-                        <tr><td colspan="7" class="text-center text-muted-strong py-4">No activity yet.</td></tr>
+                        <tr><td colspan="8" class="text-center text-muted-strong py-4">No activity yet.</td></tr>
                     <?php endif; ?>
                     </tbody>
                 </table>

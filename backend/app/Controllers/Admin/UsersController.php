@@ -14,8 +14,7 @@ class UsersController extends BaseController
     public function index()
     {
         $query = trim((string) $this->request->getGet('q'));
-        $role = trim((string) $this->request->getGet('role'));
-        $status = trim((string) $this->request->getGet('status'));
+        $department = trim((string) $this->request->getGet('department'));
         $page = (int) ($this->request->getGet('page') ?? 1);
         $perPage = 25;
 
@@ -34,12 +33,8 @@ class UsersController extends BaseController
                 ->groupEnd();
         }
 
-        if ($role !== '') {
-            $builder->where('roles.slug', $role);
-        }
-
-        if ($status !== '') {
-            $builder->where('users.status', $status);
+        if ($department !== '') {
+            $builder->where('users.department_id', $department);
         }
 
         $builder->orderBy('users.created_at', 'DESC');
@@ -54,11 +49,10 @@ class UsersController extends BaseController
             'active' => 'users',
             'users' => $users,
             'query' => $query,
-            'roleFilter' => $role,
-            'statusFilter' => $status,
-            'roles' => (new RoleModel())->orderBy('name')->findAll(),
-            'departments' => (new DepartmentModel())->orderBy('name')->findAll(),
-            'positions' => (new PositionModel())->orderBy('name')->findAll(),
+            'departmentFilter' => $department,
+            'roles' => (new RoleModel())->orderBy('LOWER(name)', 'ASC')->findAll(),
+            'departments' => (new DepartmentModel())->orderBy('LOWER(name)', 'ASC')->findAll(),
+            'positions' => (new PositionModel())->orderBy('LOWER(name)', 'ASC')->findAll(),
             'pager' => $pager,
             'total' => $total,
             'perPage' => $perPage,
@@ -72,9 +66,9 @@ class UsersController extends BaseController
             'title' => 'Create User',
             'active' => 'users',
             'user' => null,
-            'roles' => (new RoleModel())->orderBy('name')->findAll(),
-            'departments' => (new DepartmentModel())->orderBy('name')->findAll(),
-            'positions' => (new PositionModel())->orderBy('name')->findAll(),
+            'roles' => (new RoleModel())->orderBy('LOWER(name)', 'ASC')->findAll(),
+            'departments' => (new DepartmentModel())->orderBy('LOWER(name)', 'ASC')->findAll(),
+            'positions' => (new PositionModel())->orderBy('LOWER(name)', 'ASC')->findAll(),
         ]);
     }
 
@@ -133,9 +127,9 @@ class UsersController extends BaseController
             'title' => 'Edit User',
             'active' => 'users',
             'user' => $user,
-            'roles' => (new RoleModel())->orderBy('name')->findAll(),
-            'departments' => (new DepartmentModel())->orderBy('name')->findAll(),
-            'positions' => (new PositionModel())->orderBy('name')->findAll(),
+            'roles' => (new RoleModel())->orderBy('LOWER(name)', 'ASC')->findAll(),
+            'departments' => (new DepartmentModel())->orderBy('LOWER(name)', 'ASC')->findAll(),
+            'positions' => (new PositionModel())->orderBy('LOWER(name)', 'ASC')->findAll(),
         ]);
     }
 
@@ -156,6 +150,8 @@ class UsersController extends BaseController
             'password' => 'permit_empty|min_length[8]',
             'password_confirmation' => 'required_with[password]|matches[password]',
             'role_id' => 'required|integer',
+            'position_id' => 'required|integer',
+            'department_id' => 'required|integer',
             'status' => 'required|in_list[active,inactive]',
         ];
 

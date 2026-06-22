@@ -1,10 +1,10 @@
 <?php
 $roleSlug = (string) session()->get('role_slug');
-$dashboardPath = match ($roleSlug) {
-    'director_general' => 'director-general/dashboard',
-    'ict_planner' => 'ict-planner/dashboard',
-    'employee' => 'employee/dashboard',
-    default => 'admin/dashboard',
+$sidebarFile = match ($roleSlug) {
+    'director_general' => 'director_general.php',
+    'ict_planner' => 'ict_planner.php',
+    'employee' => 'employee.php',
+    default => 'admin.php',
 };
 ?>
 <aside class="app-sidebar">
@@ -24,18 +24,7 @@ $dashboardPath = match ($roleSlug) {
 </div>
 
     <nav class="sidebar-nav p-2 flex-grow-1">
-        <a class="nav-link <?= ($active ?? '') === 'dashboard' ? 'active' : '' ?>" href="<?= site_url($dashboardPath) ?>">
-            <i class="fa-solid fa-chart-line"></i> Dashboard
-        </a>
-
-        <?php if ($roleSlug === 'admin'): ?>
-            <a class="nav-link <?= ($active ?? '') === 'users' ? 'active' : '' ?>" href="<?= site_url('admin/users') ?>">
-                <i class="fa-solid fa-users"></i> User Management
-            </a>
-            <a class="nav-link <?= ($active ?? '') === 'audit' ? 'active' : '' ?>" href="<?= site_url('admin/audit-logs') ?>">
-                <i class="fa-solid fa-file-lines"></i> Audit Logs
-            </a>
-        <?php endif; ?>
+        <?php include $sidebarFile; ?>
     </nav>
 
     <div class="sidebar-footer p-2 mt-auto">

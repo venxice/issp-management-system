@@ -72,6 +72,50 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (!form) return;
 
+    // Auto-sort dropdown options when dropdown is clicked
+    const dropdowns = form.querySelectorAll('select.form-select');
+    dropdowns.forEach(dropdown => {
+        dropdown.addEventListener('click', function() {
+            const options = Array.from(this.options);
+            if (options.length <= 1) return; // Skip if only placeholder or empty
+
+            // Check if already sorted
+            let isSorted = true;
+            for (let i = 1; i < options.length; i++) {
+                if (options[i].text.toLowerCase() < options[i - 1].text.toLowerCase()) {
+                    isSorted = false;
+                    break;
+                }
+            }
+
+            if (!isSorted) {
+                // Sort options alphabetically (keep first option if it's a placeholder)
+                const firstOption = options[0];
+                const otherOptions = options.slice(1);
+
+                otherOptions.sort((a, b) => a.text.toLowerCase().localeCompare(b.text.toLowerCase()));
+
+                // Clear and re-add options
+                while (this.options.length > 0) {
+                    this.remove(0);
+                }
+
+                this.add(firstOption);
+                otherOptions.forEach(option => this.add(option));
+
+                // Preserve selected value
+                if (this.value) {
+                    this.value = this.dataset.selectedValue || this.value;
+                }
+            }
+        });
+
+        // Store selected value before sorting
+        dropdown.addEventListener('mousedown', function() {
+            this.dataset.selectedValue = this.value;
+        });
+    });
+
     form.addEventListener('submit', function(e) {
         e.preventDefault();
         e.stopPropagation();
