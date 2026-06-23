@@ -46,6 +46,37 @@ $routes->group('director-general', ['filter' => 'role:director_general'], static
 
 $routes->group('employee', ['filter' => 'role:employee'], static function (RouteCollection $routes): void {
     $routes->get('dashboard', 'Employee\DashboardController::index');
+    $routes->post('submit-issp', 'Employee\DashboardController::submitISSP');
+    $routes->post('save-draft', 'Employee\DashboardController::saveDraft');
+    $routes->get('submitted-ict-projects', 'Employee\DashboardController::submittedIctProjects');
+    $routes->get('draft-ict-projects', 'Employee\DashboardController::draftIctProjects');
+    
+    // Proposed ICT Strategy Routes
+    $routes->group('proposed-ict-strategy', static function (RouteCollection $routes): void {
+        // Network Infrastructure (Combined A.1 and A.2)
+        $routes->get('network-infrastructure', 'Employee\ProposedIctStrategyController::networkInfrastructure');
+        $routes->post('network-infrastructure/save', 'Employee\ProposedIctStrategyController::saveNetworkInfrastructure');
+        
+        // Enterprise Architecture
+        $routes->get('enterprise-architecture', 'Employee\ProposedIctStrategyController::enterpriseArchitecture');
+        $routes->post('enterprise-architecture/save', 'Employee\ProposedIctStrategyController::saveEnterpriseArchitecture');
+        
+        // ICT Human Capital
+        $routes->get('ict-human-capital', 'Employee\ProposedIctStrategyController::ictHumanCapital');
+        $routes->post('ict-human-capital/save', 'Employee\ProposedIctStrategyController::saveIctHumanCapital');
+        
+        // Proposed Information Systems
+        $routes->get('information-systems', 'Employee\ProposedIctStrategyController::informationSystems');
+        $routes->post('information-systems/save', 'Employee\ProposedIctStrategyController::saveInformationSystems');
+        
+        // ICT Projects
+        $routes->get('ict-projects', 'Employee\ProposedIctStrategyController::ictProjects');
+        $routes->post('ict-projects/save', 'Employee\ProposedIctStrategyController::saveIctProjects');
+        
+        // Performance Measurement Framework
+        $routes->get('performance-measurement', 'Employee\ProposedIctStrategyController::performanceMeasurement');
+        $routes->post('performance-measurement/save', 'Employee\ProposedIctStrategyController::savePerformanceMeasurement');
+    });
 });
 
 $routes->group('ict-planner', ['filter' => 'role:ict_planner'], static function (RouteCollection $routes): void {
