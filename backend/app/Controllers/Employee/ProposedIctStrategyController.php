@@ -21,7 +21,7 @@ class ProposedIctStrategyController extends BaseController
     public function networkInfrastructure()
     {
         return view('frontend/employee/proposed-ict-strategy/network-infrastructure', [
-            'title' => 'A. Proposed Network Infrastructure',
+            'title' => 'Proposed ICT Strategy',
             'active' => 'network-infrastructure',
             'currentUser' => $this->getUserData(),
         ]);
@@ -38,7 +38,7 @@ class ProposedIctStrategyController extends BaseController
     public function informationSystems()
     {
         return view('frontend/employee/proposed-ict-strategy/information-systems', [
-            'title' => 'D. Proposed Information Systems',
+            'title' => 'Proposed ICT Strategy',
             'active' => 'information-systems',
             'currentUser' => $this->getUserData(),
         ]);
@@ -55,7 +55,7 @@ class ProposedIctStrategyController extends BaseController
     public function ictProjects()
     {
         return view('frontend/employee/proposed-ict-strategy/ict-projects', [
-            'title' => 'E. ICT Projects',
+            'title' => 'Proposed ICT Strategy',
             'active' => 'ict-projects',
             'currentUser' => $this->getUserData(),
         ]);
@@ -73,7 +73,7 @@ class ProposedIctStrategyController extends BaseController
     public function performanceMeasurement()
     {
         return view('frontend/employee/proposed-ict-strategy/performance-measurement', [
-            'title' => 'F. Performance Measurement Framework',
+            'title' => 'Proposed ICT Strategy',
             'active' => 'performance-measurement',
             'currentUser' => $this->getUserData(),
         ]);
@@ -90,7 +90,7 @@ class ProposedIctStrategyController extends BaseController
     public function enterpriseArchitecture()
     {
         return view('frontend/employee/proposed-ict-strategy/enterprise-architecture', [
-            'title' => 'B. Enterprise Architecture',
+            'title' => 'Proposed ICT Strategy',
             'active' => 'enterprise-architecture',
             'currentUser' => $this->getUserData(),
         ]);
@@ -107,7 +107,7 @@ class ProposedIctStrategyController extends BaseController
     public function ictHumanCapital()
     {
         return view('frontend/employee/proposed-ict-strategy/ict-human-capital', [
-            'title' => 'C. Proposed ICT Human Capital',
+            'title' => 'Proposed ICT Strategy',
             'active' => 'ict-human-capital',
             'currentUser' => $this->getUserData(),
         ]);

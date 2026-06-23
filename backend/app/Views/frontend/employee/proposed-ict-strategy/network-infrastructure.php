@@ -36,13 +36,15 @@
     border: 1px solid #e8ecf1;
     border-radius: 10px;
     margin-bottom: 20px;
-    overflow: hidden;
 }
 
 .subsection-header {
     background: linear-gradient(135deg, #f8fafc 0%, #edf2f7 100%);
     padding: 14px 18px;
     border-bottom: 1px solid #d0dae6;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .subsection-header .subsection-title {
@@ -53,14 +55,50 @@
 }
 
 .subsection-header .subsection-number {
-    display: inline-block;
     background: var(--brand);
     color: #fff;
     padding: 2px 8px;
     border-radius: 4px;
     font-size: .74rem;
+    flex-shrink: 0;
     font-weight: 700;
-    margin-right: 8px;
+}
+
+.help-icon {
+    position: relative;
+    cursor: pointer;
+    color: var(--brand);
+    margin-left: 8px;
+    font-size: 1rem;
+    transition: color 0.2s ease;
+}
+
+.help-icon:hover {
+    color: var(--brand-dark);
+}
+
+.tooltip-content {
+    position: fixed;
+    background: #1e293b;
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: .75rem;
+    font-weight: 400;
+    max-width: 300px;
+    white-space: normal;
+    width: max-content;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+    z-index: 9999;
+    pointer-events: none;
+}
+
+.tooltip-content.visible {
+    opacity: 1;
+    visibility: visible;
 }
 
 .subsection-body {
@@ -83,14 +121,15 @@
 }
 
 .form-section-label {
-    font-size: .85rem;
-    font-weight: 600;
+    font-size: .9rem;
+    font-weight: 700;
     color: var(--brand-dark);
-    margin-bottom: 10px;
+    margin-bottom: 12px;
+    margin-top: 20px;
     text-transform: uppercase;
-    letter-spacing: .02em;
-    padding-bottom: 8px;
+    letter-spacing: .01em;
     border-bottom: 2px solid #e8ecf1;
+    padding-bottom: 8px;
 }
 
 .form-label {
@@ -119,15 +158,163 @@
     margin-top: 4px;
 }
 
-.action-bar {
-    background: var(--panel);
-    border: 1px solid #dde4ed;
-    border-radius: 10px;
-    padding: 16px 18px;
-    box-shadow: 0 12px 26px rgba(15, 23, 42, .05);
-    position: sticky;
-    bottom: 14px;
-    z-index: 100;
+.navigation-bar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+
+.navigation-bar.has-both {
+    justify-content: space-between;
+}
+
+.navigation-bar.align-right {
+    justify-content: flex-end;
+}
+
+.nav-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.8rem;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+    white-space: nowrap;
+}
+
+.nav-btn-prev {
+    background: white;
+    color: var(--brand);
+    border-color: #cbd5e1;
+}
+
+.nav-btn-prev:hover {
+    background: #f1f5f9;
+    border-color: var(--brand);
+    color: var(--brand-dark);
+}
+
+.nav-btn-next {
+    background: var(--brand);
+    color: white;
+    border-color: var(--brand);
+}
+
+.nav-btn-next:hover {
+    background: var(--brand-dark);
+    border-color: var(--brand-dark);
+}
+
+.nav-btn i {
+    font-size: 0.8rem;
+}
+
+@media (max-width: 768px) {
+    .navigation-bar {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .nav-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+.footer-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.action-btn i {
+    font-size: 0.875rem;
+}
+
+.action-btn-save {
+    background: var(--brand);
+    color: white;
+    border-color: var(--brand);
+}
+
+.action-btn-save:hover {
+    background: var(--brand-dark);
+    border-color: var(--brand-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(79, 101, 132, 0.2);
+}
+
+.action-btn-clear {
+    background: white;
+    color: #64748b;
+    border-color: #cbd5e1;
+}
+
+.action-btn-clear:hover {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+    color: #475569;
+    transform: translateY(-1px);
+}
+
+.navigation-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+@media (max-width: 768px) {
+    .footer-actions {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .action-buttons {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .action-btn {
+        flex: 1;
+        justify-content: center;
+    }
+    
+    .navigation-buttons {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .nav-btn {
+        width: 100%;
+        justify-content: center;
+    }
 }
 
 .file-upload-area {
@@ -174,13 +361,13 @@
     font-size: .88rem;
 }
 
-.security-table {
+.cybersecurity-table {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
 }
 
-.security-table th {
+.cybersecurity-table th {
     background: linear-gradient(135deg, #f8fafc 0%, #edf2f7 100%);
     color: var(--ink);
     font-weight: 700;
@@ -191,17 +378,17 @@
     letter-spacing: .01em;
 }
 
-.security-table td {
+.cybersecurity-table td {
     padding: 12px;
     border-bottom: 1px solid #e8ecf1;
     vertical-align: top;
 }
 
-.security-table tr:last-child td {
+.cybersecurity-table tr:last-child td {
     border-bottom: none;
 }
 
-.security-table tr:hover {
+.cybersecurity-table tr:hover {
     background: #f8fafc;
 }
 
@@ -257,18 +444,132 @@
     font-size: .7rem;
     font-weight: 600;
 }
+
+.checklist-container {
+    background: #fff;
+    border: 1px solid #e8ecf1;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 16px;
+}
+
+.category-section {
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e8ecf1;
+}
+
+.category-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.category-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.category-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--brand-dark);
+    text-transform: uppercase;
+    letter-spacing: .02em;
+}
+
+.category-stats {
+    display: flex;
+    gap: 12px;
+    font-size: .85rem;
+    font-weight: 600;
+}
+
+.stat-item {
+    padding: 4px 12px;
+    border-radius: 20px;
+    background: #f8fafc;
+    color: var(--muted);
+}
+
+.stat-item.completed {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.stat-item.mandatory-completed {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.control-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    border-radius: 6px;
+    background: #f8fafc;
+    transition: all 0.2s ease;
+}
+
+.control-item:hover {
+    background: #f1f5f9;
+}
+
+.control-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+}
+
+.control-checkbox {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: var(--brand);
+}
+
+.control-label {
+    font-size: .85rem;
+    font-weight: 500;
+    color: var(--ink);
+    line-height: 1.4;
+}
+
+.control-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: .7rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.badge-mandatory {
+    background: #566d8b;
+    color: #fff;
+}
+
+.badge-optional {
+    background: #8898aa;
+    color: #fff;
+}
+
+.badge-notspecified {
+    background: #6c757d;
+    color: #fff;
+}
 </style>
 
 <div class="row">
     <div class="col-12">
         <div class="page-header mb-3">
-            <h1 class="page-title">A. Proposed Network Infrastructure</h1>
-            <p class="page-subtitle">Network infrastructure including cybersecurity components</p>
-        </div>
-        
-        <div class="info-banner">
-            <i class="fa-solid fa-network-wired"></i>
-            Complete this section to illustrate your agency's proposed network infrastructure including cybersecurity components.
+            <h1 class="page-title">Network Infrastructure</h1>
+            <p class="page-subtitle">Network infrastructure and security components</p>
         </div>
     </div>
 </div>
@@ -279,7 +580,6 @@
     <div class="main-section-card">
         <div class="main-header">
             <h2 class="main-title">A. Proposed Network Infrastructure</h2>
-            <p class="main-subtitle">Illustrate your agency's proposed network infrastructure including Cybersecurity components</p>
         </div>
         
         <div style="padding: 22px;">
@@ -288,16 +588,14 @@
                 <div class="subsection-header">
                     <span class="subsection-number">A.1</span>
                     <span class="subsection-title">LAN/WAN Setup - Connectivity Type and Bandwidth</span>
+                    <i class="fa-solid fa-circle-question help-icon" 
+                       data-tooltip="Illustrate the layout or configuration of the proposed network architecture through a diagram. Specify the connectivity type and upload/download speeds per office or site and if IPV6 ready. Highlight the proposed cybersecurity components to be put in-place."></i>
                 </div>
                 <div class="subsection-body">
-                    <div class="info-banner">
-                        <i class="fa-solid fa-info-circle"></i>
-                        Illustrate the layout or configuration of the proposed network architecture through a diagram. Specify the connectivity type and upload/download speeds per office or site and if IPV6 ready. Highlight the proposed cybersecurity components to be put in-place.
-                    </div>
                     
                     <!-- A.1.i Department-wide Connectivity -->
                     <div class="form-section-label">
-                        <i class="fa-solid fa-diagram-project me-2"></i>A.1.i Department-wide Connectivity
+                        A.1.i Department-wide Connectivity
                     </div>
                     
                     <div class="row g-3 mb-4">
@@ -334,24 +632,24 @@
                         </div>
                         
                         <div class="col-md-6">
-                            <label class="form-label"><i class="fa-solid fa-upload me-1"></i>Upload Speed</label>
+                            <label class="form-label">Upload Speed</label>
                             <input type="text" class="form-control" name="dept_upload_speed" placeholder="e.g., 100 Mbps">
                         </div>
                         
                         <div class="col-md-6">
-                            <label class="form-label"><i class="fa-solid fa-download me-1"></i>Download Speed</label>
+                            <label class="form-label">Download Speed</label>
                             <input type="text" class="form-control" name="dept_download_speed" placeholder="e.g., 100 Mbps">
                         </div>
                         
                         <div class="col-md-12">
-                            <label class="form-label"><i class="fa-solid fa-align-left me-1"></i>Description</label>
+                            <label class="form-label">Description</label>
                             <textarea class="form-control" name="dept_description" rows="3" placeholder="Describe the department-wide connectivity configuration..."></textarea>
                         </div>
                     </div>
                     
                     <!-- A.1.ii Central Office to Branches -->
                     <div class="form-section-label">
-                        <i class="fa-solid fa-sitemap me-2"></i>A.1.ii Central Office to Branches/Regional Offices
+                        A.1.ii Central Office to Branches/Regional Offices
                     </div>
                     
                     <div class="row g-3">
@@ -389,17 +687,17 @@
                         </div>
                         
                         <div class="col-md-6">
-                            <label class="form-label"><i class="fa-solid fa-upload me-1"></i>Upload Speed</label>
+                            <label class="form-label">Upload Speed</label>
                             <input type="text" class="form-control" name="regional_upload_speed" placeholder="e.g., 100 Mbps">
                         </div>
                         
                         <div class="col-md-6">
-                            <label class="form-label"><i class="fa-solid fa-download me-1"></i>Download Speed</label>
+                            <label class="form-label">Download Speed</label>
                             <input type="text" class="form-control" name="regional_download_speed" placeholder="e.g., 100 Mbps">
                         </div>
                         
                         <div class="col-md-12">
-                            <label class="form-label"><i class="fa-solid fa-building me-1"></i>Branch/Regional Offices Details</label>
+                            <label class="form-label">Branch/Regional Offices Details</label>
                             <textarea class="form-control" name="regional_offices_details" rows="4" placeholder="List branch/regional offices with their specific connectivity details..."></textarea>
                         </div>
                     </div>
@@ -411,87 +709,313 @@
                 <div class="subsection-header">
                     <span class="subsection-number">A.2</span>
                     <span class="subsection-title">Cybersecurity Control Checklist</span>
+                    <i class="fa-solid fa-circle-question help-icon" 
+                       data-tooltip="Check all security controls currently implemented by the agency."></i>
                 </div>
                 <div class="subsection-body">
-                    <div class="info-banner">
-                        <i class="fa-solid fa-shield-halved"></i>
-                        Identifying compliance to mandatory and optional items like firewalls and anti-malware.
-                    </div>
                     
-                    <!-- Physical Security -->
-                    <div class="security-section">
-                        <div class="security-section-header">
-                            <h6><i class="fa-solid fa-building-shield me-2"></i>PHYSICAL SECURITY</h6>
+                    <div class="checklist-container">
+                        
+                        <!-- Physical Security -->
+                        <div class="category-section">
+                            <div class="category-header">
+                                <div class="category-title">Physical Security</div>
+                                <div class="category-stats">
+                                    <span class="stat-item">0/4</span>
+                                </div>
+                            </div>
+                        
+                            <div class="control-item">
+                                <div class="control-info">
+                                    <input type="checkbox" class="control-checkbox" name="perimeter_protection" value="1">
+                                    <span class="control-label">Perimeter Protection</span>
+                                </div>
+                                <span class="control-badge badge-mandatory">Mandatory</span>
+                            </div>
+                            
+                            <div class="control-item">
+                                <div class="control-info">
+                                    <input type="checkbox" class="control-checkbox" name="access_control" value="1">
+                                    <span class="control-label">Access Control</span>
+                                </div>
+                                <span class="control-badge badge-mandatory">Mandatory</span>
+                            </div>
+                            
+                            <div class="control-item">
+                                <div class="control-info">
+                                    <input type="checkbox" class="control-checkbox" name="surveillance_system" value="1">
+                                    <span class="control-label">Surveillance System</span>
+                                </div>
+                                <span class="control-badge badge-mandatory">Mandatory</span>
+                            </div>
+                            
+                            <div class="control-item">
+                                <div class="control-info">
+                                    <input type="checkbox" class="control-checkbox" name="detection_system" value="1">
+                                    <span class="control-label">Detection System</span>
+                                </div>
+                                <span class="control-badge badge-optional">Optional</span>
+                            </div>
                         </div>
-                        <div class="table-responsive">
-                            <table class="security-table">
-                                <thead>
-                                    <tr>
-                                        <th style="width: 50%;">Security Control</th>
-                                        <th style="width: 15%; text-align: center;">Mandatory</th>
-                                        <th style="width: 35%;">Implementation Details</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>
-                                            <div class="control-name">Perimeter Protection</div>
-                                            <div class="control-description">Security control implemented at the outer boundary of an office/facility to prevent, deter, detect, and delay unauthorized access.</div>
-                                        </td>
-                                        <td class="text-center">
-                                            <div class="checkbox-wrapper">
-                                                <input type="checkbox" class="form-check-input" name="perimeter_protection" value="1">
-                                                <span class="mandatory-badge">Required</span>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <textarea class="form-control form-control-sm" name="perimeter_protection_details" rows="2" placeholder="Describe implementation..."></textarea>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <div class="control-name">Access Control</div>
-                                            <div class="control-description">Security control that regulates who or what is permitted to access specific physical locations.</div>
-                                        </td>
-                                        <td class="text-center">
-                                            <div class="checkbox-wrapper">
-                                                <input type="checkbox" class="form-check-input" name="access_control" value="1">
-                                                <span class="mandatory-badge">Required</span>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <textarea class="form-control form-control-sm" name="access_control_details" rows="2" placeholder="Describe implementation..."></textarea>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <div class="control-name">Surveillance System</div>
-                                            <div class="control-description">Integrated video monitoring technologies designed to continuously observe, record, and store activities.</div>
-                                        </td>
-                                        <td class="text-center">
-                                            <div class="checkbox-wrapper">
-                                                <input type="checkbox" class="form-check-input" name="surveillance_system" value="1">
-                                                <span class="mandatory-badge">Required</span>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <textarea class="form-control form-control-sm" name="surveillance_system_details" rows="2" placeholder="Describe implementation..."></textarea>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <div class="control-name">Detection System</div>
-                                            <div class="control-description">Security control designed to identify and alert personnel to unauthorized access attempts.</div>
-                                        </td>
-                                        <td class="text-center">
-                                            <span class="optional-badge">Optional</span>
-                                        </td>
-                                        <td>
-                                            <textarea class="form-control form-control-sm" name="detection_system_details" rows="2" placeholder="Describe implementation..."></textarea>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                        
+                        <!-- Perimeter Security -->
+                        <div class="category-section">
+                            <div class="category-header">
+                                <div class="category-title">Perimeter Security</div>
+                                <div class="category-stats">
+                                    <span class="stat-item">0/4</span>
+                                </div>
+                            </div>
+                        
+                            <div class="control-item">
+                                <div class="control-info">
+                                    <input type="checkbox" class="control-checkbox" name="next_gen_firewall" value="1">
+                                    <span class="control-label">Next Generation Firewalls</span>
+                                </div>
+                                <span class="control-badge badge-mandatory">Mandatory</span>
+                            </div>
+                            
+                            <div class="control-item">
+                                <div class="control-info">
+                                    <input type="checkbox" class="control-checkbox" name="ids_ips" value="1">
+                                    <span class="control-label">Intrusion Detection/Prevention Systems (IDS/IPS)</span>
+                                </div>
+                                <span class="control-badge badge-mandatory">Mandatory</span>
+                            </div>
+                            
+                            <div class="control-item">
+                                <div class="control-info">
+                                    <input type="checkbox" class="control-checkbox" name="waf" value="1">
+                                    <span class="control-label">Web Application Firewalls (WAFs)</span>
+                                </div>
+                                <span class="control-badge badge-mandatory">Mandatory</span>
+                            </div>
+                            
+                            <div class="control-item">
+                                <div class="control-info">
+                                    <input type="checkbox" class="control-checkbox" name="dmz" value="1">
+                                    <span class="control-label">Demilitarized Zone (DMZ)</span>
+                                </div>
+                                <span class="control-badge badge-optional">Optional</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Network Security -->
+                        <div class="category-section">
+                            <div class="category-header">
+                                <div class="category-title">Network Security</div>
+                                <div class="category-stats">
+                                    <span class="stat-item">0/2</span>
+                                </div>
+                            </div>
+                        
+                            <div class="control-item">
+                                <div class="control-info">
+                                    <input type="checkbox" class="control-checkbox" name="data_encryption" value="1">
+                                    <span class="control-label">Data Encryption</span>
+                                </div>
+                                <span class="control-badge badge-mandatory">Mandatory</span>
+                            </div>
+                            
+                            <div class="control-item">
+                                <div class="control-info">
+                                    <input type="checkbox" class="control-checkbox" name="network_segmentation" value="1">
+                                    <span class="control-label">Network Segmentation</span>
+                                </div>
+                                <span class="control-badge badge-optional">Optional</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Endpoint Security -->
+                        <div class="category-section">
+                            <div class="category-header">
+                                <div class="category-title">Endpoint Security</div>
+                                <div class="category-stats">
+                                    <span class="stat-item">0/4</span>
+                                </div>
+                            </div>
+                        
+                            <div class="control-item">
+                                <div class="control-info">
+                                    <input type="checkbox" class="control-checkbox" name="antivirus_antimalware" value="1">
+                                    <span class="control-label">Anti-virus and Anti-malware Software</span>
+                                </div>
+                                <span class="control-badge badge-mandatory">Mandatory</span>
+                            </div>
+                            
+                            <div class="control-item">
+                                <div class="control-info">
+                                    <input type="checkbox" class="control-checkbox" name="application_control" value="1">
+                                    <span class="control-label">Application Control</span>
+                                </div>
+                                <span class="control-badge badge-mandatory">Mandatory</span>
+                            </div>
+                            
+                            <div class="control-item">
+                                <div class="control-info">
+                                    <input type="checkbox" class="control-checkbox" name="byod_security" value="1">
+                                    <span class="control-label">BYOD Security</span>
+                                </div>
+                                <span class="control-badge badge-mandatory">Mandatory</span>
+                            </div>
+                            
+                            <div class="control-item">
+                                <div class="control-info">
+                                    <input type="checkbox" class="control-checkbox" name="xdr" value="1">
+                                    <span class="control-label">Extended Detection and Response (XDR)</span>
+                                </div>
+                                <span class="control-badge badge-optional">Optional</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Data Security -->
+                        <div class="category-section">
+                            <div class="category-header">
+                                <div class="category-title">Data Security</div>
+                                <div class="category-stats">
+                                    <span class="stat-item">0/3</span>
+                                </div>
+                            </div>
+                        
+                            <div class="control-item">
+                                <div class="control-info">
+                                    <input type="checkbox" class="control-checkbox" name="data_classification" value="1">
+                                    <span class="control-label">Data Classification</span>
+                                </div>
+                                <span class="control-badge badge-mandatory">Mandatory</span>
+                            </div>
+                            
+                            <div class="control-item">
+                                <div class="control-info">
+                                    <input type="checkbox" class="control-checkbox" name="dlp" value="1">
+                                    <span class="control-label">Data Loss Prevention (DLP)</span>
+                                </div>
+                                <span class="control-badge badge-mandatory">Mandatory</span>
+                            </div>
+                            
+                            <div class="control-item">
+                                <div class="control-info">
+                                    <input type="checkbox" class="control-checkbox" name="data_backups" value="1">
+                                    <span class="control-label">Data Backups and Recovery</span>
+                                </div>
+                                <span class="control-badge badge-mandatory">Mandatory</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Application Security -->
+                        <div class="category-section">
+                            <div class="category-header">
+                                <div class="category-title">Application Security</div>
+                                <div class="category-stats">
+                                    <span class="stat-item">0/1</span>
+                                </div>
+                            </div>
+                        
+                            <div class="control-item">
+                                <div class="control-info">
+                                    <input type="checkbox" class="control-checkbox" name="security_scanning" value="1">
+                                    <span class="control-label">Regular Security Scanning and Testing</span>
+                                </div>
+                                <span class="control-badge badge-mandatory">Mandatory</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Other Measures -->
+                        <div class="category-section">
+                            <div class="category-header">
+                                <div class="category-title">Other Measures</div>
+                                <div class="category-stats">
+                                    <span class="stat-item">0/11</span>
+                                </div>
+                            </div>
+                        
+                            <div class="control-item">
+                                <div class="control-info">
+                                    <input type="checkbox" class="control-checkbox" name="vulnerability_assessment" value="1">
+                                    <span class="control-label">Vulnerability Assessment</span>
+                                </div>
+                                <span class="control-badge badge-notspecified">Not Specified</span>
+                            </div>
+                            
+                            <div class="control-item">
+                                <div class="control-info">
+                                    <input type="checkbox" class="control-checkbox" name="patch_management" value="1">
+                                    <span class="control-label">Patch Management</span>
+                                </div>
+                                <span class="control-badge badge-notspecified">Not Specified</span>
+                            </div>
+                            
+                            <div class="control-item">
+                                <div class="control-info">
+                                    <input type="checkbox" class="control-checkbox" name="strong_password" value="1">
+                                    <span class="control-label">Strong Password Policies</span>
+                                </div>
+                                <span class="control-badge badge-notspecified">Not Specified</span>
+                            </div>
+                            
+                            <div class="control-item">
+                                <div class="control-info">
+                                    <input type="checkbox" class="control-checkbox" name="mfa" value="1">
+                                    <span class="control-label">Multi-Factor Authentication (MFA)</span>
+                                </div>
+                                <span class="control-badge badge-notspecified">Not Specified</span>
+                            </div>
+                            
+                            <div class="control-item">
+                                <div class="control-info">
+                                    <input type="checkbox" class="control-checkbox" name="access_reviews" value="1">
+                                    <span class="control-label">Access Reviews</span>
+                                </div>
+                                <span class="control-badge badge-notspecified">Not Specified</span>
+                            </div>
+                            
+                            <div class="control-item">
+                                <div class="control-info">
+                                    <input type="checkbox" class="control-checkbox" name="security_logs" value="1">
+                                    <span class="control-label">Security Logs</span>
+                                </div>
+                                <span class="control-badge badge-notspecified">Not Specified</span>
+                            </div>
+                            
+                            <div class="control-item">
+                                <div class="control-info">
+                                    <input type="checkbox" class="control-checkbox" name="log_analysis" value="1">
+                                    <span class="control-label">Log Analysis</span>
+                                </div>
+                                <span class="control-badge badge-notspecified">Not Specified</span>
+                            </div>
+                            
+                            <div class="control-item">
+                                <div class="control-info">
+                                    <input type="checkbox" class="control-checkbox" name="incident_response" value="1">
+                                    <span class="control-label">Incident Response Plan</span>
+                                </div>
+                                <span class="control-badge badge-notspecified">Not Specified</span>
+                            </div>
+                            
+                            <div class="control-item">
+                                <div class="control-info">
+                                    <input type="checkbox" class="control-checkbox" name="siem" value="1">
+                                    <span class="control-label">Security Information and Event Management (SIEM)</span>
+                                </div>
+                                <span class="control-badge badge-notspecified">Not Specified</span>
+                            </div>
+                            
+                            <div class="control-item">
+                                <div class="control-info">
+                                    <input type="checkbox" class="control-checkbox" name="penetration_testing" value="1">
+                                    <span class="control-label">Penetration Testing</span>
+                                </div>
+                                <span class="control-badge badge-notspecified">Not Specified</span>
+                            </div>
+                            
+                            <div class="control-item">
+                                <div class="control-info">
+                                    <input type="checkbox" class="control-checkbox" name="sdlc" value="1">
+                                    <span class="control-label">Secure Software Development Life Cycle (SDLC)</span>
+                                </div>
+                                <span class="control-badge badge-notspecified">Not Specified</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -499,28 +1023,211 @@
         </div>
     </div>
 
-    <!-- Action Buttons -->
+    <!-- Footer Actions -->
     <div class="row mb-4">
         <div class="col-12">
-            <div class="action-bar">
-                <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center">
-                    <div class="d-flex gap-2">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fa-solid fa-save me-2"></i>Save Progress
-                        </button>
-                        <a href="<?= site_url('employee/dashboard') ?>" class="btn btn-outline-secondary">
-                            <i class="fa-solid fa-house me-2"></i>Dashboard
-                        </a>
-                    </div>
-                    <div class="d-flex gap-2">
-                        <a href="<?= site_url('employee/proposed-ict-strategy/enterprise-architecture') ?>" class="btn btn-success">
-                            Next: Enterprise Architecture <i class="fa-solid fa-arrow-right ms-2"></i>
-                        </a>
-                    </div>
+            <div class="footer-actions">
+                <div class="action-buttons">
+                    <button type="button" class="action-btn action-btn-save" onclick="window.saveChanges()">
+                        <i class="fa-solid fa-save"></i>
+                        <span>Save Changes</span>
+                    </button>
+                    <button type="button" class="action-btn action-btn-clear" onclick="window.clearForm()">
+                        <i class="fa-solid fa-eraser"></i>
+                        <span>Clear Fields</span>
+                    </button>
+                </div>
+                <div class="navigation-buttons">
+                    <button type="button" class="nav-btn nav-btn-next" onclick="window.navigateToPage('<?= site_url('employee/proposed-ict-strategy/enterprise-architecture') ?>')">
+                        <span>Enterprise Architecture</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 </form>
+
+<script>
+// Cybersecurity checklist counter functionality
+function updateCategoryStats() {
+    const categorySections = document.querySelectorAll('.category-section');
+    
+    categorySections.forEach(section => {
+        const checkboxes = section.querySelectorAll('.control-checkbox');
+        const statItem = section.querySelector('.stat-item');
+        
+        if (checkboxes.length > 0 && statItem) {
+            const checkedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
+            const totalCount = checkboxes.length;
+            statItem.textContent = `${checkedCount}/${totalCount}`;
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const helpIcons = document.querySelectorAll('.help-icon');
+    
+    helpIcons.forEach(icon => {
+        icon.addEventListener('mouseenter', function(e) {
+            const tooltipText = this.getAttribute('data-tooltip');
+            const tooltip = document.createElement('div');
+            tooltip.className = 'tooltip-content';
+            tooltip.textContent = tooltipText;
+            tooltip.id = 'active-tooltip';
+            document.body.appendChild(tooltip);
+            
+            const rect = this.getBoundingClientRect();
+            
+            // Position to the right of the icon
+            tooltip.style.left = (rect.right + 8) + 'px';
+            tooltip.style.top = rect.top + 'px';
+            
+            // Make it visible after positioning
+            requestAnimationFrame(() => {
+                tooltip.classList.add('visible');
+                // Adjust position if it goes off screen
+                const tooltipRect = tooltip.getBoundingClientRect();
+                if (tooltipRect.right > window.innerWidth) {
+                    // Position to the left instead
+                    tooltip.style.left = (rect.left - tooltipRect.width - 8) + 'px';
+                }
+                if (tooltipRect.bottom > window.innerHeight) {
+                    tooltip.style.top = (window.innerHeight - tooltipRect.height - 10) + 'px';
+                }
+            });
+        });
+        
+        icon.addEventListener('mouseleave', function() {
+            const tooltip = document.getElementById('active-tooltip');
+            if (tooltip) {
+                tooltip.remove();
+            }
+        });
+    });
+
+    // Initialize counters on page load
+    updateCategoryStats();
+
+    // Update counters when checkboxes change
+    const allCheckboxes = document.querySelectorAll('.control-checkbox');
+    allCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', updateCategoryStats);
+    });
+
+    // Auto-save on input change
+    const allInputs = document.querySelectorAll('input, textarea, select');
+    allInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            window.saveChanges(false);
+        });
+    });
+
+    // Load saved data on page load
+    window.loadSavedData();
+});
+
+// Clear form function
+window.clearForm = function() {
+    console.log('clearForm called');
+    try {
+        if (confirm('Are you sure you want to clear all fields? This action cannot be undone.')) {
+            const form = document.querySelector('form');
+            if (form) {
+                form.reset();
+                // Reset checkbox counters
+                updateCategoryStats();
+                // Clear localStorage
+                localStorage.removeItem('network-infrastructure-form');
+                console.log('Form cleared');
+                alert('Form has been cleared successfully.');
+            } else {
+                console.error('Form not found');
+                alert('Error: Form not found');
+            }
+        }
+    } catch (error) {
+        console.error('Error in clearForm:', error);
+        alert('Error clearing form: ' + error.message);
+    }
+};
+
+// Save changes to localStorage
+window.saveChanges = function(showAlert = true) {
+    console.log('saveChanges called with showAlert:', showAlert);
+    try {
+        const form = document.querySelector('form');
+        if (form) {
+            const formData = new FormData(form);
+            const formDataObj = {};
+            
+            formData.forEach((value, key) => {
+                formDataObj[key] = value;
+            });
+            
+            // Save to localStorage
+            localStorage.setItem('network-infrastructure-form', JSON.stringify(formDataObj));
+            console.log('Data saved to localStorage');
+            
+            // Show success message
+            if (showAlert) {
+                alert('Changes saved locally! You can continue working and your data will be preserved.');
+            }
+        } else {
+            console.error('Form not found');
+            if (showAlert) {
+                alert('Error: Form not found');
+            }
+        }
+    } catch (error) {
+        console.error('Error in saveChanges:', error);
+        if (showAlert) {
+            alert('Error saving changes: ' + error.message);
+        }
+    }
+};
+
+// Load saved data from localStorage on page load
+window.loadSavedData = function() {
+    console.log('loadSavedData called');
+    const savedData = localStorage.getItem('network-infrastructure-form');
+    if (savedData) {
+        const formDataObj = JSON.parse(savedData);
+        const form = document.querySelector('form');
+        
+        if (form) {
+            Object.keys(formDataObj).forEach(key => {
+                const input = form.querySelector(`[name="${key}"]`);
+                if (input) {
+                    if (input.type === 'checkbox') {
+                        input.checked = formDataObj[key] === '1';
+                    } else if (input.type === 'radio') {
+                        const radio = form.querySelector(`[name="${key}"][value="${formDataObj[key]}"]`);
+                        if (radio) radio.checked = true;
+                    } else {
+                        input.value = formDataObj[key];
+                    }
+                }
+            });
+            
+            // Update checkbox counters after loading data
+            updateCategoryStats();
+            console.log('Data loaded from localStorage');
+        }
+    }
+};
+
+// Navigate to page after saving
+window.navigateToPage = function(url) {
+    console.log('navigateToPage called with url:', url);
+    window.saveChanges(false);
+    setTimeout(() => {
+        // Verify data was saved before navigating
+        const savedData = localStorage.getItem('network-infrastructure-form');
+        console.log('Data in localStorage before navigation:', savedData ? 'exists' : 'empty');
+        window.location.href = url;
+    }, 500);
+};
+</script>
 
 <?= $this->endSection() ?>

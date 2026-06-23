@@ -80,38 +80,40 @@ $routes->group('employee', ['filter' => 'role:employee'], static function (Route
 });
 
 $routes->group('ict-planner', ['filter' => 'role:ict_planner'], static function (RouteCollection $routes): void {
+
     $routes->get('dashboard', 'IctPlanner\DashboardController::index');
 
     // Resource Requirements Routes
-    $routes->group(resource-requirements, static function (RouteCollection $routes)): void 
-    // Main Page 
-    $routes->get('/', 'IctPlanner\ResourceRequirementsController::index');
+    $routes->group('resource-requirements', static function (RouteCollection $routes): void {
 
-    // A.1 Year 1
-    $routes->get('year1', 'IctPlanner\ResourceRequirementsController::year1');
+        // Main Page 
+        $routes->get('/', 'IctPlanner\ResourceRequirementsController::index');
 
-    // A.2 Year 2
-    $routes->get('year2', 'IctPlanner\ResourceRequirementsController::year2');
+        // A.1 Year 1
+        $routes->get('year1', 'IctPlanner\ResourceRequirementsController::year1');
 
-    // A.3 Year 3 
-    $routes->get('year3', 'IctPlanner\ResourceRequirementsController::year3');
+        // A.2 Year 2
+        $routes->get('year2', 'IctPlanner\ResourceRequirementsController::year2');
 
-    // B. Summary of Investments
-    $routes->get('summary', 'IctPlanner\ResourceRequirementsController::summary');
+        // A.3 Year 3 
+        $routes->get('year3', 'IctPlanner\ResourceRequirementsController::year3');
 
-    // CRUD
-    $routes->get('create', 'IctPlanner\ResourceRequirementsController::create');
-    $routes->post('store', 'IctPlanner\ResourceRequirementsController::store');
+        // B. Summary of Investments
+        $routes->get('summary', 'IctPlanner\ResourceRequirementsController::summary');
 
-    $routes->get('edit/(:num)', 'IctPlanner\ResourceRequirementsController::edit/$1');
-    $routes->post('update/(:num)', 'IctPlanner\ResourceRequirementsController::update/$1');
+        // CRUD
+        $routes->get('create', 'IctPlanner\ResourceRequirementsController::create');
+        $routes->post('store', 'IctPlanner\ResourceRequirementsController::store');
 
-    $routes->get('delete/(:num)', 'IctPlanner\ResourceRequirementsController::delete/$1');
+        $routes->get('edit/(:num)', 'IctPlanner\ResourceRequirementsController::edit/$1');
+        $routes->post('update/(:num)', 'IctPlanner\ResourceRequirementsController::update/$1');
 
-    // Approval Workflow
-    $routes->get('submit/(:num)', 'IctPlanner\ResourceRequirementsController::submitForApproval/$1');
+        $routes->get('delete/(:num)', 'IctPlanner\ResourceRequirementsController::delete/$1');
+
+        // Approval Workflow
+        $routes->get('submit/(:num)', 'IctPlanner\ResourceRequirementsController::submitForApproval/$1');
     });
-  });  
+});
 
 $routes->group('director-general', ['filter' => 'role:director_general'], static function (RouteCollection $routes): void {
     $routes->get('dashboard', 'DashboardController::index');

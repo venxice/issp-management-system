@@ -10,9 +10,15 @@
                     <h2 class="panel-title">Submitted ICT Projects</h2>
                     <p class="panel-subtitle">View and manage your submitted ICT projects.</p>
                 </div>
-                <button class="btn btn-primary px-4 py-2 shadow-sm" type="button" data-bs-toggle="modal" data-bs-target="#addIctProjectModal" style="background: linear-gradient(135deg, #4f6584 0%, #5a7294 100%); border: none; font-weight: 500; letter-spacing: 0.5px;">
-                    <i class="fa-solid fa-rocket me-2"></i>New ICT Projects
-                </button>
+                <form class="d-flex flex-wrap align-items-center gap-2 toolbar-form" method="get" action="<?= site_url('employee/submitted-ict-projects') ?>">
+                    <input class="form-control form-control-sm" name="q" value="<?= esc($query ?? '') ?>" placeholder="Search Projects" style="width: 168px;">
+                    <div class="position-relative date-range-picker-wrapper">
+                        <input class="form-control form-control-sm" name="date_range" type="text" value="<?= esc($date_range ?? '') ?>" placeholder="" id="dateRangePicker" readonly>
+                        <button type="button" class="date-picker-icon-btn" id="datePickerToggleBtn">
+                            <i class="fa-solid fa-calendar-days"></i>
+                        </button>
+                    </div>
+                </form>
             </div>
             <div class="table-responsive mb-0">
                 <table class="table table-logs align-middle mb-0">
@@ -69,81 +75,145 @@
     </div>
 </div>
 
-<!-- Add ICT Project Modal -->
-<div class="modal fade" id="addIctProjectModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Add New ICT Project</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="addIctProjectForm">
-                    <div class="row g-3">
-                        <div class="col-md-12">
-                            <label for="projectTitle" class="form-label">Project Title</label>
-                            <input type="text" class="form-control" id="projectTitle" name="title" required>
-                        </div>
-                        <div class="col-md-12">
-                            <label for="projectDescription" class="form-label">Description</label>
-                            <textarea class="form-control" id="projectDescription" name="description" rows="3" required></textarea>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="projectBudget" class="form-label">Budget (₱)</label>
-                            <input type="number" class="form-control" id="projectBudget" name="budget" step="0.01" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="projectStatus" class="form-label">Status</label>
-                            <select class="form-select" id="projectStatus" name="status" required>
-                                <option value="draft">Draft</option>
-                                <option value="submitted">Submitted</option>
-                                <option value="pending">Pending</option>
-                            </select>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="projectStartDate" class="form-label">Start Date</label>
-                            <input type="date" class="form-control" id="projectStartDate" name="start_date">
-                        </div>
-                        <div class="col-md-6">
-                            <label for="projectEndDate" class="form-label">End Date</label>
-                            <input type="date" class="form-control" id="projectEndDate" name="end_date">
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" onclick="saveIctProject()">Save Project</button>
-            </div>
-        </div>
-    </div>
-</div>
+<?= $this->endSection() ?>
 
-<script>
-function saveIctProject() {
-    const form = document.getElementById('addIctProjectForm');
-    const formData = new FormData(form);
-    
-    // Basic validation
-    const title = formData.get('title');
-    const description = formData.get('description');
-    const budget = formData.get('budget');
-    
-    if (!title || !description || !budget) {
-        alert('Please fill in all required fields.');
-        return;
-    }
-    
-    // For now, just show success message (in production, you'd send this to the server)
-    alert('ICT Project saved successfully!');
-    
-    // Close the modal
-    const modal = bootstrap.Modal.getInstance(document.getElementById('addIctProjectModal'));
-    modal.hide();
-    
-    // Reset the form
-    form.reset();
+<?= $this->section('scripts') ?>
+<style>
+.date-range-picker-wrapper {
+    width: 42px;
+    flex-shrink: 0;
 }
-</script>
 
+.date-range-picker-wrapper input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.date-picker-icon-btn {
+    background: #4f6584;
+    border: none;
+    color: #fff;
+    width: 38px;
+    height: 28px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    transition: background-color 0.2s ease;
+}
+
+.date-picker-icon-btn:hover {
+    background: #344863;
+}
+
+.date-picker-icon-btn i {
+    font-size: 0.8rem;
+}
+
+.flatpickr-calendar {
+    font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    border: 1px solid #d9e0ea;
+    border-radius: 10px;
+    box-shadow: 0 12px 26px rgba(15, 23, 42, .1);
+}
+
+.flatpickr-day.selected,
+.flatpickr-day.startRange,
+.flatpickr-day.endRange,
+.flatpickr-day.selected.inRange,
+.flatpickr-day.startRange.inRange,
+.flatpickr-day.endRange.inRange,
+.flatpickr-day.selected:focus,
+.flatpickr-day.startRange:focus,
+.flatpickr-day.endRange:focus,
+.flatpickr-day.selected:hover,
+.flatpickr-day.startRange:hover,
+.flatpickr-day.endRange:hover,
+.flatpickr-day.selected.prevMonthDay,
+.flatpickr-day.startRange.prevMonthDay,
+.flatpickr-day.endRange.prevMonthDay,
+.flatpickr-day.selected.nextMonthDay,
+.flatpickr-day.startRange.nextMonthDay,
+.flatpickr-day.endRange.nextMonthDay {
+    background: #4f6584;
+    border-color: #4f6584;
+}
+
+.flatpickr-day.inRange,
+.flatpickr-day.prevMonthDay.inRange,
+.flatpickr-day.nextMonthDay.inRange,
+.flatpickr-day.today.inRange,
+.flatpickr-day.prevMonthDay.today.inRange,
+.flatpickr-day.nextMonthDay.today.inRange,
+.flatpickr-day:hover,
+.flatpickr-day.prevMonthDay:hover,
+.flatpickr-day.nextMonthDay:hover,
+.flatpickr-day:focus,
+.flatpickr-day.prevMonthDay:focus,
+.flatpickr-day.nextMonthDay:focus {
+    background: rgba(79, 101, 132, 0.15);
+    border-color: rgba(79, 101, 132, 0.15);
+}
+
+.flatpickr-months .flatpickr-month,
+.flatpickr-current-month .flatpickr-monthDropdown-months,
+.flatpickr-current-month input.cur-year {
+    font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 600;
+}
+
+.flatpickr-weekday {
+    font-weight: 600;
+}
+
+.flatpickr-day.today {
+    border-color: #4f6584;
+}
+</style>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const form = document.querySelector('form[action="<?= site_url('employee/submitted-ict-projects') ?>"]');
+    const dateRangeInput = document.getElementById('dateRangePicker');
+    const datePickerToggleBtn = document.getElementById('datePickerToggleBtn');
+
+    if (dateRangeInput) {
+        const fp = flatpickr(dateRangeInput, {
+            mode: 'range',
+            dateFormat: 'Y-m-d',
+            position: 'auto',
+            static: false,
+            appendTo: document.body,
+            onOpen: function(selectedDates, dateStr, instance) {
+                const calendar = instance.calendarContainer;
+                const mainContent = document.querySelector('.app-main') || document.querySelector('.content-wrap') || document.body;
+                const mainRect = mainContent.getBoundingClientRect();
+                const topbar = document.querySelector('.topbar') || document.querySelector('header');
+                const topbarHeight = topbar ? topbar.offsetHeight : 0;
+                const calendarWidth = calendar.offsetWidth;
+                const centerX = mainRect.left + (mainRect.width / 2) - (calendarWidth / 2);
+                const calendarHeight = calendar.offsetHeight;
+                const topPosition = topbarHeight + 20;
+                calendar.style.position = 'fixed';
+                calendar.style.left = centerX + 'px';
+                calendar.style.top = topPosition + 'px';
+                calendar.style.zIndex = '9999';
+            },
+            onChange: function(selectedDates, dateStr, instance) {
+                if (selectedDates.length === 2) {
+                    form.submit();
+                }
+            }
+        });
+
+        if (datePickerToggleBtn && fp) {
+            datePickerToggleBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                fp.open();
+            });
+        }
+    }
+});
+</script>
 <?= $this->endSection() ?>

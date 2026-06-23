@@ -16,6 +16,10 @@
     color: #fff;
     padding: 14px 18px;
     border-bottom: 1px solid rgba(255,255,255,.1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
 }
 
 .section-header .section-title {
@@ -51,12 +55,15 @@
 }
 
 .form-section-label {
-    font-size: .85rem;
-    font-weight: 600;
+    font-size: .9rem;
+    font-weight: 700;
     color: var(--brand-dark);
-    margin-bottom: 8px;
+    margin-bottom: 12px;
+    margin-top: 20px;
     text-transform: uppercase;
-    letter-spacing: .02em;
+    letter-spacing: .01em;
+    border-bottom: 2px solid #e8ecf1;
+    padding-bottom: 8px;
 }
 
 .form-label {
@@ -85,15 +92,163 @@
     margin-top: 4px;
 }
 
-.action-bar {
-    background: var(--panel);
-    border: 1px solid #dde4ed;
-    border-radius: 10px;
-    padding: 16px 18px;
-    box-shadow: 0 12px 26px rgba(15, 23, 42, .05);
-    position: sticky;
-    bottom: 14px;
-    z-index: 100;
+.navigation-bar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+
+.navigation-bar.has-both {
+    justify-content: space-between;
+}
+
+.navigation-bar.align-right {
+    justify-content: flex-end;
+}
+
+.nav-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.8rem;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+    white-space: nowrap;
+}
+
+.nav-btn-prev {
+    background: white;
+    color: var(--brand);
+    border-color: #cbd5e1;
+}
+
+.nav-btn-prev:hover {
+    background: #f1f5f9;
+    border-color: var(--brand);
+    color: var(--brand-dark);
+}
+
+.nav-btn-next {
+    background: var(--brand);
+    color: white;
+    border-color: var(--brand);
+}
+
+.nav-btn-next:hover {
+    background: var(--brand-dark);
+    border-color: var(--brand-dark);
+}
+
+.nav-btn i {
+    font-size: 0.8rem;
+}
+
+@media (max-width: 768px) {
+    .navigation-bar {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .nav-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+.footer-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.action-btn i {
+    font-size: 0.875rem;
+}
+
+.action-btn-save {
+    background: var(--brand);
+    color: white;
+    border-color: var(--brand);
+}
+
+.action-btn-save:hover {
+    background: var(--brand-dark);
+    border-color: var(--brand-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(79, 101, 132, 0.2);
+}
+
+.action-btn-clear {
+    background: white;
+    color: #64748b;
+    border-color: #cbd5e1;
+}
+
+.action-btn-clear:hover {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+    color: #475569;
+    transform: translateY(-1px);
+}
+
+.navigation-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+@media (max-width: 768px) {
+    .footer-actions {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .action-buttons {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .action-btn {
+        flex: 1;
+        justify-content: center;
+    }
+
+    .navigation-buttons {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .nav-btn {
+        width: 100%;
+        justify-content: center;
+    }
 }
 
 .kpi-table {
@@ -155,6 +310,7 @@
     margin-bottom: 16px;
     padding-bottom: 12px;
     border-bottom: 2px solid #e8ecf1;
+    gap: 10px;
 }
 
 .project-header h6 {
@@ -179,13 +335,50 @@
 .remove-project-btn:hover {
     background: #c82333;
 }
+
+.help-icon {
+    position: relative;
+    cursor: pointer;
+    color: var(--brand);
+    margin-left: 8px;
+    font-size: 1rem;
+    transition: color 0.2s ease;
+}
+
+.help-icon:hover {
+    color: var(--brand-dark);
+}
+
+.tooltip-content {
+    position: fixed;
+    background: #1e293b;
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: .75rem;
+    font-weight: 400;
+    max-width: 300px;
+    white-space: normal;
+    width: max-content;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+    z-index: 9999;
+    pointer-events: none;
+}
+
+.tooltip-content.visible {
+    opacity: 1;
+    visibility: visible;
+}
 </style>
 
 <div class="row">
     <div class="col-12">
         <div class="page-header mb-3">
-            <h1 class="page-title">F. Performance Measurement Framework</h1>
-            <p class="page-subtitle">Key Performance Indicators for ICT projects</p>
+            <h1 class="page-title">Performance Measurement & KPIs</h1>
+            <p class="page-subtitle">Proposed ICT Strategy - Key Performance Indicators framework</p>
         </div>
         
         <div class="info-banner">
@@ -203,15 +396,19 @@
         <!-- Project 1 -->
         <div class="project-card" data-project-index="1">
             <div class="project-header">
-                <h6><i class="fa-solid fa-rocket me-2"></i>Project 1</h6>
+                <div>
+                    <h6>Project 1</h6>
+                </div>
+                <i class="fa-solid fa-circle-question help-icon" 
+                   data-tooltip="Define KPIs for this ICT project to measure progress and outcomes."></i>
                 <button type="button" class="remove-project-btn" onclick="removeProject(1)">
-                    <i class="fa-solid fa-trash me-1"></i>Remove
+                    Remove
                 </button>
             </div>
             
             <div class="row g-3 mb-3">
                 <div class="col-md-12">
-                    <label class="form-label"><i class="fa-solid fa-heading me-1"></i>Project Title</label>
+                    <label class="form-label">Project Title</label>
                     <input type="text" class="form-control" name="projects[1][title]" placeholder="Enter project title">
                 </div>
             </div>
@@ -299,7 +496,7 @@
     <div class="row mb-3">
         <div class="col-12">
             <button type="button" class="btn btn-outline-primary" onclick="addProject()">
-                <i class="fa-solid fa-plus me-2"></i>Add Another Project
+                Add Another Project
             </button>
         </div>
     </div>
@@ -314,12 +511,12 @@
                 </div>
                 <div class="section-body">
                     <div class="form-section-label">
-                        <i class="fa-solid fa-chart-pie me-2"></i>Measurement Strategy
+                        Measurement Strategy
                     </div>
                     
                     <div class="row g-3">
                         <div class="col-md-12">
-                            <label class="form-label"><i class="fa-solid fa-align-left me-1"></i>Measurement Frequency</label>
+                            <label class="form-label">Measurement Frequency</label>
                             <select class="form-select" name="measurement_frequency">
                                 <option value="">Select frequency</option>
                                 <option value="monthly">Monthly</option>
@@ -330,12 +527,12 @@
                         </div>
                         
                         <div class="col-md-12">
-                            <label class="form-label"><i class="fa-solid fa-file-alt me-1"></i>Reporting Mechanism</label>
+                            <label class="form-label">Reporting Mechanism</label>
                             <textarea class="form-control" name="reporting_mechanism" rows="3" placeholder="Describe how performance data will be reported and reviewed..."></textarea>
                         </div>
                         
                         <div class="col-md-12">
-                            <label class="form-label"><i class="fa-solid fa-tools me-1"></i>Review and Adjustment Process</label>
+                            <label class="form-label">Review and Adjustment Process</label>
                             <textarea class="form-control" name="review_process" rows="3" placeholder="Describe the process for reviewing KPIs and making adjustments..."></textarea>
                         </div>
                     </div>
@@ -344,27 +541,29 @@
         </div>
     </div>
 
-    <!-- Action Buttons -->
+    <!-- Footer Actions -->
     <div class="row mb-4">
         <div class="col-12">
-            <div class="action-bar">
-                <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center">
-                    <div class="d-flex gap-2">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fa-solid fa-save me-2"></i>Save Progress
-                        </button>
-                        <a href="<?= site_url('employee/dashboard') ?>" class="btn btn-outline-secondary">
-                            <i class="fa-solid fa-house me-2"></i>Dashboard
-                        </a>
-                    </div>
-                    <div class="d-flex gap-2">
-                        <a href="<?= site_url('employee/proposed-ict-strategy/ict-projects') ?>" class="btn btn-outline-secondary">
-                            <i class="fa-solid fa-arrow-left me-2"></i>Back: ICT Projects
-                        </a>
-                        <a href="<?= site_url('employee/dashboard') ?>" class="btn btn-success">
-                            <i class="fa-solid fa-check me-2"></i>Complete Strategy
-                        </a>
-                    </div>
+            <div class="footer-actions">
+                <div class="action-buttons">
+                    <button type="button" class="action-btn action-btn-save" onclick="window.saveChanges()">
+                        <i class="fa-solid fa-save"></i>
+                        <span>Save Changes</span>
+                    </button>
+                    <button type="button" class="action-btn action-btn-clear" onclick="window.clearForm()">
+                        <i class="fa-solid fa-eraser"></i>
+                        <span>Clear Fields</span>
+                    </button>
+                </div>
+                <div class="navigation-buttons">
+                    <button type="button" class="nav-btn nav-btn-prev" onclick="window.navigateToPage('<?= site_url('employee/proposed-ict-strategy/ict-projects') ?>')">
+                        <i class="fa-solid fa-arrow-left"></i>
+                        <span>ICT Projects</span>
+                    </button>
+                    <button type="button" class="nav-btn nav-btn-next" onclick="window.navigateToPage('<?= site_url('employee/dashboard') ?>')">
+                        <span>Complete Strategy</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
                 </div>
             </div>
         </div>
@@ -373,6 +572,52 @@
 
 <script>
 let projectCount = 1;
+
+// Tooltip functionality
+function handleTooltipEnter(e) {
+    const tooltipText = this.getAttribute('data-tooltip');
+    const tooltip = document.createElement('div');
+    tooltip.className = 'tooltip-content';
+    tooltip.textContent = tooltipText;
+    tooltip.id = 'active-tooltip';
+    document.body.appendChild(tooltip);
+    
+    const rect = this.getBoundingClientRect();
+    
+    // Position to the right of the icon
+    tooltip.style.left = (rect.right + 8) + 'px';
+    tooltip.style.top = rect.top + 'px';
+    
+    // Make it visible after positioning
+    requestAnimationFrame(() => {
+        tooltip.classList.add('visible');
+        // Adjust position if it goes off screen
+        const tooltipRect = tooltip.getBoundingClientRect();
+        if (tooltipRect.right > window.innerWidth) {
+            // Position to the left instead
+            tooltip.style.left = (rect.left - tooltipRect.width - 8) + 'px';
+        }
+        if (tooltipRect.bottom > window.innerHeight) {
+            tooltip.style.top = (window.innerHeight - tooltipRect.height - 10) + 'px';
+        }
+    });
+}
+
+function handleTooltipLeave(e) {
+    const tooltip = document.getElementById('active-tooltip');
+    if (tooltip) {
+        tooltip.remove();
+    }
+}
+
+function initializeTooltips() {
+    const helpIcons = document.querySelectorAll('.help-icon');
+    
+    helpIcons.forEach(icon => {
+        icon.addEventListener('mouseenter', handleTooltipEnter);
+        icon.addEventListener('mouseleave', handleTooltipLeave);
+    });
+}
 
 function addProject() {
     projectCount++;
@@ -384,15 +629,19 @@ function addProject() {
     
     projectCard.innerHTML = `
         <div class="project-header">
-            <h6><i class="fa-solid fa-rocket me-2"></i>Project ${projectCount}</h6>
+            <div>
+                <h6>Project ${projectCount}</h6>
+            </div>
+            <i class="fa-solid fa-circle-question help-icon" 
+               data-tooltip="Define KPIs for this ICT project to measure progress and outcomes."></i>
             <button type="button" class="remove-project-btn" onclick="removeProject(${projectCount})">
-                <i class="fa-solid fa-trash me-1"></i>Remove
+                Remove
             </button>
         </div>
         
         <div class="row g-3 mb-3">
             <div class="col-md-12">
-                <label class="form-label"><i class="fa-solid fa-heading me-1"></i>Project Title</label>
+                <label class="form-label">Project Title</label>
                 <input type="text" class="form-control" name="projects[${projectCount}][title]" placeholder="Enter project title">
             </div>
         </div>
@@ -476,6 +725,9 @@ function addProject() {
     `;
     
     container.appendChild(projectCard);
+    
+    // Initialize tooltips for the new project
+    initializeTooltips();
 }
 
 function removeProject(index) {
@@ -486,6 +738,130 @@ function removeProject(index) {
         alert('At least one project must remain.');
     }
 }
+
+// Clear form function
+function clearForm() {
+    if (confirm('Are you sure you want to clear all fields? This action cannot be undone.')) {
+        const form = document.querySelector('form');
+        if (form) {
+            form.reset();
+            // Clear localStorage
+            localStorage.removeItem('performance-measurement-form');
+        }
+    }
+}
+
+// Save changes to localStorage
+function saveChanges(showAlert = true) {
+    const form = document.querySelector('form');
+    if (form) {
+        const formData = new FormData(form);
+        const formDataObj = {};
+        
+        formData.forEach((value, key) => {
+            formDataObj[key] = value;
+        });
+        
+        // Save to localStorage
+        localStorage.setItem('performance-measurement-form', JSON.stringify(formDataObj));
+        
+        // Show success message
+        if (showAlert) {
+            alert('Changes saved locally! You can continue working and your data will be preserved.');
+        }
+    }
+}
+
+// Load saved data from localStorage on page load
+window.loadSavedData = function() {
+    console.log('loadSavedData called');
+    const savedData = localStorage.getItem('performance-measurement-form');
+    if (savedData) {
+        const formDataObj = JSON.parse(savedData);
+        const form = document.querySelector('form');
+        
+        if (form) {
+            Object.keys(formDataObj).forEach(key => {
+                const input = form.querySelector(`[name="${key}"]`);
+                if (input) {
+                    if (input.type === 'checkbox') {
+                        input.checked = formDataObj[key] === '1';
+                    } else if (input.type === 'radio') {
+                        const radio = form.querySelector(`[name="${key}"][value="${formDataObj[key]}"]`);
+                        if (radio) radio.checked = true;
+                    } else {
+                        input.value = formDataObj[key];
+                    }
+                }
+            });
+            console.log('Data loaded from localStorage');
+        }
+    }
+};
+
+// Initialize tooltips and load saved data on page load
+document.addEventListener('DOMContentLoaded', function() {
+    initializeTooltips();
+    
+    // Auto-save on input change
+    const allInputs = document.querySelectorAll('input, textarea, select');
+    allInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            window.saveChanges(false);
+        });
+    });
+
+    window.loadSavedData();
+});
+
+// Clear form function
+window.clearForm = function() {
+    console.log('clearForm called');
+    if (confirm('Are you sure you want to clear all fields? This action cannot be undone.')) {
+        const form = document.querySelector('form');
+        if (form) {
+            form.reset();
+            // Clear localStorage
+            localStorage.removeItem('performance-measurement-form');
+            console.log('Form cleared');
+        }
+    }
+};
+
+// Save changes to localStorage
+window.saveChanges = function(showAlert = true) {
+    console.log('saveChanges called with showAlert:', showAlert);
+    const form = document.querySelector('form');
+    if (form) {
+        const formData = new FormData(form);
+        const formDataObj = {};
+        
+        formData.forEach((value, key) => {
+            formDataObj[key] = value;
+        });
+        
+        // Save to localStorage
+        localStorage.setItem('performance-measurement-form', JSON.stringify(formDataObj));
+        console.log('Data saved to localStorage');
+        
+        // Show success message
+        if (showAlert) {
+            alert('Changes saved locally! You can continue working and your data will be preserved.');
+        }
+    }
+};
+
+// Navigate to page after saving
+window.navigateToPage = function(url) {
+    console.log('navigateToPage called with url:', url);
+    window.saveChanges(false);
+    setTimeout(() => {
+        // Verify data was saved before navigating
+        const savedData = localStorage.getItem('performance-measurement-form');
+        console.log('Data in localStorage before navigation:', savedData ? 'exists' : 'empty');
+        window.location.href = url;
+    }, 500);
+};
 </script>
 
 <?= $this->endSection() ?>

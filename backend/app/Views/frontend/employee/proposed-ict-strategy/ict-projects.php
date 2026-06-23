@@ -16,6 +16,10 @@
     color: #fff;
     padding: 14px 18px;
     border-bottom: 1px solid rgba(255,255,255,.1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
 }
 
 .section-header .section-title {
@@ -51,12 +55,15 @@
 }
 
 .form-section-label {
-    font-size: .85rem;
-    font-weight: 600;
+    font-size: .9rem;
+    font-weight: 700;
     color: var(--brand-dark);
-    margin-bottom: 8px;
+    margin-bottom: 12px;
+    margin-top: 20px;
     text-transform: uppercase;
-    letter-spacing: .02em;
+    letter-spacing: .01em;
+    border-bottom: 2px solid #e8ecf1;
+    padding-bottom: 8px;
 }
 
 .form-label {
@@ -85,15 +92,163 @@
     margin-top: 4px;
 }
 
-.action-bar {
-    background: var(--panel);
-    border: 1px solid #dde4ed;
-    border-radius: 10px;
-    padding: 16px 18px;
-    box-shadow: 0 12px 26px rgba(15, 23, 42, .05);
-    position: sticky;
-    bottom: 14px;
-    z-index: 100;
+.navigation-bar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+
+.navigation-bar.has-both {
+    justify-content: space-between;
+}
+
+.navigation-bar.align-right {
+    justify-content: flex-end;
+}
+
+.nav-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.8rem;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+    white-space: nowrap;
+}
+
+.nav-btn-prev {
+    background: white;
+    color: var(--brand);
+    border-color: #cbd5e1;
+}
+
+.nav-btn-prev:hover {
+    background: #f1f5f9;
+    border-color: var(--brand);
+    color: var(--brand-dark);
+}
+
+.nav-btn-next {
+    background: var(--brand);
+    color: white;
+    border-color: var(--brand);
+}
+
+.nav-btn-next:hover {
+    background: var(--brand-dark);
+    border-color: var(--brand-dark);
+}
+
+.nav-btn i {
+    font-size: 0.8rem;
+}
+
+@media (max-width: 768px) {
+    .navigation-bar {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .nav-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+.footer-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.action-btn i {
+    font-size: 0.875rem;
+}
+
+.action-btn-save {
+    background: var(--brand);
+    color: white;
+    border-color: var(--brand);
+}
+
+.action-btn-save:hover {
+    background: var(--brand-dark);
+    border-color: var(--brand-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(79, 101, 132, 0.2);
+}
+
+.action-btn-clear {
+    background: white;
+    color: #64748b;
+    border-color: #cbd5e1;
+}
+
+.action-btn-clear:hover {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+    color: #475569;
+    transform: translateY(-1px);
+}
+
+.navigation-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+@media (max-width: 768px) {
+    .footer-actions {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .action-buttons {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .action-btn {
+        flex: 1;
+        justify-content: center;
+    }
+
+    .navigation-buttons {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .nav-btn {
+        width: 100%;
+        justify-content: center;
+    }
 }
 
 .project-tabs {
@@ -158,13 +313,50 @@
     margin: 0;
     cursor: pointer;
 }
+
+.help-icon {
+    position: relative;
+    cursor: pointer;
+    color: var(--brand);
+    margin-left: 8px;
+    font-size: 1rem;
+    transition: color 0.2s ease;
+}
+
+.help-icon:hover {
+    color: var(--brand-dark);
+}
+
+.tooltip-content {
+    position: fixed;
+    background: #1e293b;
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: .75rem;
+    font-weight: 400;
+    max-width: 300px;
+    white-space: normal;
+    width: max-content;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+    z-index: 9999;
+    pointer-events: none;
+}
+
+.tooltip-content.visible {
+    opacity: 1;
+    visibility: visible;
+}
 </style>
 
 <div class="row">
     <div class="col-12">
         <div class="page-header mb-3">
-            <h1 class="page-title">E. ICT Projects</h1>
-            <p class="page-subtitle">Internal and cross-agency ICT projects</p>
+            <h1 class="page-title">E. ICT Projects Portfolio</h1>
+            <p class="page-subtitle">Proposed ICT Strategy - Internal and cross-agency ICT projects</p>
         </div>
         
         <div class="info-banner">
@@ -180,10 +372,10 @@
     <!-- Project Tabs -->
     <div class="project-tabs">
         <button type="button" class="project-tab active" data-tab="internal-projects">
-            <i class="fa-solid fa-building me-2"></i>E.1 Internal ICT Projects
+            E.1 Internal ICT Projects
         </button>
         <button type="button" class="project-tab" data-tab="cross-agency-projects">
-            <i class="fa-solid fa-handshake me-2"></i>E.2 Cross-Agency ICT Projects
+            E.2 Cross-Agency ICT Projects
         </button>
     </div>
 
@@ -193,34 +385,38 @@
             <div class="col-12">
                 <div class="section-card">
                     <div class="section-header">
-                        <h5 class="section-title">E.1 Internal ICT Projects</h5>
-                        <p class="section-subtitle">Projects implemented within the agency</p>
+                        <div>
+                            <h5 class="section-title">E.1 Internal ICT Projects</h5>
+                            <p class="section-subtitle">Projects implemented within the agency</p>
+                        </div>
+                        <i class="fa-solid fa-circle-question help-icon" 
+                           data-tooltip="List ICT projects implemented within your agency."></i>
                     </div>
                     <div class="section-body">
                         <div class="form-section-label">
-                            <i class="fa-solid fa-project-diagram me-2"></i>Project Details
+                            Project Details
                         </div>
                         
                         <div class="row g-3 mb-4">
                             <div class="col-md-12">
-                                <label class="form-label"><i class="fa-solid fa-heading me-1"></i>Project Title</label>
+                                <label class="form-label">Project Title</label>
                                 <input type="text" class="form-control" name="internal_project_title" placeholder="Enter the project title">
                             </div>
                             
                             <div class="col-md-12">
-                                <label class="form-label"><i class="fa-solid fa-align-left me-1"></i>Description</label>
+                                <label class="form-label">Description</label>
                                 <textarea class="form-control" name="internal_description" rows="4" placeholder="Describe the project..."></textarea>
                             </div>
                             
                             <div class="col-md-12">
-                                <label class="form-label"><i class="fa-solid fa-bullseye me-1"></i>Objectives</label>
+                                <label class="form-label">Objectives</label>
                                 <textarea class="form-control" name="internal_objectives" rows="3" placeholder="List the project objectives..."></textarea>
                             </div>
                         </div>
 
                         <!-- Strategic Alignment -->
                         <div class="form-section-label">
-                            <i class="fa-solid fa-crosshairs me-2"></i>Strategic Alignment
+                            Strategic Alignment
                         </div>
                         
                         <div class="info-banner mb-3">
@@ -253,7 +449,7 @@
 
                         <!-- Harmonization Framework -->
                         <div class="form-section-label">
-                            <i class="fa-solid fa-layer-group me-2"></i>Harmonization Framework
+                            Harmonization Framework
                         </div>
                         
                         <div class="info-banner mb-3">
@@ -286,56 +482,56 @@
 
                         <!-- Duration -->
                         <div class="form-section-label">
-                            <i class="fa-solid fa-calendar me-2"></i>Duration
+                            Duration
                         </div>
                         
                         <div class="row g-3 mb-4">
                             <div class="col-md-6">
-                                <label class="form-label"><i class="fa-solid fa-calendar-check me-1"></i>Start Date</label>
+                                <label class="form-label">Start Date</label>
                                 <input type="date" class="form-control" name="internal_start_date">
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label"><i class="fa-solid fa-calendar-times me-1"></i>End Date</label>
+                                <label class="form-label">End Date</label>
                                 <input type="date" class="form-control" name="internal_end_date">
                             </div>
                         </div>
 
                         <!-- Deliverables -->
                         <div class="form-section-label">
-                            <i class="fa-solid fa-tasks me-2"></i>Deliverables
+                            Deliverables
                         </div>
                         
                         <div class="row g-3 mb-4">
                             <div class="col-md-4">
-                                <label class="form-label"><i class="fa-solid fa-1 me-1"></i>Year 1 Deliverables</label>
+                                <label class="form-label">Year 1 Deliverables</label>
                                 <textarea class="form-control" name="internal_year1_deliverables" rows="3" placeholder="List Year 1 deliverables..."></textarea>
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label"><i class="fa-solid fa-2 me-1"></i>Year 2 Deliverables</label>
+                                <label class="form-label">Year 2 Deliverables</label>
                                 <textarea class="form-control" name="internal_year2_deliverables" rows="3" placeholder="List Year 2 deliverables..."></textarea>
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label"><i class="fa-solid fa-3 me-1"></i>Year 3 Deliverables</label>
+                                <label class="form-label">Year 3 Deliverables</label>
                                 <textarea class="form-control" name="internal_year3_deliverables" rows="3" placeholder="List Year 3 deliverables..."></textarea>
                             </div>
                         </div>
 
                         <!-- Implementation Details -->
                         <div class="form-section-label">
-                            <i class="fa-solid fa-cogs me-2"></i>Implementation Details
+                            Implementation Details
                         </div>
                         
                         <div class="row g-3 mb-4">
                             <div class="col-md-6">
-                                <label class="form-label"><i class="fa-solid fa-building-user me-1"></i>Implementing Unit</label>
+                                <label class="form-label">Implementing Unit</label>
                                 <input type="text" class="form-control" name="internal_implementing_unit" placeholder="Enter the implementing unit">
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label"><i class="fa-solid fa-coins me-1"></i>Total Cost</label>
+                                <label class="form-label">Total Cost</label>
                                 <input type="text" class="form-control" name="internal_total_cost" placeholder="e.g., ₱5,000,000.00">
                             </div>
                             <div class="col-md-12">
-                                <label class="form-label"><i class="fa-solid fa-wallet me-1"></i>Funding Source</label>
+                                <label class="form-label">Funding Source</label>
                                 <select class="form-select" name="internal_funding_source">
                                     <option value="">Select funding source</option>
                                     <option value="national-budget">National Budget</option>
@@ -358,34 +554,38 @@
             <div class="col-12">
                 <div class="section-card">
                     <div class="section-header">
-                        <h5 class="section-title">E.2 Cross-Agency ICT Projects</h5>
-                        <p class="section-subtitle">Projects involving multiple agencies</p>
+                        <div>
+                            <h5 class="section-title">E.2 Cross-Agency ICT Projects</h5>
+                            <p class="section-subtitle">Projects involving multiple agencies</p>
+                        </div>
+                        <i class="fa-solid fa-circle-question help-icon" 
+                           data-tooltip="List ICT projects involving collaboration with other agencies."></i>
                     </div>
                     <div class="section-body">
                         <div class="form-section-label">
-                            <i class="fa-solid fa-project-diagram me-2"></i>Project Details
+                            Project Details
                         </div>
                         
                         <div class="row g-3 mb-4">
                             <div class="col-md-12">
-                                <label class="form-label"><i class="fa-solid fa-heading me-1"></i>Project Title</label>
+                                <label class="form-label">Project Title</label>
                                 <input type="text" class="form-control" name="cross_project_title" placeholder="Enter the project title">
                             </div>
                             
                             <div class="col-md-12">
-                                <label class="form-label"><i class="fa-solid fa-align-left me-1"></i>Description</label>
+                                <label class="form-label">Description</label>
                                 <textarea class="form-control" name="cross_description" rows="4" placeholder="Describe the project..."></textarea>
                             </div>
                             
                             <div class="col-md-12">
-                                <label class="form-label"><i class="fa-solid fa-bullseye me-1"></i>Objectives</label>
+                                <label class="form-label">Objectives</label>
                                 <textarea class="form-control" name="cross_objectives" rows="3" placeholder="List the project objectives..."></textarea>
                             </div>
                         </div>
 
                         <!-- Strategic Alignment -->
                         <div class="form-section-label">
-                            <i class="fa-solid fa-crosshairs me-2"></i>Strategic Alignment
+                            Strategic Alignment
                         </div>
                         
                         <div class="info-banner mb-3">
@@ -418,7 +618,7 @@
 
                         <!-- Harmonization Framework -->
                         <div class="form-section-label">
-                            <i class="fa-solid fa-layer-group me-2"></i>Harmonization Framework
+                            Harmonization Framework
                         </div>
                         
                         <div class="info-banner mb-3">
@@ -451,72 +651,72 @@
 
                         <!-- Duration -->
                         <div class="form-section-label">
-                            <i class="fa-solid fa-calendar me-2"></i>Duration
+                            Duration
                         </div>
                         
                         <div class="row g-3 mb-4">
                             <div class="col-md-6">
-                                <label class="form-label"><i class="fa-solid fa-calendar-check me-1"></i>Start Date</label>
+                                <label class="form-label">Start Date</label>
                                 <input type="date" class="form-control" name="cross_start_date">
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label"><i class="fa-solid fa-calendar-times me-1"></i>End Date</label>
+                                <label class="form-label">End Date</label>
                                 <input type="date" class="form-control" name="cross_end_date">
                             </div>
                         </div>
 
                         <!-- Deliverables -->
                         <div class="form-section-label">
-                            <i class="fa-solid fa-tasks me-2"></i>Deliverables
+                            Deliverables
                         </div>
                         
                         <div class="row g-3 mb-4">
                             <div class="col-md-4">
-                                <label class="form-label"><i class="fa-solid fa-1 me-1"></i>Year 1 Deliverables</label>
+                                <label class="form-label">Year 1 Deliverables</label>
                                 <textarea class="form-control" name="cross_year1_deliverables" rows="3" placeholder="List Year 1 deliverables..."></textarea>
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label"><i class="fa-solid fa-2 me-1"></i>Year 2 Deliverables</label>
+                                <label class="form-label">Year 2 Deliverables</label>
                                 <textarea class="form-control" name="cross_year2_deliverables" rows="3" placeholder="List Year 2 deliverables..."></textarea>
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label"><i class="fa-solid fa-3 me-1"></i>Year 3 Deliverables</label>
+                                <label class="form-label">Year 3 Deliverables</label>
                                 <textarea class="form-control" name="cross_year3_deliverables" rows="3" placeholder="List Year 3 deliverables..."></textarea>
                             </div>
                         </div>
 
                         <!-- Agency Details -->
                         <div class="form-section-label">
-                            <i class="fa-solid fa-building me-2"></i>Agency Details
+                            Agency Details
                         </div>
                         
                         <div class="row g-3 mb-4">
                             <div class="col-md-6">
-                                <label class="form-label"><i class="fa-solid fa-flag me-1"></i>Lead Agency</label>
+                                <label class="form-label">Lead Agency</label>
                                 <input type="text" class="form-control" name="cross_lead_agency" placeholder="Enter the lead agency">
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label"><i class="fa-solid fa-building-user me-1"></i>Implementing Agency</label>
+                                <label class="form-label">Implementing Agency</label>
                                 <input type="text" class="form-control" name="cross_implementing_agency" placeholder="Enter the implementing agency">
                             </div>
                         </div>
 
                         <!-- Implementation Details -->
                         <div class="form-section-label">
-                            <i class="fa-solid fa-cogs me-2"></i>Implementation Details
+                            Implementation Details
                         </div>
                         
                         <div class="row g-3 mb-4">
                             <div class="col-md-6">
-                                <label class="form-label"><i class="fa-solid fa-users me-1"></i>Implementing Unit</label>
+                                <label class="form-label">Implementing Unit</label>
                                 <input type="text" class="form-control" name="cross_implementing_unit" placeholder="Enter the implementing unit">
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label"><i class="fa-solid fa-coins me-1"></i>Total Cost</label>
+                                <label class="form-label">Total Cost</label>
                                 <input type="text" class="form-control" name="cross_total_cost" placeholder="e.g., ₱5,000,000.00">
                             </div>
                             <div class="col-md-12">
-                                <label class="form-label"><i class="fa-solid fa-wallet me-1"></i>Funding Source</label>
+                                <label class="form-label">Funding Source</label>
                                 <select class="form-select" name="cross_funding_source">
                                     <option value="">Select funding source</option>
                                     <option value="national-budget">National Budget</option>
@@ -534,27 +734,29 @@
         </div>
     </div>
 
-    <!-- Action Buttons -->
+    <!-- Footer Actions -->
     <div class="row mb-4">
         <div class="col-12">
-            <div class="action-bar">
-                <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center">
-                    <div class="d-flex gap-2">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fa-solid fa-save me-2"></i>Save Progress
-                        </button>
-                        <a href="<?= site_url('employee/dashboard') ?>" class="btn btn-outline-secondary">
-                            <i class="fa-solid fa-house me-2"></i>Dashboard
-                        </a>
-                    </div>
-                    <div class="d-flex gap-2">
-                        <a href="<?= site_url('employee/proposed-ict-strategy/information-systems') ?>" class="btn btn-outline-secondary">
-                            <i class="fa-solid fa-arrow-left me-2"></i>Back: Information Systems
-                        </a>
-                        <a href="<?= site_url('employee/proposed-ict-strategy/performance-measurement') ?>" class="btn btn-success">
-                            Next: Performance Framework <i class="fa-solid fa-arrow-right ms-2"></i>
-                        </a>
-                    </div>
+            <div class="footer-actions">
+                <div class="action-buttons">
+                    <button type="button" class="action-btn action-btn-save" onclick="window.saveChanges()">
+                        <i class="fa-solid fa-save"></i>
+                        <span>Save Changes</span>
+                    </button>
+                    <button type="button" class="action-btn action-btn-clear" onclick="window.clearForm()">
+                        <i class="fa-solid fa-eraser"></i>
+                        <span>Clear Fields</span>
+                    </button>
+                </div>
+                <div class="navigation-buttons">
+                    <button type="button" class="nav-btn nav-btn-prev" onclick="window.navigateToPage('<?= site_url('employee/proposed-ict-strategy/information-systems') ?>')">
+                        <i class="fa-solid fa-arrow-left"></i>
+                        <span>Information Systems</span>
+                    </button>
+                    <button type="button" class="nav-btn nav-btn-next" onclick="window.navigateToPage('<?= site_url('employee/proposed-ict-strategy/performance-measurement') ?>')">
+                        <span>Performance Framework</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
                 </div>
             </div>
         </div>
@@ -580,6 +782,136 @@ document.querySelectorAll('.project-tab').forEach(tab => {
         document.getElementById(tabId).classList.add('active');
     });
 });
+
+// Tooltip functionality
+const helpIcons = document.querySelectorAll('.help-icon');
+
+helpIcons.forEach(icon => {
+    icon.addEventListener('mouseenter', function(e) {
+        const tooltipText = this.getAttribute('data-tooltip');
+        const tooltip = document.createElement('div');
+        tooltip.className = 'tooltip-content';
+        tooltip.textContent = tooltipText;
+        tooltip.id = 'active-tooltip';
+        document.body.appendChild(tooltip);
+        
+        const rect = this.getBoundingClientRect();
+        
+        // Position to the right of the icon
+        tooltip.style.left = (rect.right + 8) + 'px';
+        tooltip.style.top = rect.top + 'px';
+        
+        // Make it visible after positioning
+        requestAnimationFrame(() => {
+            tooltip.classList.add('visible');
+            // Adjust position if it goes off screen
+            const tooltipRect = tooltip.getBoundingClientRect();
+            if (tooltipRect.right > window.innerWidth) {
+                // Position to the left instead
+                tooltip.style.left = (rect.left - tooltipRect.width - 8) + 'px';
+            }
+            if (tooltipRect.bottom > window.innerHeight) {
+                tooltip.style.top = (window.innerHeight - tooltipRect.height - 10) + 'px';
+            }
+        });
+    });
+    
+    icon.addEventListener('mouseleave', function() {
+        const tooltip = document.getElementById('active-tooltip');
+        if (tooltip) {
+            tooltip.remove();
+        }
+    });
+});
+
+// Load saved data on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-save on input change
+    const allInputs = document.querySelectorAll('input, textarea, select');
+    allInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            window.saveChanges(false);
+        });
+    });
+
+    window.loadSavedData();
+});
+
+// Clear form function
+window.clearForm = function() {
+    console.log('clearForm called');
+    if (confirm('Are you sure you want to clear all fields? This action cannot be undone.')) {
+        const form = document.querySelector('form');
+        if (form) {
+            form.reset();
+            // Clear localStorage
+            localStorage.removeItem('ict-projects-form');
+            console.log('Form cleared');
+        }
+    }
+};
+
+// Save changes to localStorage
+window.saveChanges = function(showAlert = true) {
+    console.log('saveChanges called with showAlert:', showAlert);
+    const form = document.querySelector('form');
+    if (form) {
+        const formData = new FormData(form);
+        const formDataObj = {};
+        
+        formData.forEach((value, key) => {
+            formDataObj[key] = value;
+        });
+        
+        // Save to localStorage
+        localStorage.setItem('ict-projects-form', JSON.stringify(formDataObj));
+        console.log('Data saved to localStorage');
+        
+        // Show success message
+        if (showAlert) {
+            alert('Changes saved locally! You can continue working and your data will be preserved.');
+        }
+    }
+};
+
+// Load saved data from localStorage on page load
+window.loadSavedData = function() {
+    console.log('loadSavedData called');
+    const savedData = localStorage.getItem('ict-projects-form');
+    if (savedData) {
+        const formDataObj = JSON.parse(savedData);
+        const form = document.querySelector('form');
+        
+        if (form) {
+            Object.keys(formDataObj).forEach(key => {
+                const input = form.querySelector(`[name="${key}"]`);
+                if (input) {
+                    if (input.type === 'checkbox') {
+                        input.checked = formDataObj[key] === '1';
+                    } else if (input.type === 'radio') {
+                        const radio = form.querySelector(`[name="${key}"][value="${formDataObj[key]}"]`);
+                        if (radio) radio.checked = true;
+                    } else {
+                        input.value = formDataObj[key];
+                    }
+                }
+            });
+            console.log('Data loaded from localStorage');
+        }
+    }
+};
+
+// Navigate to page after saving
+window.navigateToPage = function(url) {
+    console.log('navigateToPage called with url:', url);
+    window.saveChanges(false);
+    setTimeout(() => {
+        // Verify data was saved before navigating
+        const savedData = localStorage.getItem('ict-projects-form');
+        console.log('Data in localStorage before navigation:', savedData ? 'exists' : 'empty');
+        window.location.href = url;
+    }, 500);
+};
 </script>
 
 <?= $this->endSection() ?>

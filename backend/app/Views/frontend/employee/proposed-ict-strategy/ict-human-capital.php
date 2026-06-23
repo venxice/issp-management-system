@@ -16,6 +16,10 @@
     color: #fff;
     padding: 14px 18px;
     border-bottom: 1px solid rgba(255,255,255,.1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
 }
 
 .section-header .section-title {
@@ -51,12 +55,16 @@
 }
 
 .form-section-label {
-    font-size: .85rem;
-    font-weight: 600;
+    font-size: .9rem;
+    font-weight: 700;
     color: var(--brand-dark);
-    margin-bottom: 8px;
+    margin-bottom: 0;
+    margin-top: 0;
     text-transform: uppercase;
-    letter-spacing: .02em;
+    letter-spacing: .01em;
+    padding-bottom: 8px;
+    padding-top: 8px;
+    flex: 1;
 }
 
 .form-label {
@@ -126,30 +134,34 @@
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
 }
 
 .staffing-table th {
     background: linear-gradient(135deg, #f8fafc 0%, #edf2f7 100%);
     color: var(--ink);
     font-weight: 700;
-    font-size: .82rem;
-    padding: 10px 12px;
+    font-size: .85rem;
+    padding: 12px 16px;
     border-bottom: 2px solid #d0dae6;
     text-transform: uppercase;
-    letter-spacing: .01em;
+    letter-spacing: .02em;
 }
 
 .staffing-table td {
-    padding: 10px 12px;
+    padding: 12px 16px;
     border-bottom: 1px solid #e8ecf1;
     vertical-align: middle;
+    background: white;
 }
 
 .staffing-table tr:last-child td {
     border-bottom: none;
 }
 
-.staffing-table tr:hover {
+.staffing-table tr:hover td {
     background: #f8fafc;
 }
 
@@ -169,18 +181,335 @@
     background: #f8fafc;
     color: var(--muted);
 }
+
+.staffing-table .delete-btn {
+    background: transparent;
+    color: #64748b;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    padding: 6px 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+}
+
+.staffing-table .delete-btn:hover {
+    background: #fee2e2;
+    color: #dc2626;
+    border-color: #fecaca;
+}
+
+.staffing-table .delete-btn:active {
+    transform: scale(0.95);
+}
+
+.total-row {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
+    border-top: 2px solid #cbd5e1;
+    font-weight: 700;
+    color: var(--ink);
+    font-size: 0.9rem;
+}
+
+.total-row td {
+    padding: 12px 16px;
+    border-bottom: none !important;
+    vertical-align: middle;
+}
+
+.total-row .total-label {
+    text-align: left;
+    color: var(--brand-dark);
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .01em;
+}
+
+.total-row .total-value {
+    text-align: center;
+    font-size: 0.78rem;
+    color: var(--ink);
+    font-weight: 600;
+    background: #f8fafc;
+    padding: 6px 10px;
+    border-radius: 4px;
+    border: 1px solid #d0dae6;
+    min-width: 60px;
+}
+
+.add-position-btn {
+    background: var(--brand);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 12px;
+    font-weight: 600;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+}
+
+.add-position-btn:hover {
+    background: var(--brand-dark);
+    transform: translateY(-1px);
+}
+
+.add-position-btn:active {
+    transform: translateY(0);
+}
+
+.add-position-btn i {
+    font-size: 0.75rem;
+}
+
+.help-icon {
+    position: relative;
+    cursor: pointer;
+    color: var(--brand);
+    margin-left: 8px;
+    font-size: 1rem;
+    transition: color 0.2s ease;
+}
+
+.help-icon:hover {
+    color: var(--brand-dark);
+}
+
+.tooltip-content {
+    position: fixed;
+    background: #1e293b;
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: .75rem;
+    font-weight: 400;
+    max-width: 300px;
+    white-space: normal;
+    width: max-content;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+    z-index: 9999;
+    pointer-events: none;
+}
+
+.tooltip-content.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.navigation-bar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+
+.navigation-bar.has-both {
+    justify-content: space-between;
+}
+
+.navigation-bar.align-right {
+    justify-content: flex-end;
+}
+
+.nav-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.8rem;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+    white-space: nowrap;
+}
+
+.nav-btn-prev {
+    background: white;
+    color: var(--brand);
+    border-color: #cbd5e1;
+}
+
+.nav-btn-prev:hover {
+    background: #f1f5f9;
+    border-color: var(--brand);
+    color: var(--brand-dark);
+}
+
+.nav-btn-next {
+    background: var(--brand);
+    color: white;
+    border-color: var(--brand);
+}
+
+.nav-btn-next:hover {
+    background: var(--brand-dark);
+    border-color: var(--brand-dark);
+}
+
+.nav-btn i {
+    font-size: 0.8rem;
+}
+
+@media (max-width: 768px) {
+    .navigation-bar {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .nav-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+.footer-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.action-btn i {
+    font-size: 0.875rem;
+}
+
+.action-btn-save {
+    background: var(--brand);
+    color: white;
+    border-color: var(--brand);
+}
+
+.action-btn-save:hover {
+    background: var(--brand-dark);
+    border-color: var(--brand-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(79, 101, 132, 0.2);
+}
+
+.action-btn-clear {
+    background: white;
+    color: #64748b;
+    border-color: #cbd5e1;
+}
+
+.action-btn-clear:hover {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+    color: #475569;
+    transform: translateY(-1px);
+}
+
+.navigation-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+@media (max-width: 768px) {
+    .footer-actions {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .action-buttons {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .action-btn {
+        flex: 1;
+        justify-content: center;
+    }
+
+    .navigation-buttons {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .nav-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+.summary-card{
+    background:#fff;
+    border:1px solid #dde4ed;
+    border-radius:8px;
+    padding:16px;
+    text-align:center;
+    box-shadow:0 2px 8px rgba(15,23,42,.05);
+    transition: all 0.2s ease;
+}
+
+.summary-card:hover{
+    box-shadow:0 4px 12px rgba(15,23,42,.1);
+    transform: translateY(-2px);
+}
+
+.summary-card h3{
+    margin:0;
+    font-size:2rem;
+    font-weight:700;
+    color:var(--brand);
+    line-height: 1.2;
+}
+
+.summary-card p{
+    margin:6px 0 0;
+    font-size:.75rem;
+    color:var(--muted);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
 </style>
 
 <div class="row">
     <div class="col-12">
         <div class="page-header mb-3">
-            <h1 class="page-title">C. Proposed ICT Human Capital</h1>
-            <p class="page-subtitle">Agency's proposed ICT human capital to support operations and project implementations</p>
+            <h1 class="page-title">ICT Human Capital</h1>
+            <p class="page-subtitle">Human capital and staffing requirements</p>
         </div>
         
         <div class="info-banner">
             <i class="fa-solid fa-info-circle"></i>
-            Please provide information about your agency's proposed ICT human capital to effectively support your agency's day-to-day operations and proposed ICT project implementations.
+            Please provide information about your proposed ICT human capital to effectively support your agency's day-to-day operations and proposed ICT project implementations.
         </div>
     </div>
 </div>
@@ -188,166 +517,147 @@
 <form action="<?= site_url('employee/proposed-ict-strategy/ict-human-capital/save') ?>" method="post" enctype="multipart/form-data">
     <?= csrf_field() ?>
 
-    <!-- Current ICT Workforce -->
-    <div class="row mb-3">
-        <div class="col-12">
-            <div class="section-card">
-                <div class="section-header">
-                    <h5 class="section-title">C.i Current ICT Workforce</h5>
-                    <p class="section-subtitle">Existing personnel structure and distribution</p>
-                </div>
-                <div class="section-body">
-                    <div class="form-section-label">
-                        <i class="fa-solid fa-users me-2"></i>Personnel Summary
-                    </div>
-                    
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <label class="form-label"><i class="fa-solid fa-user-group me-1"></i>Total ICT Personnel</label>
-                            <input type="number" class="form-control" name="total_ict_personnel" placeholder="0">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label"><i class="fa-solid fa-user-tie me-1"></i>Permanent Staff</label>
-                            <input type="number" class="form-control" name="permanent_staff" placeholder="0">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label"><i class="fa-solid fa-user-clock me-1"></i>Contractual/Job Order</label>
-                            <input type="number" class="form-control" name="contractual_staff" placeholder="0">
-                        </div>
-                        <div class="col-md-12">
-                            <label class="form-label"><i class="fa-solid fa-align-left me-1"></i>Current ICT Workforce Description</label>
-                            <textarea class="form-control" name="current_workforce_desc" rows="4" placeholder="Describe the current ICT workforce structure and distribution..."></textarea>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Proposed ICT Workforce -->
-    <div class="row mb-3">
-        <div class="col-12">
-            <div class="section-card">
-                <div class="section-header">
-                    <h5 class="section-title">C.ii Proposed ICT Workforce</h5>
-                    <p class="section-subtitle">Target personnel and expansion plans</p>
-                </div>
-                <div class="section-body">
-                    <div class="form-section-label">
-                        <i class="fa-solid fa-user-plus me-2"></i>Workforce Expansion
-                    </div>
-                    
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <label class="form-label"><i class="fa-solid fa-bullseye me-1"></i>Target ICT Personnel</label>
-                            <input type="number" class="form-control" name="target_ict_personnel" placeholder="0">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label"><i class="fa-solid fa-user-plus me-1"></i>Additional Permanent Staff</label>
-                            <input type="number" class="form-control" name="additional_permanent" placeholder="0">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label"><i class="fa-solid fa-user-clock me-1"></i>Additional Contractual</label>
-                            <input type="number" class="form-control" name="additional_contractual" placeholder="0">
-                        </div>
-                        <div class="col-md-12">
-                            <label class="form-label"><i class="fa-solid fa-rocket me-1"></i>Workforce Expansion Plan</label>
-                            <textarea class="form-control" name="workforce_expansion" rows="4" placeholder="Describe the plan for expanding the ICT workforce..."></textarea>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- Staffing by Position/Role -->
     <div class="row mb-3">
         <div class="col-12">
             <div class="section-card">
                 <div class="section-header">
-                    <h5 class="section-title">C.iii Staffing by Position/Role</h5>
-                    <p class="section-subtitle">Detailed breakdown of personnel requirements</p>
+                    <div>
+                        <h5 class="section-title">C. Proposed ICT Human Capital</h5>
+                        <p class="section-subtitle">Detailed breakdown of personnel requirements</p>
+                    </div>
+                    <i class="fa-solid fa-circle-question help-icon" 
+                       data-tooltip="Provide detailed breakdown of personnel requirements by position/role."></i>
                 </div>
                 <div class="section-body">
+                <div class="d-flex justify-content-between align-items-center mb-4">
                     <div class="form-section-label">
-                        <i class="fa-solid fa-table me-2"></i>Position Requirements
+                        Proposed ICT Human Capital
                     </div>
-                    
+                    <button type="button" class="add-position-btn" onclick="addPositionRow()">
+                        <i class="fa-solid fa-plus"></i>
+                        Add Position
+                    </button>
+                </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-3">
+                            <div class="summary-card">
+                                <h3 id="totalPositions">0</h3>
+                                <p>Total Positions</p>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="summary-card">
+                                <h3 id="totalPlantilla">0</h3>
+                                <p>Plantilla</p>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="summary-card">
+                                <h3 id="totalContractual">0</h3>
+                                <p>Contractual</p>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="summary-card">
+                                <h3 id="totalOutsourced">0</h3>
+                                <p>Outsourced (JO, COS, and HTC)</p>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="table-responsive">
-                        <table class="staffing-table">
+                        <table class="staffing-table" id="humanCapitalTable">
                             <thead>
                                 <tr>
-                                    <th style="width: 25%;">Position/Role</th>
-                                    <th style="width: 15%; text-align: center;">Current Count</th>
-                                    <th style="width: 15%; text-align: center;">Proposed Count</th>
-                                    <th style="width: 10%; text-align: center;">Gap</th>
-                                    <th style="width: 35%;">Justification</th>
+                                    <th style="width:45%">Position / Designation</th>
+                                    <th style="width:25%">Employment Status</th>
+                                    <th style="width:20%;text-align:center;">No. of Positions</th>
+                                    <th style="width:10%;text-align:center;">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
+
                                 <tr>
-                                    <td><input type="text" class="form-control form-control-sm" name="position_1" value="ICT Director/Head"></td>
-                                    <td><input type="number" class="form-control form-control-sm" name="current_1"></td>
-                                    <td><input type="number" class="form-control form-control-sm" name="proposed_1"></td>
-                                    <td><input type="number" class="form-control form-control-sm" name="gap_1" readonly></td>
-                                    <td><input type="text" class="form-control form-control-sm" name="justification_1"></td>
+                                    <td><input type="text" class="form-control form-control-sm" name="position_1" value="Information Technology Officer III"></td>
+                                    <td>
+                                        <select class="form-select form-select-sm employment-status" name="status_1">
+                                            <option value="PLANTILLA">Plantilla</option>
+                                            <option value="CONTRACTUAL">Contractual</option>
+                                            <option value="OUTSOURCED">Outsourced</option>
+                                        </select>
+                                    </td>
+                                    <td><input type="number" class="form-control form-control-sm position-count" name="count_1"></td>
+                                    <td class="text-center">
+                                        <button type="button" class="delete-btn" onclick="deleteRow(this)">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    </td>
                                 </tr>
+
                                 <tr>
-                                    <td><input type="text" class="form-control form-control-sm" name="position_2" value="Network Administrator"></td>
-                                    <td><input type="number" class="form-control form-control-sm" name="current_2"></td>
-                                    <td><input type="number" class="form-control form-control-sm" name="proposed_2"></td>
-                                    <td><input type="number" class="form-control form-control-sm" name="gap_2" readonly></td>
-                                    <td><input type="text" class="form-control form-control-sm" name="justification_2"></td>
+                                    <td><input type="text" class="form-control form-control-sm" name="position_2" value="Information Technology Officer II"></td>
+                                    <td>
+                                        <select class="form-select form-select-sm employment-status" name="status_2">
+                                            <option value="PLANTILLA">Plantilla</option>
+                                            <option value="CONTRACTUAL">Contractual</option>
+                                            <option value="OUTSOURCED">Outsourced</option>
+                                        </select>
+                                    </td>
+                                    <td><input type="number" class="form-control form-control-sm position-count" name="count_2"></td>
+                                    <td class="text-center">
+                                        <button type="button" class="delete-btn" onclick="deleteRow(this)">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    </td>
                                 </tr>
+
                                 <tr>
-                                    <td><input type="text" class="form-control form-control-sm" name="position_3" value="Systems Administrator"></td>
-                                    <td><input type="number" class="form-control form-control-sm" name="current_3"></td>
-                                    <td><input type="number" class="form-control form-control-sm" name="proposed_3"></td>
-                                    <td><input type="number" class="form-control form-control-sm" name="gap_3" readonly></td>
-                                    <td><input type="text" class="form-control form-control-sm" name="justification_3"></td>
+                                    <td><input type="text" class="form-control form-control-sm" name="position_3" value="Information Technology Officer I"></td>
+                                    <td>
+                                        <select class="form-select form-select-sm employment-status" name="status_3">
+                                            <option value="PLANTILLA">Plantilla</option>
+                                            <option value="CONTRACTUAL">Contractual</option>
+                                            <option value="OUTSOURCED">Outsourced</option>
+                                        </select>
+                                    </td>
+                                    <td><input type="number" class="form-control form-control-sm position-count" name="count_3"></td>
+                                    <td class="text-center">
+                                        <button type="button" class="delete-btn" onclick="deleteRow(this)">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    </td>
                                 </tr>
+
                                 <tr>
-                                    <td><input type="text" class="form-control form-control-sm" name="position_4" value="Database Administrator"></td>
-                                    <td><input type="number" class="form-control form-control-sm" name="current_4"></td>
-                                    <td><input type="number" class="form-control form-control-sm" name="proposed_4"></td>
-                                    <td><input type="number" class="form-control form-control-sm" name="gap_4" readonly></td>
-                                    <td><input type="text" class="form-control form-control-sm" name="justification_4"></td>
+                                    <td><input type="text" class="form-control form-control-sm" name="position_4" placeholder="Job Order"></td>
+                                    <td>
+                                        <select class="form-select form-select-sm employment-status" name="status_4">
+                                            <option value="CONTRACTUAL">Contractual</option>
+                                            <option value="PLANTILLA">Plantilla</option>
+                                            <option value="OUTSOURCED">Outsourced</option>
+                                        </select>
+                                    </td>
+                                    <td><input type="number" class="form-control form-control-sm position-count" name="count_4"></td>
+                                    <td class="text-center">
+                                        <button type="button" class="delete-btn" onclick="deleteRow(this)">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    </td>
                                 </tr>
-                                <tr>
-                                    <td><input type="text" class="form-control form-control-sm" name="position_5" value="Software Developer"></td>
-                                    <td><input type="number" class="form-control form-control-sm" name="current_5"></td>
-                                    <td><input type="number" class="form-control form-control-sm" name="proposed_5"></td>
-                                    <td><input type="number" class="form-control form-control-sm" name="gap_5" readonly></td>
-                                    <td><input type="text" class="form-control form-control-sm" name="justification_5"></td>
+
+                                <tr id="total-row" class="total-row">
+                                    <td class="total-label">Total</td>
+                                    <td></td>
+                                    <td id="total-count" class="total-value">0</td>
+                                    <td></td>
                                 </tr>
-                                <tr>
-                                    <td><input type="text" class="form-control form-control-sm" name="position_6" value="ICT Support Staff"></td>
-                                    <td><input type="number" class="form-control form-control-sm" name="current_6"></td>
-                                    <td><input type="number" class="form-control form-control-sm" name="proposed_6"></td>
-                                    <td><input type="number" class="form-control form-control-sm" name="gap_6" readonly></td>
-                                    <td><input type="text" class="form-control form-control-sm" name="justification_6"></td>
-                                </tr>
-                                <tr>
-                                    <td><input type="text" class="form-control form-control-sm" name="position_7" value="Cybersecurity Specialist"></td>
-                                    <td><input type="number" class="form-control form-control-sm" name="current_7"></td>
-                                    <td><input type="number" class="form-control form-control-sm" name="proposed_7"></td>
-                                    <td><input type="number" class="form-control form-control-sm" name="gap_7" readonly></td>
-                                    <td><input type="text" class="form-control form-control-sm" name="justification_7"></td>
-                                </tr>
-                                <tr>
-                                    <td><input type="text" class="form-control form-control-sm" name="position_8" value="Data Analyst"></td>
-                                    <td><input type="number" class="form-control form-control-sm" name="current_8"></td>
-                                    <td><input type="number" class="form-control form-control-sm" name="proposed_8"></td>
-                                    <td><input type="number" class="form-control form-control-sm" name="gap_8" readonly></td>
-                                    <td><input type="text" class="form-control form-control-sm" name="justification_8"></td>
-                                </tr>
-                                <tr>
-                                    <td><input type="text" class="form-control form-control-sm" name="position_other" placeholder="Other positions"></td>
-                                    <td><input type="number" class="form-control form-control-sm" name="current_other"></td>
-                                    <td><input type="number" class="form-control form-control-sm" name="proposed_other"></td>
-                                    <td><input type="number" class="form-control form-control-sm" name="gap_other" readonly></td>
-                                    <td><input type="text" class="form-control form-control-sm" name="justification_other"></td>
-                                </tr>
+
                             </tbody>
                         </table>
                     </div>
@@ -356,118 +666,29 @@
         </div>
     </div>
 
-    <!-- Training and Development -->
-    <div class="row mb-3">
-        <div class="col-12">
-            <div class="section-card">
-                <div class="section-header">
-                    <h5 class="section-title">C.iv Training and Development Plan</h5>
-                    <p class="section-subtitle">Capacity building and skill enhancement strategies</p>
-                </div>
-                <div class="section-body">
-                    <div class="form-section-label">
-                        <i class="fa-solid fa-graduation-cap me-2"></i>Learning & Development
-                    </div>
-                    
-                    <div class="row g-3">
-                        <div class="col-md-12">
-                            <label class="form-label"><i class="fa-solid fa-clipboard-check me-1"></i>Training Needs Assessment</label>
-                            <textarea class="form-control" name="training_needs" rows="4" placeholder="Identify training needs for ICT workforce..."></textarea>
-                        </div>
-                        <div class="col-md-12">
-                            <label class="form-label"><i class="fa-solid fa-book me-1"></i>Proposed Training Programs</label>
-                            <textarea class="form-control" name="training_programs" rows="4" placeholder="List proposed training programs and certifications..."></textarea>
-                        </div>
-                        <div class="col-md-12">
-                            <label class="form-label"><i class="fa-solid fa-chart-line me-1"></i>Capacity Building Strategy</label>
-                            <textarea class="form-control" name="capacity_building" rows="4" placeholder="Describe strategies for building ICT workforce capacity..."></textarea>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Recruitment and Retention -->
-    <div class="row mb-3">
-        <div class="col-12">
-            <div class="section-card">
-                <div class="section-header">
-                    <h5 class="section-title">C.v Recruitment and Retention Strategy</h5>
-                    <p class="section-subtitle">Talent acquisition and retention approaches</p>
-                </div>
-                <div class="section-body">
-                    <div class="form-section-label">
-                        <i class="fa-solid fa-handshake me-2"></i>Talent Management
-                    </div>
-                    
-                    <div class="row g-3">
-                        <div class="col-md-12">
-                            <label class="form-label"><i class="fa-solid fa-user-plus me-1"></i>Recruitment Plan</label>
-                            <textarea class="form-control" name="recruitment_plan" rows="4" placeholder="Describe strategies for recruiting qualified ICT personnel..."></textarea>
-                        </div>
-                        <div class="col-md-12">
-                            <label class="form-label"><i class="fa-solid fa-heart me-1"></i>Retention Strategies</label>
-                            <textarea class="form-control" name="retention_strategies" rows="4" placeholder="Describe strategies for retaining skilled ICT workforce..."></textarea>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Organizational Structure -->
-    <div class="row mb-3">
-        <div class="col-12">
-            <div class="section-card">
-                <div class="section-header">
-                    <h5 class="section-title">C.vi Organizational Structure</h5>
-                    <p class="section-subtitle">Proposed ICT organizational hierarchy and chart</p>
-                </div>
-                <div class="section-body">
-                    <div class="form-section-label">
-                        <i class="fa-solid fa-sitemap me-2"></i>Organization Design
-                    </div>
-                    
-                    <div class="row g-3">
-                        <div class="col-md-12">
-                            <div class="file-upload-area">
-                                <i class="fa-solid fa-cloud-arrow-up"></i>
-                                <p>Upload the proposed ICT organizational structure chart</p>
-                                <input type="file" class="form-control mt-2" name="org_chart" accept="image/*,.pdf">
-                            </div>
-                        </div>
-                        <div class="col-md-12">
-                            <label class="form-label"><i class="fa-solid fa-align-left me-1"></i>Structure Description</label>
-                            <textarea class="form-control" name="org_structure_desc" rows="4" placeholder="Describe the proposed ICT organizational structure..."></textarea>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Action Buttons -->
+    <!-- Footer Actions -->
     <div class="row mb-4">
         <div class="col-12">
-            <div class="action-bar">
-                <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center">
-                    <div class="d-flex gap-2">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fa-solid fa-save me-2"></i>Save Progress
-                        </button>
-                        <a href="<?= site_url('employee/dashboard') ?>" class="btn btn-outline-secondary">
-                            <i class="fa-solid fa-house me-2"></i>Dashboard
-                        </a>
-                    </div>
-                    <div class="d-flex gap-2">
-                        <a href="<?= site_url('employee/proposed-ict-strategy/enterprise-architecture') ?>" class="btn btn-outline-secondary">
-                            <i class="fa-solid fa-arrow-left me-2"></i>Back: Enterprise Architecture
-                        </a>
-                        <a href="<?= site_url('employee/dashboard') ?>" class="btn btn-success">
-                            Complete Strategy <i class="fa-solid fa-check ms-2"></i>
-                        </a>
-                    </div>
+            <div class="footer-actions">
+                <div class="action-buttons">
+                    <button type="button" class="action-btn action-btn-save" onclick="window.saveChanges()">
+                        <i class="fa-solid fa-save"></i>
+                        <span>Save Changes</span>
+                    </button>
+                    <button type="button" class="action-btn action-btn-clear" onclick="window.clearForm()">
+                        <i class="fa-solid fa-eraser"></i>
+                        <span>Clear Fields</span>
+                    </button>
+                </div>
+                <div class="navigation-buttons">
+                    <button type="button" class="nav-btn nav-btn-prev" onclick="window.navigateToPage('<?= site_url('employee/proposed-ict-strategy/enterprise-architecture') ?>')">
+                        <i class="fa-solid fa-arrow-left"></i>
+                        <span>Enterprise Architecture</span>
+                    </button>
+                    <button type="button" class="nav-btn nav-btn-next" onclick="window.navigateToPage('<?= site_url('employee/proposed-ict-strategy/information-systems') ?>')">
+                        <span>Information Systems</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
                 </div>
             </div>
         </div>
@@ -478,28 +699,217 @@
 
 <?= $this->section('scripts') ?>
 <script>
-// Auto-calculate gap fields
-document.addEventListener('DOMContentLoaded', function() {
-    const table = document.querySelector('.staffing-table');
-    if (table) {
-        const rows = table.querySelectorAll('tbody tr');
-        rows.forEach(row => {
-            const currentInput = row.querySelector('input[name^="current_"]');
-            const proposedInput = row.querySelector('input[name^="proposed_"]');
-            const gapInput = row.querySelector('input[name^="gap_"]');
-            
-            if (currentInput && proposedInput && gapInput) {
-                const calculateGap = function() {
-                    const current = parseInt(currentInput.value) || 0;
-                    const proposed = parseInt(proposedInput.value) || 0;
-                    gapInput.value = proposed - current;
-                };
-                
-                currentInput.addEventListener('input', calculateGap);
-                proposedInput.addEventListener('input', calculateGap);
+function updateTotals() {
+    let plantilla = 0;
+    let contractual = 0;
+    let outsourced = 0;
+    let total = 0;
+
+    document.querySelectorAll('.employment-status').forEach((statusField) => {
+        const row = statusField.closest('tr');
+        const countField = row.querySelector('.position-count');
+        const count = parseInt(countField?.value) || 0;
+        total += count;
+
+        if(statusField.value === 'PLANTILLA'){
+            plantilla += count;
+        }
+
+        if(statusField.value === 'CONTRACTUAL'){
+            contractual += count;
+        }
+
+        if(statusField.value === 'OUTSOURCED'){
+            outsourced += count;
+        }
+    });
+    
+    document.getElementById('totalPositions').textContent = total;
+    document.getElementById('totalPlantilla').textContent = plantilla;
+    document.getElementById('totalContractual').textContent = contractual;
+    document.getElementById('totalOutsourced').textContent = outsourced;
+    document.getElementById('total-count').textContent = total;
+}
+document.addEventListener('input', updateTotals);
+document.addEventListener('change', updateTotals);
+function addPositionRow() {
+    const totalRow = document.getElementById('total-row');
+    const row = document.createElement('tr');
+    row.innerHTML = `
+        <td>
+            <input type="text" class="form-control form-control-sm">
+        </td>
+        <td>
+            <select class="form-select form-select-sm employment-status">
+                <option value="">Select</option>
+                <option value="PLANTILLA">Plantilla</option>
+                <option value="CONTRACTUAL">Contractual</option>
+                <option value="OUTSOURCED">Outsourced</option>
+            </select>
+        </td>
+        <td>
+            <input type="number" class="form-control form-control-sm position-count">
+        </td>
+        <td class="text-center">
+            <button type="button" class="delete-btn" onclick="deleteRow(this)">
+                <i class="fa-solid fa-trash"></i>
+            </button>
+        </td>
+    `;
+    totalRow.parentNode.insertBefore(row, totalRow);
+    updateTotals();
+}
+
+function deleteRow(button) {
+    const row = button.closest('tr');
+    const tbody = row.closest('tbody');
+    const dataRows = tbody.querySelectorAll('tr:not(#total-row)');
+    
+    if (dataRows.length > 1) {
+        row.remove();
+        updateTotals();
+    } else {
+        alert('You must have at least one row in the table.');
+    }
+}
+
+// Tooltip functionality
+const helpIcons = document.querySelectorAll('.help-icon');
+
+helpIcons.forEach(icon => {
+    icon.addEventListener('mouseenter', function(e) {
+        const tooltipText = this.getAttribute('data-tooltip');
+        const tooltip = document.createElement('div');
+        tooltip.className = 'tooltip-content';
+        tooltip.textContent = tooltipText;
+        tooltip.id = 'active-tooltip';
+        document.body.appendChild(tooltip);
+        
+        const rect = this.getBoundingClientRect();
+        
+        // Position to the right of the icon
+        tooltip.style.left = (rect.right + 8) + 'px';
+        tooltip.style.top = rect.top + 'px';
+        
+        // Make it visible after positioning
+        requestAnimationFrame(() => {
+            tooltip.classList.add('visible');
+            // Adjust position if it goes off screen
+            const tooltipRect = tooltip.getBoundingClientRect();
+            if (tooltipRect.right > window.innerWidth) {
+                // Position to the left instead
+                tooltip.style.left = (rect.left - tooltipRect.width - 8) + 'px';
+            }
+            if (tooltipRect.bottom > window.innerHeight) {
+                tooltip.style.top = (window.innerHeight - tooltipRect.height - 10) + 'px';
             }
         });
-    }
+    });
+    
+    icon.addEventListener('mouseleave', function() {
+        const tooltip = document.getElementById('active-tooltip');
+        if (tooltip) {
+            tooltip.remove();
+        }
+    });
+
+    // Auto-save on input change
+    const allInputs = document.querySelectorAll('input, textarea, select');
+    allInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            window.saveChanges(false);
+        });
+    });
+
+    // Load saved data on page load
+    window.loadSavedData();
 });
+
+// Clear form function
+window.clearForm = function() {
+    console.log('clearForm called');
+    try {
+        if (confirm('Are you sure you want to clear all fields? This action cannot be undone.')) {
+            const form = document.querySelector('form');
+            if (form) {
+                form.reset();
+                // Clear localStorage
+                localStorage.removeItem('ict-human-capital-form');
+                console.log('Form cleared');
+                alert('Form has been cleared successfully.');
+            } else {
+                console.error('Form not found');
+                alert('Error: Form not found');
+            }
+        }
+    } catch (error) {
+        console.error('Error in clearForm:', error);
+        alert('Error clearing form: ' + error.message);
+    }
+};
+
+// Save changes to localStorage
+window.saveChanges = function(showAlert = true) {
+    console.log('saveChanges called with showAlert:', showAlert);
+    const form = document.querySelector('form');
+    if (form) {
+        const formData = new FormData(form);
+        const formDataObj = {};
+        
+        formData.forEach((value, key) => {
+            formDataObj[key] = value;
+        });
+        
+        // Save to localStorage
+        localStorage.setItem('ict-human-capital-form', JSON.stringify(formDataObj));
+        console.log('Data saved to localStorage');
+        
+        // Show success message
+        if (showAlert) {
+            alert('Changes saved locally! You can continue working and your data will be preserved.');
+        }
+    }
+};
+
+// Load saved data from localStorage on page load
+window.loadSavedData = function() {
+    console.log('loadSavedData called');
+    const savedData = localStorage.getItem('ict-human-capital-form');
+    if (savedData) {
+        const formDataObj = JSON.parse(savedData);
+        const form = document.querySelector('form');
+        
+        if (form) {
+            Object.keys(formDataObj).forEach(key => {
+                const input = form.querySelector(`[name="${key}"]`);
+                if (input) {
+                    if (input.type === 'checkbox') {
+                        input.checked = formDataObj[key] === '1';
+                    } else if (input.type === 'radio') {
+                        const radio = form.querySelector(`[name="${key}"][value="${formDataObj[key]}"]`);
+                        if (radio) radio.checked = true;
+                    } else {
+                        input.value = formDataObj[key];
+                    }
+                }
+            });
+            console.log('Data loaded from localStorage');
+            updateTotals();
+        }
+    }
+};
+
+// Navigate to page after saving
+window.navigateToPage = function(url) {
+    console.log('navigateToPage called with url:', url);
+    window.saveChanges(false);
+    setTimeout(() => {
+        // Verify data was saved before navigating
+        const savedData = localStorage.getItem('ict-human-capital-form');
+        console.log('Data in localStorage before navigation:', savedData ? 'exists' : 'empty');
+        window.location.href = url;
+    }, 500);
+};
 </script>
+
 <?= $this->endSection() ?>

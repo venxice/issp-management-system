@@ -230,37 +230,6 @@ $isIsspPage = strpos($currentPage, 'proposed-ict-strategy') !== false ||
     <span class="status-indicator not-started"></span> Object of Expenditure
 </a>
 
-<div class="sidebar-section-title">Annex 1: ICT Asset Inventory</div>
-
-<a class="nav-link <?= $active === 'ict-equipment-inventory' ? 'active' : '' ?>" href="<?= site_url('employee/annex1/ict-equipment-inventory') ?>">
-    <span class="status-indicator not-started"></span> ICT Equipment Inventory
-</a>
-
-<a class="nav-link <?= $active === 'ict-software-inventory' ? 'active' : '' ?>" href="<?= site_url('employee/annex1/ict-software-inventory') ?>">
-    <span class="status-indicator not-started"></span> ICT Software Inventory
-</a>
-
-<div class="sidebar-section-title">Annex 2: DRBCP</div>
-
-<a class="nav-link <?= $active === 'dr-governance' ? 'active' : '' ?>" href="<?= site_url('employee/annex2/dr-governance') ?>">
-    <span class="status-indicator not-started"></span> Plan Governance
-</a>
-
-<a class="nav-link <?= $active === 'ict-component-inventory' ? 'active' : '' ?>" href="<?= site_url('employee/annex2/ict-component-inventory') ?>">
-    <span class="status-indicator not-started"></span> ICT Component Inventory
-</a>
-
-<a class="nav-link <?= $active === 'recovery-strategies' ? 'active' : '' ?>" href="<?= site_url('employee/annex2/recovery-strategies') ?>">
-    <span class="status-indicator not-started"></span> Recovery Strategies
-</a>
-
-<a class="nav-link <?= $active === 'operational-procedures' ? 'active' : '' ?>" href="<?= site_url('employee/annex2/operational-procedures') ?>">
-    <span class="status-indicator not-started"></span> Operational Procedures
-</a>
-
-<a class="nav-link <?= $active === 'compliance-kpis' ? 'active' : '' ?>" href="<?= site_url('employee/annex2/compliance-kpis') ?>">
-    <span class="status-indicator not-started"></span> Compliance & KPIs
-</a>
 
 <div class="sidebar-footer-submit mt-3">
     <button type="button" class="save-draft-btn mb-2" id="saveDraftBtn" onclick="saveDraft()">
