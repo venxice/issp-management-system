@@ -83,7 +83,7 @@ $routes->group('ict-planner', ['filter' => 'role:ict_planner'], static function 
     $routes->get('dashboard', 'IctPlanner\DashboardController::index');
 
     // Resource Requirements Routes
-    $routes->group(resource-requirements, static function (RouteCollection $routes): void 
+    $routes->group(resource-requirements, static function (RouteCollection $routes)): void 
     // Main Page 
     $routes->get('/', 'IctPlanner\ResourceRequirementsController::index');
 
@@ -111,7 +111,7 @@ $routes->group('ict-planner', ['filter' => 'role:ict_planner'], static function 
     // Approval Workflow
     $routes->get('submit/(:num)', 'IctPlanner\ResourceRequirementsController::submitForApproval/$1');
     });
-});
+  });  
 
 $routes->group('director-general', ['filter' => 'role:director_general'], static function (RouteCollection $routes): void {
     $routes->get('dashboard', 'DashboardController::index');
