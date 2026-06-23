@@ -235,46 +235,27 @@ document.addEventListener('DOMContentLoaded', () => {
             dateFormat: 'Y-m-d',
             position: 'auto',
             static: false,
-            appendTo: document.body,
-            onOpen: function(selectedDates, dateStr, instance) {
-                // Center the calendar in the viewport and keep it within content area
-                const calendar = instance.calendarContainer;
-                
-                // Get the main content area or app-main for boundaries
-                const mainContent = document.querySelector('.app-main') || document.querySelector('.content-wrap') || document.body;
-                const mainRect = mainContent.getBoundingClientRect();
-                
-                // Get the topbar/header height
-                const topbar = document.querySelector('.topbar') || document.querySelector('header');
-                const topbarHeight = topbar ? topbar.offsetHeight : 0;
-                
-                // Center horizontally within the main content area
-                const calendarWidth = calendar.offsetWidth;
-                const centerX = mainRect.left + (mainRect.width / 2) - (calendarWidth / 2);
-                
-                // Position vertically below the topbar but within viewport
-                const calendarHeight = calendar.offsetHeight;
-                const topPosition = topbarHeight + 20;
-                
-                // Apply centered positioning
-                calendar.style.position = 'fixed';
-                calendar.style.left = centerX + 'px';
-                calendar.style.top = topPosition + 'px';
-                calendar.style.zIndex = '9999';
-            },
+            // Target the icon button wrapper so the calendar appears right under it
+            positionElement: datePickerToggleBtn, 
             onChange: function(selectedDates, dateStr, instance) {
+                // Automatically submit the filter form once both Start and End dates are selected
                 if (selectedDates.length === 2) {
                     form.submit();
                 }
             }
         });
 
-        // Make the calendar icon button open the picker
+        // Toggle button logic: Opens if closed, closes if clicked again while open
         if (datePickerToggleBtn && fp) {
             datePickerToggleBtn.addEventListener('click', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
-                fp.open();
+                
+                if (fp.isOpen) {
+                    fp.close();
+                } else {
+                    fp.open();
+                }
             });
         }
     }
