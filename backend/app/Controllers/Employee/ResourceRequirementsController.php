@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controllers\IctPlanner;
+namespace App\Controllers\Employee;
 
 use App\Controllers\BaseController;
 use App\Models\UserModel;
@@ -22,7 +22,7 @@ class ResourceRequirementsController extends BaseController
 
     public function index()
     {
-            return view('ict_planner/resource_requirements/index', [
+            return view('employee/resource_requirements/index', [
                 'title' => 'Resource Requirements',
                 'active' => 'resource-requirements',
             ]);
@@ -38,7 +38,7 @@ class ResourceRequirementsController extends BaseController
         $data['year'] = 1;
         $data['title'] = 'A.1 Year 1 Resource Requirements'
 
-        return view('ict_planner/resource_requirements/year', $data);
+        return view('employee/resource_requirements/year', $data);
     }
 
     // YEAR 2 TABLE (A.2)
@@ -51,7 +51,7 @@ class ResourceRequirementsController extends BaseController
         $data['year'] = 2;
         $data['title'] = 'A.2 Year 2 Resource Requirements'
 
-        return view('ict_planner/resource_requirements/year', $data);
+        return view('employee/resource_requirements/year', $data);
     }
 
  // YEAR 3 TABLE (A.3)
@@ -64,7 +64,7 @@ class ResourceRequirementsController extends BaseController
         $data['year'] = 3;
         $data['title'] = 'A.3 Year 3 Resource Requirements'
 
-        return view('ict_planner/resource_requirements/year', $data);
+        return view('employee/resource_requirements/year', $data);
     }
 
     // SUMMARY OF INVESTMENTS

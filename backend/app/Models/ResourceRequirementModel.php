@@ -4,7 +4,7 @@ namespace App\Models;
 
 use CodeIgniter\Model;
 
-class ISspRecordModel extends Model
+class ResourceRequirementModel extends Model
 {
     protected $table = 'resource_requirements';
     protected $primaryKey = 'id';
