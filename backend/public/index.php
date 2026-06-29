@@ -51,6 +51,8 @@ if (getcwd() . DIRECTORY_SEPARATOR !== FCPATH) {
 require FCPATH . '../app/Config/Paths.php';
 // ^^^ Change this line if you move your application folder
 
+date_default_timezone_set('Asia/Manila');
+
 $paths = new Paths();
 
 // LOAD THE FRAMEWORK BOOTSTRAP FILE

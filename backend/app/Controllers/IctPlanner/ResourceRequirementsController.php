@@ -4,6 +4,7 @@ namespace App\Controllers\IctPlanner;
 
 use App\Controllers\BaseController;
 use App\Models\UserModel;
+use App\Models\AuditLogModel;
 
 class ResourceRequirementsController extends BaseController
 {
@@ -83,10 +84,10 @@ class ResourceRequirementsController extends BaseController
     }
 
     // Save
-    public functon store()
+    public function store()
     {
-        $qty = $this->request->getPost('quantity')
-        $unitCost = $this->request->getPost('unit_cost')
+        $qty = $this->request->getPost('quantity');
+        $unitCost = $this->request->getPost('unit_cost');
 
         $this->resourceModel->save([
             'year' => $this->request->getPost('year'),
@@ -104,7 +105,9 @@ class ResourceRequirementsController extends BaseController
             'description' => $this->request->getPost('description'),
             'created_by' => session()->get('user_id'),
             'status' => 'Draft'
-        ])
+        ]);
+        
+        $this->writeLog('resource.created', 'Created resource requirement: ' . ($this->request->getPost('item_name') ?? ''));
         
         return redirect()->back()->with('success', 'Saved successfully.');
     }
@@ -113,6 +116,8 @@ class ResourceRequirementsController extends BaseController
     public function delete($id)
     {
        $this->resourceModel->delete($id);
+       
+       $this->writeLog('resource.deleted', 'Deleted resource requirement #' . $id);
        
        return redirect()->back()->with('success', 'Deleted successfully,');
 
@@ -125,10 +130,22 @@ class ResourceRequirementsController extends BaseController
            'status' => 'Pending Approval'
 
         ]);
+        
+        $this->writeLog('resource.submitted_for_approval', 'Submitted resource requirement #' . $id . ' for approval');
 
             return redirect()->back()->with('success', 'Submitted for approval.');
     }
 
+    
+    private function writeLog(string $action, string $description): void
+    {
+        (new AuditLogModel())->insert([
+            'user_id' => (int) session()->get('user_id'),
+            'action' => $action,
+            'description' => $description,
+            'created_at' => date('Y-m-d H:i:s'),
+        ]);
+    }
     
     }
 }
