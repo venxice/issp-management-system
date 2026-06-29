@@ -19,6 +19,7 @@ class ISspRecordModel extends Model
         'budget',
         'start_date',
         'end_date',
+        'form_data',
     ];
 
     public function getRecentRecordsByUser(int $userId, int $limit = 10): array

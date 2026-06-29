@@ -48,8 +48,12 @@ $routes->group('employee', ['filter' => 'role:employee'], static function (Route
     $routes->get('dashboard', 'Employee\DashboardController::index');
     $routes->post('submit-issp', 'Employee\DashboardController::submitISSP');
     $routes->post('save-draft', 'Employee\DashboardController::saveDraft');
+    $routes->get('load-form-data/(:num)', 'Employee\DashboardController::loadFormData/$1');
     $routes->get('submitted-ict-projects', 'Employee\DashboardController::submittedIctProjects');
     $routes->get('draft-ict-projects', 'Employee\DashboardController::draftIctProjects');
+    $routes->get('edit-ict-project/(:num)/(:any)', 'Employee\DashboardController::editIctProject/$1/$2');
+    $routes->post('save-edit-draft/(:num)', 'Employee\DashboardController::saveEditDraft/$1');
+    $routes->post('submit-edit-project/(:num)', 'Employee\DashboardController::submitEditProject/$1');
     
     // Proposed ICT Strategy Routes
     $routes->group('proposed-ict-strategy', static function (RouteCollection $routes): void {

@@ -1,11 +1,15 @@
 <?php
 $roleSlug = (string) session()->get('role_slug');
-$sidebarFile = match ($roleSlug) {
-    'director_general' => 'director_general.php',
-    'ict_planner' => 'ict_planner.php',
-    'employee' => 'employee.php',
-    default => 'admin.php',
-};
+if ($editMode ?? false) {
+    $sidebarFile = 'edit-sidebar.php';
+} else {
+    $sidebarFile = match ($roleSlug) {
+        'director_general' => 'director_general.php',
+        'ict_planner' => 'ict_planner.php',
+        'employee' => 'employee.php',
+        default => 'admin.php',
+    };
+}
 ?>
 <aside class="app-sidebar">
 <div class="brand">

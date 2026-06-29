@@ -4,6 +4,7 @@ namespace App\Controllers\DirectorGeneral;
 
 use App\Controllers\BaseController;
 use App\Models\UserModel;
+use App\Models\AuditLogModel;
 
 class DashboardController extends BaseController
 {
@@ -11,6 +12,13 @@ class DashboardController extends BaseController
     {
         $currentUserId = (int) session()->get('user_id');
         $userModel = new UserModel();
+
+        (new AuditLogModel())->insert([
+            'user_id' => $currentUserId,
+            'action' => 'dashboard.viewed',
+            'description' => 'Viewed Director General dashboard',
+            'created_at' => date('Y-m-d H:i:s'),
+        ]);
 
         return view('frontend/director_general/dashboard/index', [
             'title' => 'Director General Dashboard',

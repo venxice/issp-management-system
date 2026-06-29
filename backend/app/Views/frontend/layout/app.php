@@ -670,6 +670,33 @@ $active = $active ?? '';
             --bs-btn-hover-color: #9f2e2e;
         }
 
+        .badge-status {
+            border: 1px solid transparent;
+        }
+        .badge-status-draft {
+            background: #8896a8;
+            color: #fff;
+        }
+        .badge-status-pending {
+            background: #c9953b;
+            color: #fff;
+        }
+        .badge-status-approved {
+            background: #4a8c5c;
+            color: #fff;
+        }
+        .badge-status-rejected {
+            background: #b34a4a;
+            color: #fff;
+        }
+        .badge-status-submitted {
+            background: #4f6584;
+            color: #fff;
+        }
+        .badge-status-revision {
+            background: #c97d3b;
+            color: #fff;
+        }
         .badge-soft {
             background: #edf2f7;
             color: var(--brand-dark);
@@ -1181,6 +1208,24 @@ $active = $active ?? '';
 <div class="app-layout">
     <?= $this->include('frontend/layout/sidebar/sidebar') ?>
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Custom Alert & Confirm Modals -->
+    <div class="custom-modal-overlay" id="customModalOverlay" style="display:none;position:fixed;inset:0;z-index:1050;background:rgba(0,0,0,.45);"></div>
+    <div class="custom-modal" id="confirmModal" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:1060;background:#fff;border-radius:6px;box-shadow:0 18px 40px rgba(15,23,42,.18);min-width:320px;max-width:400px;overflow:hidden;">
+        <div style="background:#536783;color:#fff;padding:12px 14px;font-size:.94rem;font-weight:700;"><i class="fa-solid fa-triangle-exclamation me-2"></i><span id="confirmModalTitle">Confirm</span></div>
+        <div style="padding:14px 14px;font-size:.82rem;color:#1f2a3a;"><p class="mb-0" id="confirmMessage">Are you sure?</p></div>
+        <div style="padding:8px 12px;border-top:1px solid #e1e6ee;display:flex;justify-content:flex-end;gap:8px;">
+            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="closeCustomModals()">Cancel</button>
+            <button type="button" class="btn btn-primary btn-sm" id="confirmModalButton">Confirm</button>
+        </div>
+    </div>
+    <div class="custom-modal" id="alertModal" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:1060;background:#fff;border-radius:6px;box-shadow:0 18px 40px rgba(15,23,42,.18);min-width:320px;max-width:400px;overflow:hidden;">
+        <div style="background:#536783;color:#fff;padding:12px 14px;font-size:.94rem;font-weight:700;" id="alertModalHeader"><span id="alertModalLabel">Notice</span></div>
+        <div style="padding:14px 14px;font-size:.82rem;color:#1f2a3a;"><p class="mb-0" id="alertMessage">Message</p></div>
+        <div style="padding:8px 12px;border-top:1px solid #e1e6ee;display:flex;justify-content:flex-end;gap:8px;">
+            <button type="button" class="btn btn-primary btn-sm" onclick="closeCustomModals()">OK</button>
+        </div>
+    </div>
     <main class="app-main">
         <header class="topbar">
             <div class="d-flex align-items-center gap-3">
@@ -1204,24 +1249,6 @@ $active = $active ?? '';
     </main>
 </div>
 
-<!-- Logout Confirmation Modal -->
-<div class="modal fade" id="logoutConfirmModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-sm modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title"><i class="fa-solid fa-right-from-bracket me-2"></i>Confirm Logout</h5>
-            </div>
-            <div class="modal-body">
-                <p class="mb-0">Are you sure you want to log out?</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" id="confirmLogoutButton">Logout</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script>
@@ -1236,7 +1263,6 @@ document.addEventListener('DOMContentLoaded', function() {
         sidebarOverlay.classList.toggle('active');
         document.body.classList.toggle('sidebar-open');
 
-        // Update menu icon
         const icon = menuToggle.querySelector('i');
         if (sidebar.classList.contains('sidebar-open')) {
             icon.classList.remove('fa-bars');
@@ -1252,7 +1278,6 @@ document.addEventListener('DOMContentLoaded', function() {
         sidebarOverlay.classList.remove('active');
         document.body.classList.remove('sidebar-open');
 
-        // Reset menu icon
         const icon = menuToggle.querySelector('i');
         icon.classList.remove('fa-xmark');
         icon.classList.add('fa-bars');
@@ -1268,7 +1293,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Close sidebar when clicking on nav links (mobile)
     const navLinks = document.querySelectorAll('.sidebar-nav .nav-link');
     navLinks.forEach(link => {
         link.addEventListener('click', function() {
@@ -1278,53 +1302,96 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Handle window resize
     window.addEventListener('resize', function() {
         if (window.innerWidth > 991) {
             closeSidebar();
         }
     });
 
-    // Auto-expand dropdowns when a child link is active
     const activeLinks = document.querySelectorAll('.sidebar-nav .nav-link.active');
     activeLinks.forEach(activeLink => {
         let parentCollapse = activeLink.closest('.collapse');
         while (parentCollapse) {
             parentCollapse.classList.add('show');
-
             const toggleButton = document.querySelector(`[data-bs-target="#${parentCollapse.id}"]`);
             if (toggleButton) {
                 toggleButton.setAttribute('aria-expanded', 'true');
             }
-
             parentCollapse = parentCollapse.parentElement.closest('.collapse');
         }
     });
 
-    // Logout Confirmation Modal
+    // Logout - use custom modal
     const logoutButton = document.getElementById('logoutButton');
     const logoutForm = document.getElementById('logoutForm');
-    const logoutConfirmModal = document.getElementById('logoutConfirmModal');
-    const confirmLogoutButton = document.getElementById('confirmLogoutButton');
-
-    if (logoutButton && logoutForm && logoutConfirmModal && confirmLogoutButton) {
-        let logoutModalInstance;
-
+    if (logoutButton && logoutForm) {
         logoutButton.addEventListener('click', function(e) {
             e.preventDefault();
-            logoutModalInstance = new bootstrap.Modal(logoutConfirmModal);
-            logoutModalInstance.show();
-        });
-
-        confirmLogoutButton.addEventListener('click', function() {
-            if (logoutModalInstance) {
-                logoutModalInstance.hide();
-            }
-            logoutForm.submit();
+            showConfirmModal('Are you sure you want to log out?', function() {
+                logoutForm.submit();
+            });
         });
     }
 });
 </script>
+
+<script>
+// Custom modal helpers - no Bootstrap Modal dependency
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('customModalOverlay').addEventListener('click', closeCustomModals);
+});
+
+function showCustomModal(id) {
+    document.getElementById(id).style.display = 'block';
+    document.getElementById('customModalOverlay').style.display = 'block';
+    document.body.style.overflow = 'hidden';
+}
+
+function closeCustomModals() {
+    document.querySelectorAll('.custom-modal').forEach(el => el.style.display = 'none');
+    document.getElementById('customModalOverlay').style.display = 'none';
+    document.body.style.overflow = '';
+}
+
+window.showConfirmModal = function(message, callback) {
+    document.getElementById('confirmMessage').textContent = message;
+    const confirmBtn = document.getElementById('confirmModalButton');
+    confirmBtn._callback = callback;
+    confirmBtn.onclick = function() {
+        closeCustomModals();
+        if (typeof confirmBtn._callback === 'function') {
+            const cb = confirmBtn._callback;
+            confirmBtn._callback = null;
+            cb();
+        }
+    };
+    showCustomModal('confirmModal');
+};
+
+window.showAlertModal = function(title, message) {
+    document.getElementById('alertModalLabel').textContent = title;
+    document.getElementById('alertMessage').textContent = message;
+    showCustomModal('alertModal');
+};
+
+// Prevent stale form data from BFCache on back/forward navigation
+window.addEventListener('pageshow', function(e) {
+    if (e.persisted) {
+        document.querySelectorAll('#mainForm input, #mainForm textarea, #mainForm select').forEach(function(el) {
+            if (el.type !== 'hidden' && el.type !== 'file') {
+                el.value = '';
+            }
+        });
+        if (typeof loadSavedData === 'function') {
+            loadSavedData();
+        }
+        if (typeof updateStatusIndicators === 'function') {
+            updateStatusIndicators();
+        }
+    }
+});
+</script>
+
 <?= $this->renderSection('scripts') ?>
 </body>
 </html>
