@@ -80,32 +80,21 @@ $routes->group('employee', ['filter' => 'role:employee'], static function (Route
 });
 
 // Resource Requirements Routes
-    $routes->group('resource-requirements', static function (RouteCollection $routes): void {
+      $routes->group('employee', ['filter' => 'role:employee'], static function (RouteCollection $routes): void {
 
-        // Main Page 
-        $routes->get('/', 'Employee\ResourceRequirementsController::index');
+      $routes->group('resource-requirements', static function (RouteCollection $routes): void {
 
-        // A.1 Year 1
-        $routes->get('year1', 'Employee\ResourceRequirementsController::year1');
+    $routes->get('year1-requirements', 'Employee\ResourceRequirementsController::year1Requirements');
+    $routes->get('year2-requirements', 'Employee\ResourceRequirementsController::year2Requirements');
+    $routes->get('year3-requirements', 'Employee\ResourceRequirementsController::year3Requirements');
 
-        // A.2 Year 2
-        $routes->get('year2', 'Employee\ResourceRequirementsController::year2');
+    $routes->get('summary-of-investments', 'Employee\ResourceRequirementsController::summaryOfInvestments');
 
-        // A.3 Year 3 
-        $routes->get('year3', 'Employee\ResourceRequirementsController::year3');
-
-        // B. Summary of Investments
-        $routes->get('summary', 'Employee\ResourceRequirementsController::summary');
-
-        // CRUD
-        $routes->get('create', 'Employee\ResourceRequirementsController::create');
-        $routes->post('store', 'Employee\ResourceRequirementsController::store');
-
-        $routes->get('edit/(:num)', 'Employee\ResourceRequirementsController::edit/$1');
-        $routes->post('update/(:num)', 'Employee\ResourceRequirementsController::update/$1');
-
-        $routes->get('delete/(:num)', 'IctPlanner\ResourceRequirementsController::delete/$1');
-    });
+    $routes->post('store', 'Employee\ResourceRequirementsController::store');
+     $routes->post('update', 'Employee\ResourceRequirementsController::update');
+    $routes->get('delete/(:num)', 'Employee\ResourceRequirementsController::delete/$1');
+});
+      });
 
 $routes->group('ict-planner', ['filter' => 'role:ict_planner'], static function (RouteCollection $routes): void {
     $routes->get('dashboard', 'IctPlanner\DashboardController::index');

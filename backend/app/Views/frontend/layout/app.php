@@ -11,6 +11,7 @@ $active = $active ?? '';
     <meta http-equiv="Cache-Control" content="post-check=0, pre-check=0">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="Sat, 26 Jul 1997 05:00:00 GMT">
+    <meta name="csrf-token" content="<?= csrf_hash() ?>">
     <title><?= esc($title) ?> | ISSP Management System</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css?v=2" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css?v=2" rel="stylesheet">
@@ -54,7 +55,7 @@ $active = $active ?? '';
         }
 
         .app-sidebar {
-            width: 182px;
+            width: 220px;
             background: linear-gradient(180deg, #202a3e 0%, var(--nav) 100%);
             color: #fff;
             display: flex;
@@ -65,6 +66,8 @@ $active = $active ?? '';
             z-index: 30;
             box-shadow: 1px 0 0 rgba(15, 23, 42, .08);
             transition: transform 0.3s ease-in-out;
+            max-height: 100vh;
+            overflow: hidden;
         }
 
         .app-sidebar.sidebar-closed {
@@ -133,6 +136,7 @@ $active = $active ?? '';
             border-bottom: 1px solid rgba(255,255,255,.08);
             margin-bottom: 8px;
             position: relative;
+            flex-shrink: 0;
         }
 
         .brand-logo {
@@ -174,18 +178,36 @@ $active = $active ?? '';
         }
 
         .sidebar-nav {
-            min-height: 0;
-            overflow: visible;
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
             padding: 10px 0 !important;
             scrollbar-width: thin;
+        }
+
+        .sidebar-nav::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar-nav::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .sidebar-nav::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+        }
+
+        .sidebar-nav::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
         }
 
         .app-sidebar .nav-link {
             color: rgba(255, 255, 255, .76);
             background: transparent;
             border-radius: 0;
-            padding: 10px 12px;
-            margin-bottom: 6px;
+            padding: 10px 12px 10px 12px;
+            margin-bottom: 4px;
             font-size: .82rem;
             line-height: 1.15;
             font-weight: 600;
@@ -201,6 +223,7 @@ $active = $active ?? '';
             text-align: center;
             font-size: .82rem;
             color: inherit;
+            flex-shrink: 0;
         }
 
         .app-sidebar .nav-link:hover,
@@ -215,6 +238,8 @@ $active = $active ?? '';
 
         .sidebar-footer {
             padding: 10px 0 !important;
+            flex-shrink: 0;
+            margin-top: auto;
         }
 
         .sidebar-footer form {
@@ -251,10 +276,12 @@ $active = $active ?? '';
             box-shadow: inset 3px 0 0 rgba(255, 255, 255, .22);
         }
 
+
+
         .app-main {
             min-width: 0;
             flex: 1;
-            margin-left: 182px;
+            margin-left: 220px;
         }
 
         .topbar {
@@ -1235,7 +1262,6 @@ document.addEventListener('DOMContentLoaded', function() {
         menuToggle.addEventListener('click', toggleSidebar);
         sidebarOverlay.addEventListener('click', closeSidebar);
 
-        // Add close button functionality
         const sidebarClose = document.getElementById('sidebarClose');
         if (sidebarClose) {
             sidebarClose.addEventListener('click', closeSidebar);
@@ -1256,6 +1282,22 @@ document.addEventListener('DOMContentLoaded', function() {
     window.addEventListener('resize', function() {
         if (window.innerWidth > 991) {
             closeSidebar();
+        }
+    });
+
+    // Auto-expand dropdowns when a child link is active
+    const activeLinks = document.querySelectorAll('.sidebar-nav .nav-link.active');
+    activeLinks.forEach(activeLink => {
+        let parentCollapse = activeLink.closest('.collapse');
+        while (parentCollapse) {
+            parentCollapse.classList.add('show');
+
+            const toggleButton = document.querySelector(`[data-bs-target="#${parentCollapse.id}"]`);
+            if (toggleButton) {
+                toggleButton.setAttribute('aria-expanded', 'true');
+            }
+
+            parentCollapse = parentCollapse.parentElement.closest('.collapse');
         }
     });
 

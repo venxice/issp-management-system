@@ -3,132 +3,179 @@
 namespace App\Controllers\Employee;
 
 use App\Controllers\BaseController;
-use App\Models\UserModel;
+use App\Models\ResourceRequirementModel;
 
 class ResourceRequirementsController extends BaseController
 {
-    protected $resourceModel;
+    protected $model;
 
-    public function _construct()
+    public function __construct()
     {
-        $this->resourceModel = new ResourceRequirementModel();
+        $this->model = new ResourceRequirementModel();
     }
 
-     private function getUserData()
+    public function year1Requirements()
     {
-        $currentUserId = (int) session()->get('user_id');
-        return $this->userModel->findWithRole($currentUserId);
-    }
+        $categories = [
+            'A. Office Productivity',
+            'B. Internal ICT Projects',
+            'C. Cross Agency ICT Projects',
+            'D. Continuing Costs'
+        ];
 
-    public function index()
-    {
-            return view('employee/resource_requirements/index', [
-                'title' => 'Resource Requirements',
-                'active' => 'resource-requirements',
-            ]);
-    }
+        $types = [
+            'Capital Outlay',
+            'MOOE'
+        ];
 
-    // YEAR 1 TABLE (A.1)
-    public function year1()
-    {
-        $data['requirements'] = $this->resourceModel
-        ->where('year', 1)
-        ->findAll();
+        $requirements = $this->model->findAll(); // TEMP: later optimize/group
 
-        $data['year'] = 1;
-        $data['title'] = 'A.1 Year 1 Resource Requirements'
-
-        return view('employee/resource_requirements/year', $data);
-    }
-
-    // YEAR 2 TABLE (A.2)
-    public function year2()
-    {
-        $data['requirements'] = $this->resourceModel
-        ->where('year', 2)
-        ->findAll();
-
-        $data['year'] = 2;
-        $data['title'] = 'A.2 Year 2 Resource Requirements'
-
-        return view('employee/resource_requirements/year', $data);
-    }
-
- // YEAR 3 TABLE (A.3)
-    public function year3()
-    {
-        $data['requirements'] = $this->resourceModel
-        ->where('year', 3)
-        ->findAll();
-
-        $data['year'] = 3;
-        $data['title'] = 'A.3 Year 3 Resource Requirements'
-
-        return view('employee/resource_requirements/year', $data);
-    }
-
-    // SUMMARY OF INVESTMENTS
-    public function summary()
-    {
-       $model = $this->resourceModel;
-
-       return view('/ict_planner/resource_requirements/summary', [
-        'office_productivity' => $model->where('strategic_category', 'Office Productivity')->findAll(),
-        'internal_projects' => $model->where('strategic_category', 'Internal ICT Projects')->findAll(),
-        'cross_agency' => $model->where('strategic_category', 'Cross Agency ICT Projects')->findAll()
-        'continuing_costs' => $model->where('strategic_category', 'Continuing Costs')->findAll(),
-        
-       ])
-
-    }
-
-    // Save
-    public functon store()
-    {
-        $qty = $this->request->getPost('quantity')
-        $unitCost = $this->request->getPost('unit_cost')
-
-        $this->resourceModel->save([
-            'year' => $this->request->getPost('year'),
-            'item_name' => $this->request->getPost('item_name'),
-            'strategic_category' => $this->request->getPost('strategic_category'),
-            'office_location' => $this->request->getPost('office_location'),
-            'fund_source' => $this->request->getPost('fund_source'),
-            'expenditure_type' => $this->request->getPost('expenditure_type'),
-            'uacs_code' => $this->request->getPost('uacs_code'),
-            'object_of_expenditure' => $this->request->getPost('object_of_expenditure'),
-            'physical_target' => $this->request->getPost('physical target'),
-            'quantity' => $qty,
-            'unit_cost' => $unitCost,
-            'total_cost' => $qty * $unitCost,
-            'description' => $this->request->getPost('description'),
-            'created_by' => session()->get('user_id'),
-            'status' => 'Draft'
-        ])
-        
-        return redirect()->back()->with('success', 'Saved successfully.');
-    }
-     
-    // Delete
-    public function delete($id)
-    {
-       $this->resourceModel->delete($id);
-       
-       return redirect()->back()->with('success', 'Deleted successfully,');
-
-    }
-
-
-    public function submitForApproval($id)
-    {
-        $this->resourceModel->update($id, [
-           'status' => 'Pending Approval'
-
+        return view('frontend/employee/resource-requirements/year1-requirements', [
+            'title' => 'Resource Requirements',
+            'active' => 'year1-requirements',
+            'categories' => $categories,
+            'types' => $types,
+            'requirements' => $requirements,
         ]);
-
-            return redirect()->back()->with('success', 'Submitted for approval.');
     }
 
-    
+    public function year2Requirements()
+    {
+        $categories = [
+            'A. Office Productivity',
+            'B. Internal ICT Projects',
+            'C. Cross Agency ICT Projects',
+            'D. Continuing Costs'
+        ];
+
+        $types = [
+            'Capital Outlay',
+            'MOOE'
+        ];
+
+        $requirements = $this->model->findAll(); // TEMP: later optimize/group
+
+        return view('frontend/employee/resource-requirements/year2-requirements', [
+            'title' => 'Resource Requirements',
+            'active' => 'year2-requirements',
+            'categories' => $categories,
+            'types' => $types,
+            'requirements' => $requirements,
+        ]);
     }
+
+     public function year3Requirements()
+    {
+        $categories = [
+            'A. Office Productivity',
+            'B. Internal ICT Projects',
+            'C. Cross Agency ICT Projects',
+            'D. Continuing Costs'
+        ];
+
+        $types = [
+            'Capital Outlay',
+            'MOOE'
+        ];
+
+        $requirements = $this->model->findAll(); // TEMP: later optimize/group
+
+        return view('frontend/employee/resource-requirements/year3-requirements', [
+            'title' =>  'Resource Requirements',
+            'active' => 'year3-requirements',
+            'categories' => $categories,
+            'types' => $types,
+            'requirements' => $requirements
+        ]);
+    }
+
+ public function summaryOfInvestments()
+{
+   $categories = [
+        'Office Productivity',
+        'Internal ICT Projects',
+        'Cross Agency ICT Projects',
+        'Continuing Costs'
+    ];
+
+    $fundSource = [
+    'General Appropriations Act (GAA)',
+    'Foreign-Assisted',
+    'Locally Funded',
+    'Other Income Generating Sources'
+];
+
+    $statementOfExpenditure = [
+        'Capital Outlay (CO)',
+        'Maintenance and Other Operating Expenses (M00E)'
+    ];
+
+    $data = [
+        'title' => 'Resource Requirements',
+         'active' => 'summary-of-investments',
+
+        'categories' => $categories,
+        'fundSource' => $fundSource,
+        'statementOfExpenditure' => $statementOfExpenditure,
+
+        'generalSummary'      => $this->model->getgeneralSummary(),
+        'fundSourceSummary'   => $this->model->getfundSourceSummary(),
+        'statementOfExpenditureSummary'  => $this->model->getstatementOfExpenditureSummary(),
+        'objectOfExpenditureSummary' => $this->model->getobjectOfExpenditureSummary()
+    ];
+
+    return view('frontend/employee/resource-requirements/summary-of-investments', $data);
+}
+
+
+        public function store()
+        {
+        //dd($this->request->getPost());
+        $this->model->save([
+        'year'                  => 1,
+        'strategic_category'    => $this->request->getPost('strategic_category'),
+        'item'                  => $this->request->getPost('item'),
+        'office'       => $this->request->getPost('office'),
+        'uacs_code'           => $this->request->getPost('uacs_code'),
+        'fund_source'             => $this->request->getPost('fund_source'),
+        'unit_cost'       => $this->request->getPost('unit_cost'),
+        'physical_target'            => $this->request->getPost('physical_target'),
+        'total_cost'      => $this->request->getPost('total_cost'),
+        'object_of_expenditure' => $this->request->getPost('object_of_expenditure'),
+        'expenditure_type'             => $this->request->getPost('expenditure_type'),
+        'remarks'               => $this->request->getPost('remarks'),
+        'created_by'            => session()->get('user_id') ?? 1
+    ]);
+
+    return redirect()->back()->with('success', 'Resource Requirement added successfully.');
+}
+
+public function update()
+{
+    $id = $this->request->getPost('id');
+
+    $this->model->update($id, [
+
+        'strategic_category'    => $this->request->getPost('strategic_category'),
+        'item'                  => $this->request->getPost('item'),
+        'office'       => $this->request->getPost('office'),
+        'fund_source'           => $this->request->getPost('fund_source'),
+        'unit_cost'             => $this->request->getPost('unit_cost'),
+        'physical_target'       => $this->request->getPost('physical_target'),
+        'total_cost'            => $this->request->getPost('total_cost'),
+        'object_of_expenditure' => $this->request->getPost('object_of_expenditure'),
+        'expenditure_type'             => $this->request->getPost('expenditure_type'),
+        'remarks'               => $this->request->getPost('remarks')
+
+    ]);
+
+    return redirect()->back()->with('success', 'Resource Requirement updated successfully.');
+}
+
+public function delete($id)
+{
+    $this->model->delete($id);
+
+    return redirect()->back()->with('success', 'Resource Requirement deleted successfully.');
+}
 }
