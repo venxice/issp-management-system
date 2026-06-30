@@ -446,6 +446,11 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(function(r) { return r.json(); })
             .catch(function() {})
             .finally(function() {
+                // Clear all form keys first to prevent stale draft data
+                var formKeys = ['network-infrastructure-form','enterprise-architecture-form','ict-human-capital-form','information-systems-form','ict-projects-form','performance-measurement-form'];
+                formKeys.forEach(function(k) {
+                    localStorage.removeItem(k);
+                });
                 // Restore new project backup if it exists
                 var backup = localStorage.getItem('new-project-backup');
                 if (backup) {

@@ -168,15 +168,6 @@ document.addEventListener('DOMContentLoaded', function() {
             roleId.setCustomValidity('');
         }
 
-        if (!positionId || !positionId.value) {
-            positionId.setCustomValidity('Position is required');
-            positionId.reportValidity();
-            if (isValid) positionId.focus();
-            isValid = false;
-        } else {
-            positionId.setCustomValidity('');
-        }
-
         if (!departmentId || !departmentId.value) {
             departmentId.setCustomValidity('Division is required');
             departmentId.reportValidity();

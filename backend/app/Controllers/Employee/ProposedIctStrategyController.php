@@ -7,6 +7,8 @@ use App\Models\UserModel;
 
 class ProposedIctStrategyController extends BaseController
 {
+    private UserModel $userModel;
+
     public function __construct()
     {
         $this->userModel = new UserModel();

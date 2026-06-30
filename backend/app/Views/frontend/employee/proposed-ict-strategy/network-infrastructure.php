@@ -634,7 +634,10 @@
                             <div class="file-upload-area">
                                 <i class="fa-solid fa-cloud-arrow-up"></i>
                                 <p>Upload network architecture diagram showing connectivity among attached agencies</p>
-                                <input type="file" class="form-control mt-2" name="dept_network_diagram" accept="image/*,.pdf">
+                                <div class="upload-wrapper">
+                                    <input type="file" class="form-control mt-2" name="dept_network_diagram" accept="image/*,.pdf" onchange="window.uploadFileInput(this)">
+                                    <span class="upload-status" style="font-size:.72rem;margin-top:4px;display:block;"></span>
+                                </div>
                             </div>
                         </div>
                         
@@ -688,7 +691,10 @@
                             <div class="file-upload-area">
                                 <i class="fa-solid fa-cloud-arrow-up"></i>
                                 <p>Upload network architecture diagram showing connectivity to branches/regional offices</p>
-                                <input type="file" class="form-control mt-2" name="regional_network_diagram" accept="image/*,.pdf">
+                                <div class="upload-wrapper">
+                                    <input type="file" class="form-control mt-2" name="regional_network_diagram" accept="image/*,.pdf" onchange="window.uploadFileInput(this)">
+                                    <span class="upload-status" style="font-size:.72rem;margin-top:4px;display:block;"></span>
+                                </div>
                             </div>
                         </div>
                         
@@ -1059,7 +1065,7 @@
         <div class="col-12">
             <div class="footer-actions">
                 <div class="action-buttons">
-                    <button type="button" class="action-btn action-btn-save" onclick="window.saveChanges()">
+                    <button type="button" class="action-btn action-btn-save" onclick="window.saveChanges(); window.autoSaveDraft();">
                         <i class="fa-solid fa-save"></i>
                         <span>Save Changes</span>
                     </button>
@@ -1203,6 +1209,11 @@ window.saveChanges = function(showAlert = true) {
             
             formData.forEach((value, key) => {
                 if (value instanceof File && value.name) {
+                    var fileInput = form.querySelector('[name="' + key + '"]');
+                    var uploadedPath = fileInput ? fileInput.getAttribute('data-uploaded-path') : null;
+                    if (uploadedPath) {
+                        formDataObj[key] = uploadedPath;
+                    } else {
                         fileReads.push(
                         new Promise(resolve => {
                             const reader = new FileReader();
@@ -1222,6 +1233,7 @@ window.saveChanges = function(showAlert = true) {
                             reader.readAsDataURL(value);
                         })
                     );
+                    }
                 } else if (value instanceof File) {
                     // Empty file input — skip (would serialize to {})
                 } else {
@@ -1251,7 +1263,7 @@ function finalizeSave(formDataObj, showAlert) {
     const prevData = JSON.parse(localStorage.getItem('network-infrastructure-form') || '{}');
     Object.keys(prevData).forEach(key => {
         const val = prevData[key];
-        if (typeof val === 'string' && val.startsWith('data:')) {
+        if (typeof val === 'string' && (val.startsWith('data:') || val.startsWith('uploads/'))) {
             if (!(key in formDataObj) || formDataObj[key] === '') {
                 formDataObj[key] = val;
             }
@@ -1296,8 +1308,11 @@ window.loadSavedData = function() {
                     if (input) {
                         const val = formDataObj[key];
                         if (typeof val === 'string' && val.startsWith('data:')) {
-                            // This is a stored file (base64 data URL)
                             restoreFilePreview(input, val);
+                            restoredCount++;
+                        } else if (typeof val === 'string' && val.startsWith('uploads/')) {
+                            input.setAttribute('data-uploaded-path', val);
+                            showServerFileLink(input, val);
                             restoredCount++;
                         } else if (input.type === 'checkbox') {
                             input.checked = val === '1';
@@ -1426,6 +1441,14 @@ function getFileNameFromDataUrl(dataUrl) {
 // Navigate to page after saving
 window.navigateToPage = function(url) {
     console.log('navigateToPage called with url:', url);
+    // If in edit mode, rewrite URLs to stay in edit context
+    var editId = localStorage.getItem('edit_project_id');
+    if (editId) {
+        url = url.replace('proposed-ict-strategy/', 'edit-ict-project/' + editId + '/');
+        if (url.indexOf('employee/dashboard') !== -1) {
+            url = '<?= site_url('employee/draft-ict-projects') ?>';
+        }
+    }
     const form = document.querySelector('#mainForm');
     if (form) {
         const formData = new FormData(form);
@@ -1462,7 +1485,7 @@ window.navigateToPage = function(url) {
             Object.keys(prevData).forEach(key => {
                 if (!(key in formDataObj)) {
                     const val = prevData[key];
-                    if (typeof val === 'string' && val.startsWith('data:')) {
+                    if (typeof val === 'string' && (val.startsWith('data:') || val.startsWith('uploads/'))) {
                         formDataObj[key] = val;
                     }
                 }

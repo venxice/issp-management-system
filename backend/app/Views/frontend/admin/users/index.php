@@ -461,10 +461,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 isValid = false;
                 firstInvalidField = firstInvalidField || roleId;
             }
-            if (!positionId || !positionId.value) {
-                isValid = false;
-                firstInvalidField = firstInvalidField || positionId;
-            }
             if (!departmentId || !departmentId.value) {
                 isValid = false;
                 firstInvalidField = firstInvalidField || departmentId;
@@ -662,10 +658,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!roleId || !roleId.value) {
                 isValid = false;
                 firstInvalidField = firstInvalidField || roleId;
-            }
-            if (!positionId || !positionId.value) {
-                isValid = false;
-                firstInvalidField = firstInvalidField || positionId;
             }
             if (!departmentId || !departmentId.value) {
                 isValid = false;

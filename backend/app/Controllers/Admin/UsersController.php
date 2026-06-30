@@ -82,7 +82,7 @@ class UsersController extends BaseController
             'password' => 'required|min_length[8]',
             'password_confirmation' => 'required|matches[password]',
             'role_id' => 'required|integer',
-            'position_id' => 'required|integer',
+            'position_id' => 'permit_empty|integer',
             'department_id' => 'required|integer',
             'status' => 'required|in_list[active,inactive]',
         ];
@@ -150,7 +150,7 @@ class UsersController extends BaseController
             'password' => 'permit_empty|min_length[8]',
             'password_confirmation' => 'required_with[password]|matches[password]',
             'role_id' => 'required|integer',
-            'position_id' => 'required|integer',
+            'position_id' => 'permit_empty|integer',
             'department_id' => 'required|integer',
             'status' => 'required|in_list[active,inactive]',
         ];
