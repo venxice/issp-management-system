@@ -327,6 +327,41 @@ class DashboardController extends BaseController
         }
     }
 
+    public function uploadFile()
+    {
+        $this->response->setContentType('application/json');
+
+        try {
+            $file = $this->request->getFile('file');
+            if (!$file || !$file->isValid()) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'No valid file uploaded.'
+                ]);
+            }
+
+            $uploadPath = FCPATH . 'uploads';
+            if (!is_dir($uploadPath)) {
+                mkdir($uploadPath, 0755, true);
+            }
+
+            $newName = $file->getRandomName();
+            $file->move($uploadPath, $newName);
+
+            return $this->response->setJSON([
+                'success' => true,
+                'path' => 'uploads/' . $newName,
+                'name' => $file->getClientName(),
+                'size' => $file->getSize(),
+            ]);
+        } catch (\Exception $e) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
+
     private function ensureFormDataColumn(): void
     {
         $db = \Config\Database::connect();

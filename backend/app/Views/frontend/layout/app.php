@@ -1328,6 +1328,7 @@ document.addEventListener('DOMContentLoaded', function() {
         logoutButton.addEventListener('click', function(e) {
             e.preventDefault();
             showConfirmModal('Are you sure you want to log out?', function() {
+                localStorage.clear();
                 logoutForm.submit();
             });
         });
@@ -1393,5 +1394,109 @@ window.addEventListener('pageshow', function(e) {
 </script>
 
 <?= $this->renderSection('scripts') ?>
+
+<script>
+// Auto-save current section to DB (called by Save Changes button)
+window.autoSaveDraft = function() {
+    var editId = localStorage.getItem('edit_project_id');
+    var csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    if (!csrfToken) return;
+
+    var keys = ['network-infrastructure-form','enterprise-architecture-form','ict-human-capital-form','information-systems-form','ict-projects-form','performance-measurement-form'];
+    var data = {};
+    keys.forEach(function(key) {
+        try {
+            var saved = localStorage.getItem(key);
+            if (saved) data[key] = JSON.parse(saved);
+        } catch(e) {}
+    });
+
+    fetch('<?= site_url('employee/save-draft') ?>', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({
+            csrf_test_name: csrfToken,
+            form_data: data,
+            id: editId || null
+        })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(result) {
+        if (result.success && result.id && !editId) {
+            localStorage.setItem('edit_project_id', result.id);
+        }
+    })
+    .catch(function(err) {
+        console.error('Auto-save to DB failed:', err);
+    });
+};
+
+// File upload helper — uploads file to server, stores path on the input
+window.uploadFileInput = function(input) {
+    var file = input.files[0];
+    if (!file) return;
+
+    var formData = new FormData();
+    formData.append('file', file);
+
+    var csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    if (csrfToken) formData.append('csrf_test_name', csrfToken);
+
+    var wrapper = input.closest('.upload-wrapper') || input.parentElement;
+    var statusEl = wrapper.querySelector('.upload-status');
+
+    if (statusEl) {
+        statusEl.textContent = 'Uploading...';
+        statusEl.className = 'upload-status text-info';
+    }
+
+    fetch('<?= site_url('employee/upload-file') ?>', {
+        method: 'POST',
+        body: formData,
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(result) {
+        if (result.success) {
+            input.setAttribute('data-uploaded-path', result.path);
+            input.setAttribute('data-uploaded-name', result.name);
+            if (statusEl) {
+                statusEl.textContent = result.name + ' (uploaded)';
+                statusEl.className = 'upload-status text-success';
+            }
+        } else if (statusEl) {
+            statusEl.textContent = 'Upload failed';
+            statusEl.className = 'upload-status text-danger';
+        }
+    })
+    .catch(function() {
+        if (statusEl) {
+            statusEl.textContent = 'Upload error';
+            statusEl.className = 'upload-status text-danger';
+        }
+    });
+};
+
+// Show a download link for server-uploaded files
+window.showServerFileLink = function(input, filePath) {
+    if (!input || !filePath) return;
+    var existing = input.parentElement.querySelector('.file-preview');
+    if (existing) existing.remove();
+    var preview = document.createElement('div');
+    preview.className = 'file-preview';
+    preview.setAttribute('data-file-input', input.name);
+    var link = document.createElement('a');
+    link.href = '<?= site_url() ?>/' + filePath;
+    link.target = '_blank';
+    link.textContent = filePath.split('/').pop() || 'Download file';
+    link.style.display = 'block';
+    link.style.padding = '4px 0';
+    preview.appendChild(link);
+    input.parentElement.appendChild(preview);
+};
+</script>
 </body>
 </html>

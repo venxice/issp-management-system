@@ -54,6 +54,7 @@ $routes->group('employee', ['filter' => 'role:employee'], static function (Route
     $routes->get('edit-ict-project/(:num)/(:any)', 'Employee\DashboardController::editIctProject/$1/$2');
     $routes->post('save-edit-draft/(:num)', 'Employee\DashboardController::saveEditDraft/$1');
     $routes->post('submit-edit-project/(:num)', 'Employee\DashboardController::submitEditProject/$1');
+    $routes->post('upload-file', 'Employee\DashboardController::uploadFile');
     
     // Proposed ICT Strategy Routes
     $routes->group('proposed-ict-strategy', static function (RouteCollection $routes): void {

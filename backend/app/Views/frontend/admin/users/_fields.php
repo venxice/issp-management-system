@@ -54,7 +54,7 @@ $fieldId = static function (string $field) use ($prefix): string {
     </div>
     <div class="col-md-6">
         <label class="form-label fw-semibold" for="<?= esc($fieldId('position_id')) ?>">Position</label>
-        <select class="form-select" id="<?= esc($fieldId('position_id')) ?>" name="position_id" required>
+        <select class="form-select" id="<?= esc($fieldId('position_id')) ?>" name="position_id">
             <option value="">Select position</option>
             <?php foreach ($positions ?? [] as $position): ?>
                 <?php $selectedPosition = (string) old('position_id', $user['position_id'] ?? '') === (string) $position['id']; ?>

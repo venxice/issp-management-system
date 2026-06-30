@@ -305,6 +305,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     }, 100);
                 } else {
                     if (localStorage.getItem('edit_project_id')) {
+                        // Clear all form keys first to prevent stale draft data
+                        var formKeys = ['network-infrastructure-form','enterprise-architecture-form','ict-human-capital-form','information-systems-form','ict-projects-form','performance-measurement-form'];
+                        formKeys.forEach(function(k) {
+                            localStorage.removeItem(k);
+                        });
                         var backup = localStorage.getItem('new-project-backup');
                         if (backup) {
                             // Active edit — restore original new project data
@@ -316,7 +321,6 @@ document.addEventListener('DOMContentLoaded', function() {
                             } catch(e) {}
                             localStorage.removeItem('new-project-backup');
                         }
-                        // Always just remove edit_project_id — never clear form keys
                         localStorage.removeItem('edit_project_id');
                     }
                     window.location.href = link.href;
@@ -383,6 +387,7 @@ function saveDraft() {
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
                      document.querySelector('input[name="csrf_test_name"]')?.value;
 
+    var editId = localStorage.getItem('edit_project_id');
     fetch('<?= site_url('employee/save-draft') ?>', {
         method: 'POST',
         headers: {
@@ -391,7 +396,8 @@ function saveDraft() {
         },
         body: JSON.stringify({
             csrf_test_name: csrfToken,
-            form_data: collectFormData()
+            form_data: collectFormData(),
+            id: editId || null
         })
     })
     .then(response => response.json())
@@ -424,6 +430,7 @@ function submitISSP() {
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
                          document.querySelector('input[name="csrf_test_name"]')?.value;
 
+        var editId = localStorage.getItem('edit_project_id');
         fetch('<?= site_url('employee/submit-issp') ?>', {
             method: 'POST',
             headers: {
@@ -432,7 +439,8 @@ function submitISSP() {
             },
             body: JSON.stringify({
                 csrf_test_name: csrfToken,
-                form_data: collectFormData()
+                form_data: collectFormData(),
+                id: editId || null
             })
         })
         .then(response => response.json())

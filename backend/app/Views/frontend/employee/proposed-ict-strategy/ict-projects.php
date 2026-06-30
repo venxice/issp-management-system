@@ -785,7 +785,7 @@ input[type="checkbox"] {
         <div class="col-12">
             <div class="footer-actions">
                 <div class="action-buttons">
-                    <button type="button" class="action-btn action-btn-save" onclick="window.saveChanges()">
+                    <button type="button" class="action-btn action-btn-save" onclick="window.saveChanges(); window.autoSaveDraft();">
                         <i class="fa-solid fa-save"></i>
                         <span>Save Changes</span>
                     </button>
@@ -974,7 +974,7 @@ function finalizeSave(formDataObj, showAlert) {
     const prevData = JSON.parse(localStorage.getItem('ict-projects-form') || '{}');
     Object.keys(prevData).forEach(key => {
         const val = prevData[key];
-        if (typeof val === 'string' && val.startsWith('data:')) {
+        if (typeof val === 'string' && (val.startsWith('data:') || val.startsWith('uploads/'))) {
             if (!(key in formDataObj) || formDataObj[key] === '') {
                 formDataObj[key] = val;
             }
@@ -1019,8 +1019,11 @@ window.loadSavedData = function() {
                     if (input) {
                         const val = formDataObj[key];
                         if (typeof val === 'string' && val.startsWith('data:')) {
-                            // This is a stored file (base64 data URL)
                             restoreFilePreview(input, val);
+                            restoredCount++;
+                        } else if (typeof val === 'string' && val.startsWith('uploads/')) {
+                            input.setAttribute('data-uploaded-path', val);
+                            showServerFileLink(input, val);
                             restoredCount++;
                         } else if (input.type === 'checkbox') {
                             input.checked = val === '1';
@@ -1161,6 +1164,14 @@ function getFileNameFromDataUrl(dataUrl) {
 
 window.navigateToPage = function(url) {
     console.log('navigateToPage called with url:', url);
+    // If in edit mode, rewrite URLs to stay in edit context
+    var editId = localStorage.getItem('edit_project_id');
+    if (editId) {
+        url = url.replace('proposed-ict-strategy/', 'edit-ict-project/' + editId + '/');
+        if (url.indexOf('employee/dashboard') !== -1) {
+            url = '<?= site_url('employee/draft-ict-projects') ?>';
+        }
+    }
     const form = document.querySelector('#mainForm');
     if (form) {
         const formData = new FormData(form);
@@ -1197,7 +1208,7 @@ window.navigateToPage = function(url) {
             Object.keys(prevData).forEach(key => {
                 if (!(key in formDataObj)) {
                     const val = prevData[key];
-                    if (typeof val === 'string' && val.startsWith('data:')) {
+                    if (typeof val === 'string' && (val.startsWith('data:') || val.startsWith('uploads/'))) {
                         formDataObj[key] = val;
                     }
                 }

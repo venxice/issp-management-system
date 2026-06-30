@@ -390,7 +390,10 @@
                             <div class="file-upload-area">
                                 <i class="fa-solid fa-cloud-arrow-up"></i>
                                 <p>Upload enterprise architecture diagram showing structure and operation</p>
-                                <input type="file" class="form-control mt-2" name="ea_diagram" accept="image/*,.pdf">
+                                <div class="upload-wrapper">
+                                    <input type="file" class="form-control mt-2" name="ea_diagram" accept="image/*,.pdf" onchange="window.uploadFileInput(this)">
+                                    <span class="upload-status" style="font-size:.72rem;margin-top:4px;display:block;"></span>
+                                </div>
                             </div>
                         </div>
                         <div class="col-md-12">
@@ -408,7 +411,7 @@
         <div class="col-12">
             <div class="footer-actions">
                 <div class="action-buttons">
-                    <button type="button" class="action-btn action-btn-save" onclick="window.saveChanges()">
+                    <button type="button" class="action-btn action-btn-save" onclick="window.saveChanges(); window.autoSaveDraft();">
                         <i class="fa-solid fa-save"></i>
                         <span>Save Changes</span>
                     </button>
@@ -572,7 +575,7 @@ function finalizeSave(formDataObj, showAlert) {
     const prevData = JSON.parse(localStorage.getItem('enterprise-architecture-form') || '{}');
     Object.keys(prevData).forEach(key => {
         const val = prevData[key];
-        if (typeof val === 'string' && val.startsWith('data:')) {
+        if (typeof val === 'string' && (val.startsWith('data:') || val.startsWith('uploads/'))) {
             if (!(key in formDataObj) || formDataObj[key] === '') {
                 formDataObj[key] = val;
             }
@@ -617,8 +620,11 @@ window.loadSavedData = function() {
                     if (input) {
                         const val = formDataObj[key];
                         if (typeof val === 'string' && val.startsWith('data:')) {
-                            // This is a stored file (base64 data URL)
                             restoreFilePreview(input, val);
+                            restoredCount++;
+                        } else if (typeof val === 'string' && val.startsWith('uploads/')) {
+                            input.setAttribute('data-uploaded-path', val);
+                            showServerFileLink(input, val);
                             restoredCount++;
                         } else if (input.type === 'checkbox') {
                             input.checked = val === '1';
@@ -748,43 +754,57 @@ function getFileNameFromDataUrl(dataUrl) {
 // Navigate to page after saving
 window.navigateToPage = function(url) {
     console.log('navigateToPage called with url:', url);
+    // If in edit mode, rewrite URLs to stay in edit context
+    var editId = localStorage.getItem('edit_project_id');
+    if (editId) {
+        url = url.replace('proposed-ict-strategy/', 'edit-ict-project/' + editId + '/');
+        if (url.indexOf('employee/dashboard') !== -1) {
+            url = '<?= site_url('employee/draft-ict-projects') ?>';
+        }
+    }
     const form = document.querySelector('#mainForm');
     if (form) {
         const formData = new FormData(form);
         const formDataObj = {};
         const fileReads = [];
-        formData.forEach((value, key) => {
-            if (value instanceof File && value.name) {
-                fileReads.push(
-                    new Promise(resolve => {
-                        const reader = new FileReader();
-                        reader.onload = () => {
-                            const dataUrl = reader.result;
-                            const b64Idx = dataUrl.indexOf(';base64,');
-                            if (b64Idx !== -1) {
-                                const beforeBase64 = dataUrl.substring(0, b64Idx);
-                                const afterBase64 = dataUrl.substring(b64Idx);
-                                formDataObj[key] = beforeBase64 + ';name=' + encodeURIComponent(value.name) + afterBase64;
-                            } else {
-                                const parts = dataUrl.split(',');
-                                formDataObj[key] = parts[0] + ';name=' + encodeURIComponent(value.name) + ',' + parts.slice(1).join(',');
-                            }
-                            resolve();
-                        };
-                        reader.readAsDataURL(value);
-                    })
-                );
-            } else {
-                formDataObj[key] = value;
-            }
-        });
+            formData.forEach((value, key) => {
+                if (value instanceof File && value.name) {
+                    var fileInput = form.querySelector('[name="' + key + '"]');
+                    var uploadedPath = fileInput ? fileInput.getAttribute('data-uploaded-path') : null;
+                    if (uploadedPath) {
+                        formDataObj[key] = uploadedPath;
+                    } else {
+                        fileReads.push(
+                        new Promise(resolve => {
+                            const reader = new FileReader();
+                            reader.onload = () => {
+                                const dataUrl = reader.result;
+                                const b64Idx = dataUrl.indexOf(';base64,');
+                                if (b64Idx !== -1) {
+                                    const beforeBase64 = dataUrl.substring(0, b64Idx);
+                                    const afterBase64 = dataUrl.substring(b64Idx);
+                                    formDataObj[key] = beforeBase64 + ';name=' + encodeURIComponent(value.name) + afterBase64;
+                                } else {
+                                    const parts = dataUrl.split(',');
+                                    formDataObj[key] = parts[0] + ';name=' + encodeURIComponent(value.name) + ',' + parts.slice(1).join(',');
+                                }
+                                resolve();
+                            };
+                            reader.readAsDataURL(value);
+                        })
+                    );
+                    }
+                } else {
+                    formDataObj[key] = value;
+                }
+            });
         const doNav = () => {
             // Merge with previous localStorage data to preserve file previews
             const prevData = JSON.parse(localStorage.getItem('enterprise-architecture-form') || '{}');
             Object.keys(prevData).forEach(key => {
                 if (!(key in formDataObj)) {
                     const val = prevData[key];
-                    if (typeof val === 'string' && val.startsWith('data:')) {
+                    if (typeof val === 'string' && (val.startsWith('data:') || val.startsWith('uploads/'))) {
                         formDataObj[key] = val;
                     }
                 }

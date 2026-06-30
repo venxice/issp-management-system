@@ -339,8 +339,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         var newProjBackup = {};
                         var formKeys = ['network-infrastructure-form','enterprise-architecture-form','ict-human-capital-form','information-systems-form','ict-projects-form','performance-measurement-form'];
                         formKeys.forEach(function(k) {
-                            var val = localStorage.getItem(k);
-                            if (val) newProjBackup[k] = val;
+                            newProjBackup[k] = localStorage.getItem(k) || '';
                         });
                         localStorage.clear();
                         // Save backup AFTER clear so it persists
