@@ -18,13 +18,6 @@ class AuthSeeder extends Seeder
         ], $now);
 
         $this->upsertRole([
-            'name'        => 'Department Head',
-            'slug'        => 'department_head',
-            'description' => 'Reviews department submissions and monitors assigned work.',
-            'is_system'   => 1,
-        ], $now);
-
-        $this->upsertRole([
             'name'        => 'Director General',
             'slug'        => 'director_general',
             'description' => 'Views consolidated planning and management summaries.',

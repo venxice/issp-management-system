@@ -11,7 +11,7 @@
 
 <div class="row g-2 mb-2">
     <?php foreach ($stats as $index => $stat): ?>
-        <div class="col-md-6 col-xl-3">
+        <div class="col-3">
             <div class="stat-card <?= $index === 1 ? 'stat-card-alt' : ($index === 2 ? 'stat-card-soft' : ($index === 3 ? 'stat-card-muted' : '')) ?>">
                 <div><div class="label"><?= esc($stat['label']) ?></div><div class="value"><?= esc($stat['value']) ?></div></div>
                 <div class="stat-icon"><i class="fa-solid <?= esc($stat['icon']) ?>"></i></div>

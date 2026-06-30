@@ -244,6 +244,15 @@ $isIsspPage = strpos($currentPage, 'proposed-ict-strategy') !== false ||
 
 <script>
 function updateStatusIndicators() {
+    var skipFields = {
+        'network-infrastructure-form': ['dept_network_diagram','regional_network_diagram'],
+        'enterprise-architecture-form': ['ea_diagram'],
+        'ict-human-capital-form': [],
+        'information-systems-form': [],
+        'ict-projects-form': [],
+        'performance-measurement-form': []
+    };
+
     var path = window.location.pathname;
     var isFormPage = path.indexOf('/proposed-ict-strategy/') >= 0 || path.indexOf('/edit-ict-project/') >= 0;
     if (!isFormPage) return;
@@ -257,15 +266,20 @@ function updateStatusIndicators() {
             const data = localStorage.getItem(storageKey);
             if (data) {
                 const parsed = JSON.parse(data);
-                // Count only real user-filled fields (exclude CSRF/tokens and empty values)
-                const filledFields = Object.entries(parsed).filter(([key, v]) => {
-                    if (key.startsWith('csrf_') || key === '_token') return false;
-                    if (typeof v !== 'string') return false;
-                    return v.trim() !== '';
-                }).length;
-                if (filledFields > 5) {
+                var totalReal = 0;
+                var emptyReal = 0;
+                var skip = skipFields[storageKey] || [];
+                Object.entries(parsed).forEach(([key, v]) => {
+                    if (key.startsWith('csrf_') || key === '_token') return;
+                    if (skip.indexOf(key) >= 0) return;
+                    if (typeof v !== 'string') return;
+                    totalReal++;
+                    if (v.trim() === '') emptyReal++;
+                });
+                var filledCount = totalReal - emptyReal;
+                if (totalReal > 0 && filledCount / totalReal >= 0.8) {
                     indicator.className = 'status-indicator complete';
-                } else if (filledFields > 0) {
+                } else if (filledCount > 0) {
                     indicator.className = 'status-indicator in-progress';
                 } else {
                     indicator.className = 'status-indicator not-started';
@@ -420,7 +434,57 @@ function saveDraft() {
     });
 }
 
+function areAllFormsComplete() {
+    var sections = {
+        'network-infrastructure-form': { label: 'Network Infrastructure', skip: ['dept_network_diagram','regional_network_diagram'] },
+        'enterprise-architecture-form': { label: 'Enterprise Architecture', skip: ['ea_diagram'] },
+        'ict-human-capital-form': { label: 'ICT Human Capital', skip: [] },
+        'information-systems-form': { label: 'Information Systems', skip: [] },
+        'ict-projects-form': { label: 'ICT Projects', skip: [] },
+        'performance-measurement-form': { label: 'Performance Measurement', skip: [] }
+    };
+
+    // Special check: ict-projects must have a title
+    try {
+        var ictProjects = JSON.parse(localStorage.getItem('ict-projects-form'));
+        if (!ictProjects || !ictProjects.internal_project_title || ictProjects.internal_project_title.trim() === '') {
+            return { valid: false, message: 'ICT Project Title is required in the ICT Projects section.' };
+        }
+    } catch(e) {
+        return { valid: false, message: 'ICT Projects section is empty. Please fill in required fields.' };
+    }
+
+    for (var key in sections) {
+        var section = sections[key];
+        try {
+            var data = JSON.parse(localStorage.getItem(key));
+            if (!data) {
+                return { valid: false, message: section.label + ' section is empty. Please fill in required fields.' };
+            }
+            for (var field in data) {
+                if (field.startsWith('csrf_') || field === '_token') continue;
+                if (section.skip.indexOf(field) >= 0) continue;
+                // Checkboxes/radios that are unchecked are not in FormData, skip them
+                // Only check text-like values
+                if (typeof data[field] === 'string' && data[field].trim() === '') {
+                    return { valid: false, message: section.label + ' section has empty fields. Please fill in all fields before submitting.' };
+                }
+            }
+        } catch(e) {
+            return { valid: false, message: section.label + ' section has invalid data. Please check and save again.' };
+        }
+    }
+
+    return { valid: true };
+}
+
 function submitISSP() {
+    var check = areAllFormsComplete();
+    if (!check.valid) {
+        showAlertModal('Incomplete Form', check.message);
+        return;
+    }
+
     // Show confirmation modal
     showConfirmModal('Are you sure you want to submit your ISSP for review? This action cannot be undone.', function() {
         const submitBtn = document.getElementById('submitIsspBtn');

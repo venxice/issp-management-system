@@ -87,6 +87,11 @@ $routes->group('employee', ['filter' => 'role:employee'], static function (Route
 $routes->group('ict-planner', ['filter' => 'role:ict_planner'], static function (RouteCollection $routes): void {
 
     $routes->get('dashboard', 'IctPlanner\DashboardController::index');
+    $routes->get('consolidation', 'IctPlanner\ConsolidationController::index');
+    $routes->post('endorse/(:num)', 'IctPlanner\DashboardController::endorse/$1');
+    $routes->get('view-full/(:num)', 'IctPlanner\ConsolidationController::viewFull/$1');
+    $routes->get('download/(:num)', 'IctPlanner\ConsolidationController::download/$1');
+    $routes->post('download-batch', 'IctPlanner\ConsolidationController::batchDownload');
 
     // Resource Requirements Routes
     $routes->group('resource-requirements', static function (RouteCollection $routes): void {
@@ -128,6 +133,3 @@ $routes->group('employee', ['filter' => 'role:employee'], static function (Route
     $routes->get('dashboard', 'DashboardController::index');
 });
 
-$routes->group('ict-planner', ['filter' => 'role:ict_planner'], static function (RouteCollection $routes): void {
-    $routes->get('dashboard', 'DashboardController::index');
-});

@@ -11,6 +11,16 @@ use App\Models\UserModel;
 
 class UsersController extends BaseController
 {
+    private function allowedRoles(): array
+    {
+        return (new RoleModel())->whereIn('slug', [
+            'admin',
+            'director_general',
+            'ict_planner',
+            'employee',
+        ])->orderBy('LOWER(name)', 'ASC')->findAll();
+    }
+
     public function index()
     {
         $query = trim((string) $this->request->getGet('q'));
@@ -50,13 +60,12 @@ class UsersController extends BaseController
             'users' => $users,
             'query' => $query,
             'departmentFilter' => $department,
-            'roles' => (new RoleModel())->orderBy('LOWER(name)', 'ASC')->findAll(),
+            'roles' => $this->allowedRoles(),
             'departments' => (new DepartmentModel())->orderBy('LOWER(name)', 'ASC')->findAll(),
             'positions' => (new PositionModel())->orderBy('LOWER(name)', 'ASC')->findAll(),
             'pager' => $pager,
             'total' => $total,
             'perPage' => $perPage,
-            'currentPage' => $page,
         ]);
     }
 
@@ -66,7 +75,7 @@ class UsersController extends BaseController
             'title' => 'Create User',
             'active' => 'users',
             'user' => null,
-            'roles' => (new RoleModel())->orderBy('LOWER(name)', 'ASC')->findAll(),
+            'roles' => $this->allowedRoles(),
             'departments' => (new DepartmentModel())->orderBy('LOWER(name)', 'ASC')->findAll(),
             'positions' => (new PositionModel())->orderBy('LOWER(name)', 'ASC')->findAll(),
         ]);
@@ -127,7 +136,7 @@ class UsersController extends BaseController
             'title' => 'Edit User',
             'active' => 'users',
             'user' => $user,
-            'roles' => (new RoleModel())->orderBy('LOWER(name)', 'ASC')->findAll(),
+            'roles' => $this->allowedRoles(),
             'departments' => (new DepartmentModel())->orderBy('LOWER(name)', 'ASC')->findAll(),
             'positions' => (new PositionModel())->orderBy('LOWER(name)', 'ASC')->findAll(),
         ]);

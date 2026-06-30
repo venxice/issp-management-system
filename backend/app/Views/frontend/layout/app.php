@@ -678,8 +678,8 @@ $active = $active ?? '';
             color: #fff;
         }
         .badge-status-pending {
-            background: #c9953b;
-            color: #fff;
+            background: #fef7e0;
+            color: #8a6d1e;
         }
         .badge-status-approved {
             background: #4a8c5c;
@@ -1201,6 +1201,57 @@ $active = $active ?? '';
                 width: 32px;
             }
         }
+
+        /* ==================== RESPONSIVE FORM PAGES ==================== */
+        @media (max-width: 768px) {
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 4px;
+            }
+            .page-header .page-title { font-size: 1.1rem; }
+            .page-header .page-subtitle { font-size: .78rem; }
+            .row.g-3 { --bs-gutter-y: .6rem; }
+            .file-upload-area { padding: 16px; }
+            .form-section-label { font-size: .85rem; }
+            .subsection-body { padding: 12px; }
+            .subsection-header { flex-wrap: wrap; gap: 6px; }
+            .system-card-body { padding: 14px; }
+            .project-tabs { overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; }
+            .project-tab { padding: 10px 14px; font-size: .8rem; white-space: nowrap; }
+            .summary-card { padding: 12px; }
+            .summary-card h3 { font-size: 1.5rem; }
+        }
+
+        @media (max-width: 575px) {
+            .page-header .page-title { font-size: 1rem; }
+            .page-header .page-subtitle { font-size: .72rem; display: none; }
+            .section-card .section-body,
+            .main-section-card > div,
+            .subsection-card .subsection-body { padding: 12px; }
+            .row.g-3 { --bs-gutter-y: .4rem; }
+            .file-upload-area { padding: 12px; }
+            .file-upload-area i { font-size: 1.2rem; }
+            .file-upload-area p { font-size: .72rem; }
+            .form-section-label { font-size: .8rem; padding-bottom: 6px; }
+            .system-card-body { padding: 10px; }
+            .summary-card { padding: 10px; }
+            .summary-card h3 { font-size: 1.25rem; }
+            .summary-card p { font-size: .68rem; }
+            .category-header { flex-direction: column; align-items: flex-start; gap: 4px; }
+            .control-item { flex-wrap: wrap; gap: 6px; }
+            .checklist-container { padding: 12px; }
+            .checkbox-group { gap: 8px; }
+            .project-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+            .project-tab { padding: 8px 10px; font-size: .74rem; }
+            .system-card-header { flex-direction: column; gap: 6px; }
+            .subsection-body { padding: 10px; }
+            .main-header { padding: 12px 14px; }
+            .main-header .main-title { font-size: 1rem; }
+            .section-header { padding: 12px 14px; flex-direction: column; align-items: flex-start; gap: 4px; }
+            .section-header .section-title { font-size: .88rem; }
+            .page-header { gap: 2px; }
+        }
     </style>
     <?= $this->renderSection('styles') ?>
 </head>
@@ -1497,6 +1548,29 @@ window.showServerFileLink = function(input, filePath) {
     preview.appendChild(link);
     input.parentElement.appendChild(preview);
 };
+
+// Clean up stale edit data when loading a new project page
+(function() {
+    var path = window.location.pathname;
+    if (path.indexOf('/proposed-ict-strategy/') >= 0 && path.indexOf('/edit-ict-project/') < 0) {
+        var editId = localStorage.getItem('edit_project_id');
+        if (editId) {
+            var formKeys = ['network-infrastructure-form','enterprise-architecture-form','ict-human-capital-form','information-systems-form','ict-projects-form','performance-measurement-form'];
+            formKeys.forEach(function(k) { localStorage.removeItem(k); });
+            var backup = localStorage.getItem('new-project-backup');
+            if (backup) {
+                try {
+                    var parsed = JSON.parse(backup);
+                    Object.keys(parsed).forEach(function(k) {
+                        if (parsed[k]) localStorage.setItem(k, parsed[k]);
+                    });
+                } catch(e) {}
+                localStorage.removeItem('new-project-backup');
+            }
+            localStorage.removeItem('edit_project_id');
+        }
+    }
+})();
 </script>
 </body>
 </html>
