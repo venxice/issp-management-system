@@ -276,14 +276,14 @@ function saveEditDraft() {
 }
 
 function areAllFormsComplete() {
-    var keys = [
-        'network-infrastructure-form',
-        'enterprise-architecture-form',
-        'ict-human-capital-form',
-        'information-systems-form',
-        'ict-projects-form',
-        'performance-measurement-form'
-    ];
+    var sections = {
+        'network-infrastructure-form': { label: 'Network Infrastructure', skip: ['dept_network_diagram','regional_network_diagram'] },
+        'enterprise-architecture-form': { label: 'Enterprise Architecture', skip: ['ea_diagram'] },
+        'ict-human-capital-form': { label: 'ICT Human Capital', skip: [] },
+        'information-systems-form': { label: 'Information Systems', skip: [] },
+        'ict-projects-form': { label: 'ICT Projects', skip: [] },
+        'performance-measurement-form': { label: 'Performance Measurement', skip: [] }
+    };
 
     try {
         var ictProjects = JSON.parse(localStorage.getItem('ict-projects-form'));
@@ -291,31 +291,25 @@ function areAllFormsComplete() {
             return { valid: false, message: 'ICT Project Title is required in the ICT Projects section.' };
         }
     } catch(e) {
-        return { valid: false, message: 'ICT Projects section is empty. Please fill in at least the project title.' };
+        return { valid: false, message: 'ICT Projects section is empty. Please fill in required fields.' };
     }
 
-    for (var i = 0; i < keys.length; i++) {
+    for (var key in sections) {
+        var section = sections[key];
         try {
-            var data = JSON.parse(localStorage.getItem(keys[i]));
+            var data = JSON.parse(localStorage.getItem(key));
             if (!data) {
-                var section = keys[i].replace('-form', '').replace(/-/g, ' ').replace(/\b\w/g, function(l) { return l.toUpperCase(); });
-                return { valid: false, message: section + ' section is empty. Please fill in required fields.' };
+                return { valid: false, message: section.label + ' section is empty. Please fill in required fields.' };
             }
-            var hasValue = false;
-            for (var key in data) {
-                if (key.startsWith('csrf_') || key === '_token') continue;
-                if (typeof data[key] === 'string' && data[key].trim() !== '') {
-                    hasValue = true;
-                    break;
+            for (var field in data) {
+                if (field.startsWith('csrf_') || field === '_token') continue;
+                if (section.skip.indexOf(field) >= 0) continue;
+                if (typeof data[field] === 'string' && data[field].trim() === '') {
+                    return { valid: false, message: section.label + ' section has empty fields. Please fill in all fields before submitting.' };
                 }
             }
-            if (!hasValue) {
-                var section = keys[i].replace('-form', '').replace(/-/g, ' ').replace(/\b\w/g, function(l) { return l.toUpperCase(); });
-                return { valid: false, message: section + ' section is empty. Please fill in required fields.' };
-            }
         } catch(e) {
-            var section = keys[i].replace('-form', '').replace(/-/g, ' ').replace(/\b\w/g, function(l) { return l.toUpperCase(); });
-            return { valid: false, message: section + ' section has invalid data. Please check and save again.' };
+            return { valid: false, message: section.label + ' section has invalid data. Please check and save again.' };
         }
     }
 
@@ -383,15 +377,24 @@ function updateStatusIndicators() {
             var data = localStorage.getItem(storageKey);
             if (data) {
                 var parsed = JSON.parse(data);
-                var filledFields = Object.entries(parsed).filter(function(entry) {
+                var skip = ['dept_network_diagram','regional_network_diagram','ea_diagram'];
+                if (storageKey === 'network-infrastructure-form') skip = ['dept_network_diagram','regional_network_diagram'];
+                else if (storageKey === 'enterprise-architecture-form') skip = ['ea_diagram'];
+                else skip = [];
+                var totalReal = 0;
+                var emptyReal = 0;
+                Object.entries(parsed).forEach(function(entry) {
                     var key = entry[0], v = entry[1];
-                    if (key.startsWith('csrf_') || key === '_token') return false;
-                    if (typeof v !== 'string') return false;
-                    return v.trim() !== '';
-                }).length;
-                if (filledFields > 5) {
+                    if (key.startsWith('csrf_') || key === '_token') return;
+                    if (skip.indexOf(key) >= 0) return;
+                    if (typeof v !== 'string') return;
+                    totalReal++;
+                    if (v.trim() === '') emptyReal++;
+                });
+                var filledCount = totalReal - emptyReal;
+                if (totalReal > 0 && filledCount / totalReal >= 0.8) {
                     indicator.className = 'status-indicator complete';
-                } else if (filledFields > 0) {
+                } else if (filledCount > 0) {
                     indicator.className = 'status-indicator in-progress';
                 } else {
                     indicator.className = 'status-indicator not-started';

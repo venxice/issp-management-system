@@ -22,7 +22,7 @@
             </div>
             <div class="table-responsive mb-0">
                 <table class="table table-logs align-middle mb-0">
-                    <thead>
+<thead>
                     <tr>
                         <th>ICT Project Title</th>
                         <th>Description</th>
