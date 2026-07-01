@@ -36,17 +36,19 @@
 
 <div class="section-header">
 
-<h3 class="section-title">
-Summary of Investments
+        <h3 class="section-title">
+    Summary of Investments
+    <i
+        class="fas fa-question-circle text-white"
+        data-bs-toggle="tooltip"
+        data-bs-placement="right"
+        title="Consolidated 3-year budget review across all ICT expenditure categories.">
+    </i>
 </h3>
 
 </div>
 
 <div class="section-body">
-
-<p class="text-muted">
-Consolidated 3-year budget view across all ICT expenditure categories.
-</p>
 
 <div class="alert alert-success">
 
