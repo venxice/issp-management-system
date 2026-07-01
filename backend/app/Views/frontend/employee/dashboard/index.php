@@ -5,7 +5,7 @@
     ['label' => 'Submitted ICT Projects', 'value' => $submittedProjects, 'icon' => 'fa-folder-open'],
     ['label' => 'Approved ICT Projects', 'value' => $approvedProjects, 'icon' => 'fa-check-circle'],
     ['label' => 'Need Revision', 'value' => $needRevision, 'icon' => 'fa-exclamation-circle'],
-    ['label' => 'Total Budget', 'value' => '₱' . number_format($totalBudget, 2), 'icon' => 'fa-peso-sign'],
+    ['label' => 'Total Proposed Budget', 'value' => '₱' . number_format($totalBudget, 2), 'icon' => 'fa-peso-sign'],
 ];
 ?>
 
@@ -156,6 +156,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         Object.keys(data.form_data).forEach(function(key) {
                             localStorage.setItem(key, JSON.stringify(data.form_data[key]));
                         });
+                        localStorage.setItem('edit_project_id', id);
                         window.location.href = '<?= site_url('employee/edit-ict-project') ?>/' + id + '/network-infrastructure';
                     } else {
                         showAlertModal('Error', 'Error loading form data.');

@@ -802,8 +802,12 @@ $active = $active ?? '';
         .activity-summary {
             display: block;
             max-width: 100%;
+            max-height: 3.5em;
+            overflow-y: auto;
             white-space: normal;
             word-wrap: break-word;
+            font-size: inherit;
+            color: inherit;
         }
 
         .table {
@@ -1459,8 +1463,19 @@ window.autoSaveDraft = function() {
         try {
             var saved = localStorage.getItem(key);
             if (saved) data[key] = JSON.parse(saved);
-        } catch(e) {}
+            else data[key] = {};
+        } catch(e) {
+            data[key] = {};
+        }
     });
+
+    var projectTitle = data['ict-projects-form'] && data['ict-projects-form'].internal_project_title;
+    if (!projectTitle || !projectTitle.trim()) {
+        if (typeof showAlertModal === 'function') {
+            showAlertModal('Validation Error', 'Project title is required. Please go to the ICT Projects section and enter a title before saving.');
+        }
+        return;
+    }
 
     fetch('<?= site_url('employee/save-draft') ?>', {
         method: 'POST',
@@ -1540,9 +1555,9 @@ window.showServerFileLink = function(input, filePath) {
     preview.className = 'file-preview';
     preview.setAttribute('data-file-input', input.name);
     var link = document.createElement('a');
-    link.href = '<?= site_url() ?>/' + filePath;
-    link.target = '_blank';
-    link.textContent = filePath.split('/').pop() || 'Download file';
+    link.href = '<?= base_url() ?>/' + filePath;
+    link.download = filePath.split('/').pop();
+    link.textContent = 'Download: ' + (input.getAttribute('data-uploaded-name') || filePath.split('/').pop());
     link.style.display = 'block';
     link.style.padding = '4px 0';
     preview.appendChild(link);

@@ -280,9 +280,9 @@ function areAllFormsComplete() {
         'network-infrastructure-form': { label: 'Network Infrastructure', skip: ['dept_network_diagram','regional_network_diagram'] },
         'enterprise-architecture-form': { label: 'Enterprise Architecture', skip: ['ea_diagram'] },
         'ict-human-capital-form': { label: 'ICT Human Capital', skip: [] },
-        'information-systems-form': { label: 'Information Systems', skip: [] },
-        'ict-projects-form': { label: 'ICT Projects', skip: [] },
-        'performance-measurement-form': { label: 'Performance Measurement', skip: [] }
+        'information-systems-form': { label: 'Information Systems', skip: ['interop1_internal_system','interop1_external_system','online_link_1','system_usage_1','interop1_sub','owner_1','dev_strategy_1','platform_1','database_1','storage_1'] },
+        'ict-projects-form': { label: 'ICT Projects', skip: ['internal_strategic_others_text','cross_strategic_others_text'] },
+        'performance-measurement-form': { label: 'Performance Measurement', skip: ['cross_projects[1][kpi][intermediate][indicator]','cross_projects[1][kpi][intermediate][baseline]','cross_projects[1][kpi][intermediate][target]','cross_projects[1][kpi][intermediate][method]','cross_projects[1][kpi][intermediate][responsibility]','cross_projects[1][kpi][immediate][indicator]','cross_projects[1][kpi][immediate][baseline]','cross_projects[1][kpi][immediate][target]','cross_projects[1][kpi][immediate][method]','cross_projects[1][kpi][immediate][responsibility]','cross_projects[1][kpi][output][indicator]','cross_projects[1][kpi][output][baseline]','cross_projects[1][kpi][output][target]','cross_projects[1][kpi][output][method]','cross_projects[1][kpi][output][responsibility]'] }
     };
 
     try {

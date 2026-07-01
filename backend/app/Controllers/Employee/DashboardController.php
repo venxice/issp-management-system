@@ -17,10 +17,17 @@ class DashboardController extends BaseController
 
         $recentRecords = $isspRecordModel->getRecentRecordsByUser($currentUserId, 10);
 
-        $submittedProjects = count(array_filter($recentRecords, fn($r) => in_array($r['status'] ?? '', ['pending', 'approved', 'rejected'])));
-        $approvedProjects = count(array_filter($recentRecords, fn($r) => ($r['status'] ?? '') === 'approved'));
-        $needRevision = count(array_filter($recentRecords, fn($r) => ($r['status'] ?? '') === 'rejected'));
-        $totalBudget = array_sum(array_column($recentRecords, 'budget'));
+        $allUserRecords = $isspRecordModel->select('status, budget')
+            ->where('created_by', $currentUserId)
+            ->findAll();
+
+        $submittedProjects = count(array_filter($allUserRecords, fn($r) => $r['status'] !== 'draft'));
+        $approvedProjects = count(array_filter($allUserRecords, fn($r) => $r['status'] === 'approved'));
+        $needRevision = count(array_filter($allUserRecords, fn($r) => $r['status'] === 'rejected'));
+        $totalBudget = array_sum(array_column(
+            array_filter($allUserRecords, fn($r) => $r['status'] !== 'draft'),
+            'budget'
+        ));
 
         return view('frontend/employee/dashboard/index', [
             'title' => 'Employee Dashboard',
@@ -225,10 +232,18 @@ class DashboardController extends BaseController
             $formData = $json['form_data'] ?? [];
             $id = $json['id'] ?? null;
 
+            $title = $formData['ict-projects-form']['internal_project_title'] ?? ($json['title'] ?? '');
+            if (empty(trim($title))) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Project title is required.'
+                ]);
+            }
+
             if ($id) {
                 // Update existing draft
                 $isspRecordModel->update($id, [
-                    'title' => $formData['ict-projects-form']['internal_project_title'] ?? ($json['title'] ?? 'ISSP Draft'),
+                    'title' => $title,
                     'description' => $formData['ict-projects-form']['internal_description'] ?? '',
                     'budget' => $formData['ict-projects-form']['internal_total_cost'] ?? 0,
                     'form_data' => json_encode($formData),
@@ -238,7 +253,7 @@ class DashboardController extends BaseController
             } else {
                 // Create new draft
                 $id = $isspRecordModel->insert([
-                    'title' => $formData['ict-projects-form']['internal_project_title'] ?? 'ISSP Draft',
+                    'title' => $title,
                     'description' => $formData['ict-projects-form']['internal_description'] ?? '',
                     'budget' => $formData['ict-projects-form']['internal_total_cost'] ?? 0,
                     'department_id' => session()->get('department_id'),

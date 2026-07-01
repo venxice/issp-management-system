@@ -5,16 +5,23 @@
 <div class="row g-0">
     <div class="col-12">
         <section class="panel mb-0">
-            <div class="panel-header d-flex align-items-center gap-3">
+            <div class="panel-header d-flex align-items-center gap-3 flex-wrap">
                 <div>
                     <h2 class="panel-title">All Submissions</h2>
                     <p class="panel-subtitle">Consolidated list of all ISSP project submissions.</p>
                 </div>
-                <div class="ms-auto">
+                <form class="d-flex align-items-center toolbar-form ms-auto" method="get" action="<?= site_url('ict-planner/consolidation') ?>">
+                    <input class="form-control form-control-sm" name="q" value="<?= esc($query ?? '') ?>" placeholder="Search projects, users, departments">
+                    <div class="position-relative date-range-picker-wrapper">
+                        <input class="form-control form-control-sm" name="date_range" type="text" value="<?= esc($date_range ?? '') ?>" placeholder="" id="dateRangePicker" readonly>
+                        <button type="button" class="date-picker-icon-btn" id="datePickerToggleBtn">
+                            <i class="fa-solid fa-calendar-days"></i>
+                        </button>
+                    </div>
                     <button class="btn btn-sm btn-outline-primary" type="button" id="selectAllBtn" onclick="toggleSelectAll()">
                         <i class="fa-regular fa-square me-1"></i> Select All
                     </button>
-                </div>
+                </form>
             </div>
             <div id="bulkBar" class="bulk-bar" style="display:none;">
                 <div class="bulk-bar-inner">
@@ -100,6 +107,54 @@
                     </table>
                 </div>
             </form>
+
+            <?php if ($pager && $total > $perPage): ?>
+            <div class="d-flex justify-content-between align-items-center mt-3 px-3 pb-3">
+                <div class="text-muted" style="font-size:.8rem;">
+                    Showing <?= ($currentPage - 1) * $perPage + 1 ?> to <?= min($currentPage * $perPage, $total) ?> of <?= $total ?> entries
+                </div>
+                <nav>
+                    <ul class="pagination mb-0">
+                        <?php if ($currentPage > 1): ?>
+                        <li class="page-item">
+                            <a class="page-link" href="<?= site_url('ict-planner/consolidation') ?>?<?= http_build_query(array_filter(['q' => $query, 'date_range' => $date_range, 'page' => $currentPage - 1])) ?>">Previous</a>
+                        </li>
+                        <?php endif; ?>
+
+                        <?php
+                        $totalPages = (int) ceil($total / $perPage);
+                        $startPage = max(1, $currentPage - 2);
+                        $endPage = min($totalPages, $currentPage + 2);
+
+                        if ($startPage > 1): ?>
+                            <li class="page-item"><a class="page-link" href="<?= site_url('ict-planner/consolidation') ?>?<?= http_build_query(array_filter(['q' => $query, 'date_range' => $date_range, 'page' => 1])) ?>">1</a></li>
+                            <?php if ($startPage > 2): ?>
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                            <?php endif; ?>
+                        <?php endif; ?>
+
+                        <?php for ($i = $startPage; $i <= $endPage; $i++): ?>
+                            <li class="page-item <?= $i === $currentPage ? 'active' : '' ?>">
+                                <a class="page-link" href="<?= site_url('ict-planner/consolidation') ?>?<?= http_build_query(array_filter(['q' => $query, 'date_range' => $date_range, 'page' => $i])) ?>"><?= $i ?></a>
+                            </li>
+                        <?php endfor; ?>
+
+                        <?php if ($endPage < $totalPages): ?>
+                            <?php if ($endPage < $totalPages - 1): ?>
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                            <?php endif; ?>
+                            <li class="page-item"><a class="page-link" href="<?= site_url('ict-planner/consolidation') ?>?<?= http_build_query(array_filter(['q' => $query, 'date_range' => $date_range, 'page' => $totalPages])) ?>"><?= $totalPages ?></a></li>
+                        <?php endif; ?>
+
+                        <?php if ($currentPage < $totalPages): ?>
+                        <li class="page-item">
+                            <a class="page-link" href="<?= site_url('ict-planner/consolidation') ?>?<?= http_build_query(array_filter(['q' => $query, 'date_range' => $date_range, 'page' => $currentPage + 1])) ?>">Next</a>
+                        </li>
+                        <?php endif; ?>
+                    </ul>
+                </nav>
+            </div>
+            <?php endif; ?>
         </section>
     </div>
 </div>
@@ -126,6 +181,10 @@
     font-weight: 700;
 }
 
+.toolbar-form {
+    gap: 8px;
+}
+
 .modal-content { border-radius: 14px; overflow: hidden; border: 1px solid #e9ecef; background: #fff; }
 .modal-header { background: #536783; border-bottom: none; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; }
 .modal-title { font-size: 1.1rem; font-weight: 700; color: #fff; margin: 0; }
@@ -134,6 +193,98 @@
 .detail-grid { display: grid; grid-template-columns: 170px 1fr; gap: 12px 18px; }
 .key { font-size: .8rem; color: #6c757d; font-weight: 600; }
 .val { font-size: .9rem; color: #212529; word-break: break-word; }
+
+.date-range-picker-wrapper {
+    width: 42px;
+    flex-shrink: 0;
+}
+
+.date-range-picker-wrapper input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.date-picker-icon-btn {
+    background: #4f6584;
+    border: none;
+    color: #fff;
+    width: 38px;
+    height: 28px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    transition: background-color 0.2s ease;
+}
+
+.date-picker-icon-btn:hover {
+    background: #344863;
+}
+
+.date-picker-icon-btn i {
+    font-size: 0.8rem;
+}
+
+.flatpickr-calendar {
+    font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    border: 1px solid #d9e0ea;
+    border-radius: 10px;
+    box-shadow: 0 12px 26px rgba(15, 23, 42, .1);
+}
+
+.flatpickr-day.selected,
+.flatpickr-day.startRange,
+.flatpickr-day.endRange,
+.flatpickr-day.selected.inRange,
+.flatpickr-day.startRange.inRange,
+.flatpickr-day.endRange.inRange,
+.flatpickr-day.selected:focus,
+.flatpickr-day.startRange:focus,
+.flatpickr-day.endRange:focus,
+.flatpickr-day.selected:hover,
+.flatpickr-day.startRange:hover,
+.flatpickr-day.endRange:hover,
+.flatpickr-day.selected.prevMonthDay,
+.flatpickr-day.startRange.prevMonthDay,
+.flatpickr-day.endRange.prevMonthDay,
+.flatpickr-day.selected.nextMonthDay,
+.flatpickr-day.startRange.nextMonthDay,
+.flatpickr-day.endRange.nextMonthDay {
+    background: #4f6584;
+    border-color: #4f6584;
+}
+
+.flatpickr-day.inRange,
+.flatpickr-day.prevMonthDay.inRange,
+.flatpickr-day.nextMonthDay.inRange,
+.flatpickr-day.today.inRange,
+.flatpickr-day.prevMonthDay.today.inRange,
+.flatpickr-day.nextMonthDay.today.inRange,
+.flatpickr-day:hover,
+.flatpickr-day.prevMonthDay:hover,
+.flatpickr-day.nextMonthDay:hover,
+.flatpickr-day:focus,
+.flatpickr-day.prevMonthDay:focus,
+.flatpickr-day.nextMonthDay:focus {
+    background: rgba(79, 101, 132, 0.15);
+    border-color: rgba(79, 101, 132, 0.15);
+}
+
+.flatpickr-months .flatpickr-month,
+.flatpickr-current-month .flatpickr-monthDropdown-months,
+.flatpickr-current-month input.cur-year {
+    font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 600;
+}
+
+.flatpickr-weekday {
+    font-weight: 600;
+}
+
+.flatpickr-day.today {
+    border-color: #4f6584;
+}
 </style>
 
 <div class="custom-modal" id="viewProjectModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;z-index:1060;align-items:center;justify-content:center;">
@@ -235,6 +386,44 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+
+    var form = document.querySelector('.toolbar-form');
+    var searchInput = form ? form.querySelector('input[name="q"]') : null;
+    if (searchInput) {
+        searchInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                form.submit();
+            }
+        });
+    }
+
+    var dateRangeInput = document.getElementById('dateRangePicker');
+    var datePickerToggleBtn = document.getElementById('datePickerToggleBtn');
+    if (dateRangeInput && datePickerToggleBtn) {
+        var fp = flatpickr(dateRangeInput, {
+            mode: 'range',
+            dateFormat: 'Y-m-d',
+            position: 'auto',
+            static: false,
+            positionElement: datePickerToggleBtn,
+            onChange: function(selectedDates, dateStr, instance) {
+                if (selectedDates.length === 2) {
+                    form.submit();
+                }
+            }
+        });
+
+        datePickerToggleBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (fp.isOpen) {
+                fp.close();
+            } else {
+                fp.open();
+            }
+        });
+    }
 });
 </script>
 
