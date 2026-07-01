@@ -43,7 +43,7 @@ class AuditLogsController extends BaseController
             ->join('roles', 'roles.id = users.role_id', 'left')
             ->join('departments', 'departments.id = users.department_id', 'left')
             ->join('positions', 'positions.id = users.position_id', 'left')
-            ->whereNotIn('logs.action', ['login', 'logout'])
+            ->whereNotIn('logs.action', ['login', 'logout', 'dashboard.viewed'])
             ->orderBy('logs.created_at', 'DESC');
 
         $total = $builder->countAllResults(false);

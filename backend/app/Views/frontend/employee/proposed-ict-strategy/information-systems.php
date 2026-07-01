@@ -899,7 +899,7 @@
         <div class="col-12">
             <div class="footer-actions">
                 <div class="action-buttons">
-                    <button type="button" class="action-btn action-btn-save" onclick="window.saveChanges(); window.autoSaveDraft();">
+                    <button type="button" class="action-btn action-btn-save" onclick="window.saveChanges().then(function() { window.autoSaveDraft(); });">
                         <i class="fa-solid fa-save"></i>
                         <span>Save Changes</span>
                     </button>
@@ -997,55 +997,61 @@ window.clearForm = function() {
 
 // Save changes to localStorage (supports file persistence)
 window.saveChanges = function(showAlert = true) {
-    console.log('saveChanges called with showAlert:', showAlert);
-    try {
-        const form = document.querySelector('#mainForm');
-        if (form) {
-            const formData = new FormData(form);
-            const formDataObj = {};
-            const fileReads = [];
-            
-            formData.forEach((value, key) => {
-                if (value instanceof File && value.name) {
-                    fileReads.push(
-                        new Promise(resolve => {
-                            const reader = new FileReader();
-                            reader.onload = () => {
-                                const dataUrl = reader.result;
-                                const b64Idx = dataUrl.indexOf(';base64,');
-                                if (b64Idx !== -1) {
-                                    const beforeBase64 = dataUrl.substring(0, b64Idx);
-                                    const afterBase64 = dataUrl.substring(b64Idx);
-                                    formDataObj[key] = beforeBase64 + ';name=' + encodeURIComponent(value.name) + afterBase64;
-                                } else {
-                                    const parts = dataUrl.split(',');
-                                    formDataObj[key] = parts[0] + ';name=' + encodeURIComponent(value.name) + ',' + parts.slice(1).join(',');
-                                }
-                                resolve();
-                            };
-                            reader.readAsDataURL(value);
-                        })
-                    );
-                } else {
-                    formDataObj[key] = value;
-                }
-            });
-            
-            if (fileReads.length > 0) {
-                Promise.all(fileReads).then(() => {
-                    finalizeSave(formDataObj, showAlert);
+    return new Promise(function(resolve) {
+        console.log('saveChanges called with showAlert:', showAlert);
+        try {
+            const form = document.querySelector('#mainForm');
+            if (form) {
+                const formData = new FormData(form);
+                const formDataObj = {};
+                const fileReads = [];
+                
+                formData.forEach((value, key) => {
+                    if (value instanceof File && value.name) {
+                        fileReads.push(
+                            new Promise(resolve => {
+                                const reader = new FileReader();
+                                reader.onload = () => {
+                                    const dataUrl = reader.result;
+                                    const b64Idx = dataUrl.indexOf(';base64,');
+                                    if (b64Idx !== -1) {
+                                        const beforeBase64 = dataUrl.substring(0, b64Idx);
+                                        const afterBase64 = dataUrl.substring(b64Idx);
+                                        formDataObj[key] = beforeBase64 + ';name=' + encodeURIComponent(value.name) + afterBase64;
+                                    } else {
+                                        const parts = dataUrl.split(',');
+                                        formDataObj[key] = parts[0] + ';name=' + encodeURIComponent(value.name) + ',' + parts.slice(1).join(',');
+                                    }
+                                    resolve();
+                                };
+                                reader.readAsDataURL(value);
+                            })
+                        );
+                    } else {
+                        formDataObj[key] = value;
+                    }
                 });
+                
+                if (fileReads.length > 0) {
+                    Promise.all(fileReads).then(() => {
+                        finalizeSave(formDataObj, showAlert);
+                        resolve();
+                    });
+                } else {
+                    finalizeSave(formDataObj, showAlert);
+                    resolve();
+                }
             } else {
-                finalizeSave(formDataObj, showAlert);
+                console.error('Form #mainForm not found');
+                if (showAlert) showAlertModal('Error', 'Error: Form not found');
+                resolve();
             }
-        } else {
-            console.error('Form #mainForm not found');
-            if (showAlert) showAlertModal('Error', 'Error: Form not found');
+        } catch (error) {
+            console.error('Error in saveChanges:', error);
+            if (showAlert) showAlertModal('Error', 'Error saving changes: ' + error.message);
+            resolve();
         }
-    } catch (error) {
-        console.error('Error in saveChanges:', error);
-        if (showAlert) showAlertModal('Error', 'Error saving changes: ' + error.message);
-    }
+    });
 };
 
 function finalizeSave(formDataObj, showAlert) {
@@ -1056,6 +1062,16 @@ function finalizeSave(formDataObj, showAlert) {
             const val = prevData[key];
             if (typeof val === 'string' && (val.startsWith('data:') || val.startsWith('uploads/'))) {
                 formDataObj[key] = val;
+            }
+        }
+    });
+    
+    // Remove empty values from hidden elements (e.g. Others textbox when "Others" not checked)
+    Object.keys(formDataObj).forEach(key => {
+        if (formDataObj[key] === '') {
+            const el = document.querySelector(`[name="${key}"]`);
+            if (el && el.offsetParent === null) {
+                delete formDataObj[key];
             }
         }
     });
@@ -1119,7 +1135,7 @@ window.loadSavedData = function() {
                             showServerFileLink(input, val);
                             restoredCount++;
                         } else if (input.type === 'checkbox') {
-                            input.checked = val === '1' || val === true;
+                            input.checked = val === '1' || val === 'on' || val === true;
                             restoredCount++;
                         } else if (input.type === 'radio') {
                             const radio = form.querySelector(`[name="${key}"][value="${val}"]`);
@@ -1285,6 +1301,15 @@ window.navigateToPage = function(url) {
                     const val = prevData[key];
                     if (typeof val === 'string' && (val.startsWith('data:') || val.startsWith('uploads/'))) {
                         formDataObj[key] = val;
+                    }
+                }
+            });
+            // Remove empty values from hidden elements
+            Object.keys(formDataObj).forEach(key => {
+                if (formDataObj[key] === '') {
+                    const el = document.querySelector(`[name="${key}"]`);
+                    if (el && el.offsetParent === null) {
+                        delete formDataObj[key];
                     }
                 }
             });

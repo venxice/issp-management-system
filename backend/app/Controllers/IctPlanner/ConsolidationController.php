@@ -9,28 +9,50 @@ class ConsolidationController extends BaseController
 {
     public function index()
     {
+        $query = trim((string) $this->request->getGet('q'));
+        $dateRange = trim((string) $this->request->getGet('date_range'));
+        $page = (int) ($this->request->getGet('page') ?? 1);
+        $perPage = 25;
+
         $isspModel = new ISspRecordModel();
 
-        $projects = $isspModel
+        if ($query !== '') {
+            $isspModel->groupStart()
+                ->like('issp_records.title', $query)
+                ->orLike('users.name', $query)
+                ->orLike('departments.name', $query)
+                ->groupEnd();
+        }
+
+        if ($dateRange !== '') {
+            $dates = explode(' to ', $dateRange);
+            if (count($dates) === 2) {
+                $isspModel->where('issp_records.created_at >=', trim($dates[0]) . ' 00:00:00')
+                    ->where('issp_records.created_at <=', trim($dates[1]) . ' 23:59:59');
+            }
+        }
+
+        $builder = $isspModel
             ->select('issp_records.*, departments.name AS department_name, users.name AS created_by_name')
             ->join('departments', 'departments.id = issp_records.department_id', 'left')
             ->join('users', 'users.id = issp_records.created_by', 'left')
             ->where('issp_records.status !=', 'draft')
-            ->orderBy('issp_records.created_at', 'DESC')
-            ->findAll();
+            ->orderBy('issp_records.created_at', 'DESC');
 
-        $stats = [
-            'total' => count($projects),
-            'pending' => count(array_filter($projects, fn($p) => $p['status'] === 'pending')),
-            'endorsed' => count(array_filter($projects, fn($p) => $p['status'] === 'endorsed')),
-            'approved' => count(array_filter($projects, fn($p) => $p['status'] === 'approved')),
-        ];
+        $total = $builder->countAllResults(false);
+        $projects = $builder->paginate($perPage, 'default', $page);
+        $pager = $isspModel->pager;
 
         return view('frontend/ict_planner/consolidation/index', [
             'title' => 'Consolidation',
             'active' => 'consolidation',
             'projects' => $projects,
-            'stats' => $stats,
+            'query' => $query,
+            'date_range' => $dateRange,
+            'pager' => $pager,
+            'total' => $total,
+            'perPage' => $perPage,
+            'currentPage' => $page,
         ]);
     }
 

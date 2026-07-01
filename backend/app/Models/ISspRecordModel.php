@@ -27,7 +27,7 @@ class ISspRecordModel extends Model
         return $this->select('issp_records.*, departments.name AS department_name')
             ->join('departments', 'departments.id = issp_records.department_id', 'left')
             ->where('issp_records.created_by', $userId)
-            ->orderBy('issp_records.created_at', 'DESC')
+            ->orderBy('COALESCE(issp_records.updated_at, issp_records.created_at)', 'DESC', false)
             ->limit($limit)
             ->findAll();
     }
@@ -37,7 +37,7 @@ class ISspRecordModel extends Model
         return $this->select('issp_records.*, departments.name AS department_name, users.name AS created_by_name')
             ->join('departments', 'departments.id = issp_records.department_id', 'left')
             ->join('users', 'users.id = issp_records.created_by', 'left')
-            ->orderBy('issp_records.created_at', 'DESC')
+            ->orderBy('COALESCE(issp_records.updated_at, issp_records.created_at)', 'DESC', false)
             ->limit($limit)
             ->findAll();
     }
@@ -48,7 +48,7 @@ class ISspRecordModel extends Model
             ->join('departments', 'departments.id = issp_records.department_id', 'left')
             ->join('users', 'users.id = issp_records.created_by', 'left')
             ->where('issp_records.status !=', 'draft')
-            ->orderBy('issp_records.created_at', 'DESC')
+            ->orderBy('COALESCE(issp_records.updated_at, issp_records.created_at)', 'DESC', false)
             ->limit($limit)
             ->findAll();
     }
