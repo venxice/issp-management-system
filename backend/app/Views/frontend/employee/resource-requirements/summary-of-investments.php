@@ -62,95 +62,137 @@ All totals are consistent across B.1, B.2, and B.3.
 
 <div class="section-card">
 
-<div class="section-header">
+    <div class="section-header">
+        <h5 class="mb-0">
+            B.1 General Summary
+        </h5>
+    </div>
 
-<h5 class="mb-0">
+    <div class="section-body">
 
-B.1 General Summary
+        <table class="table table-bordered">
 
-</h5>
+            <thead class="table-light">
+
+                <tr>
+
+                    <th>Category</th>
+                    <th class="text-end">Year 1</th>
+                    <th class="text-end">Year 2</th>
+                    <th class="text-end">Year 3</th>
+                    <th class="text-end">Total</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+            <?php
+            $year1 = $year2 = $year3 = $grand = 0;
+            ?>
+
+            <?php foreach($generalSummary as $row): ?>
+
+            <?php
+            $year1 += $row['year1'];
+            $year2 += $row['year2'];
+            $year3 += $row['year3'];
+            $grand += $row['total'];
+            ?>
+
+            <tr>
+
+                <td><?= esc($row['strategic_category']) ?></td>
+
+                <td class="text-end">₱<?= number_format($row['year1'],2) ?></td>
+
+                <td class="text-end">₱<?= number_format($row['year2'],2) ?></td>
+
+                <td class="text-end">₱<?= number_format($row['year3'],2) ?></td>
+
+                <td class="text-end">₱<?= number_format($row['total'],2) ?></td>
+
+            </tr>
+
+            <?php endforeach; ?>
+
+            </tbody>
+
+            <tfoot>
+
+            <tr class="table-secondary fw-bold">
+
+                <td>Grand Total</td>
+
+                <td class="text-end">₱<?= number_format($year1,2) ?></td>
+
+                <td class="text-end">₱<?= number_format($year2,2) ?></td>
+
+                <td class="text-end">₱<?= number_format($year3,2) ?></td>
+
+                <td class="text-end">₱<?= number_format($grand,2) ?></td>
+
+            </tr>
+
+            </tfoot>
+
+        </table>
+
+    </div>
 
 </div>
 
-<div class="section-body">
+<div class="section-card">
 
-<table class="table table-bordered">
+    <div class="section-header">
+        <h5 class="mb-0">B.2 Fund Source</h5>
+    </div>
 
-<thead class="table-light">
+    <div class="section-body">
 
-<tr>
+        <table class="table table-bordered">
 
-<th>Category</th>
+            <thead class="table-light">
+                <tr>
+                    <th>Fund Source</th>
+                    <th class="text-end">Year 1</th>
+                    <th class="text-end">Year 2</th>
+                    <th class="text-end">Year 3</th>
+                    <th class="text-end">Total</th>
+                </tr>
+            </thead>
 
-<th class="text-end">Year 1</th>
+            <tbody>
 
-<th class="text-end">Year 2</th>
+<?php
+$year1 = $year2 = $year3 = $grand = 0;
+?>
 
-<th class="text-end">Year 3</th>
+<?php foreach($fundSourceSummary as $row): ?>
 
-<th class="text-end">Total</th>
-
-</tr>
-
-</thead>
-
-<tbody>
-
-<tr>
-
-<td>Office Productivity</td>
-
-<td class="text-end">₱0.00</td>
-
-<td class="text-end">₱0.00</td>
-
-<td class="text-end">₱0.00</td>
-
-<td class="text-end">₱0.00</td>
-
-</tr>
+<?php
+$year1 += $row['year1'];
+$year2 += $row['year2'];
+$year3 += $row['year3'];
+$grand += $row['total'];
+?>
 
 <tr>
 
-<td>Internal ICT Projects</td>
+<td><?= esc($row['fund_source']) ?></td>
 
-<td class="text-end">₱0.00</td>
+<td class="text-end">₱<?= number_format($row['year1'],2) ?></td>
 
-<td class="text-end">₱0.00</td>
+<td class="text-end">₱<?= number_format($row['year2'],2) ?></td>
 
-<td class="text-end">₱0.00</td>
+<td class="text-end">₱<?= number_format($row['year3'],2) ?></td>
 
-<td class="text-end">₱0.00</td>
-
-</tr>
-
-<tr>
-
-<td>Cross Agency ICT Projects</td>
-
-<td class="text-end">₱0.00</td>
-
-<td class="text-end">₱0.00</td>
-
-<td class="text-end">₱0.00</td>
-
-<td class="text-end">₱0.00</td>
+<td class="text-end">₱<?= number_format($row['total'],2) ?></td>
 
 </tr>
 
-<tr>
-
-<td>Continuing Costs</td>
-
-<td class="text-end">₱0.00</td>
-
-<td class="text-end">₱0.00</td>
-
-<td class="text-end">₱0.00</td>
-
-<td class="text-end">₱0.00</td>
-
-</tr>
+<?php endforeach; ?>
 
 </tbody>
 
@@ -160,13 +202,13 @@ B.1 General Summary
 
 <td>Grand Total</td>
 
-<td class="text-end">₱0.00</td>
+<td class="text-end">₱<?= number_format($year1,2) ?></td>
 
-<td class="text-end">₱0.00</td>
+<td class="text-end">₱<?= number_format($year2,2) ?></td>
 
-<td class="text-end">₱0.00</td>
+<td class="text-end">₱<?= number_format($year3,2) ?></td>
 
-<td class="text-end">₱0.00</td>
+<td class="text-end">₱<?= number_format($grand,2) ?></td>
 
 </tr>
 
@@ -181,13 +223,7 @@ B.1 General Summary
 <div class="section-card">
 
 <div class="section-header">
-
-<h5 class="mb-0">
-
-B.2 Fund Source
-
-</h5>
-
+<h5 class="mb-0">B.3 Statement of Expenditure</h5>
 </div>
 
 <div class="section-body">
@@ -195,80 +231,45 @@ B.2 Fund Source
 <table class="table table-bordered">
 
 <thead class="table-light">
-
 <tr>
-
-<th>Category</th>
-
+<th>Statement of Expenditure</th>
 <th class="text-end">Year 1</th>
-
 <th class="text-end">Year 2</th>
-
 <th class="text-end">Year 3</th>
-
 <th class="text-end">Total</th>
-
 </tr>
-
 </thead>
 
 <tbody>
 
-<tr>
+<?php
+$year1 = $year2 = $year3 = $grand = 0;
+?>
 
-<td>General Appropriations Act (GAA)</td>
+<?php foreach($statementOfExpenditureSummary as $row): ?>
 
-<td class="text-end">₱0.00</td>
-
-<td class="text-end">₱0.00</td>
-
-<td class="text-end">₱0.00</td>
-
-<td class="text-end">₱0.00</td>
-
-</tr>
-
-<tr>
-
-<td>Foreign-Assisted</td>
-
-<td class="text-end">₱0.00</td>
-
-<td class="text-end">₱0.00</td>
-
-<td class="text-end">₱0.00</td>
-
-<td class="text-end">₱0.00</td>
-
-</tr>
+<?php
+$year1 += $row['year1'];
+$year2 += $row['year2'];
+$year3 += $row['year3'];
+$grand += $row['total'];
+?>
 
 <tr>
 
-<td>Locally Funded</td>
+<td><?= esc($row['expenditure_type']) ?></td>
 
-<td class="text-end">₱0.00</td>
+<td class="text-end">₱<?= number_format($row['year1'],2) ?></td>
 
-<td class="text-end">₱0.00</td>
+<td class="text-end">₱<?= number_format($row['year2'],2) ?></td>
 
-<td class="text-end">₱0.00</td>
+<td class="text-end">₱<?= number_format($row['year3'],2) ?></td>
 
-<td class="text-end">₱0.00</td>
-
-</tr>
-
-<tr>
-
-<td>Other Income Generating Sources</td>
-
-<td class="text-end">₱0.00</td>
-
-<td class="text-end">₱0.00</td>
-
-<td class="text-end">₱0.00</td>
-
-<td class="text-end">₱0.00</td>
+<td class="text-end">₱<?= number_format($row['total'],2) ?></td>
 
 </tr>
+
+<?php endforeach; ?>
 
 </tbody>
 
@@ -278,15 +279,13 @@ B.2 Fund Source
 
 <td>Grand Total</td>
 
-<td class="text-end">₱0.00</td>
+<td class="text-end">₱<?= number_format($year1,2) ?></td>
 
-<td class="text-end">₱0.00</td>
+<td class="text-end">₱<?= number_format($year2,2) ?></td>
 
-<td class="text-end">₱0.00</td>
+<td class="text-end">₱<?= number_format($year3,2) ?></td>
 
-<td class="text-end">₱0.00</td>
-
-</tr>
+<td class="text-end">₱<?= number_format($grand,2) ?></td>
 
 </tfoot>
 
@@ -298,216 +297,132 @@ B.2 Fund Source
 
 <div class="section-card">
 
-<div class="section-header">
+    <div class="section-header">
 
-<h5 class="mb-0">
+        <h5 class="mb-0">
+            B.4 Object of Expenditure
+        </h5>
 
-B.3 Statement of Expenditure
+    </div>
 
-</h5>
+    <div class="section-body">
+
+        <table class="table table-bordered">
+
+            <thead class="table-light">
+
+                <tr>
+
+                    <th>UACS Code</th>
+                    <th>Description</th>
+                    <th class="text-end">Year 1</th>
+                    <th class="text-end">Year 2</th>
+                    <th class="text-end">Year 3</th>
+                    <th class="text-end">Total</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+            <?php
+            $year1 = $year2 = $year3 = $grand = 0;
+            ?>
+
+            <?php foreach($objectOfExpenditureSummary as $row): ?>
+
+            <?php
+            $year1 += $row['year1'];
+            $year2 += $row['year2'];
+            $year3 += $row['year3'];
+            $grand += $row['total'];
+            ?>
+
+            <tr>
+
+                <td><?= esc($row['uacs_code']) ?></td>
+
+                <td><?= esc($row['object_of_expenditure']) ?></td>
+
+                <td class="text-end">
+                    ₱<?= number_format($row['year1'], 2) ?>
+                </td>
+
+                <td class="text-end">
+                    ₱<?= number_format($row['year2'], 2) ?>
+                </td>
+
+                <td class="text-end">
+                    ₱<?= number_format($row['year3'], 2) ?>
+                </td>
+
+                <td class="text-end">
+                    ₱<?= number_format($row['total'], 2) ?>
+                </td>
+
+            </tr>
+
+            <?php endforeach; ?>
+
+            <?php if(empty($objectOfExpenditureSummary)): ?>
+
+            <tr>
+
+                <td colspan="6" class="text-center text-muted">
+
+                    No records found.
+
+                </td>
+
+            </tr>
+
+            <?php endif; ?>
+
+            </tbody>
+
+            <tfoot>
+
+                <tr class="table-secondary fw-bold">
+
+                    <td colspan="2">
+
+                        Grand Total
+
+                    </td>
+
+                    <td class="text-end">
+
+                        ₱<?= number_format($year1, 2) ?>
+
+                    </td>
+
+                    <td class="text-end">
+
+                        ₱<?= number_format($year2, 2) ?>
+
+                    </td>
+
+                    <td class="text-end">
+
+                        ₱<?= number_format($year3, 2) ?>
+
+                    </td>
+
+                    <td class="text-end">
+
+                        ₱<?= number_format($grand, 2) ?>
+
+                    </td>
+
+                </tr>
+
+            </tfoot>
+
+        </table>
+
+    </div>
 
 </div>
-
-<div class="section-body">
-
-<table class="table table-bordered">
-
-<thead class="table-light">
-
-<tr>
-
-<th>Category</th>
-
-<th class="text-end">Year 1</th>
-
-<th class="text-end">Year 2</th>
-
-<th class="text-end">Year 3</th>
-
-<th class="text-end">Total</th>
-
-</tr>
-
-</thead>
-
-<tbody>
-
-<tr>
-
-<td>Capital Outlay (C0)</td>
-
-<td class="text-end">₱0.00</td>
-
-<td class="text-end">₱0.00</td>
-
-<td class="text-end">₱0.00</td>
-
-<td class="text-end">₱0.00</td>
-
-</tr>
-
-<tr>
-
-<td>Maintenance and Other Operating Expenses (MOOE)</td>
-
-<td class="text-end">₱0.00</td>
-
-<td class="text-end">₱0.00</td>
-
-<td class="text-end">₱0.00</td>
-
-<td class="text-end">₱0.00</td>
-
-</tr>
-
-<tr>
-
-</tbody>
-
-<tfoot>
-
-<tr class="table-secondary fw-bold">
-
-<td>Grand Total</td>
-
-<td class="text-end">₱0.00</td>
-
-<td class="text-end">₱0.00</td>
-
-<td class="text-end">₱0.00</td>
-
-<td class="text-end">₱0.00</td>
-
-</tr>
-
-</tfoot>
-
-</table>
-
-</div>
-
-</div>
-
-<div class="section-card">
-
-<div class="section-header">
-
-<h5 class="mb-0">
-
-B.4 Object of Expenditure
-
-</h5>
-
-</div>
-
-<div class="section-body">
-
-<table class="table table-bordered">
-
-<thead class="table-light">
-
-<tr>
-
-<th>UACS Code</th>
-
-<th>Description</th>
-
-<th class="text-end">Year 1</th>
-
-<th class="text-end">Year 2</th>
-
-<th class="text-end">Year 3</th>
-
-<th class="text-end">Total</th>
-
-</tr>
-
-</thead>
-
-<tbody>
-
-<tr>
-
-<td>5020201001</td>
-
-<td>ICT Training Expenses</td>
-
-<td class="text-end">₱0.00</td>
-
-<td class="text-end">₱0.00</td>
-
-<td class="text-end">₱0.00</td>
-
-<td class="text-end">₱0.00</td>
-
-</tr>
-
-<tr>
-
-<td>5020201002</td>
-
-<td>Training Expenses</td>
-
-<td class="text-end">₱0.00</td>
-
-<td class="text-end">₱0.00</td>
-
-<td class="text-end">₱0.00</td>
-
-<td class="text-end">₱0.00</td>
-
-</tr>
-
-<tr>
-
-<td>5020301001</td>
-
-<td>ICT Office Supplies Expenses</td>
-
-<td class="text-end">₱0.00</td>
-
-<td class="text-end">₱0.00</td>
-
-<td class="text-end">₱0.00</td>
-
-<td class="text-end">₱0.00</td>
-
-</tr>
-
-<tr>
-
-<td>5020502001</td>
-
-<td>Mobile</td>
-
-<td class="text-end">₱0.00</td>
-
-<td class="text-end">₱0.00</td>
-
-<td class="text-end">₱0.00</td>
-
-<td class="text-end">₱0.00</td>
-
-</tbody>
-
-<tfoot>
-
-<tr class="table-secondary fw-bold">
-    <td>Grand Total</td>
-    <td></td>
-    <td class="text-end">₱0.00</td>
-    <td class="text-end">₱0.00</td>
-    <td class="text-end">₱0.00</td>
-    <td class="text-end">₱0.00</td>
-</tr>
-
-</tfoot>
-
-</table>
-
-</div>
-
-</div>
-
 
 <?= $this->endSection() ?>

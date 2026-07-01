@@ -1,0 +1,46 @@
+<?php
+
+namespace App\Database\Migrations;
+
+use CodeIgniter\Database\Migration;
+
+class AddAuditLogFields extends Migration
+{
+    public function up()
+{
+    $fields = [];
+
+    if (! $this->db->fieldExists('page_url', 'logs')) {
+        $fields['page_url'] = ['type' => 'TEXT', 'null' => true];
+    }
+
+    if (! $this->db->fieldExists('user_agent', 'logs')) {
+        $fields['user_agent'] = ['type' => 'TEXT', 'null' => true];
+    }
+
+    if (! $this->db->fieldExists('ip_address', 'logs')) {
+        $fields['ip_address'] = ['type' => 'VARCHAR', 'constraint' => 45, 'null' => true];
+    }
+
+    if (! $this->db->fieldExists('new_data', 'logs')) {
+        $fields['new_data'] = ['type' => 'TEXT', 'null' => true];
+    }
+
+    if (! $this->db->fieldExists('contact_number', 'logs')) {
+        $fields['contact_number'] = ['type' => 'VARCHAR', 'constraint' => 64, 'null' => true];
+    }
+
+    if (! $this->db->fieldExists('position', 'logs')) {
+        $fields['position'] = ['type' => 'VARCHAR', 'constraint' => 128, 'null' => true];
+    }
+
+    if (! empty($fields)) {
+        $this->forge->addColumn('logs', $fields);
+    }
+}
+
+    public function down()
+    {
+        $this->forge->dropColumn('logs', ['page_url', 'user_agent', 'ip_address', 'new_data', 'contact_number', 'position']);
+    }
+}

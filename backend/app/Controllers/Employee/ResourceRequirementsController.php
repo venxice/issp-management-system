@@ -24,8 +24,8 @@ class ResourceRequirementsController extends BaseController
         ];
 
         $types = [
-            'Capital Outlay',
-            'MOOE'
+            'Capital Outlay (CO)',
+            'Maintenance and Other Operating Expenses (MOOE)'
         ];
 
         $requirements = $this->model->findAll(); // TEMP: later optimize/group
@@ -49,8 +49,8 @@ class ResourceRequirementsController extends BaseController
         ];
 
         $types = [
-            'Capital Outlay',
-            'MOOE'
+            'Capital Outlay (CO)',
+            'Maintenance and Other Operating Expenses (MOOE)'
         ];
 
         $requirements = $this->model->findAll(); // TEMP: later optimize/group
@@ -74,8 +74,8 @@ class ResourceRequirementsController extends BaseController
         ];
 
         $types = [
-            'Capital Outlay',
-            'MOOE'
+            'Capital Outlay (CO)',
+            'Maintenance and Other Operating Expenses (MOOE)'
         ];
 
         $requirements = $this->model->findAll(); // TEMP: later optimize/group
@@ -130,7 +130,9 @@ class ResourceRequirementsController extends BaseController
 
         public function store()
         {
-        //dd($this->request->getPost());
+
+        dd($this->request->getPost());
+
         $this->model->save([
         'year'                  => 1,
         'strategic_category'    => $this->request->getPost('strategic_category'),
