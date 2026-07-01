@@ -82,6 +82,8 @@
     transition: all 0.2s ease;
 }
 
+
+
 .form-control:focus, .form-select:focus {
     border-color: var(--brand);
     box-shadow: 0 0 0 3px rgba(79, 101, 132, .1);
@@ -208,11 +210,10 @@
 }
 
 .total-row {
-    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
+    background: transparent !important;
     border-top: 2px solid #cbd5e1;
     font-weight: 700;
     color: var(--ink);
-    font-size: 0.9rem;
 }
 
 .total-row td {
@@ -228,17 +229,19 @@
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: .01em;
+    padding-left: 20px;  
 }
 
 .total-row .total-value {
-    text-align: center;
+    text-align: left;
     font-size: 0.78rem;
     color: var(--ink);
     font-weight: 600;
-    background: #f8fafc;
-    padding: 6px 10px;
-    border-radius: 4px;
-    border: 1px solid #d0dae6;
+    background: transparent;  
+    padding: 0px;   
+    padding-left: 30px;             
+    border: none;             
+    border-radius: 0;        
     min-width: 60px;
 }
 
@@ -499,6 +502,37 @@
     letter-spacing: 0.5px;
 }
 </style>
+<style>
+.file-preview {
+    margin-top: 8px;
+    padding: 8px 12px;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: .82rem;
+}
+.file-preview img {
+    max-width: 80px;
+    max-height: 60px;
+    border-radius: 4px;
+    object-fit: cover;
+}
+.file-preview .file-name {
+    color: var(--ink);
+    font-weight: 600;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.file-preview .file-size {
+    color: var(--muted);
+    font-size: .72rem;
+}
+</style>
 
 <div class="row">
     <div class="col-12">
@@ -506,15 +540,10 @@
             <h1 class="page-title">ICT Human Capital</h1>
             <p class="page-subtitle">Human capital and staffing requirements</p>
         </div>
-        
-        <div class="info-banner">
-            <i class="fa-solid fa-info-circle"></i>
-            Please provide information about your proposed ICT human capital to effectively support your agency's day-to-day operations and proposed ICT project implementations.
-        </div>
     </div>
 </div>
 
-<form action="<?= site_url('employee/proposed-ict-strategy/ict-human-capital/save') ?>" method="post" enctype="multipart/form-data">
+<form id="mainForm" action="<?= site_url('employee/proposed-ict-strategy/ict-human-capital/save') ?>" method="post" enctype="multipart/form-data">
     <?= csrf_field() ?>
 
 
@@ -527,14 +556,14 @@
                         <h5 class="section-title">C. Proposed ICT Human Capital</h5>
                         <p class="section-subtitle">Detailed breakdown of personnel requirements</p>
                     </div>
-                    <i class="fa-solid fa-circle-question help-icon" 
-                       data-tooltip="Provide detailed breakdown of personnel requirements by position/role."></i>
                 </div>
                 <div class="section-body">
                 <div class="d-flex justify-content-between align-items-center mb-4">
-                    <div class="form-section-label">
-                        Proposed ICT Human Capital
-                    </div>
+                <div class="form-section-label">
+                    <span>Proposed ICT Human Capital</span>
+                    <i class="fa-solid fa-circle-question help-icon"
+                    data-tooltip="Provide detailed breakdown of personnel requirements by position/role."></i>
+                </div>
                     <button type="button" class="add-position-btn" onclick="addPositionRow()">
                         <i class="fa-solid fa-plus"></i>
                         Add Position
@@ -584,15 +613,16 @@
                             <tbody>
 
                                 <tr>
-                                    <td><input type="text" class="form-control form-control-sm" name="position_1" value="Information Technology Officer III"></td>
+                                    <td><input type="text" class="form-control form-control-sm" name="position_1" placeholder="Enter position/designation (e.g. Information Technology Officer III)"></td>
                                     <td>
                                         <select class="form-select form-select-sm employment-status" name="status_1">
+                                            <option value="" disabled selected>Select employment status</option>
                                             <option value="PLANTILLA">Plantilla</option>
                                             <option value="CONTRACTUAL">Contractual</option>
                                             <option value="OUTSOURCED">Outsourced</option>
                                         </select>
                                     </td>
-                                    <td><input type="number" class="form-control form-control-sm position-count" name="count_1"></td>
+                                    <td><input type="number" class="form-control form-control-sm position-count" name="count_1" placeholder="Enter number of positions"></td>
                                     <td class="text-center">
                                         <button type="button" class="delete-btn" onclick="deleteRow(this)">
                                             <i class="fa-solid fa-trash"></i>
@@ -601,15 +631,16 @@
                                 </tr>
 
                                 <tr>
-                                    <td><input type="text" class="form-control form-control-sm" name="position_2" value="Information Technology Officer II"></td>
+                                    <td><input type="text" class="form-control form-control-sm" name="position_2" placeholder="Enter position/designation (e.g. Information Technology Officer II)"></td>
                                     <td>
-                                        <select class="form-select form-select-sm employment-status" name="status_2">
+                                        <select class="form-select form-select-sm employment-status" name="status_1">
+                                            <option value="" disabled selected>Select employment status</option>
                                             <option value="PLANTILLA">Plantilla</option>
                                             <option value="CONTRACTUAL">Contractual</option>
                                             <option value="OUTSOURCED">Outsourced</option>
                                         </select>
                                     </td>
-                                    <td><input type="number" class="form-control form-control-sm position-count" name="count_2"></td>
+                                    <td><input type="number" class="form-control form-control-sm position-count" name="count_2" placeholder="Enter number of positions"></td>
                                     <td class="text-center">
                                         <button type="button" class="delete-btn" onclick="deleteRow(this)">
                                             <i class="fa-solid fa-trash"></i>
@@ -618,15 +649,16 @@
                                 </tr>
 
                                 <tr>
-                                    <td><input type="text" class="form-control form-control-sm" name="position_3" value="Information Technology Officer I"></td>
+                                    <td><input type="text" class="form-control form-control-sm" name="position_3" placeholder="Enter position/designation (e.g. Information Technology Officer I)"></td>
                                     <td>
                                         <select class="form-select form-select-sm employment-status" name="status_3">
+                                            <option value="" disabled selected>Select employment status</option>
                                             <option value="PLANTILLA">Plantilla</option>
                                             <option value="CONTRACTUAL">Contractual</option>
                                             <option value="OUTSOURCED">Outsourced</option>
                                         </select>
                                     </td>
-                                    <td><input type="number" class="form-control form-control-sm position-count" name="count_3"></td>
+                                    <td><input type="number" class="form-control form-control-sm position-count" name="count_3" placeholder="Enter number of positions"></td>
                                     <td class="text-center">
                                         <button type="button" class="delete-btn" onclick="deleteRow(this)">
                                             <i class="fa-solid fa-trash"></i>
@@ -635,15 +667,16 @@
                                 </tr>
 
                                 <tr>
-                                    <td><input type="text" class="form-control form-control-sm" name="position_4" placeholder="Job Order"></td>
+                                    <td><input type="text" class="form-control form-control-sm" name="position_4" placeholder="Enter position/designation (e.g. Job Order)"></td>
                                     <td>
-                                        <select class="form-select form-select-sm employment-status" name="status_4">
-                                            <option value="CONTRACTUAL">Contractual</option>
+                                        <select class="form-select form-select-sm employment-status" name="status_3">
+                                            <option value="" disabled selected>Select employment status</option>
                                             <option value="PLANTILLA">Plantilla</option>
+                                            <option value="CONTRACTUAL">Contractual</option>
                                             <option value="OUTSOURCED">Outsourced</option>
                                         </select>
                                     </td>
-                                    <td><input type="number" class="form-control form-control-sm position-count" name="count_4"></td>
+                                    <td><input type="number" class="form-control form-control-sm position-count" name="count_4" placeholder="Enter number of positions"></td>
                                     <td class="text-center">
                                         <button type="button" class="delete-btn" onclick="deleteRow(this)">
                                             <i class="fa-solid fa-trash"></i>
@@ -666,12 +699,13 @@
         </div>
     </div>
 
+
     <!-- Footer Actions -->
     <div class="row mb-4">
         <div class="col-12">
             <div class="footer-actions">
                 <div class="action-buttons">
-                    <button type="button" class="action-btn action-btn-save" onclick="window.saveChanges()">
+                    <button type="button" class="action-btn action-btn-save" onclick="window.saveChanges(); window.autoSaveDraft();">
                         <i class="fa-solid fa-save"></i>
                         <span>Save Changes</span>
                     </button>
@@ -769,146 +803,457 @@ function deleteRow(button) {
         row.remove();
         updateTotals();
     } else {
-        alert('You must have at least one row in the table.');
+        showAlertModal('Notice', 'You must have at least one row in the table.');
     }
 }
 
 // Tooltip functionality
-const helpIcons = document.querySelectorAll('.help-icon');
-
-helpIcons.forEach(icon => {
-    icon.addEventListener('mouseenter', function(e) {
-        const tooltipText = this.getAttribute('data-tooltip');
-        const tooltip = document.createElement('div');
-        tooltip.className = 'tooltip-content';
-        tooltip.textContent = tooltipText;
-        tooltip.id = 'active-tooltip';
-        document.body.appendChild(tooltip);
+document.addEventListener('DOMContentLoaded', function() {
+    const helpIcons = document.querySelectorAll('.help-icon');
+    
+    helpIcons.forEach(icon => {
+        icon.addEventListener('mouseenter', function(e) {
+            const tooltipText = this.getAttribute('data-tooltip');
+            const tooltip = document.createElement('div');
+            tooltip.className = 'tooltip-content';
+            tooltip.textContent = tooltipText;
+            tooltip.id = 'active-tooltip';
+            document.body.appendChild(tooltip);
+            
+            const rect = this.getBoundingClientRect();
+            
+            tooltip.style.left = (rect.right + 8) + 'px';
+            tooltip.style.top = rect.top + 'px';
+            
+            requestAnimationFrame(() => {
+                tooltip.classList.add('visible');
+                const tooltipRect = tooltip.getBoundingClientRect();
+                if (tooltipRect.right > window.innerWidth) {
+                    tooltip.style.left = (rect.left - tooltipRect.width - 8) + 'px';
+                }
+                if (tooltipRect.bottom > window.innerHeight) {
+                    tooltip.style.top = (window.innerHeight - tooltipRect.height - 10) + 'px';
+                }
+            });
+        });
         
-        const rect = this.getBoundingClientRect();
-        
-        // Position to the right of the icon
-        tooltip.style.left = (rect.right + 8) + 'px';
-        tooltip.style.top = rect.top + 'px';
-        
-        // Make it visible after positioning
-        requestAnimationFrame(() => {
-            tooltip.classList.add('visible');
-            // Adjust position if it goes off screen
-            const tooltipRect = tooltip.getBoundingClientRect();
-            if (tooltipRect.right > window.innerWidth) {
-                // Position to the left instead
-                tooltip.style.left = (rect.left - tooltipRect.width - 8) + 'px';
-            }
-            if (tooltipRect.bottom > window.innerHeight) {
-                tooltip.style.top = (window.innerHeight - tooltipRect.height - 10) + 'px';
+        icon.addEventListener('mouseleave', function() {
+            const tooltip = document.getElementById('active-tooltip');
+            if (tooltip) {
+                tooltip.remove();
             }
         });
     });
-    
-    icon.addEventListener('mouseleave', function() {
-        const tooltip = document.getElementById('active-tooltip');
-        if (tooltip) {
-            tooltip.remove();
-        }
+
+    // Conditional show/hide for System Usage Type
+    document.querySelectorAll('input[name="system_usage_type"]').forEach(function(radio) {
+        radio.addEventListener('change', function() {
+            var details = document.getElementById('deploymentDetails');
+            details.style.display = this.value === 'frontline' && this.checked ? 'block' : 'none';
+            if (this.value !== 'frontline') {
+                document.getElementById('onlineLinkField').style.display = 'none';
+            }
+        });
     });
 
-    // Auto-save on input change
-    const allInputs = document.querySelectorAll('input, textarea, select');
-    allInputs.forEach(input => {
-        input.addEventListener('change', function() {
-            window.saveChanges(false);
+    // Conditional show/hide for System Usage Type deployment details
+    document.querySelectorAll('input[name="system_usage_type"]').forEach(function(radio) {
+        radio.addEventListener('change', function() {
+            var details = document.getElementById('deploymentDetails');
+            details.style.display = this.value === 'frontline' && this.checked ? 'block' : 'none';
+            if (this.value !== 'frontline') {
+                document.getElementById('onlineLinkField').style.display = 'none';
+            }
+        });
+    });
+
+    // Conditional show/hide for Online link field
+    document.querySelectorAll('input[name="deployment_type"]').forEach(function(radio) {
+        radio.addEventListener('change', function() {
+            var linkField = document.getElementById('onlineLinkField');
+            linkField.style.display = this.value === 'online' && this.checked ? 'block' : 'none';
+        });
+    });
+
+    // Conditional show/hide for Interoperability system integration example
+    document.querySelectorAll('input[name="interoperability"]').forEach(function(radio) {
+        radio.addEventListener('change', function() {
+            var example = document.getElementById('systemIntegrationExample');
+            if (this.value === 'system_integration' && this.checked) {
+                example.style.display = 'block';
+            } else {
+                example.style.display = 'none';
+            }
         });
     });
 
     // Load saved data on page load
     window.loadSavedData();
+    if (typeof updateStatusIndicators === 'function') updateStatusIndicators();
+    // Retry loading after a short delay in case of async rendering
+    setTimeout(function() {
+        window.loadSavedData();
+        if (typeof updateStatusIndicators === 'function') updateStatusIndicators();
+    }, 300);
 });
 
-// Clear form function
 window.clearForm = function() {
     console.log('clearForm called');
     try {
-        if (confirm('Are you sure you want to clear all fields? This action cannot be undone.')) {
-            const form = document.querySelector('form');
+        showConfirmModal('Are you sure you want to clear all fields? This action cannot be undone.', function() {
+            const form = document.querySelector('#mainForm');
             if (form) {
-                form.reset();
+                // Explicitly clear all fields instead of form.reset() to avoid reset-checked checkboxes
+                form.querySelectorAll('input:not([type="hidden"]):not([type="file"]), textarea, select').forEach(function(el) {
+                    if (el.type === 'checkbox' || el.type === 'radio') {
+                        el.checked = false;
+                    } else {
+                        el.value = '';
+                    }
+                });
+                // Remove all file previews
+                form.querySelectorAll('.file-preview').forEach(el => el.remove());
                 // Clear localStorage
                 localStorage.removeItem('ict-human-capital-form');
+                updateTotals();
+                if (typeof updateStatusIndicators === 'function') updateStatusIndicators();
                 console.log('Form cleared');
-                alert('Form has been cleared successfully.');
+                showAlertModal('Success', 'Form has been cleared successfully.');
             } else {
                 console.error('Form not found');
-                alert('Error: Form not found');
+                showAlertModal('Error', 'Error: Form not found');
             }
-        }
+        });
     } catch (error) {
         console.error('Error in clearForm:', error);
-        alert('Error clearing form: ' + error.message);
+        showAlertModal('Error', 'Error clearing form: ' + error.message);
     }
 };
 
-// Save changes to localStorage
+// Save changes to localStorage (supports file persistence)
 window.saveChanges = function(showAlert = true) {
     console.log('saveChanges called with showAlert:', showAlert);
-    const form = document.querySelector('form');
-    if (form) {
-        const formData = new FormData(form);
-        const formDataObj = {};
-        
-        formData.forEach((value, key) => {
-            formDataObj[key] = value;
-        });
-        
-        // Save to localStorage
-        localStorage.setItem('ict-human-capital-form', JSON.stringify(formDataObj));
-        console.log('Data saved to localStorage');
-        
-        // Show success message
-        if (showAlert) {
-            alert('Changes saved locally! You can continue working and your data will be preserved.');
+    try {
+        const form = document.querySelector('#mainForm');
+        if (form) {
+            const formData = new FormData(form);
+            const formDataObj = {};
+            const fileReads = [];
+            
+            formData.forEach((value, key) => {
+                if (value instanceof File && value.name) {
+                    fileReads.push(
+                        new Promise(resolve => {
+                            const reader = new FileReader();
+                            reader.onload = () => {
+                                const dataUrl = reader.result;
+                                const b64Idx = dataUrl.indexOf(';base64,');
+                                if (b64Idx !== -1) {
+                                    const beforeBase64 = dataUrl.substring(0, b64Idx);
+                                    const afterBase64 = dataUrl.substring(b64Idx);
+                                    formDataObj[key] = beforeBase64 + ';name=' + encodeURIComponent(value.name) + afterBase64;
+                                } else {
+                                    const parts = dataUrl.split(',');
+                                    formDataObj[key] = parts[0] + ';name=' + encodeURIComponent(value.name) + ',' + parts.slice(1).join(',');
+                                }
+                                resolve();
+                            };
+                            reader.readAsDataURL(value);
+                        })
+                    );
+                } else if (value instanceof File) {
+                    // Empty file input — skip (would serialize to {})
+                } else {
+                    formDataObj[key] = value;
+                }
+            });
+            
+            if (fileReads.length > 0) {
+                Promise.all(fileReads).then(() => {
+                    finalizeSave(formDataObj, showAlert);
+                });
+            } else {
+                finalizeSave(formDataObj, showAlert);
+            }
+        } else {
+            console.error('Form #mainForm not found');
+            if (showAlert) showAlertModal('Error', 'Error: Form not found');
         }
+    } catch (error) {
+        console.error('Error in saveChanges:', error);
+        if (showAlert) showAlertModal('Error', 'Error saving changes: ' + error.message);
     }
 };
+
+function finalizeSave(formDataObj, showAlert) {
+    // Merge with previous localStorage data to preserve file previews
+    const prevData = JSON.parse(localStorage.getItem('ict-human-capital-form') || '{}');
+    Object.keys(prevData).forEach(key => {
+        const val = prevData[key];
+        if (typeof val === 'string' && (val.startsWith('data:') || val.startsWith('uploads/'))) {
+            if (!(key in formDataObj) || formDataObj[key] === '') {
+                formDataObj[key] = val;
+            }
+        }
+    });
+    
+    try {
+        const jsonStr = JSON.stringify(formDataObj);
+        localStorage.setItem('ict-human-capital-form', jsonStr);
+        
+        const verify = localStorage.getItem('ict-human-capital-form');
+        console.log('Save verified:', verify ? 'OK (' + Object.keys(JSON.parse(verify)).length + ' keys)' : 'FAILED');
+        
+        if (typeof updateStatusIndicators === 'function') updateStatusIndicators();
+        if (showAlert) showAlertModal('Success', 'Changes saved locally!');
+    } catch (error) {
+        console.error('Error saving to localStorage:', error);
+        if (error.name === 'QuotaExceededError' || error.code === 22) {
+            if (showAlert) showAlertModal('Error', 'Unable to save: File(s) too large. Please reduce file sizes and try again.');
+        } else {
+            if (showAlert) showAlertModal('Error', 'Error saving changes: ' + error.message);
+        }
+    }
+}
 
 // Load saved data from localStorage on page load
 window.loadSavedData = function() {
     console.log('loadSavedData called');
-    const savedData = localStorage.getItem('ict-human-capital-form');
-    if (savedData) {
-        const formDataObj = JSON.parse(savedData);
-        const form = document.querySelector('form');
-        
-        if (form) {
-            Object.keys(formDataObj).forEach(key => {
-                const input = form.querySelector(`[name="${key}"]`);
-                if (input) {
-                    if (input.type === 'checkbox') {
-                        input.checked = formDataObj[key] === '1';
-                    } else if (input.type === 'radio') {
-                        const radio = form.querySelector(`[name="${key}"][value="${formDataObj[key]}"]`);
-                        if (radio) radio.checked = true;
-                    } else {
-                        input.value = formDataObj[key];
+    try {
+        const savedData = localStorage.getItem('ict-human-capital-form');
+        console.log('Saved data from localStorage:', savedData ? 'exists (' + savedData.length + ' chars)' : 'empty');
+        if (savedData) {
+            const formDataObj = JSON.parse(savedData);
+            console.log('Parsed form data keys:', Object.keys(formDataObj));
+            const form = document.querySelector('#mainForm');
+            console.log('Form found:', !!form);
+            
+            if (form) {
+                let restoredCount = 0;
+                Object.keys(formDataObj).forEach(key => {
+                    const input = form.querySelector(`[name="${key}"]`);
+                    if (input) {
+                        const val = formDataObj[key];
+                        if (typeof val === 'string' && val.startsWith('data:')) {
+                            restoreFilePreview(input, val);
+                            restoredCount++;
+                        } else if (typeof val === 'string' && val.startsWith('uploads/')) {
+                            input.setAttribute('data-uploaded-path', val);
+                            showServerFileLink(input, val);
+                            restoredCount++;
+                        } else if (input.type === 'checkbox') {
+                            input.checked = val === '1';
+                            restoredCount++;
+                        } else if (input.type === 'radio') {
+                            const radio = form.querySelector(`[name="${key}"][value="${val}"]`);
+                            if (radio) radio.checked = true;
+                            restoredCount++;
+                        } else if (input.type === 'file') {
+                            // File inputs cannot be set programmatically; skip
+                            restoredCount++;
+                        } else {
+                            input.value = val;
+                            restoredCount++;
+                        }
                     }
+                });
+                
+                updateTotals();
+                console.log('Data loaded from localStorage, restored', restoredCount, 'fields');
+
+
+                // Update conditional visibility after restoring data
+                var frontlineRadio = document.querySelector('input[name="system_usage_type"][value="frontline"]');
+                var deployDetails = document.getElementById('deploymentDetails');
+                if (deployDetails && frontlineRadio) {
+                    deployDetails.style.display = frontlineRadio.checked ? 'block' : 'none';
                 }
-            });
-            console.log('Data loaded from localStorage');
-            updateTotals();
+                var onlineRadio = document.querySelector('input[name="deployment_type"][value="online"]');
+                var onlineLinkField = document.getElementById('onlineLinkField');
+                if (onlineLinkField && onlineRadio) {
+                    onlineLinkField.style.display = onlineRadio.checked ? 'block' : 'none';
+                }
+                var integrationDetails = document.getElementById('integrationDetails');
+                var interopIntegration = document.querySelector('input[name="interoperability"][value="integration"]');
+                if (integrationDetails && interopIntegration) {
+                    integrationDetails.style.display = interopIntegration.checked ? 'block' : 'none';
+                }
+                var sysIntExample = document.getElementById('systemIntegrationExample');
+                var sysIntRadio = document.querySelector('input[name="interoperability"][value="system_integration"]');
+                if (sysIntExample && sysIntRadio) {
+                    sysIntExample.style.display = sysIntRadio.checked ? 'block' : 'none';
+                }
+            }
         }
+    } catch (error) {
+        console.error('Error loading saved data:', error);
+
     }
 };
+
+function restoreFilePreview(input, dataUrl) {
+    if (!input || !dataUrl) return;
+    const existing = input.parentElement.querySelector('.file-preview');
+    if (existing) existing.remove();
+    const preview = document.createElement('div');
+    preview.className = 'file-preview';
+    preview.setAttribute('data-file-input', input.name);
+    preview.style.cursor = 'pointer';
+    preview.title = 'Click to open file';
+    preview.addEventListener('click', function(e) {
+        if (e.target.closest('button')) return;
+        try {
+            // Parse base64 data URL to Blob for reliable download
+            const commaIdx = dataUrl.indexOf(',');
+            const mimeMatch = dataUrl.substring(0, commaIdx).match(/:(.*?);/);
+            const mime = mimeMatch ? mimeMatch[1] : 'application/octet-stream';
+            const b64Data = dataUrl.substring(commaIdx + 1);
+            const byteStr = atob(b64Data);
+            const ab = new ArrayBuffer(byteStr.length);
+            const ia = new Uint8Array(ab);
+            for (let i = 0; i < byteStr.length; i++) {
+                ia[i] = byteStr.charCodeAt(i);
+            }
+            const blob = new Blob([ab], {type: mime});
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = getFileNameFromDataUrl(dataUrl) || 'file';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        } catch (dlError) {
+            console.error('Download failed:', dlError);
+            // Fallback: open data URL in new tab
+            const win = window.open(dataUrl, '_blank');
+            if (!win) {
+                showAlertModal('Notice', 'Unable to open file. Try saving it first.');
+            }
+        }
+    });
+    if (dataUrl.startsWith('data:image/')) {
+        const img = document.createElement('img');
+        img.src = dataUrl;
+        img.alt = 'Uploaded image';
+        preview.appendChild(img);
+    }
+    const nameSpan = document.createElement('span');
+    nameSpan.className = 'file-name';
+    const fileSize = Math.round((dataUrl.length * 0.75) / 1024);
+    nameSpan.textContent = getFileNameFromDataUrl(dataUrl) || 'Uploaded file';
+    preview.appendChild(nameSpan);
+    const sizeSpan = document.createElement('span');
+    sizeSpan.className = 'file-size';
+    sizeSpan.textContent = fileSize > 1024 ? (fileSize / 1024).toFixed(1) + ' MB' : fileSize + ' KB';
+    preview.appendChild(sizeSpan);
+    const removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.className = 'btn btn-sm btn-outline-danger';
+    removeBtn.innerHTML = '&times;';
+    removeBtn.title = 'Remove file';
+    removeBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        preview.remove();
+        input.value = '';
+        // Remove only this file from localStorage directly
+        try {
+            const savedData = JSON.parse(localStorage.getItem('ict-human-capital-form') || '{}');
+            delete savedData[input.name];
+            localStorage.setItem('ict-human-capital-form', JSON.stringify(savedData));
+            if (typeof updateStatusIndicators === 'function') updateStatusIndicators();
+            showAlertModal('Success', 'File removed.');
+        } catch (error) {
+            console.error('Error removing file:', error);
+            showAlertModal('Error', 'Error removing file: ' + error.message);
+        }
+    });
+    preview.appendChild(removeBtn);
+    input.parentElement.appendChild(preview);
+}
+
+function getFileNameFromDataUrl(dataUrl) {
+    try {
+        const commaIndex = dataUrl.indexOf(',');
+        const header = commaIndex >= 0 ? dataUrl.substring(0, commaIndex) : dataUrl;
+        const parts = header.split(';');
+        for (const part of parts) {
+            const trimmed = part.trim();
+            if (trimmed.startsWith('name=')) {
+                return decodeURIComponent(trimmed.substring(5));
+            }
+        }
+        return null;
+    } catch(e) {
+        return null;
+    }
+}
 
 // Navigate to page after saving
 window.navigateToPage = function(url) {
     console.log('navigateToPage called with url:', url);
-    window.saveChanges(false);
-    setTimeout(() => {
-        // Verify data was saved before navigating
-        const savedData = localStorage.getItem('ict-human-capital-form');
-        console.log('Data in localStorage before navigation:', savedData ? 'exists' : 'empty');
+    // If in edit mode, rewrite URLs to stay in edit context
+    var editId = localStorage.getItem('edit_project_id');
+    if (editId) {
+        url = url.replace('proposed-ict-strategy/', 'edit-ict-project/' + editId + '/');
+        if (url.indexOf('employee/dashboard') !== -1) {
+            url = '<?= site_url('employee/draft-ict-projects') ?>';
+        }
+    }
+    const form = document.querySelector('#mainForm');
+    if (form) {
+        const formData = new FormData(form);
+        const formDataObj = {};
+        const fileReads = [];
+        formData.forEach((value, key) => {
+            if (value instanceof File && value.name) {
+                fileReads.push(
+                    new Promise(resolve => {
+                        const reader = new FileReader();
+                        reader.onload = () => {
+                            const dataUrl = reader.result;
+                            const b64Idx = dataUrl.indexOf(';base64,');
+                            if (b64Idx !== -1) {
+                                const beforeBase64 = dataUrl.substring(0, b64Idx);
+                                const afterBase64 = dataUrl.substring(b64Idx);
+                                formDataObj[key] = beforeBase64 + ';name=' + encodeURIComponent(value.name) + afterBase64;
+                            } else {
+                                const parts = dataUrl.split(',');
+                                formDataObj[key] = parts[0] + ';name=' + encodeURIComponent(value.name) + ',' + parts.slice(1).join(',');
+                            }
+                            resolve();
+                        };
+                        reader.readAsDataURL(value);
+                    })
+                );
+            } else {
+                formDataObj[key] = value;
+            }
+        });
+        const doNav = () => {
+            // Merge with previous localStorage data to preserve file previews
+            const prevData = JSON.parse(localStorage.getItem('ict-human-capital-form') || '{}');
+            Object.keys(prevData).forEach(key => {
+                if (!(key in formDataObj)) {
+                    const val = prevData[key];
+                    if (typeof val === 'string' && (val.startsWith('data:') || val.startsWith('uploads/'))) {
+                        formDataObj[key] = val;
+                    }
+                }
+            });
+            const jsonStr = JSON.stringify(formDataObj);
+            localStorage.setItem('ict-human-capital-form', jsonStr);
+            if (typeof updateStatusIndicators === 'function') updateStatusIndicators();
+            window.location.href = url;
+        };
+        if (fileReads.length > 0) {
+            Promise.all(fileReads).then(doNav);
+        } else {
+            doNav();
+        }
+    } else {
         window.location.href = url;
-    }, 500);
+    }
 };
 </script>
 

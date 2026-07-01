@@ -11,6 +11,16 @@ use App\Models\UserModel;
 
 class UsersController extends BaseController
 {
+    private function allowedRoles(): array
+    {
+        return (new RoleModel())->whereIn('slug', [
+            'admin',
+            'director_general',
+            'ict_planner',
+            'employee',
+        ])->orderBy('LOWER(name)', 'ASC')->findAll();
+    }
+
     public function index()
     {
         $query = trim((string) $this->request->getGet('q'));
@@ -50,13 +60,12 @@ class UsersController extends BaseController
             'users' => $users,
             'query' => $query,
             'departmentFilter' => $department,
-            'roles' => (new RoleModel())->orderBy('LOWER(name)', 'ASC')->findAll(),
+            'roles' => $this->allowedRoles(),
             'departments' => (new DepartmentModel())->orderBy('LOWER(name)', 'ASC')->findAll(),
             'positions' => (new PositionModel())->orderBy('LOWER(name)', 'ASC')->findAll(),
             'pager' => $pager,
             'total' => $total,
             'perPage' => $perPage,
-            'currentPage' => $page,
         ]);
     }
 
@@ -66,7 +75,7 @@ class UsersController extends BaseController
             'title' => 'Create User',
             'active' => 'users',
             'user' => null,
-            'roles' => (new RoleModel())->orderBy('LOWER(name)', 'ASC')->findAll(),
+            'roles' => $this->allowedRoles(),
             'departments' => (new DepartmentModel())->orderBy('LOWER(name)', 'ASC')->findAll(),
             'positions' => (new PositionModel())->orderBy('LOWER(name)', 'ASC')->findAll(),
         ]);
@@ -82,7 +91,7 @@ class UsersController extends BaseController
             'password' => 'required|min_length[8]',
             'password_confirmation' => 'required|matches[password]',
             'role_id' => 'required|integer',
-            'position_id' => 'required|integer',
+            'position_id' => 'permit_empty|integer',
             'department_id' => 'required|integer',
             'status' => 'required|in_list[active,inactive]',
         ];
@@ -127,7 +136,7 @@ class UsersController extends BaseController
             'title' => 'Edit User',
             'active' => 'users',
             'user' => $user,
-            'roles' => (new RoleModel())->orderBy('LOWER(name)', 'ASC')->findAll(),
+            'roles' => $this->allowedRoles(),
             'departments' => (new DepartmentModel())->orderBy('LOWER(name)', 'ASC')->findAll(),
             'positions' => (new PositionModel())->orderBy('LOWER(name)', 'ASC')->findAll(),
         ]);
@@ -150,7 +159,7 @@ class UsersController extends BaseController
             'password' => 'permit_empty|min_length[8]',
             'password_confirmation' => 'required_with[password]|matches[password]',
             'role_id' => 'required|integer',
-            'position_id' => 'required|integer',
+            'position_id' => 'permit_empty|integer',
             'department_id' => 'required|integer',
             'status' => 'required|in_list[active,inactive]',
         ];

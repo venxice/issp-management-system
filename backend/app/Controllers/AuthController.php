@@ -241,7 +241,7 @@ class AuthController extends BaseController
         $configured = strtolower((string) env('SSO_GOOGLE_ALLOWED_ROLES'));
 
         if ($configured === '') {
-            return ['admin', 'director_general', 'department_head', 'ict_planner', 'employee'];
+            return ['admin', 'director_general', 'ict_planner', 'employee'];
         }
 
         $roles = array_filter(array_map(

@@ -176,27 +176,27 @@ $isIsspPage = strpos($currentPage, 'proposed-ict-strategy') !== false ||
 <!-- ISSP Sections (Dropdown) -->
 <div class="sidebar-section-title">Proposed ICT Strategy</div>
 
-<a class="nav-link <?= $active === 'network-infrastructure' ? 'active' : '' ?>" href="<?= site_url('employee/proposed-ict-strategy/network-infrastructure') ?>">
-    <span class="status-indicator complete"></span> Network Infrastructure
+<a class="nav-link <?= $active === 'network-infrastructure' ? 'active' : '' ?>" href="<?= site_url('employee/proposed-ict-strategy/network-infrastructure') ?>" data-form-key="network-infrastructure-form">
+    <span class="status-indicator not-started"></span> Network Infrastructure
 </a>
 
-<a class="nav-link <?= $active === 'enterprise-architecture' ? 'active' : '' ?>" href="<?= site_url('employee/proposed-ict-strategy/enterprise-architecture') ?>">
-    <span class="status-indicator in-progress"></span> Enterprise Architecture
+<a class="nav-link <?= $active === 'enterprise-architecture' ? 'active' : '' ?>" href="<?= site_url('employee/proposed-ict-strategy/enterprise-architecture') ?>" data-form-key="enterprise-architecture-form">
+    <span class="status-indicator not-started"></span> Enterprise Architecture
 </a>
 
-<a class="nav-link <?= $active === 'ict-human-capital' ? 'active' : '' ?>" href="<?= site_url('employee/proposed-ict-strategy/ict-human-capital') ?>">
+<a class="nav-link <?= $active === 'ict-human-capital' ? 'active' : '' ?>" href="<?= site_url('employee/proposed-ict-strategy/ict-human-capital') ?>" data-form-key="ict-human-capital-form">
     <span class="status-indicator not-started"></span> ICT Human Capital
 </a>
 
-<a class="nav-link <?= $active === 'information-systems' ? 'active' : '' ?>" href="<?= site_url('employee/proposed-ict-strategy/information-systems') ?>">
+<a class="nav-link <?= $active === 'information-systems' ? 'active' : '' ?>" href="<?= site_url('employee/proposed-ict-strategy/information-systems') ?>" data-form-key="information-systems-form">
     <span class="status-indicator not-started"></span> Information Systems
 </a>
 
-<a class="nav-link <?= $active === 'ict-projects' ? 'active' : '' ?>" href="<?= site_url('employee/proposed-ict-strategy/ict-projects') ?>">
+<a class="nav-link <?= $active === 'ict-projects' ? 'active' : '' ?>" href="<?= site_url('employee/proposed-ict-strategy/ict-projects') ?>" data-form-key="ict-projects-form">
     <span class="status-indicator not-started"></span> ICT Projects
 </a>
 
-<a class="nav-link <?= $active === 'performance-measurement' ? 'active' : '' ?>" href="<?= site_url('employee/proposed-ict-strategy/performance-measurement') ?>">
+<a class="nav-link <?= $active === 'performance-measurement' ? 'active' : '' ?>" href="<?= site_url('employee/proposed-ict-strategy/performance-measurement') ?>" data-form-key="performance-measurement-form">
     <span class="status-indicator not-started"></span> Performance Framework
 </a>
 
@@ -231,13 +231,103 @@ $isIsspPage = strpos($currentPage, 'proposed-ict-strategy') !== false ||
 </div>
 
 <script>
+function updateStatusIndicators() {
+    var skipFields = {
+        'network-infrastructure-form': ['dept_network_diagram','regional_network_diagram'],
+        'enterprise-architecture-form': ['ea_diagram'],
+        'ict-human-capital-form': [],
+        'information-systems-form': [],
+        'ict-projects-form': [],
+        'performance-measurement-form': []
+    };
+
+    var path = window.location.pathname;
+    var isFormPage = path.indexOf('/proposed-ict-strategy/') >= 0 || path.indexOf('/edit-ict-project/') >= 0;
+    if (!isFormPage) return;
+
+    document.querySelectorAll('#isspDropdown .nav-link[data-form-key]').forEach(link => {
+        const storageKey = link.getAttribute('data-form-key');
+        const indicator = link.querySelector('.status-indicator');
+        if (!indicator || !storageKey) return;
+
+        try {
+            const data = localStorage.getItem(storageKey);
+            if (data) {
+                const parsed = JSON.parse(data);
+                var totalReal = 0;
+                var emptyReal = 0;
+                var skip = skipFields[storageKey] || [];
+                Object.entries(parsed).forEach(([key, v]) => {
+                    if (key.startsWith('csrf_') || key === '_token') return;
+                    if (skip.indexOf(key) >= 0) return;
+                    if (typeof v !== 'string') return;
+                    totalReal++;
+                    if (v.trim() === '') emptyReal++;
+                });
+                var filledCount = totalReal - emptyReal;
+                if (totalReal > 0 && filledCount / totalReal >= 0.8) {
+                    indicator.className = 'status-indicator complete';
+                } else if (filledCount > 0) {
+                    indicator.className = 'status-indicator in-progress';
+                } else {
+                    indicator.className = 'status-indicator not-started';
+                }
+            } else {
+                indicator.className = 'status-indicator not-started';
+            }
+        } catch (e) {
+            indicator.className = 'status-indicator not-started';
+        }
+    });
+}
+
 document.addEventListener('DOMContentLoaded', function() {
+    updateStatusIndicators();
     const dropdownToggle = document.getElementById('isspDropdownToggle');
     const dropdown = document.getElementById('isspDropdown');
 
     if (dropdownToggle && dropdown) {
         dropdownToggle.addEventListener('click', function(e) {
             e.preventDefault();
+        });
+
+        dropdown.querySelectorAll('a.nav-link[href]').forEach(function(link) {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                var path = window.location.pathname;
+                var onFormPage = path.indexOf('proposed-ict-strategy') !== -1 ||
+                                 path.indexOf('resource-requirements') !== -1 ||
+                                 path.indexOf('edit-ict-project') !== -1;
+                if (onFormPage) {
+                    if (typeof window.saveChanges === 'function') {
+                        window.saveChanges(false);
+                    }
+                    setTimeout(function() {
+                        window.location.href = link.href;
+                    }, 100);
+                } else {
+                    if (localStorage.getItem('edit_project_id')) {
+                        // Clear all form keys first to prevent stale draft data
+                        var formKeys = ['network-infrastructure-form','enterprise-architecture-form','ict-human-capital-form','information-systems-form','ict-projects-form','performance-measurement-form'];
+                        formKeys.forEach(function(k) {
+                            localStorage.removeItem(k);
+                        });
+                        var backup = localStorage.getItem('new-project-backup');
+                        if (backup) {
+                            // Active edit — restore original new project data
+                            try {
+                                var parsed = JSON.parse(backup);
+                                Object.keys(parsed).forEach(function(k) {
+                                    if (parsed[k]) localStorage.setItem(k, parsed[k]);
+                                });
+                            } catch(e) {}
+                            localStorage.removeItem('new-project-backup');
+                        }
+                        localStorage.removeItem('edit_project_id');
+                    }
+                    window.location.href = link.href;
+                }
+            });
         });
 
         dropdown.addEventListener('show.bs.collapse', function() {
@@ -267,14 +357,39 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+// Collect form data from all 6 localStorage keys
+function collectFormData() {
+    const keys = [
+        'network-infrastructure-form',
+        'enterprise-architecture-form',
+        'ict-human-capital-form',
+        'information-systems-form',
+        'ict-projects-form',
+        'performance-measurement-form'
+    ];
+    const data = {};
+    keys.forEach(function(key) {
+        try {
+            const saved = localStorage.getItem(key);
+            if (saved) {
+                data[key] = JSON.parse(saved);
+            }
+        } catch(e) {
+            console.warn('Failed to parse localStorage key:', key, e);
+        }
+    });
+    return data;
+}
+
 function saveDraft() {
     const saveDraftBtn = document.getElementById('saveDraftBtn');
     saveDraftBtn.disabled = true;
     saveDraftBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i>Saving...';
 
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
-                     document.querySelector('input[name="csrf_token"]')?.value;
+                     document.querySelector('input[name="csrf_test_name"]')?.value;
 
+    var editId = localStorage.getItem('edit_project_id');
     fetch('<?= site_url('employee/save-draft') ?>', {
         method: 'POST',
         headers: {
@@ -282,38 +397,92 @@ function saveDraft() {
             'X-Requested-With': 'XMLHttpRequest'
         },
         body: JSON.stringify({
-            csrf_token: csrfToken
+            csrf_test_name: csrfToken,
+            form_data: collectFormData(),
+            id: editId || null
         })
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            alert('Draft saved successfully!');
+            localStorage.clear();
+            showAlertModal('Success', 'Draft saved successfully!');
             window.location.href = '<?= site_url('employee/draft-ict-projects') ?>';
         } else {
-            alert('Error saving draft: ' + (data.message || 'Please try again.'));
+            showAlertModal('Error', 'Error saving draft: ' + (data.message || 'Please try again.'));
             saveDraftBtn.disabled = false;
             saveDraftBtn.innerHTML = '<i class="fa-solid fa-floppy-disk me-2"></i>Save as Draft';
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('Error saving draft. Please try again.');
+        showAlertModal('Error', 'Error saving draft. Please try again.');
         saveDraftBtn.disabled = false;
         saveDraftBtn.innerHTML = '<i class="fa-solid fa-floppy-disk me-2"></i>Save as Draft';
     });
 }
 
+function areAllFormsComplete() {
+    var sections = {
+        'network-infrastructure-form': { label: 'Network Infrastructure', skip: ['dept_network_diagram','regional_network_diagram'] },
+        'enterprise-architecture-form': { label: 'Enterprise Architecture', skip: ['ea_diagram'] },
+        'ict-human-capital-form': { label: 'ICT Human Capital', skip: [] },
+        'information-systems-form': { label: 'Information Systems', skip: [] },
+        'ict-projects-form': { label: 'ICT Projects', skip: [] },
+        'performance-measurement-form': { label: 'Performance Measurement', skip: [] }
+    };
+
+    // Special check: ict-projects must have a title
+    try {
+        var ictProjects = JSON.parse(localStorage.getItem('ict-projects-form'));
+        if (!ictProjects || !ictProjects.internal_project_title || ictProjects.internal_project_title.trim() === '') {
+            return { valid: false, message: 'ICT Project Title is required in the ICT Projects section.' };
+        }
+    } catch(e) {
+        return { valid: false, message: 'ICT Projects section is empty. Please fill in required fields.' };
+    }
+
+    for (var key in sections) {
+        var section = sections[key];
+        try {
+            var data = JSON.parse(localStorage.getItem(key));
+            if (!data) {
+                return { valid: false, message: section.label + ' section is empty. Please fill in required fields.' };
+            }
+            for (var field in data) {
+                if (field.startsWith('csrf_') || field === '_token') continue;
+                if (section.skip.indexOf(field) >= 0) continue;
+                // Checkboxes/radios that are unchecked are not in FormData, skip them
+                // Only check text-like values
+                if (typeof data[field] === 'string' && data[field].trim() === '') {
+                    return { valid: false, message: section.label + ' section has empty fields. Please fill in all fields before submitting.' };
+                }
+            }
+        } catch(e) {
+            return { valid: false, message: section.label + ' section has invalid data. Please check and save again.' };
+        }
+    }
+
+    return { valid: true };
+}
+
 function submitISSP() {
+    var check = areAllFormsComplete();
+    if (!check.valid) {
+        showAlertModal('Incomplete Form', check.message);
+        return;
+    }
+
     // Show confirmation modal
-    if (confirm('Are you sure you want to submit your ISSP for review? This action cannot be undone.')) {
+    showConfirmModal('Are you sure you want to submit your ISSP for review? This action cannot be undone.', function() {
         const submitBtn = document.getElementById('submitIsspBtn');
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i>Submitting...';
 
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
-                         document.querySelector('input[name="csrf_token"]')?.value;
+                         document.querySelector('input[name="csrf_test_name"]')?.value;
 
+        var editId = localStorage.getItem('edit_project_id');
         fetch('<?= site_url('employee/submit-issp') ?>', {
             method: 'POST',
             headers: {
@@ -321,27 +490,29 @@ function submitISSP() {
                 'X-Requested-With': 'XMLHttpRequest'
             },
             body: JSON.stringify({
-                csrf_token: csrfToken
+                csrf_test_name: csrfToken,
+                form_data: collectFormData(),
+                id: editId || null
             })
         })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                // Show success message
-                alert('ISSP submitted successfully!');
-                window.location.href = '<?= site_url('employee/dashboard') ?>';
+                localStorage.clear();
+                showAlertModal('Success', 'ISSP submitted successfully!');
+                window.location.href = '<?= site_url('employee/submitted-ict-projects') ?>';
             } else {
-                alert('Error submitting ISSP: ' + (data.message || 'Please try again.'));
+                showAlertModal('Error', 'Error submitting ISSP: ' + (data.message || 'Please try again.'));
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane me-2"></i>Submit Project';
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('Error submitting ISSP. Please try again.');
+            showAlertModal('Error', 'Error submitting ISSP. Please try again.');
             submitBtn.disabled = false;
             submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane me-2"></i>Submit Project';
         });
-    }
+    });
 }
 </script>

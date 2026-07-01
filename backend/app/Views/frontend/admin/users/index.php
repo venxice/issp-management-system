@@ -1,6 +1,7 @@
 <?= $this->extend('frontend/layout/app') ?>
 
 <?= $this->section('content') ?>
+<?= $this->include('frontend/layout/alerts') ?>
 <?php
 $roles = $roles ?? [];
 $departments = $departments ?? [];
@@ -350,20 +351,24 @@ document.addEventListener('DOMContentLoaded', () => {
         editForm.querySelector('[name="status"]').value = user.status || 'active';
         editForm.querySelector('[name="password"]').value = '';
         editForm.querySelector('[name="password_confirmation"]').value = '';
-        editDeactivateButton.classList.toggle('d-none', user.status !== 'active');
-        editReactivateButton.classList.toggle('d-none', user.status === 'active');
+        if (editDeactivateButton) editDeactivateButton.classList.toggle('d-none', user.status !== 'active');
+        if (editReactivateButton) editReactivateButton.classList.toggle('d-none', user.status === 'active');
 
-        editDeactivateForm.action = `<?= site_url('admin/users') ?>/` + user.id + `/deactivate`;
-        editReactivateForm.action = `<?= site_url('admin/users') ?>/` + user.id + `/reactivate`;
+        if (editDeactivateForm) editDeactivateForm.action = `<?= site_url('admin/users') ?>/` + user.id + `/deactivate`;
+        if (editReactivateForm) editReactivateForm.action = `<?= site_url('admin/users') ?>/` + user.id + `/reactivate`;
     });
 
-    editDeactivateButton.addEventListener('click', () => {
-        editDeactivateForm.submit();
-    });
+    if (editDeactivateButton) {
+        editDeactivateButton.addEventListener('click', () => {
+            if (editDeactivateForm) editDeactivateForm.submit();
+        });
+    }
 
-    editReactivateButton.addEventListener('click', () => {
-        editReactivateForm.submit();
-    });
+    if (editReactivateButton) {
+        editReactivateButton.addEventListener('click', () => {
+            if (editReactivateForm) editReactivateForm.submit();
+        });
+    }
 
     const addForm = document.getElementById('addUserForm');
     const editFormElement = document.getElementById('editUserForm');
@@ -374,15 +379,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     let pendingSubmitForm = null;
-    const confirmModalEl = document.getElementById('confirmSubmitModal');
-    const confirmModal = confirmModalEl ? new bootstrap.Modal(confirmModalEl) : null;
     const confirmMessageEl = document.getElementById('confirmSubmitMessage');
     const confirmButton = document.getElementById('confirmSubmitButton');
 
     const openConfirm = (form, message) => {
         pendingSubmitForm = form;
         if (confirmMessageEl) confirmMessageEl.textContent = message || 'Are you sure?';
-        if (confirmModal) confirmModal.show();
+        showCustomModal('confirmSubmitModal');
     };
 
     if (confirmButton) {
@@ -390,7 +393,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (! pendingSubmitForm) return;
             pendingSubmitForm.submit();
             pendingSubmitForm = null;
-            if (confirmModal) confirmModal.hide();
+            closeCustomModals();
         });
     }
 
@@ -415,114 +418,81 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (addForm) {
         addForm.addEventListener('submit', (e) => {
-            console.log('Add User Form submitted');
             e.preventDefault();
 
-            // Custom validation for add form - scoped to this form only
             const firstName = addForm.querySelector('[name="first_name"]');
             const lastName = addForm.querySelector('[name="last_name"]');
             const email = addForm.querySelector('[name="email"]');
             const roleId = addForm.querySelector('[name="role_id"]');
-            const positionId = addForm.querySelector('[name="position_id"]');
             const departmentId = addForm.querySelector('[name="department_id"]');
             const status = addForm.querySelector('[name="status"]');
             const password = addForm.querySelector('[name="password"]');
             const confirmPassword = addForm.querySelector('[name="password_confirmation"]');
 
-            console.log('Add form elements found:', {
-                firstName: !!firstName,
-                lastName: !!lastName,
-                email: !!email,
-                roleId: !!roleId,
-                positionId: !!positionId,
-                departmentId: !!departmentId,
-                status: !!status,
-                password: !!password,
-                confirmPassword: !!confirmPassword
-            });
-
-            let isValid = true;
-            let firstInvalidField = null;
-
             // Validate required fields
             if (!firstName || !firstName.value || firstName.value.trim() === '') {
-                isValid = false;
-                firstInvalidField = firstInvalidField || firstName;
+                showValidationModal('First name is required.');
+                if (firstName) firstName.focus();
+                return;
             }
             if (!lastName || !lastName.value || lastName.value.trim() === '') {
-                isValid = false;
-                firstInvalidField = firstInvalidField || lastName;
+                showValidationModal('Last name is required.');
+                if (lastName) lastName.focus();
+                return;
             }
             if (!email || !email.value || email.value.trim() === '') {
-                isValid = false;
-                firstInvalidField = firstInvalidField || email;
+                showValidationModal('Email address is required.');
+                if (email) email.focus();
+                return;
             }
             if (!roleId || !roleId.value) {
-                isValid = false;
-                firstInvalidField = firstInvalidField || roleId;
-            }
-            if (!positionId || !positionId.value) {
-                isValid = false;
-                firstInvalidField = firstInvalidField || positionId;
+                showValidationModal('Please select a role.');
+                if (roleId) roleId.focus();
+                return;
             }
             if (!departmentId || !departmentId.value) {
-                isValid = false;
-                firstInvalidField = firstInvalidField || departmentId;
+                showValidationModal('Please select a division.');
+                if (departmentId) departmentId.focus();
+                return;
             }
             if (!status || !status.value) {
-                isValid = false;
-                firstInvalidField = firstInvalidField || status;
+                showValidationModal('Please select a status.');
+                if (status) status.focus();
+                return;
             }
 
             // Password is required for new users
             if (!password || !password.value || password.value.trim() === '') {
-                alert('Password is required');
+                showValidationModal('Password is required.');
                 if (password) password.focus();
                 return;
             }
 
             // Check password requirements
-            const requirements = [];
-            if (password.value.length < 8) {
-                requirements.push('8+ characters');
-            }
-            if (!/[A-Z]/.test(password.value)) {
-                requirements.push('uppercase letter');
-            }
-            if (!/[a-z]/.test(password.value)) {
-                requirements.push('lowercase letter');
-            }
-            if (!/[0-9]/.test(password.value)) {
-                requirements.push('number');
-            }
-            if (!/[!@#$%^&*(),.?":{}|<>]/.test(password.value)) {
-                requirements.push('special character');
-            }
+            const missing = [];
+            if (password.value.length < 8) missing.push('8+ characters');
+            if (!/[A-Z]/.test(password.value)) missing.push('uppercase letter');
+            if (!/[a-z]/.test(password.value)) missing.push('lowercase letter');
+            if (!/[0-9]/.test(password.value)) missing.push('number');
+            if (!/[!@#$%^&*(),.?":{}|<>]/.test(password.value)) missing.push('special character');
 
-            if (requirements.length > 0) {
-                showValidationModal('Password must contain: ' + requirements.join(', '));
+            if (missing.length > 0) {
+                showValidationModal('Password must contain: ' + missing.join(', ') + '.');
                 if (password) password.focus();
                 return;
             }
 
             // Password confirmation is required
             if (!confirmPassword || !confirmPassword.value || confirmPassword.value.trim() === '') {
-                alert('Please confirm your password');
+                showValidationModal('Please confirm your password.');
                 if (confirmPassword) confirmPassword.focus();
                 return;
             }
 
             // Check if passwords match
-            console.log('Password match check:', password.value, '===', confirmPassword.value, '=', password.value === confirmPassword.value);
             if (password.value !== confirmPassword.value) {
-                alert('Passwords do not match');
+                showValidationModal('Passwords do not match.');
                 if (confirmPassword) confirmPassword.focus();
-                return;
-            }
-
-            if (!isValid) {
-                alert('Please fill in all required fields');
-                if (firstInvalidField) firstInvalidField.focus();
                 return;
             }
 
@@ -663,10 +633,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 isValid = false;
                 firstInvalidField = firstInvalidField || roleId;
             }
-            if (!positionId || !positionId.value) {
-                isValid = false;
-                firstInvalidField = firstInvalidField || positionId;
-            }
             if (!departmentId || !departmentId.value) {
                 isValid = false;
                 firstInvalidField = firstInvalidField || departmentId;
@@ -795,43 +761,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Validation modal function
         function showValidationModal(message) {
-            const validationModal = new bootstrap.Modal(document.getElementById('validationModal'));
             document.getElementById('validationMessage').textContent = message;
-            validationModal.show();
+            showCustomModal('validationModal');
         }
     }
 });
 </script>
-<div class="modal fade" id="validationModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-sm modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Validation Error</h5>
-      </div>
-      <div class="modal-body">
-        <p id="validationMessage">Please correct the following errors:</p>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
-      </div>
+
+<div class="custom-modal" id="validationModal" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:1060;background:#fff;border-radius:6px;box-shadow:0 18px 40px rgba(15,23,42,.18);min-width:320px;max-width:400px;overflow:hidden;">
+    <div style="background:#536783;color:#fff;padding:12px 14px;font-size:.94rem;font-weight:700;" id="validationModalHeader"><span>Validation Error</span></div>
+    <div style="padding:14px 14px;font-size:.82rem;color:#1f2a3a;"><p class="mb-0" id="validationMessage">Please correct the following errors:</p></div>
+    <div style="padding:8px 12px;border-top:1px solid #e1e6ee;display:flex;justify-content:flex-end;gap:8px;">
+        <button type="button" class="btn btn-primary btn-sm" onclick="closeCustomModals()">OK</button>
     </div>
-  </div>
 </div>
 
-<div class="modal fade" id="confirmSubmitModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-sm modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Confirm</h5>
-      </div>
-      <div class="modal-body">
-        <p id="confirmSubmitMessage">Are you sure?</p>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-primary" id="confirmSubmitButton">Confirm</button>
-      </div>
+<div class="custom-modal" id="confirmSubmitModal" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:1060;background:#fff;border-radius:6px;box-shadow:0 18px 40px rgba(15,23,42,.18);min-width:320px;max-width:400px;overflow:hidden;">
+    <div style="background:#536783;color:#fff;padding:12px 14px;font-size:.94rem;font-weight:700;"><i class="fa-solid fa-triangle-exclamation me-2"></i><span id="confirmSubmitTitle">Confirm</span></div>
+    <div style="padding:14px 14px;font-size:.82rem;color:#1f2a3a;"><p class="mb-0" id="confirmSubmitMessage">Are you sure?</p></div>
+    <div style="padding:8px 12px;border-top:1px solid #e1e6ee;display:flex;justify-content:flex-end;gap:8px;">
+        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="closeCustomModals(); pendingSubmitForm = null;">Cancel</button>
+        <button type="button" class="btn btn-primary btn-sm" id="confirmSubmitButton">Confirm</button>
     </div>
-  </div>
 </div>
 <?= $this->endSection() ?>

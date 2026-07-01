@@ -48,8 +48,13 @@ $routes->group('employee', ['filter' => 'role:employee'], static function (Route
     $routes->get('dashboard', 'Employee\DashboardController::index');
     $routes->post('submit-issp', 'Employee\DashboardController::submitISSP');
     $routes->post('save-draft', 'Employee\DashboardController::saveDraft');
+    $routes->get('load-form-data/(:num)', 'Employee\DashboardController::loadFormData/$1');
     $routes->get('submitted-ict-projects', 'Employee\DashboardController::submittedIctProjects');
     $routes->get('draft-ict-projects', 'Employee\DashboardController::draftIctProjects');
+    $routes->get('edit-ict-project/(:num)/(:any)', 'Employee\DashboardController::editIctProject/$1/$2');
+    $routes->post('save-edit-draft/(:num)', 'Employee\DashboardController::saveEditDraft/$1');
+    $routes->post('submit-edit-project/(:num)', 'Employee\DashboardController::submitEditProject/$1');
+    $routes->post('upload-file', 'Employee\DashboardController::uploadFile');
     
     // Proposed ICT Strategy Routes
     $routes->group('proposed-ict-strategy', static function (RouteCollection $routes): void {
@@ -80,10 +85,20 @@ $routes->group('employee', ['filter' => 'role:employee'], static function (Route
 });
 
 // Resource Requirements Routes
-      $routes->group('employee', ['filter' => 'role:employee'], static function (RouteCollection $routes): void {
+      $routes->group('ict-planner', ['filter' => 'role:ict_planner'], static function (RouteCollection $routes): void {
 
-      $routes->group('resource-requirements', static function (RouteCollection $routes): void {
 
+
+    $routes->get('dashboard', 'IctPlanner\DashboardController::index');
+    $routes->get('consolidation', 'IctPlanner\ConsolidationController::index');
+    $routes->post('endorse/(:num)', 'IctPlanner\DashboardController::endorse/$1');
+    $routes->get('view-full/(:num)', 'IctPlanner\ConsolidationController::viewFull/$1');
+    $routes->get('download/(:num)', 'IctPlanner\ConsolidationController::download/$1');
+    $routes->post('download-batch', 'IctPlanner\ConsolidationController::batchDownload');
+
+$routes->group('employee', ['filter' => 'role:employee'], static function (RouteCollection $routes): void {
+
+    $routes->group('resource-requirements', static function (RouteCollection $routes): void {
     $routes->get('year1-requirements', 'Employee\ResourceRequirementsController::year1Requirements');
     $routes->get('year2-requirements', 'Employee\ResourceRequirementsController::year2Requirements');
     $routes->get('year3-requirements', 'Employee\ResourceRequirementsController::year3Requirements');
@@ -107,6 +122,3 @@ $routes->group('employee', ['filter' => 'role:employee'], static function (Route
     $routes->get('dashboard', 'DashboardController::index');
 });
 
-$routes->group('ict-planner', ['filter' => 'role:ict_planner'], static function (RouteCollection $routes): void {
-    $routes->get('dashboard', 'DashboardController::index');
-});

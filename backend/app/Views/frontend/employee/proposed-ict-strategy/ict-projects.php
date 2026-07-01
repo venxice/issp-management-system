@@ -54,6 +54,10 @@
     margin-right: 8px;
 }
 
+input[type="checkbox"] {
+    accent-color: var(--brand);
+}
+
 .form-section-label {
     font-size: .9rem;
     font-weight: 700;
@@ -351,22 +355,48 @@
     visibility: visible;
 }
 </style>
+<style>
+.file-preview {
+    margin-top: 8px;
+    padding: 8px 12px;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: .82rem;
+}
+.file-preview img {
+    max-width: 80px;
+    max-height: 60px;
+    border-radius: 4px;
+    object-fit: cover;
+}
+.file-preview .file-name {
+    color: var(--ink);
+    font-weight: 600;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.file-preview .file-size {
+    color: var(--muted);
+    font-size: .72rem;
+}
+</style>
 
 <div class="row">
     <div class="col-12">
         <div class="page-header mb-3">
-            <h1 class="page-title">E. ICT Projects Portfolio</h1>
-            <p class="page-subtitle">Proposed ICT Strategy - Internal and cross-agency ICT projects</p>
-        </div>
-        
-        <div class="info-banner">
-            <i class="fa-solid fa-info-circle"></i>
-            Provide detailed information about your agency's ICT projects, including internal projects and cross-agency initiatives.
+            <h1 class="page-title">ICT Projects Portfolio</h1>
+            <p class="page-subtitle">Internal and cross-agency ICT projects</p>
         </div>
     </div>
 </div>
 
-<form action="<?= site_url('employee/proposed-ict-strategy/ict-projects/save') ?>" method="post" enctype="multipart/form-data">
+<form id="mainForm" action="<?= site_url('employee/proposed-ict-strategy/ict-projects/save') ?>" method="post" enctype="multipart/form-data">
     <?= csrf_field() ?>
 
     <!-- Project Tabs -->
@@ -394,7 +424,9 @@
                     </div>
                     <div class="section-body">
                         <div class="form-section-label">
-                            Project Details
+                            <span>Project Details
+                              <i class="fa-solid fa-circle-question help-icon"
+                          data-tooltip="Provide detailed information about your agency's ICT projects, including internal projects and cross-agency initiatives."></i>
                         </div>
                         
                         <div class="row g-3 mb-4">
@@ -424,27 +456,30 @@
                             Select all that apply
                         </div>
                         
-                        <div class="checkbox-group mb-4">
+                        <div class="checkbox-group mb-2">
                             <div class="checkbox-item">
-                                <input type="checkbox" name="internal_strategic_1" id="internal_strategic_1">
-                                <label for="internal_strategic_1">Digital Transformation</label>
+                                <input type="checkbox" name="internal_strategic_pip" id="internal_strategic_pip">
+                                <label for="internal_strategic_pip">Public Investment Program</label>
                             </div>
                             <div class="checkbox-item">
-                                <input type="checkbox" name="internal_strategic_2" id="internal_strategic_2">
-                                <label for="internal_strategic_2">Service Delivery Improvement</label>
+                                <input type="checkbox" name="internal_strategic_ncp" id="internal_strategic_ncp">
+                                <label for="internal_strategic_ncp">National Cybersecurity Plan</label>
                             </div>
                             <div class="checkbox-item">
-                                <input type="checkbox" name="internal_strategic_3" id="internal_strategic_3">
-                                <label for="internal_strategic_3">Operational Efficiency</label>
+                                <input type="checkbox" name="internal_strategic_egov" id="internal_strategic_egov">
+                                <label for="internal_strategic_egov">E-Government Master Plan</label>
                             </div>
                             <div class="checkbox-item">
-                                <input type="checkbox" name="internal_strategic_4" id="internal_strategic_4">
-                                <label for="internal_strategic_4">Cost Reduction</label>
+                                <input type="checkbox" name="internal_strategic_pcb" id="internal_strategic_pcb">
+                                <label for="internal_strategic_pcb">Program Convergence Budgeting</label>
                             </div>
                             <div class="checkbox-item">
-                                <input type="checkbox" name="internal_strategic_5" id="internal_strategic_5">
-                                <label for="internal_strategic_5">Citizen Engagement</label>
+                                <input type="checkbox" name="internal_strategic_others" id="internal_strategic_others">
+                                <label for="internal_strategic_others">Others (Specify)</label>
                             </div>
+                        </div>
+                        <div class="mb-3" id="internalStrategicOthers" style="display:none;">
+                            <input type="text" class="form-control form-control-sm" name="internal_strategic_others_text" id="internal_strategic_others_text" placeholder="Please specify" style="max-width:400px;">
                         </div>
 
                         <!-- Harmonization Framework -->
@@ -460,23 +495,23 @@
                         <div class="checkbox-group mb-4">
                             <div class="checkbox-item">
                                 <input type="checkbox" name="internal_harmonization_1" id="internal_harmonization_1">
-                                <label for="internal_harmonization_1">e-Government Masterplan</label>
+                                <label for="internal_harmonization_1">National Prioritization</label>
                             </div>
                             <div class="checkbox-item">
                                 <input type="checkbox" name="internal_harmonization_2" id="internal_harmonization_2">
-                                <label for="internal_harmonization_2">ICT Standards</label>
+                                <label for="internal_harmonization_2">Resource Optimization</label>
                             </div>
                             <div class="checkbox-item">
                                 <input type="checkbox" name="internal_harmonization_3" id="internal_harmonization_3">
-                                <label for="internal_harmonization_3">Data Privacy Compliance</label>
+                                <label for="internal_harmonization_3">Interoperability Framework</label>
                             </div>
                             <div class="checkbox-item">
                                 <input type="checkbox" name="internal_harmonization_4" id="internal_harmonization_4">
-                                <label for="internal_harmonization_4">Security Standards</label>
+                                <label for="internal_harmonization_4">Cross-Agency Collaboration</label>
                             </div>
                             <div class="checkbox-item">
                                 <input type="checkbox" name="internal_harmonization_5" id="internal_harmonization_5">
-                                <label for="internal_harmonization_5">Interoperability Framework</label>
+                                <label for="internal_harmonization_5">Scalability and Sustainability</label>
                             </div>
                         </div>
 
@@ -534,11 +569,10 @@
                                 <label class="form-label">Funding Source</label>
                                 <select class="form-select" name="internal_funding_source">
                                     <option value="">Select funding source</option>
-                                    <option value="national-budget">National Budget</option>
-                                    <option value="agency-budget">Agency Budget</option>
-                                    <option value="donor-funded">Donor-Funded</option>
-                                    <option value="public-private">Public-Private Partnership</option>
-                                    <option value="other">Other</option>
+                                    <option value="gaa">GAA</option>
+                                    <option value="foreign-assisted">Foreign-assisted projects</option>
+                                    <option value="locally-funded">Locally funded</option>
+                                    <option value="other-income">Other Income Generating Sources</option>
                                 </select>
                             </div>
                         </div>
@@ -563,7 +597,9 @@
                     </div>
                     <div class="section-body">
                         <div class="form-section-label">
-                            Project Details
+                            <span>Project Details
+                              <i class="fa-solid fa-circle-question help-icon"
+                          data-tooltip="Provide detailed information about cross-agency ICT projects, including collaborative initiatives with other agencies."></i>
                         </div>
                         
                         <div class="row g-3 mb-4">
@@ -581,6 +617,15 @@
                                 <label class="form-label">Objectives</label>
                                 <textarea class="form-control" name="cross_objectives" rows="3" placeholder="List the project objectives..."></textarea>
                             </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Lead Agency</label>
+                                <input type="text" class="form-control" name="cross_lead_agency" placeholder="Enter the lead agency">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Implementing Agency</label>
+                                <input type="text" class="form-control" name="cross_implementing_agency" placeholder="Enter the implementing agency">
+                            </div>
                         </div>
 
                         <!-- Strategic Alignment -->
@@ -593,27 +638,30 @@
                             Select all that apply
                         </div>
                         
-                        <div class="checkbox-group mb-4">
+                        <div class="checkbox-group mb-2">
                             <div class="checkbox-item">
-                                <input type="checkbox" name="cross_strategic_1" id="cross_strategic_1">
-                                <label for="cross_strategic_1">Digital Transformation</label>
+                                <input type="checkbox" name="cross_strategic_pip" id="cross_strategic_pip">
+                                <label for="cross_strategic_pip">Public Investment Program</label>
                             </div>
                             <div class="checkbox-item">
-                                <input type="checkbox" name="cross_strategic_2" id="cross_strategic_2">
-                                <label for="cross_strategic_2">Service Delivery Improvement</label>
+                                <input type="checkbox" name="cross_strategic_ncp" id="cross_strategic_ncp">
+                                <label for="cross_strategic_ncp">National Cybersecurity Plan</label>
                             </div>
                             <div class="checkbox-item">
-                                <input type="checkbox" name="cross_strategic_3" id="cross_strategic_3">
-                                <label for="cross_strategic_3">Operational Efficiency</label>
+                                <input type="checkbox" name="cross_strategic_egov" id="cross_strategic_egov">
+                                <label for="cross_strategic_egov">E-Government Master Plan</label>
                             </div>
                             <div class="checkbox-item">
-                                <input type="checkbox" name="cross_strategic_4" id="cross_strategic_4">
-                                <label for="cross_strategic_4">Cost Reduction</label>
+                                <input type="checkbox" name="cross_strategic_pcb" id="cross_strategic_pcb">
+                                <label for="cross_strategic_pcb">Program Convergence Budgeting</label>
                             </div>
                             <div class="checkbox-item">
-                                <input type="checkbox" name="cross_strategic_5" id="cross_strategic_5">
-                                <label for="cross_strategic_5">Citizen Engagement</label>
+                                <input type="checkbox" name="cross_strategic_others" id="cross_strategic_others">
+                                <label for="cross_strategic_others">Others (Specify)</label>
                             </div>
+                        </div>
+                        <div class="mb-3" id="crossStrategicOthers" style="display:none;">
+                            <input type="text" class="form-control form-control-sm" name="cross_strategic_others_text" id="cross_strategic_others_text" placeholder="Please specify" style="max-width:400px;">
                         </div>
 
                         <!-- Harmonization Framework -->
@@ -629,23 +677,23 @@
                         <div class="checkbox-group mb-4">
                             <div class="checkbox-item">
                                 <input type="checkbox" name="cross_harmonization_1" id="cross_harmonization_1">
-                                <label for="cross_harmonization_1">e-Government Masterplan</label>
+                                <label for="cross_harmonization_1">National Prioritization</label>
                             </div>
                             <div class="checkbox-item">
                                 <input type="checkbox" name="cross_harmonization_2" id="cross_harmonization_2">
-                                <label for="cross_harmonization_2">ICT Standards</label>
+                                <label for="cross_harmonization_2">Resource Optimization</label>
                             </div>
                             <div class="checkbox-item">
                                 <input type="checkbox" name="cross_harmonization_3" id="cross_harmonization_3">
-                                <label for="cross_harmonization_3">Data Privacy Compliance</label>
+                                <label for="cross_harmonization_3">Interoperability Framework</label>
                             </div>
                             <div class="checkbox-item">
                                 <input type="checkbox" name="cross_harmonization_4" id="cross_harmonization_4">
-                                <label for="cross_harmonization_4">Security Standards</label>
+                                <label for="cross_harmonization_4">Cross-Agency Collaboration</label>
                             </div>
                             <div class="checkbox-item">
                                 <input type="checkbox" name="cross_harmonization_5" id="cross_harmonization_5">
-                                <label for="cross_harmonization_5">Interoperability Framework</label>
+                                <label for="cross_harmonization_5">Scalability and Sustainability</label>
                             </div>
                         </div>
 
@@ -719,12 +767,10 @@
                                 <label class="form-label">Funding Source</label>
                                 <select class="form-select" name="cross_funding_source">
                                     <option value="">Select funding source</option>
-                                    <option value="national-budget">National Budget</option>
-                                    <option value="agency-budget">Agency Budget</option>
-                                    <option value="donor-funded">Donor-Funded</option>
-                                    <option value="public-private">Public-Private Partnership</option>
-                                    <option value="multi-agency">Multi-Agency Funded</option>
-                                    <option value="other">Other</option>
+                                    <option value="gaa">GAA</option>
+                                    <option value="foreign-assisted">Foreign-assisted projects</option>
+                                    <option value="locally-funded">Locally funded</option>
+                                    <option value="other-income">Other Income Generating Sources</option>
                                 </select>
                             </div>
                         </div>
@@ -739,7 +785,7 @@
         <div class="col-12">
             <div class="footer-actions">
                 <div class="action-buttons">
-                    <button type="button" class="action-btn action-btn-save" onclick="window.saveChanges()">
+                    <button type="button" class="action-btn action-btn-save" onclick="window.saveChanges(); window.autoSaveDraft();">
                         <i class="fa-solid fa-save"></i>
                         <span>Save Changes</span>
                     </button>
@@ -764,26 +810,20 @@
 </form>
 
 <script>
-// Tab switching functionality
 document.querySelectorAll('.project-tab').forEach(tab => {
     tab.addEventListener('click', function() {
-        // Remove active class from all tabs
         document.querySelectorAll('.project-tab').forEach(t => t.classList.remove('active'));
-        // Add active class to clicked tab
         this.classList.add('active');
         
-        // Hide all tab contents
         document.querySelectorAll('.tab-content').forEach(content => {
             content.classList.remove('active');
         });
         
-        // Show selected tab content
         const tabId = this.getAttribute('data-tab');
         document.getElementById(tabId).classList.add('active');
     });
 });
 
-// Tooltip functionality
 const helpIcons = document.querySelectorAll('.help-icon');
 
 helpIcons.forEach(icon => {
@@ -797,17 +837,13 @@ helpIcons.forEach(icon => {
         
         const rect = this.getBoundingClientRect();
         
-        // Position to the right of the icon
         tooltip.style.left = (rect.right + 8) + 'px';
         tooltip.style.top = rect.top + 'px';
         
-        // Make it visible after positioning
         requestAnimationFrame(() => {
             tooltip.classList.add('visible');
-            // Adjust position if it goes off screen
             const tooltipRect = tooltip.getBoundingClientRect();
             if (tooltipRect.right > window.innerWidth) {
-                // Position to the left instead
                 tooltip.style.left = (rect.left - tooltipRect.width - 8) + 'px';
             }
             if (tooltipRect.bottom > window.innerHeight) {
@@ -824,93 +860,372 @@ helpIcons.forEach(icon => {
     });
 });
 
-// Load saved data on page load
 document.addEventListener('DOMContentLoaded', function() {
-    // Auto-save on input change
-    const allInputs = document.querySelectorAll('input, textarea, select');
-    allInputs.forEach(input => {
-        input.addEventListener('change', function() {
-            window.saveChanges(false);
-        });
+    // Show/hide Others textbox for Internal Strategic Alignment
+    document.getElementById('internal_strategic_others').addEventListener('change', function() {
+        var othersDiv = document.getElementById('internalStrategicOthers');
+        othersDiv.style.display = this.checked ? 'block' : 'none';
+    });
+
+    // Show/hide Others textbox for Cross-Agency Strategic Alignment
+    document.getElementById('cross_strategic_others').addEventListener('change', function() {
+        var othersDiv = document.getElementById('crossStrategicOthers');
+        othersDiv.style.display = this.checked ? 'block' : 'none';
     });
 
     window.loadSavedData();
+    if (typeof updateStatusIndicators === 'function') updateStatusIndicators();
+    // Retry loading after a short delay in case of async rendering
+    setTimeout(function() {
+        window.loadSavedData();
+        if (typeof updateStatusIndicators === 'function') updateStatusIndicators();
+    }, 300);
 });
 
-// Clear form function
 window.clearForm = function() {
     console.log('clearForm called');
-    if (confirm('Are you sure you want to clear all fields? This action cannot be undone.')) {
-        const form = document.querySelector('form');
-        if (form) {
-            form.reset();
-            // Clear localStorage
-            localStorage.removeItem('ict-projects-form');
-            console.log('Form cleared');
-        }
+    try {
+        showConfirmModal('Are you sure you want to clear all fields? This action cannot be undone.', function() {
+            const form = document.querySelector('#mainForm');
+            if (form) {
+                // Explicitly clear all fields instead of form.reset() to avoid reset-checked checkboxes
+                form.querySelectorAll('input:not([type="hidden"]):not([type="file"]), textarea, select').forEach(function(el) {
+                    if (el.type === 'checkbox' || el.type === 'radio') {
+                        el.checked = false;
+                    } else {
+                        el.value = '';
+                    }
+                });
+                // Remove all file previews
+                form.querySelectorAll('.file-preview').forEach(el => el.remove());
+                // Clear localStorage
+                localStorage.removeItem('ict-projects-form');
+                if (typeof updateStatusIndicators === 'function') updateStatusIndicators();
+                console.log('Form cleared');
+                showAlertModal('Success', 'Form has been cleared successfully.');
+            } else {
+                console.error('Form not found');
+                showAlertModal('Error', 'Error: Form not found');
+            }
+        });
+    } catch (error) {
+        console.error('Error in clearForm:', error);
+        showAlertModal('Error', 'Error clearing form: ' + error.message);
     }
 };
 
-// Save changes to localStorage
+// Save changes to localStorage (supports file persistence)
 window.saveChanges = function(showAlert = true) {
     console.log('saveChanges called with showAlert:', showAlert);
-    const form = document.querySelector('form');
-    if (form) {
-        const formData = new FormData(form);
-        const formDataObj = {};
-        
-        formData.forEach((value, key) => {
-            formDataObj[key] = value;
-        });
-        
-        // Save to localStorage
-        localStorage.setItem('ict-projects-form', JSON.stringify(formDataObj));
-        console.log('Data saved to localStorage');
-        
-        // Show success message
-        if (showAlert) {
-            alert('Changes saved locally! You can continue working and your data will be preserved.');
+    try {
+        const form = document.querySelector('#mainForm');
+        if (form) {
+            const formData = new FormData(form);
+            const formDataObj = {};
+            const fileReads = [];
+            
+            formData.forEach((value, key) => {
+                if (value instanceof File && value.name) {
+                    fileReads.push(
+                        new Promise(resolve => {
+                            const reader = new FileReader();
+                            reader.onload = () => {
+                                const dataUrl = reader.result;
+                                const b64Idx = dataUrl.indexOf(';base64,');
+                                if (b64Idx !== -1) {
+                                    const beforeBase64 = dataUrl.substring(0, b64Idx);
+                                    const afterBase64 = dataUrl.substring(b64Idx);
+                                    formDataObj[key] = beforeBase64 + ';name=' + encodeURIComponent(value.name) + afterBase64;
+                                } else {
+                                    const parts = dataUrl.split(',');
+                                    formDataObj[key] = parts[0] + ';name=' + encodeURIComponent(value.name) + ',' + parts.slice(1).join(',');
+                                }
+                                resolve();
+                            };
+                            reader.readAsDataURL(value);
+                        })
+                    );
+                } else if (value instanceof File) {
+                    // Empty file input — skip (would serialize to {})
+                } else {
+                    formDataObj[key] = value;
+                }
+            });
+            
+            if (fileReads.length > 0) {
+                Promise.all(fileReads).then(() => {
+                    finalizeSave(formDataObj, showAlert);
+                });
+            } else {
+                finalizeSave(formDataObj, showAlert);
+            }
+        } else {
+            console.error('Form #mainForm not found');
+            if (showAlert) showAlertModal('Error', 'Error: Form not found');
         }
+    } catch (error) {
+        console.error('Error in saveChanges:', error);
+        if (showAlert) showAlertModal('Error', 'Error saving changes: ' + error.message);
     }
 };
+
+function finalizeSave(formDataObj, showAlert) {
+    // Merge with previous localStorage data to preserve file previews
+    const prevData = JSON.parse(localStorage.getItem('ict-projects-form') || '{}');
+    Object.keys(prevData).forEach(key => {
+        const val = prevData[key];
+        if (typeof val === 'string' && (val.startsWith('data:') || val.startsWith('uploads/'))) {
+            if (!(key in formDataObj) || formDataObj[key] === '') {
+                formDataObj[key] = val;
+            }
+        }
+    });
+    
+    try {
+        const jsonStr = JSON.stringify(formDataObj);
+        localStorage.setItem('ict-projects-form', jsonStr);
+        
+        const verify = localStorage.getItem('ict-projects-form');
+        console.log('Save verified:', verify ? 'OK (' + Object.keys(JSON.parse(verify)).length + ' keys)' : 'FAILED');
+        
+        if (typeof updateStatusIndicators === 'function') updateStatusIndicators();
+        if (showAlert) showAlertModal('Success', 'Changes saved locally!');
+    } catch (error) {
+        console.error('Error saving to localStorage:', error);
+        if (error.name === 'QuotaExceededError' || error.code === 22) {
+            if (showAlert) showAlertModal('Error', 'Unable to save: File(s) too large. Please reduce file sizes and try again.');
+        } else {
+            if (showAlert) showAlertModal('Error', 'Error saving changes: ' + error.message);
+        }
+    }
+}
 
 // Load saved data from localStorage on page load
 window.loadSavedData = function() {
     console.log('loadSavedData called');
-    const savedData = localStorage.getItem('ict-projects-form');
-    if (savedData) {
-        const formDataObj = JSON.parse(savedData);
-        const form = document.querySelector('form');
-        
-        if (form) {
-            Object.keys(formDataObj).forEach(key => {
-                const input = form.querySelector(`[name="${key}"]`);
-                if (input) {
-                    if (input.type === 'checkbox') {
-                        input.checked = formDataObj[key] === '1';
-                    } else if (input.type === 'radio') {
-                        const radio = form.querySelector(`[name="${key}"][value="${formDataObj[key]}"]`);
-                        if (radio) radio.checked = true;
-                    } else {
-                        input.value = formDataObj[key];
+    try {
+        const savedData = localStorage.getItem('ict-projects-form');
+        console.log('Saved data from localStorage:', savedData ? 'exists (' + savedData.length + ' chars)' : 'empty');
+        if (savedData) {
+            const formDataObj = JSON.parse(savedData);
+            console.log('Parsed form data keys:', Object.keys(formDataObj));
+            const form = document.querySelector('#mainForm');
+            console.log('Form found:', !!form);
+            
+            if (form) {
+                let restoredCount = 0;
+                Object.keys(formDataObj).forEach(key => {
+                    const input = form.querySelector(`[name="${key}"]`);
+                    if (input) {
+                        const val = formDataObj[key];
+                        if (typeof val === 'string' && val.startsWith('data:')) {
+                            restoreFilePreview(input, val);
+                            restoredCount++;
+                        } else if (typeof val === 'string' && val.startsWith('uploads/')) {
+                            input.setAttribute('data-uploaded-path', val);
+                            showServerFileLink(input, val);
+                            restoredCount++;
+                        } else if (input.type === 'checkbox') {
+                            input.checked = val === '1';
+                            restoredCount++;
+                        } else if (input.type === 'radio') {
+                            const radio = form.querySelector(`[name="${key}"][value="${val}"]`);
+                            if (radio) radio.checked = true;
+                            restoredCount++;
+                        } else if (input.type === 'file') {
+                            // File inputs cannot be set programmatically; skip
+                            restoredCount++;
+                        } else {
+                            input.value = val;
+                            restoredCount++;
+                        }
                     }
+                });
+                
+                console.log('Data loaded from localStorage, restored', restoredCount, 'fields');
+
+
+                // Update conditional visibility for Others textboxes
+                var internalOthers = document.getElementById('internalStrategicOthers');
+                var internalOthersCheck = document.getElementById('internal_strategic_others');
+                if (internalOthers && internalOthersCheck) {
+                    internalOthers.style.display = internalOthersCheck.checked ? 'block' : 'none';
                 }
-            });
-            console.log('Data loaded from localStorage');
+                var crossOthers = document.getElementById('crossStrategicOthers');
+                var crossOthersCheck = document.getElementById('cross_strategic_others');
+                if (crossOthers && crossOthersCheck) {
+                    crossOthers.style.display = crossOthersCheck.checked ? 'block' : 'none';
+                }
+            }
         }
+    } catch (error) {
+        console.error('Error loading saved data:', error);
+
     }
 };
 
-// Navigate to page after saving
+function restoreFilePreview(input, dataUrl) {
+    if (!input || !dataUrl) return;
+    const existing = input.parentElement.querySelector('.file-preview');
+    if (existing) existing.remove();
+    const preview = document.createElement('div');
+    preview.className = 'file-preview';
+    preview.setAttribute('data-file-input', input.name);
+    preview.style.cursor = 'pointer';
+    preview.title = 'Click to open file';
+    preview.addEventListener('click', function(e) {
+        if (e.target.closest('button')) return;
+        try {
+            // Parse base64 data URL to Blob for reliable download
+            const commaIdx = dataUrl.indexOf(',');
+            const mimeMatch = dataUrl.substring(0, commaIdx).match(/:(.*?);/);
+            const mime = mimeMatch ? mimeMatch[1] : 'application/octet-stream';
+            const b64Data = dataUrl.substring(commaIdx + 1);
+            const byteStr = atob(b64Data);
+            const ab = new ArrayBuffer(byteStr.length);
+            const ia = new Uint8Array(ab);
+            for (let i = 0; i < byteStr.length; i++) {
+                ia[i] = byteStr.charCodeAt(i);
+            }
+            const blob = new Blob([ab], {type: mime});
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = getFileNameFromDataUrl(dataUrl) || 'file';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        } catch (dlError) {
+            console.error('Download failed:', dlError);
+            // Fallback: open data URL in new tab
+            const win = window.open(dataUrl, '_blank');
+            if (!win) {
+                showAlertModal('Notice', 'Unable to open file. Try saving it first.');
+            }
+        }
+    });
+    if (dataUrl.startsWith('data:image/')) {
+        const img = document.createElement('img');
+        img.src = dataUrl;
+        img.alt = 'Uploaded image';
+        preview.appendChild(img);
+    }
+    const nameSpan = document.createElement('span');
+    nameSpan.className = 'file-name';
+    const fileSize = Math.round((dataUrl.length * 0.75) / 1024);
+    nameSpan.textContent = getFileNameFromDataUrl(dataUrl) || 'Uploaded file';
+    preview.appendChild(nameSpan);
+    const sizeSpan = document.createElement('span');
+    sizeSpan.className = 'file-size';
+    sizeSpan.textContent = fileSize > 1024 ? (fileSize / 1024).toFixed(1) + ' MB' : fileSize + ' KB';
+    preview.appendChild(sizeSpan);
+    const removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.className = 'btn btn-sm btn-outline-danger';
+    removeBtn.innerHTML = '&times;';
+    removeBtn.title = 'Remove file';
+    removeBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        preview.remove();
+        input.value = '';
+        // Remove only this file from localStorage directly
+        try {
+            const savedData = JSON.parse(localStorage.getItem('ict-projects-form') || '{}');
+            delete savedData[input.name];
+            localStorage.setItem('ict-projects-form', JSON.stringify(savedData));
+            if (typeof updateStatusIndicators === 'function') updateStatusIndicators();
+            showAlertModal('Success', 'File removed.');
+        } catch (error) {
+            console.error('Error removing file:', error);
+            showAlertModal('Error', 'Error removing file: ' + error.message);
+        }
+    });
+    preview.appendChild(removeBtn);
+    input.parentElement.appendChild(preview);
+}
+
+function getFileNameFromDataUrl(dataUrl) {
+    try {
+        const commaIndex = dataUrl.indexOf(',');
+        const header = commaIndex >= 0 ? dataUrl.substring(0, commaIndex) : dataUrl;
+        const parts = header.split(';');
+        for (const part of parts) {
+            const trimmed = part.trim();
+            if (trimmed.startsWith('name=')) {
+                return decodeURIComponent(trimmed.substring(5));
+            }
+        }
+        return null;
+    } catch(e) {
+        return null;
+    }
+}
+
 window.navigateToPage = function(url) {
     console.log('navigateToPage called with url:', url);
-    window.saveChanges(false);
-    setTimeout(() => {
-        // Verify data was saved before navigating
-        const savedData = localStorage.getItem('ict-projects-form');
-        console.log('Data in localStorage before navigation:', savedData ? 'exists' : 'empty');
+    // If in edit mode, rewrite URLs to stay in edit context
+    var editId = localStorage.getItem('edit_project_id');
+    if (editId) {
+        url = url.replace('proposed-ict-strategy/', 'edit-ict-project/' + editId + '/');
+        if (url.indexOf('employee/dashboard') !== -1) {
+            url = '<?= site_url('employee/draft-ict-projects') ?>';
+        }
+    }
+    const form = document.querySelector('#mainForm');
+    if (form) {
+        const formData = new FormData(form);
+        const formDataObj = {};
+        const fileReads = [];
+        formData.forEach((value, key) => {
+            if (value instanceof File && value.name) {
+                fileReads.push(
+                    new Promise(resolve => {
+                        const reader = new FileReader();
+                        reader.onload = () => {
+                            const dataUrl = reader.result;
+                            const b64Idx = dataUrl.indexOf(';base64,');
+                            if (b64Idx !== -1) {
+                                const beforeBase64 = dataUrl.substring(0, b64Idx);
+                                const afterBase64 = dataUrl.substring(b64Idx);
+                                formDataObj[key] = beforeBase64 + ';name=' + encodeURIComponent(value.name) + afterBase64;
+                            } else {
+                                const parts = dataUrl.split(',');
+                                formDataObj[key] = parts[0] + ';name=' + encodeURIComponent(value.name) + ',' + parts.slice(1).join(',');
+                            }
+                            resolve();
+                        };
+                        reader.readAsDataURL(value);
+                    })
+                );
+            } else {
+                formDataObj[key] = value;
+            }
+        });
+        const doNav = () => {
+            // Merge with previous localStorage data to preserve file previews
+            const prevData = JSON.parse(localStorage.getItem('ict-projects-form') || '{}');
+            Object.keys(prevData).forEach(key => {
+                if (!(key in formDataObj)) {
+                    const val = prevData[key];
+                    if (typeof val === 'string' && (val.startsWith('data:') || val.startsWith('uploads/'))) {
+                        formDataObj[key] = val;
+                    }
+                }
+            });
+            const jsonStr = JSON.stringify(formDataObj);
+            localStorage.setItem('ict-projects-form', jsonStr);
+            if (typeof updateStatusIndicators === 'function') updateStatusIndicators();
+            window.location.href = url;
+        };
+        if (fileReads.length > 0) {
+            Promise.all(fileReads).then(doNav);
+        } else {
+            doNav();
+        }
+    } else {
         window.location.href = url;
-    }, 500);
+    }
 };
 </script>
 

@@ -670,6 +670,33 @@ $active = $active ?? '';
             --bs-btn-hover-color: #9f2e2e;
         }
 
+        .badge-status {
+            border: 1px solid transparent;
+        }
+        .badge-status-draft {
+            background: #8896a8;
+            color: #fff;
+        }
+        .badge-status-pending {
+            background: #fef7e0;
+            color: #8a6d1e;
+        }
+        .badge-status-approved {
+            background: #4a8c5c;
+            color: #fff;
+        }
+        .badge-status-rejected {
+            background: #b34a4a;
+            color: #fff;
+        }
+        .badge-status-submitted {
+            background: #4f6584;
+            color: #fff;
+        }
+        .badge-status-revision {
+            background: #c97d3b;
+            color: #fff;
+        }
         .badge-soft {
             background: #edf2f7;
             color: var(--brand-dark);
@@ -1174,6 +1201,57 @@ $active = $active ?? '';
                 width: 32px;
             }
         }
+
+        /* ==================== RESPONSIVE FORM PAGES ==================== */
+        @media (max-width: 768px) {
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 4px;
+            }
+            .page-header .page-title { font-size: 1.1rem; }
+            .page-header .page-subtitle { font-size: .78rem; }
+            .row.g-3 { --bs-gutter-y: .6rem; }
+            .file-upload-area { padding: 16px; }
+            .form-section-label { font-size: .85rem; }
+            .subsection-body { padding: 12px; }
+            .subsection-header { flex-wrap: wrap; gap: 6px; }
+            .system-card-body { padding: 14px; }
+            .project-tabs { overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; }
+            .project-tab { padding: 10px 14px; font-size: .8rem; white-space: nowrap; }
+            .summary-card { padding: 12px; }
+            .summary-card h3 { font-size: 1.5rem; }
+        }
+
+        @media (max-width: 575px) {
+            .page-header .page-title { font-size: 1rem; }
+            .page-header .page-subtitle { font-size: .72rem; display: none; }
+            .section-card .section-body,
+            .main-section-card > div,
+            .subsection-card .subsection-body { padding: 12px; }
+            .row.g-3 { --bs-gutter-y: .4rem; }
+            .file-upload-area { padding: 12px; }
+            .file-upload-area i { font-size: 1.2rem; }
+            .file-upload-area p { font-size: .72rem; }
+            .form-section-label { font-size: .8rem; padding-bottom: 6px; }
+            .system-card-body { padding: 10px; }
+            .summary-card { padding: 10px; }
+            .summary-card h3 { font-size: 1.25rem; }
+            .summary-card p { font-size: .68rem; }
+            .category-header { flex-direction: column; align-items: flex-start; gap: 4px; }
+            .control-item { flex-wrap: wrap; gap: 6px; }
+            .checklist-container { padding: 12px; }
+            .checkbox-group { gap: 8px; }
+            .project-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+            .project-tab { padding: 8px 10px; font-size: .74rem; }
+            .system-card-header { flex-direction: column; gap: 6px; }
+            .subsection-body { padding: 10px; }
+            .main-header { padding: 12px 14px; }
+            .main-header .main-title { font-size: 1rem; }
+            .section-header { padding: 12px 14px; flex-direction: column; align-items: flex-start; gap: 4px; }
+            .section-header .section-title { font-size: .88rem; }
+            .page-header { gap: 2px; }
+        }
     </style>
     <?= $this->renderSection('styles') ?>
 </head>
@@ -1181,6 +1259,24 @@ $active = $active ?? '';
 <div class="app-layout">
     <?= $this->include('frontend/layout/sidebar/sidebar') ?>
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Custom Alert & Confirm Modals -->
+    <div class="custom-modal-overlay" id="customModalOverlay" style="display:none;position:fixed;inset:0;z-index:1050;background:rgba(0,0,0,.45);"></div>
+    <div class="custom-modal" id="confirmModal" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:1060;background:#fff;border-radius:6px;box-shadow:0 18px 40px rgba(15,23,42,.18);min-width:320px;max-width:400px;overflow:hidden;">
+        <div style="background:#536783;color:#fff;padding:12px 14px;font-size:.94rem;font-weight:700;"><i class="fa-solid fa-triangle-exclamation me-2"></i><span id="confirmModalTitle">Confirm</span></div>
+        <div style="padding:14px 14px;font-size:.82rem;color:#1f2a3a;"><p class="mb-0" id="confirmMessage">Are you sure?</p></div>
+        <div style="padding:8px 12px;border-top:1px solid #e1e6ee;display:flex;justify-content:flex-end;gap:8px;">
+            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="closeCustomModals()">Cancel</button>
+            <button type="button" class="btn btn-primary btn-sm" id="confirmModalButton">Confirm</button>
+        </div>
+    </div>
+    <div class="custom-modal" id="alertModal" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:1060;background:#fff;border-radius:6px;box-shadow:0 18px 40px rgba(15,23,42,.18);min-width:320px;max-width:400px;overflow:hidden;">
+        <div style="background:#536783;color:#fff;padding:12px 14px;font-size:.94rem;font-weight:700;" id="alertModalHeader"><span id="alertModalLabel">Notice</span></div>
+        <div style="padding:14px 14px;font-size:.82rem;color:#1f2a3a;"><p class="mb-0" id="alertMessage">Message</p></div>
+        <div style="padding:8px 12px;border-top:1px solid #e1e6ee;display:flex;justify-content:flex-end;gap:8px;">
+            <button type="button" class="btn btn-primary btn-sm" onclick="closeCustomModals()">OK</button>
+        </div>
+    </div>
     <main class="app-main">
         <header class="topbar">
             <div class="d-flex align-items-center gap-3">
@@ -1204,24 +1300,6 @@ $active = $active ?? '';
     </main>
 </div>
 
-<!-- Logout Confirmation Modal -->
-<div class="modal fade" id="logoutConfirmModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-sm modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title"><i class="fa-solid fa-right-from-bracket me-2"></i>Confirm Logout</h5>
-            </div>
-            <div class="modal-body">
-                <p class="mb-0">Are you sure you want to log out?</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" id="confirmLogoutButton">Logout</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script>
@@ -1236,7 +1314,6 @@ document.addEventListener('DOMContentLoaded', function() {
         sidebarOverlay.classList.toggle('active');
         document.body.classList.toggle('sidebar-open');
 
-        // Update menu icon
         const icon = menuToggle.querySelector('i');
         if (sidebar.classList.contains('sidebar-open')) {
             icon.classList.remove('fa-bars');
@@ -1252,7 +1329,6 @@ document.addEventListener('DOMContentLoaded', function() {
         sidebarOverlay.classList.remove('active');
         document.body.classList.remove('sidebar-open');
 
-        // Reset menu icon
         const icon = menuToggle.querySelector('i');
         icon.classList.remove('fa-xmark');
         icon.classList.add('fa-bars');
@@ -1268,7 +1344,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Close sidebar when clicking on nav links (mobile)
     const navLinks = document.querySelectorAll('.sidebar-nav .nav-link');
     navLinks.forEach(link => {
         link.addEventListener('click', function() {
@@ -1278,53 +1353,224 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Handle window resize
     window.addEventListener('resize', function() {
         if (window.innerWidth > 991) {
             closeSidebar();
         }
     });
 
-    // Auto-expand dropdowns when a child link is active
     const activeLinks = document.querySelectorAll('.sidebar-nav .nav-link.active');
     activeLinks.forEach(activeLink => {
         let parentCollapse = activeLink.closest('.collapse');
         while (parentCollapse) {
             parentCollapse.classList.add('show');
-
             const toggleButton = document.querySelector(`[data-bs-target="#${parentCollapse.id}"]`);
             if (toggleButton) {
                 toggleButton.setAttribute('aria-expanded', 'true');
             }
-
             parentCollapse = parentCollapse.parentElement.closest('.collapse');
         }
     });
 
-    // Logout Confirmation Modal
+    // Logout - use custom modal
     const logoutButton = document.getElementById('logoutButton');
     const logoutForm = document.getElementById('logoutForm');
-    const logoutConfirmModal = document.getElementById('logoutConfirmModal');
-    const confirmLogoutButton = document.getElementById('confirmLogoutButton');
-
-    if (logoutButton && logoutForm && logoutConfirmModal && confirmLogoutButton) {
-        let logoutModalInstance;
-
+    if (logoutButton && logoutForm) {
         logoutButton.addEventListener('click', function(e) {
             e.preventDefault();
-            logoutModalInstance = new bootstrap.Modal(logoutConfirmModal);
-            logoutModalInstance.show();
-        });
-
-        confirmLogoutButton.addEventListener('click', function() {
-            if (logoutModalInstance) {
-                logoutModalInstance.hide();
-            }
-            logoutForm.submit();
+            showConfirmModal('Are you sure you want to log out?', function() {
+                localStorage.clear();
+                logoutForm.submit();
+            });
         });
     }
 });
 </script>
+
+<script>
+// Custom modal helpers - no Bootstrap Modal dependency
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('customModalOverlay').addEventListener('click', closeCustomModals);
+});
+
+function showCustomModal(id) {
+    document.getElementById(id).style.display = 'block';
+    document.getElementById('customModalOverlay').style.display = 'block';
+    document.body.style.overflow = 'hidden';
+}
+
+function closeCustomModals() {
+    document.querySelectorAll('.custom-modal').forEach(el => el.style.display = 'none');
+    document.getElementById('customModalOverlay').style.display = 'none';
+    document.body.style.overflow = '';
+}
+
+window.showConfirmModal = function(message, callback) {
+    document.getElementById('confirmMessage').textContent = message;
+    const confirmBtn = document.getElementById('confirmModalButton');
+    confirmBtn._callback = callback;
+    confirmBtn.onclick = function() {
+        closeCustomModals();
+        if (typeof confirmBtn._callback === 'function') {
+            const cb = confirmBtn._callback;
+            confirmBtn._callback = null;
+            cb();
+        }
+    };
+    showCustomModal('confirmModal');
+};
+
+window.showAlertModal = function(title, message) {
+    document.getElementById('alertModalLabel').textContent = title;
+    document.getElementById('alertMessage').textContent = message;
+    showCustomModal('alertModal');
+};
+
+// Prevent stale form data from BFCache on back/forward navigation
+window.addEventListener('pageshow', function(e) {
+    if (e.persisted) {
+        document.querySelectorAll('#mainForm input, #mainForm textarea, #mainForm select').forEach(function(el) {
+            if (el.type !== 'hidden' && el.type !== 'file') {
+                el.value = '';
+            }
+        });
+        if (typeof loadSavedData === 'function') {
+            loadSavedData();
+        }
+        if (typeof updateStatusIndicators === 'function') {
+            updateStatusIndicators();
+        }
+    }
+});
+</script>
+
 <?= $this->renderSection('scripts') ?>
+
+<script>
+// Auto-save current section to DB (called by Save Changes button)
+window.autoSaveDraft = function() {
+    var editId = localStorage.getItem('edit_project_id');
+    var csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    if (!csrfToken) return;
+
+    var keys = ['network-infrastructure-form','enterprise-architecture-form','ict-human-capital-form','information-systems-form','ict-projects-form','performance-measurement-form'];
+    var data = {};
+    keys.forEach(function(key) {
+        try {
+            var saved = localStorage.getItem(key);
+            if (saved) data[key] = JSON.parse(saved);
+        } catch(e) {}
+    });
+
+    fetch('<?= site_url('employee/save-draft') ?>', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({
+            csrf_test_name: csrfToken,
+            form_data: data,
+            id: editId || null
+        })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(result) {
+        if (result.success && result.id && !editId) {
+            localStorage.setItem('edit_project_id', result.id);
+        }
+    })
+    .catch(function(err) {
+        console.error('Auto-save to DB failed:', err);
+    });
+};
+
+// File upload helper — uploads file to server, stores path on the input
+window.uploadFileInput = function(input) {
+    var file = input.files[0];
+    if (!file) return;
+
+    var formData = new FormData();
+    formData.append('file', file);
+
+    var csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    if (csrfToken) formData.append('csrf_test_name', csrfToken);
+
+    var wrapper = input.closest('.upload-wrapper') || input.parentElement;
+    var statusEl = wrapper.querySelector('.upload-status');
+
+    if (statusEl) {
+        statusEl.textContent = 'Uploading...';
+        statusEl.className = 'upload-status text-info';
+    }
+
+    fetch('<?= site_url('employee/upload-file') ?>', {
+        method: 'POST',
+        body: formData,
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(result) {
+        if (result.success) {
+            input.setAttribute('data-uploaded-path', result.path);
+            input.setAttribute('data-uploaded-name', result.name);
+            if (statusEl) {
+                statusEl.textContent = result.name + ' (uploaded)';
+                statusEl.className = 'upload-status text-success';
+            }
+        } else if (statusEl) {
+            statusEl.textContent = 'Upload failed';
+            statusEl.className = 'upload-status text-danger';
+        }
+    })
+    .catch(function() {
+        if (statusEl) {
+            statusEl.textContent = 'Upload error';
+            statusEl.className = 'upload-status text-danger';
+        }
+    });
+};
+
+// Show a download link for server-uploaded files
+window.showServerFileLink = function(input, filePath) {
+    if (!input || !filePath) return;
+    var existing = input.parentElement.querySelector('.file-preview');
+    if (existing) existing.remove();
+    var preview = document.createElement('div');
+    preview.className = 'file-preview';
+    preview.setAttribute('data-file-input', input.name);
+    var link = document.createElement('a');
+    link.href = '<?= site_url() ?>/' + filePath;
+    link.target = '_blank';
+    link.textContent = filePath.split('/').pop() || 'Download file';
+    link.style.display = 'block';
+    link.style.padding = '4px 0';
+    preview.appendChild(link);
+    input.parentElement.appendChild(preview);
+};
+
+// Clean up stale edit data when loading a new project page
+(function() {
+    var path = window.location.pathname;
+    if (path.indexOf('/proposed-ict-strategy/') >= 0 && path.indexOf('/edit-ict-project/') < 0) {
+        var editId = localStorage.getItem('edit_project_id');
+        if (editId) {
+            var formKeys = ['network-infrastructure-form','enterprise-architecture-form','ict-human-capital-form','information-systems-form','ict-projects-form','performance-measurement-form'];
+            formKeys.forEach(function(k) { localStorage.removeItem(k); });
+            var backup = localStorage.getItem('new-project-backup');
+            if (backup) {
+                try {
+                    var parsed = JSON.parse(backup);
+                    Object.keys(parsed).forEach(function(k) {
+                        if (parsed[k]) localStorage.setItem(k, parsed[k]);
+                    });
+                } catch(e) {}
+                localStorage.removeItem('new-project-backup');
+            }
+            localStorage.removeItem('edit_project_id');
+        }
+    }
+})();
+</script>
 </body>
 </html>
