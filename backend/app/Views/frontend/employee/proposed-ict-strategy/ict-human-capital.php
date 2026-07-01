@@ -1,0 +1,915 @@
+<?= $this->extend('frontend/layout/app') ?>
+
+<?= $this->section('content') ?>
+<style>
+.section-card {
+    background: var(--panel);
+    border: 1px solid #dde4ed;
+    border-radius: 10px;
+    box-shadow: 0 12px 26px rgba(15, 23, 42, .05);
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.section-header {
+    background: linear-gradient(180deg, #566d8b 0%, var(--brand) 100%);
+    color: #fff;
+    padding: 14px 18px;
+    border-bottom: 1px solid rgba(255,255,255,.1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.section-header .section-title {
+    font-size: .98rem;
+    font-weight: 700;
+    margin: 0;
+    color: #fff;
+}
+
+.section-header .section-subtitle {
+    font-size: .76rem;
+    color: rgba(255,255,255,.82);
+    margin: 4px 0 0;
+}
+
+.section-body {
+    padding: 18px;
+}
+
+.info-banner {
+    background: linear-gradient(135deg, #e8f4f8 0%, #f0f6fa 100%);
+    border-left: 4px solid var(--brand);
+    border-radius: 6px;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    color: var(--ink);
+    font-size: .82rem;
+}
+
+.info-banner i {
+    color: var(--brand);
+    margin-right: 8px;
+}
+
+.form-section-label {
+    font-size: .9rem;
+    font-weight: 700;
+    color: var(--brand-dark);
+    margin-bottom: 0;
+    margin-top: 0;
+    text-transform: uppercase;
+    letter-spacing: .01em;
+    padding-bottom: 8px;
+    padding-top: 8px;
+    flex: 1;
+}
+
+.form-label {
+    font-size: .82rem;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 4px;
+}
+
+.form-control, .form-select {
+    border: 1px solid #d0dae6;
+    border-radius: 6px;
+    font-size: .82rem;
+    padding: 8px 12px;
+    transition: all 0.2s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--brand);
+    box-shadow: 0 0 0 3px rgba(79, 101, 132, .1);
+}
+
+.form-text {
+    font-size: .74rem;
+    color: var(--muted);
+    margin-top: 4px;
+}
+
+.action-bar {
+    background: var(--panel);
+    border: 1px solid #dde4ed;
+    border-radius: 10px;
+    padding: 16px 18px;
+    box-shadow: 0 12px 26px rgba(15, 23, 42, .05);
+    position: sticky;
+    bottom: 14px;
+    z-index: 100;
+}
+
+.file-upload-area {
+    border: 2px dashed #d0dae6;
+    border-radius: 8px;
+    padding: 24px;
+    text-align: center;
+    background: #fafbfc;
+    transition: all 0.2s ease;
+}
+
+.file-upload-area:hover {
+    border-color: var(--brand);
+    background: #f8fafc;
+}
+
+.file-upload-area i {
+    font-size: 1.5rem;
+    color: var(--brand);
+    margin-bottom: 8px;
+}
+
+.file-upload-area p {
+    font-size: .8rem;
+    color: var(--muted);
+    margin: 0;
+}
+
+.staffing-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.staffing-table th {
+    background: linear-gradient(135deg, #f8fafc 0%, #edf2f7 100%);
+    color: var(--ink);
+    font-weight: 700;
+    font-size: .85rem;
+    padding: 12px 16px;
+    border-bottom: 2px solid #d0dae6;
+    text-transform: uppercase;
+    letter-spacing: .02em;
+}
+
+.staffing-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #e8ecf1;
+    vertical-align: middle;
+    background: white;
+}
+
+.staffing-table tr:last-child td {
+    border-bottom: none;
+}
+
+.staffing-table tr:hover td {
+    background: #f8fafc;
+}
+
+.staffing-table .form-control-sm {
+    font-size: .78rem;
+    padding: 6px 10px;
+    border: 1px solid #d0dae6;
+    border-radius: 4px;
+}
+
+.staffing-table .form-control-sm:focus {
+    border-color: var(--brand);
+    box-shadow: 0 0 0 2px rgba(79, 101, 132, .1);
+}
+
+.staffing-table .form-control-sm[readonly] {
+    background: #f8fafc;
+    color: var(--muted);
+}
+
+.staffing-table .delete-btn {
+    background: transparent;
+    color: #64748b;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    padding: 6px 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+}
+
+.staffing-table .delete-btn:hover {
+    background: #fee2e2;
+    color: #dc2626;
+    border-color: #fecaca;
+}
+
+.staffing-table .delete-btn:active {
+    transform: scale(0.95);
+}
+
+.total-row {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
+    border-top: 2px solid #cbd5e1;
+    font-weight: 700;
+    color: var(--ink);
+    font-size: 0.9rem;
+}
+
+.total-row td {
+    padding: 12px 16px;
+    border-bottom: none !important;
+    vertical-align: middle;
+}
+
+.total-row .total-label {
+    text-align: left;
+    color: var(--brand-dark);
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .01em;
+}
+
+.total-row .total-value {
+    text-align: center;
+    font-size: 0.78rem;
+    color: var(--ink);
+    font-weight: 600;
+    background: #f8fafc;
+    padding: 6px 10px;
+    border-radius: 4px;
+    border: 1px solid #d0dae6;
+    min-width: 60px;
+}
+
+.add-position-btn {
+    background: var(--brand);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 12px;
+    font-weight: 600;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+}
+
+.add-position-btn:hover {
+    background: var(--brand-dark);
+    transform: translateY(-1px);
+}
+
+.add-position-btn:active {
+    transform: translateY(0);
+}
+
+.add-position-btn i {
+    font-size: 0.75rem;
+}
+
+.help-icon {
+    position: relative;
+    cursor: pointer;
+    color: var(--brand);
+    margin-left: 8px;
+    font-size: 1rem;
+    transition: color 0.2s ease;
+}
+
+.help-icon:hover {
+    color: var(--brand-dark);
+}
+
+.tooltip-content {
+    position: fixed;
+    background: #1e293b;
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: .75rem;
+    font-weight: 400;
+    max-width: 300px;
+    white-space: normal;
+    width: max-content;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+    z-index: 9999;
+    pointer-events: none;
+}
+
+.tooltip-content.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.navigation-bar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+
+.navigation-bar.has-both {
+    justify-content: space-between;
+}
+
+.navigation-bar.align-right {
+    justify-content: flex-end;
+}
+
+.nav-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.8rem;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+    white-space: nowrap;
+}
+
+.nav-btn-prev {
+    background: white;
+    color: var(--brand);
+    border-color: #cbd5e1;
+}
+
+.nav-btn-prev:hover {
+    background: #f1f5f9;
+    border-color: var(--brand);
+    color: var(--brand-dark);
+}
+
+.nav-btn-next {
+    background: var(--brand);
+    color: white;
+    border-color: var(--brand);
+}
+
+.nav-btn-next:hover {
+    background: var(--brand-dark);
+    border-color: var(--brand-dark);
+}
+
+.nav-btn i {
+    font-size: 0.8rem;
+}
+
+@media (max-width: 768px) {
+    .navigation-bar {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .nav-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+.footer-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.action-btn i {
+    font-size: 0.875rem;
+}
+
+.action-btn-save {
+    background: var(--brand);
+    color: white;
+    border-color: var(--brand);
+}
+
+.action-btn-save:hover {
+    background: var(--brand-dark);
+    border-color: var(--brand-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(79, 101, 132, 0.2);
+}
+
+.action-btn-clear {
+    background: white;
+    color: #64748b;
+    border-color: #cbd5e1;
+}
+
+.action-btn-clear:hover {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+    color: #475569;
+    transform: translateY(-1px);
+}
+
+.navigation-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+@media (max-width: 768px) {
+    .footer-actions {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .action-buttons {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .action-btn {
+        flex: 1;
+        justify-content: center;
+    }
+
+    .navigation-buttons {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .nav-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+.summary-card{
+    background:#fff;
+    border:1px solid #dde4ed;
+    border-radius:8px;
+    padding:16px;
+    text-align:center;
+    box-shadow:0 2px 8px rgba(15,23,42,.05);
+    transition: all 0.2s ease;
+}
+
+.summary-card:hover{
+    box-shadow:0 4px 12px rgba(15,23,42,.1);
+    transform: translateY(-2px);
+}
+
+.summary-card h3{
+    margin:0;
+    font-size:2rem;
+    font-weight:700;
+    color:var(--brand);
+    line-height: 1.2;
+}
+
+.summary-card p{
+    margin:6px 0 0;
+    font-size:.75rem;
+    color:var(--muted);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+</style>
+
+<div class="row">
+    <div class="col-12">
+        <div class="page-header mb-3">
+            <h1 class="page-title">ICT Human Capital</h1>
+            <p class="page-subtitle">Human capital and staffing requirements</p>
+        </div>
+        
+        <div class="info-banner">
+            <i class="fa-solid fa-info-circle"></i>
+            Please provide information about your proposed ICT human capital to effectively support your agency's day-to-day operations and proposed ICT project implementations.
+        </div>
+    </div>
+</div>
+
+<form action="<?= site_url('employee/proposed-ict-strategy/ict-human-capital/save') ?>" method="post" enctype="multipart/form-data">
+    <?= csrf_field() ?>
+
+
+    <!-- Staffing by Position/Role -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="section-card">
+                <div class="section-header">
+                    <div>
+                        <h5 class="section-title">C. Proposed ICT Human Capital</h5>
+                        <p class="section-subtitle">Detailed breakdown of personnel requirements</p>
+                    </div>
+                    <i class="fa-solid fa-circle-question help-icon" 
+                       data-tooltip="Provide detailed breakdown of personnel requirements by position/role."></i>
+                </div>
+                <div class="section-body">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div class="form-section-label">
+                        Proposed ICT Human Capital
+                    </div>
+                    <button type="button" class="add-position-btn" onclick="addPositionRow()">
+                        <i class="fa-solid fa-plus"></i>
+                        Add Position
+                    </button>
+                </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-3">
+                            <div class="summary-card">
+                                <h3 id="totalPositions">0</h3>
+                                <p>Total Positions</p>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="summary-card">
+                                <h3 id="totalPlantilla">0</h3>
+                                <p>Plantilla</p>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="summary-card">
+                                <h3 id="totalContractual">0</h3>
+                                <p>Contractual</p>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="summary-card">
+                                <h3 id="totalOutsourced">0</h3>
+                                <p>Outsourced (JO, COS, and HTC)</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="staffing-table" id="humanCapitalTable">
+                            <thead>
+                                <tr>
+                                    <th style="width:45%">Position / Designation</th>
+                                    <th style="width:25%">Employment Status</th>
+                                    <th style="width:20%;text-align:center;">No. of Positions</th>
+                                    <th style="width:10%;text-align:center;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                                <tr>
+                                    <td><input type="text" class="form-control form-control-sm" name="position_1" value="Information Technology Officer III"></td>
+                                    <td>
+                                        <select class="form-select form-select-sm employment-status" name="status_1">
+                                            <option value="PLANTILLA">Plantilla</option>
+                                            <option value="CONTRACTUAL">Contractual</option>
+                                            <option value="OUTSOURCED">Outsourced</option>
+                                        </select>
+                                    </td>
+                                    <td><input type="number" class="form-control form-control-sm position-count" name="count_1"></td>
+                                    <td class="text-center">
+                                        <button type="button" class="delete-btn" onclick="deleteRow(this)">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td><input type="text" class="form-control form-control-sm" name="position_2" value="Information Technology Officer II"></td>
+                                    <td>
+                                        <select class="form-select form-select-sm employment-status" name="status_2">
+                                            <option value="PLANTILLA">Plantilla</option>
+                                            <option value="CONTRACTUAL">Contractual</option>
+                                            <option value="OUTSOURCED">Outsourced</option>
+                                        </select>
+                                    </td>
+                                    <td><input type="number" class="form-control form-control-sm position-count" name="count_2"></td>
+                                    <td class="text-center">
+                                        <button type="button" class="delete-btn" onclick="deleteRow(this)">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td><input type="text" class="form-control form-control-sm" name="position_3" value="Information Technology Officer I"></td>
+                                    <td>
+                                        <select class="form-select form-select-sm employment-status" name="status_3">
+                                            <option value="PLANTILLA">Plantilla</option>
+                                            <option value="CONTRACTUAL">Contractual</option>
+                                            <option value="OUTSOURCED">Outsourced</option>
+                                        </select>
+                                    </td>
+                                    <td><input type="number" class="form-control form-control-sm position-count" name="count_3"></td>
+                                    <td class="text-center">
+                                        <button type="button" class="delete-btn" onclick="deleteRow(this)">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td><input type="text" class="form-control form-control-sm" name="position_4" placeholder="Job Order"></td>
+                                    <td>
+                                        <select class="form-select form-select-sm employment-status" name="status_4">
+                                            <option value="CONTRACTUAL">Contractual</option>
+                                            <option value="PLANTILLA">Plantilla</option>
+                                            <option value="OUTSOURCED">Outsourced</option>
+                                        </select>
+                                    </td>
+                                    <td><input type="number" class="form-control form-control-sm position-count" name="count_4"></td>
+                                    <td class="text-center">
+                                        <button type="button" class="delete-btn" onclick="deleteRow(this)">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <tr id="total-row" class="total-row">
+                                    <td class="total-label">Total</td>
+                                    <td></td>
+                                    <td id="total-count" class="total-value">0</td>
+                                    <td></td>
+                                </tr>
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Actions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="footer-actions">
+                <div class="action-buttons">
+                    <button type="button" class="action-btn action-btn-save" onclick="window.saveChanges()">
+                        <i class="fa-solid fa-save"></i>
+                        <span>Save Changes</span>
+                    </button>
+                    <button type="button" class="action-btn action-btn-clear" onclick="window.clearForm()">
+                        <i class="fa-solid fa-eraser"></i>
+                        <span>Clear Fields</span>
+                    </button>
+                </div>
+                <div class="navigation-buttons">
+                    <button type="button" class="nav-btn nav-btn-prev" onclick="window.navigateToPage('<?= site_url('employee/proposed-ict-strategy/enterprise-architecture') ?>')">
+                        <i class="fa-solid fa-arrow-left"></i>
+                        <span>Enterprise Architecture</span>
+                    </button>
+                    <button type="button" class="nav-btn nav-btn-next" onclick="window.navigateToPage('<?= site_url('employee/proposed-ict-strategy/information-systems') ?>')">
+                        <span>Information Systems</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<?= $this->endSection() ?>
+
+<?= $this->section('scripts') ?>
+<script>
+function updateTotals() {
+    let plantilla = 0;
+    let contractual = 0;
+    let outsourced = 0;
+    let total = 0;
+
+    document.querySelectorAll('.employment-status').forEach((statusField) => {
+        const row = statusField.closest('tr');
+        const countField = row.querySelector('.position-count');
+        const count = parseInt(countField?.value) || 0;
+        total += count;
+
+        if(statusField.value === 'PLANTILLA'){
+            plantilla += count;
+        }
+
+        if(statusField.value === 'CONTRACTUAL'){
+            contractual += count;
+        }
+
+        if(statusField.value === 'OUTSOURCED'){
+            outsourced += count;
+        }
+    });
+    
+    document.getElementById('totalPositions').textContent = total;
+    document.getElementById('totalPlantilla').textContent = plantilla;
+    document.getElementById('totalContractual').textContent = contractual;
+    document.getElementById('totalOutsourced').textContent = outsourced;
+    document.getElementById('total-count').textContent = total;
+}
+document.addEventListener('input', updateTotals);
+document.addEventListener('change', updateTotals);
+function addPositionRow() {
+    const totalRow = document.getElementById('total-row');
+    const row = document.createElement('tr');
+    row.innerHTML = `
+        <td>
+            <input type="text" class="form-control form-control-sm">
+        </td>
+        <td>
+            <select class="form-select form-select-sm employment-status">
+                <option value="">Select</option>
+                <option value="PLANTILLA">Plantilla</option>
+                <option value="CONTRACTUAL">Contractual</option>
+                <option value="OUTSOURCED">Outsourced</option>
+            </select>
+        </td>
+        <td>
+            <input type="number" class="form-control form-control-sm position-count">
+        </td>
+        <td class="text-center">
+            <button type="button" class="delete-btn" onclick="deleteRow(this)">
+                <i class="fa-solid fa-trash"></i>
+            </button>
+        </td>
+    `;
+    totalRow.parentNode.insertBefore(row, totalRow);
+    updateTotals();
+}
+
+function deleteRow(button) {
+    const row = button.closest('tr');
+    const tbody = row.closest('tbody');
+    const dataRows = tbody.querySelectorAll('tr:not(#total-row)');
+    
+    if (dataRows.length > 1) {
+        row.remove();
+        updateTotals();
+    } else {
+        alert('You must have at least one row in the table.');
+    }
+}
+
+// Tooltip functionality
+const helpIcons = document.querySelectorAll('.help-icon');
+
+helpIcons.forEach(icon => {
+    icon.addEventListener('mouseenter', function(e) {
+        const tooltipText = this.getAttribute('data-tooltip');
+        const tooltip = document.createElement('div');
+        tooltip.className = 'tooltip-content';
+        tooltip.textContent = tooltipText;
+        tooltip.id = 'active-tooltip';
+        document.body.appendChild(tooltip);
+        
+        const rect = this.getBoundingClientRect();
+        
+        // Position to the right of the icon
+        tooltip.style.left = (rect.right + 8) + 'px';
+        tooltip.style.top = rect.top + 'px';
+        
+        // Make it visible after positioning
+        requestAnimationFrame(() => {
+            tooltip.classList.add('visible');
+            // Adjust position if it goes off screen
+            const tooltipRect = tooltip.getBoundingClientRect();
+            if (tooltipRect.right > window.innerWidth) {
+                // Position to the left instead
+                tooltip.style.left = (rect.left - tooltipRect.width - 8) + 'px';
+            }
+            if (tooltipRect.bottom > window.innerHeight) {
+                tooltip.style.top = (window.innerHeight - tooltipRect.height - 10) + 'px';
+            }
+        });
+    });
+    
+    icon.addEventListener('mouseleave', function() {
+        const tooltip = document.getElementById('active-tooltip');
+        if (tooltip) {
+            tooltip.remove();
+        }
+    });
+
+    // Auto-save on input change
+    const allInputs = document.querySelectorAll('input, textarea, select');
+    allInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            window.saveChanges(false);
+        });
+    });
+
+    // Load saved data on page load
+    window.loadSavedData();
+});
+
+// Clear form function
+window.clearForm = function() {
+    console.log('clearForm called');
+    try {
+        if (confirm('Are you sure you want to clear all fields? This action cannot be undone.')) {
+            const form = document.querySelector('form');
+            if (form) {
+                form.reset();
+                // Clear localStorage
+                localStorage.removeItem('ict-human-capital-form');
+                console.log('Form cleared');
+                alert('Form has been cleared successfully.');
+            } else {
+                console.error('Form not found');
+                alert('Error: Form not found');
+            }
+        }
+    } catch (error) {
+        console.error('Error in clearForm:', error);
+        alert('Error clearing form: ' + error.message);
+    }
+};
+
+// Save changes to localStorage
+window.saveChanges = function(showAlert = true) {
+    console.log('saveChanges called with showAlert:', showAlert);
+    const form = document.querySelector('form');
+    if (form) {
+        const formData = new FormData(form);
+        const formDataObj = {};
+        
+        formData.forEach((value, key) => {
+            formDataObj[key] = value;
+        });
+        
+        // Save to localStorage
+        localStorage.setItem('ict-human-capital-form', JSON.stringify(formDataObj));
+        console.log('Data saved to localStorage');
+        
+        // Show success message
+        if (showAlert) {
+            alert('Changes saved locally! You can continue working and your data will be preserved.');
+        }
+    }
+};
+
+// Load saved data from localStorage on page load
+window.loadSavedData = function() {
+    console.log('loadSavedData called');
+    const savedData = localStorage.getItem('ict-human-capital-form');
+    if (savedData) {
+        const formDataObj = JSON.parse(savedData);
+        const form = document.querySelector('form');
+        
+        if (form) {
+            Object.keys(formDataObj).forEach(key => {
+                const input = form.querySelector(`[name="${key}"]`);
+                if (input) {
+                    if (input.type === 'checkbox') {
+                        input.checked = formDataObj[key] === '1';
+                    } else if (input.type === 'radio') {
+                        const radio = form.querySelector(`[name="${key}"][value="${formDataObj[key]}"]`);
+                        if (radio) radio.checked = true;
+                    } else {
+                        input.value = formDataObj[key];
+                    }
+                }
+            });
+            console.log('Data loaded from localStorage');
+            updateTotals();
+        }
+    }
+};
+
+// Navigate to page after saving
+window.navigateToPage = function(url) {
+    console.log('navigateToPage called with url:', url);
+    window.saveChanges(false);
+    setTimeout(() => {
+        // Verify data was saved before navigating
+        const savedData = localStorage.getItem('ict-human-capital-form');
+        console.log('Data in localStorage before navigation:', savedData ? 'exists' : 'empty');
+        window.location.href = url;
+    }, 500);
+};
+</script>
+
+<?= $this->endSection() ?>
