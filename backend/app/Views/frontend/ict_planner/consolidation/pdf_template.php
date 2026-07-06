@@ -59,7 +59,7 @@ $fieldLabels = [
         'pia_1'                     => 'Privacy Impact Assessment (PIA)',
     ],
     'ict-projects-form' => [
-        'internal_project_title'    => 'Project Title',
+        'internal_project_title'    => 'Internal Project Title',
         'internal_description'      => 'Description',
         'internal_objectives'        => 'Objectives',
         'internal_strategic_pip'    => 'Public Investment Program',
@@ -81,7 +81,7 @@ $fieldLabels = [
         'internal_implementing_unit' => 'Implementing Unit',
         'internal_total_cost'       => 'Total Cost',
         'internal_funding_source'   => 'Funding Source',
-        'cross_project_title'       => 'Project Title',
+        'cross_project_title'       => 'Cross-Agency Project Title',
         'cross_description'         => 'Description',
         'cross_objectives'          => 'Objectives',
         'cross_lead_agency'         => 'Lead Agency',

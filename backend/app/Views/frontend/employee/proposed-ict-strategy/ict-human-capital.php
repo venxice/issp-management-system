@@ -633,7 +633,7 @@
                                 <tr>
                                     <td><input type="text" class="form-control form-control-sm" name="position_2" placeholder="Enter position/designation (e.g. Information Technology Officer II)"></td>
                                     <td>
-                                        <select class="form-select form-select-sm employment-status" name="status_1">
+                                        <select class="form-select form-select-sm employment-status" name="status_2">
                                             <option value="" disabled selected>Select employment status</option>
                                             <option value="PLANTILLA">Plantilla</option>
                                             <option value="CONTRACTUAL">Contractual</option>
@@ -669,7 +669,7 @@
                                 <tr>
                                     <td><input type="text" class="form-control form-control-sm" name="position_4" placeholder="Enter position/designation (e.g. Job Order)"></td>
                                     <td>
-                                        <select class="form-select form-select-sm employment-status" name="status_3">
+                                        <select class="form-select form-select-sm employment-status" name="status_4">
                                             <option value="" disabled selected>Select employment status</option>
                                             <option value="PLANTILLA">Plantilla</option>
                                             <option value="CONTRACTUAL">Contractual</option>
@@ -768,13 +768,16 @@ document.addEventListener('input', updateTotals);
 document.addEventListener('change', updateTotals);
 function addPositionRow() {
     const totalRow = document.getElementById('total-row');
+    const tbody = totalRow.closest('tbody');
+    const dataRows = tbody.querySelectorAll('tr:not(#total-row)');
+    const nextNum = dataRows.length + 1;
     const row = document.createElement('tr');
     row.innerHTML = `
         <td>
-            <input type="text" class="form-control form-control-sm">
+            <input type="text" class="form-control form-control-sm" name="position_${nextNum}" placeholder="Enter position/designation">
         </td>
         <td>
-            <select class="form-select form-select-sm employment-status">
+            <select class="form-select form-select-sm employment-status" name="status_${nextNum}">
                 <option value="">Select</option>
                 <option value="PLANTILLA">Plantilla</option>
                 <option value="CONTRACTUAL">Contractual</option>
@@ -782,7 +785,7 @@ function addPositionRow() {
             </select>
         </td>
         <td>
-            <input type="number" class="form-control form-control-sm position-count">
+            <input type="number" class="form-control form-control-sm position-count" name="count_${nextNum}">
         </td>
         <td class="text-center">
             <button type="button" class="delete-btn" onclick="deleteRow(this)">
@@ -800,6 +803,15 @@ function deleteRow(button) {
     const dataRows = tbody.querySelectorAll('tr:not(#total-row)');
     
     if (dataRows.length > 1) {
+        const inputs = row.querySelectorAll('[name]');
+        inputs.forEach(function(el) {
+            const key = el.getAttribute('name');
+            try {
+                const savedData = JSON.parse(localStorage.getItem('ict-human-capital-form') || '{}');
+                delete savedData[key];
+                localStorage.setItem('ict-human-capital-form', JSON.stringify(savedData));
+            } catch(e) {}
+        });
         row.remove();
         updateTotals();
     } else {
@@ -1038,74 +1050,126 @@ window.loadSavedData = function() {
     try {
         const savedData = localStorage.getItem('ict-human-capital-form');
         console.log('Saved data from localStorage:', savedData ? 'exists (' + savedData.length + ' chars)' : 'empty');
+        const form = document.querySelector('#mainForm');
+        console.log('Form found:', !!form);
+        
+        if (!form) return;
+
+        // Collect all position rows from saved data
+        const positions = [];
         if (savedData) {
             const formDataObj = JSON.parse(savedData);
-            console.log('Parsed form data keys:', Object.keys(formDataObj));
-            const form = document.querySelector('#mainForm');
-            console.log('Form found:', !!form);
-            
-            if (form) {
-                let restoredCount = 0;
-                Object.keys(formDataObj).forEach(key => {
-                    const input = form.querySelector(`[name="${key}"]`);
-                    if (input) {
-                        const val = formDataObj[key];
-                        if (typeof val === 'string' && val.startsWith('data:')) {
-                            restoreFilePreview(input, val);
-                            restoredCount++;
-                        } else if (typeof val === 'string' && val.startsWith('uploads/')) {
-                            input.setAttribute('data-uploaded-path', val);
-                            showServerFileLink(input, val);
-                            restoredCount++;
-                        } else if (input.type === 'checkbox') {
-                            input.checked = val === '1' || val === 'on';
-                            restoredCount++;
-                        } else if (input.type === 'radio') {
-                            const radio = form.querySelector(`[name="${key}"][value="${val}"]`);
-                            if (radio) radio.checked = true;
-                            restoredCount++;
-                        } else if (input.type === 'file') {
-                            // File inputs cannot be set programmatically; skip
-                            restoredCount++;
-                        } else {
-                            input.value = val;
-                            restoredCount++;
-                        }
-                    }
-                });
-                
-                updateTotals();
-                console.log('Data loaded from localStorage, restored', restoredCount, 'fields');
+            // Group by index: position_N, status_N, count_N
+            const indices = new Set();
+            Object.keys(formDataObj).forEach(function(key) {
+                const match = key.match(/^(?:position|status|count)_(\d+)$/);
+                if (match) indices.add(parseInt(match[1]));
+            });
+            indices.forEach(function(idx) {
+                if (formDataObj['position_' + idx] || formDataObj['status_' + idx] || formDataObj['count_' + idx]) {
+                    positions.push({
+                        position: formDataObj['position_' + idx] || '',
+                        status: formDataObj['status_' + idx] || '',
+                        count: formDataObj['count_' + idx] || ''
+                    });
+                }
+            });
+        }
 
+        // Clear all data rows from table (keep only total-row)
+        const tbody = form.querySelector('#humanCapitalTable tbody');
+        const totalRow = document.getElementById('total-row');
+        if (tbody) {
+            const rows = tbody.querySelectorAll('tr:not(#total-row)');
+            rows.forEach(function(r) { r.remove(); });
+        }
 
-                // Update conditional visibility after restoring data
-                var frontlineRadio = document.querySelector('input[name="system_usage_type"][value="frontline"]');
-                var deployDetails = document.getElementById('deploymentDetails');
-                if (deployDetails && frontlineRadio) {
-                    deployDetails.style.display = frontlineRadio.checked ? 'block' : 'none';
+        // Rebuild rows from saved data (or show defaults if empty)
+        if (positions.length > 0) {
+            positions.forEach(function(p, i) {
+                const num = i + 1;
+                const row = document.createElement('tr');
+                row.innerHTML = [
+                    '<td><input type="text" class="form-control form-control-sm" name="position_' + num + '" value="' + escHtml(p.position) + '" placeholder="Enter position/designation"></td>',
+                    '<td><select class="form-select form-select-sm employment-status" name="status_' + num + '">',
+                        '<option value="">Select</option>',
+                        '<option value="PLANTILLA"' + (p.status === 'PLANTILLA' ? ' selected' : '') + '>Plantilla</option>',
+                        '<option value="CONTRACTUAL"' + (p.status === 'CONTRACTUAL' ? ' selected' : '') + '>Contractual</option>',
+                        '<option value="OUTSOURCED"' + (p.status === 'OUTSOURCED' ? ' selected' : '') + '>Outsourced</option>',
+                    '</select></td>',
+                    '<td><input type="number" class="form-control form-control-sm position-count" name="count_' + num + '" value="' + escHtml(p.count) + '" placeholder="Enter number of positions"></td>',
+                    '<td class="text-center"><button type="button" class="delete-btn" onclick="deleteRow(this)"><i class="fa-solid fa-trash"></i></button></td>'
+                ].join('');
+                tbody.insertBefore(row, totalRow);
+            });
+        } else {
+            // Show one default empty row
+            const row = document.createElement('tr');
+            row.innerHTML = [
+                '<td><input type="text" class="form-control form-control-sm" name="position_1" placeholder="Enter position/designation"></td>',
+                '<td><select class="form-select form-select-sm employment-status" name="status_1"><option value="">Select</option><option value="PLANTILLA">Plantilla</option><option value="CONTRACTUAL">Contractual</option><option value="OUTSOURCED">Outsourced</option></select></td>',
+                '<td><input type="number" class="form-control form-control-sm position-count" name="count_1" placeholder="Enter number of positions"></td>',
+                '<td class="text-center"><button type="button" class="delete-btn" onclick="deleteRow(this)"><i class="fa-solid fa-trash"></i></button></td>'
+            ].join('');
+            tbody.insertBefore(row, totalRow);
+        }
+
+        updateTotals();
+
+        // Restore non-table fields (e.g. conditional radio fields from other sections)
+        if (savedData) {
+            const formDataObj = JSON.parse(savedData);
+            Object.keys(formDataObj).forEach(function(key) {
+                if (/^(?:position|status|count)_\d+$/.test(key)) return;
+                const input = form.querySelector('[name="' + key + '"]');
+                if (!input) return;
+                const val = formDataObj[key];
+                if (typeof val === 'string' && val.startsWith('data:')) {
+                    restoreFilePreview(input, val);
+                } else if (typeof val === 'string' && val.startsWith('uploads/')) {
+                    input.setAttribute('data-uploaded-path', val);
+                    showServerFileLink(input, val);
+                } else if (input.type === 'checkbox') {
+                    input.checked = val === '1' || val === 'on';
+                } else if (input.type === 'radio') {
+                    const radio = form.querySelector('[name="' + key + '"][value="' + val + '"]');
+                    if (radio) radio.checked = true;
+                } else if (input.type !== 'file') {
+                    input.value = val;
                 }
-                var onlineRadio = document.querySelector('input[name="deployment_type"][value="online"]');
-                var onlineLinkField = document.getElementById('onlineLinkField');
-                if (onlineLinkField && onlineRadio) {
-                    onlineLinkField.style.display = onlineRadio.checked ? 'block' : 'none';
-                }
-                var integrationDetails = document.getElementById('integrationDetails');
-                var interopIntegration = document.querySelector('input[name="interoperability"][value="integration"]');
-                if (integrationDetails && interopIntegration) {
-                    integrationDetails.style.display = interopIntegration.checked ? 'block' : 'none';
-                }
-                var sysIntExample = document.getElementById('systemIntegrationExample');
-                var sysIntRadio = document.querySelector('input[name="interoperability"][value="system_integration"]');
-                if (sysIntExample && sysIntRadio) {
-                    sysIntExample.style.display = sysIntRadio.checked ? 'block' : 'none';
-                }
-            }
+            });
+        }
+
+        // Update conditional visibility
+        var frontlineRadio = document.querySelector('input[name="system_usage_type"][value="frontline"]');
+        var deployDetails = document.getElementById('deploymentDetails');
+        if (deployDetails && frontlineRadio) {
+            deployDetails.style.display = frontlineRadio.checked ? 'block' : 'none';
+        }
+        var onlineRadio = document.querySelector('input[name="deployment_type"][value="online"]');
+        var onlineLinkField = document.getElementById('onlineLinkField');
+        if (onlineLinkField && onlineRadio) {
+            onlineLinkField.style.display = onlineRadio.checked ? 'block' : 'none';
+        }
+        var integrationDetails = document.getElementById('integrationDetails');
+        var interopIntegration = document.querySelector('input[name="interoperability"][value="integration"]');
+        if (integrationDetails && interopIntegration) {
+            integrationDetails.style.display = interopIntegration.checked ? 'block' : 'none';
+        }
+        var sysIntExample = document.getElementById('systemIntegrationExample');
+        var sysIntRadio = document.querySelector('input[name="interoperability"][value="system_integration"]');
+        if (sysIntExample && sysIntRadio) {
+            sysIntExample.style.display = sysIntRadio.checked ? 'block' : 'none';
         }
     } catch (error) {
         console.error('Error loading saved data:', error);
-
     }
 };
+
+function escHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
 
 function restoreFilePreview(input, dataUrl) {
     if (!input || !dataUrl) return;

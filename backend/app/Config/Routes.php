@@ -93,6 +93,20 @@ $routes->group('ict-planner', ['filter' => 'role:ict_planner'], static function 
     $routes->get('download/(:num)', 'IctPlanner\ConsolidationController::download/$1');
     $routes->post('download-batch', 'IctPlanner\ConsolidationController::batchDownload');
 
+    // Agency Information Routes
+    $routes->group('agency-information', static function (RouteCollection $routes): void {
+        $routes->get('mandate-vision-mission', 'IctPlanner\AgencyInformationController::mandateVisionMission');
+        $routes->post('mandate-vision-mission/save', 'IctPlanner\AgencyInformationController::saveMandateVisionMission');
+        $routes->get('organizational-structure', 'IctPlanner\AgencyInformationController::organizationalStructure');
+        $routes->post('organizational-structure/save', 'IctPlanner\AgencyInformationController::saveOrganizationalStructure');
+        $routes->get('stakeholder-analysis', 'IctPlanner\AgencyInformationController::stakeholderAnalysis');
+        $routes->post('stakeholder-analysis/save', 'IctPlanner\AgencyInformationController::saveStakeholderAnalysis');
+        $routes->get('strategic-concerns', 'IctPlanner\AgencyInformationController::strategicConcerns');
+        $routes->get('network-infrastructure', 'IctPlanner\AgencyInformationController::networkInfrastructure');
+        $routes->get('information-systems-inventory', 'IctPlanner\AgencyInformationController::informationSystemsInventory');
+        $routes->get('e-government-programs', 'IctPlanner\AgencyInformationController::eGovernmentPrograms');
+    });
+
     // Resource Requirements Routes
     $routes->group('resource-requirements', static function (RouteCollection $routes): void {
 
@@ -127,6 +141,13 @@ $routes->group('ict-planner', ['filter' => 'role:ict_planner'], static function 
 
 $routes->group('director-general', ['filter' => 'role:director_general'], static function (RouteCollection $routes): void {
     $routes->get('dashboard', 'DashboardController::index');
+    $routes->get('pending-approval', 'DirectorGeneral\PendingApprovalController::index');
+    $routes->get('approved-projects', 'DirectorGeneral\ApprovedProjectsController::index');
+    $routes->post('approve/(:num)', 'DirectorGeneral\DashboardController::approve/$1');
+    $routes->post('reject/(:num)', 'DirectorGeneral\DashboardController::reject/$1');
+    $routes->post('return/(:num)', 'DirectorGeneral\DashboardController::return/$1');
+    $routes->get('view-full/(:num)', 'DirectorGeneral\DashboardController::viewFull/$1');
+    $routes->get('download/(:num)', 'DirectorGeneral\DashboardController::download/$1');
 });
 
 $routes->group('employee', ['filter' => 'role:employee'], static function (RouteCollection $routes): void {

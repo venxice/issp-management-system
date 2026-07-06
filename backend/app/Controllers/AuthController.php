@@ -12,7 +12,17 @@ class AuthController extends BaseController
     public function loginForm()
     {
         if (session()->get('is_logged_in')) {
+            $intended = session()->get('intended_url');
+            if ($intended) {
+                session()->remove('intended_url');
+                return redirect()->to($intended);
+            }
             return redirect()->to(site_url($this->dashboardPathForRole((string) session()->get('role_slug'))));
+        }
+
+        $intended = $this->request->getGet('redirect') ?: session()->get('intended_url');
+        if ($intended) {
+            session()->set('intended_url', $intended);
         }
 
         return view('frontend/auth/login', [
@@ -44,6 +54,12 @@ class AuthController extends BaseController
         }
 
         $this->startUserSession($user, 'password');
+
+        $intended = $this->request->getPost('redirect') ?: session()->get('intended_url');
+        if ($intended) {
+            session()->remove('intended_url');
+            return redirect()->to($intended);
+        }
 
         return redirect()->to(site_url($this->dashboardPathForRole((string) ($user['role_slug'] ?? 'employee'))));
     }
@@ -82,6 +98,11 @@ class AuthController extends BaseController
 
         $state = bin2hex(random_bytes(32));
         session()->set('google_oauth_state', $state);
+
+        $redirect = $this->request->getGet('redirect');
+        if ($redirect) {
+            session()->set('intended_url', $redirect);
+        }
 
         $query = http_build_query([
             'client_id'     => env('SSO_GOOGLE_CLIENT_ID'),
@@ -146,6 +167,12 @@ class AuthController extends BaseController
         }
 
         $this->startUserSession($user, 'google');
+
+        $intended = session()->get('intended_url');
+        if ($intended) {
+            session()->remove('intended_url');
+            return redirect()->to($intended)->with('success', 'Successfully signed in');
+        }
 
         return redirect()->to(site_url($this->dashboardPathForRole((string) ($user['role_slug'] ?? 'employee'))))->with('success', 'Successfully signed in');
     }

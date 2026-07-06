@@ -71,6 +71,16 @@ class DashboardController extends BaseController
             'created_at' => date('Y-m-d H:i:s'),
         ]);
 
+        helper('notification');
+
+        $currentUser = (new UserModel())->findWithRole((int) session()->get('user_id'));
+
+        $directorGenerals = (new UserModel())->getUsersByRole('director_general');
+
+        foreach ($directorGenerals as $dg) {
+            sendEndorsementNotification($record, $currentUser, $dg);
+        }
+
         return redirect()->back()->with('success', 'Project endorsed to Director General for approval.');
     }
 }

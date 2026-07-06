@@ -11,6 +11,7 @@ class ConsolidationController extends BaseController
     {
         $query = trim((string) $this->request->getGet('q'));
         $dateRange = trim((string) $this->request->getGet('date_range'));
+        $statusFilter = trim((string) $this->request->getGet('status'));
         $page = (int) ($this->request->getGet('page') ?? 1);
         $perPage = 25;
 
@@ -39,9 +40,21 @@ class ConsolidationController extends BaseController
             ->where('issp_records.status !=', 'draft')
             ->orderBy('issp_records.created_at', 'DESC');
 
+        if ($statusFilter !== '' && in_array($statusFilter, ['pending', 'endorsed', 'approved', 'rejected', 'returned'])) {
+            $builder->where('issp_records.status', $statusFilter);
+        }
+
         $total = $builder->countAllResults(false);
         $projects = $builder->paginate($perPage, 'default', $page);
         $pager = $isspModel->pager;
+
+        $statusCounts = [
+            'pending' => $isspModel->where('status', 'pending')->countAllResults(),
+            'endorsed' => $isspModel->where('status', 'endorsed')->countAllResults(),
+            'approved' => $isspModel->where('status', 'approved')->countAllResults(),
+            'rejected' => $isspModel->where('status', 'rejected')->countAllResults(),
+            'returned' => $isspModel->where('status', 'returned')->countAllResults(),
+        ];
 
         return view('frontend/ict_planner/consolidation/index', [
             'title' => 'Consolidation',
@@ -49,10 +62,12 @@ class ConsolidationController extends BaseController
             'projects' => $projects,
             'query' => $query,
             'date_range' => $dateRange,
+            'statusFilter' => $statusFilter,
             'pager' => $pager,
             'total' => $total,
             'perPage' => $perPage,
             'currentPage' => $page,
+            'statusCounts' => $statusCounts,
         ]);
     }
 
