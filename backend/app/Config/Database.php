@@ -29,7 +29,7 @@ class Database extends Config
         'hostname'     => 'db',
         'username'     => 'root',
         'password'     => 'root',
-        'database'     => 'issp_db',
+        'database'     => 'issp_db2',
         'DBDriver'     => 'MySQLi',
         'DBPrefix'     => '',
         'pConnect'     => false,
