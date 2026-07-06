@@ -175,7 +175,7 @@ $pieCanvasData = json_encode(array_map(function ($seg) {
             <div class="dashboard-chart flex-fill">
                 <div class="dashboard-chart__frame h-100">
                     <?php if ($pieSegments !== []): ?>
-                        <div class="d-flex align-items-center justify-content-center" style="min-height: 180px;">
+                        <div class="d-flex justify-content-center" style="min-height: 180px; padding-top: 20px;">
                             <div class="pie-wrap">
                                 <canvas id="pieCanvas" width="180" height="180"></canvas>
                                 <div id="pieTooltip" class="pie-tooltip"></div>
@@ -200,7 +200,7 @@ $pieCanvasData = json_encode(array_map(function ($seg) {
                 <table class="table table-ict-projects align-middle mb-0">
                     <thead>
                         <tr>
-                            <th>ICT Project Title</th>
+                            <th>Internal / Cross-Agency Project Title</th>
                             <th>User</th>
                             <th>Department</th>
                             <th>Budget</th>
@@ -212,20 +212,25 @@ $pieCanvasData = json_encode(array_map(function ($seg) {
                     <tbody>
                         <?php if ($recentProjects !== []): ?>
                             <?php foreach ($recentProjects as $project): ?>
+                                <?php $fd = !empty($project['form_data']) ? json_decode($project['form_data'], true) : []; $ict = $fd['ict-projects-form'] ?? []; $intTitle = $ict['internal_project_title'] ?? $project['title'] ?? 'Untitled'; $crossTitle = $ict['cross_project_title'] ?? ''; ?>
                                 <tr>
-                                    <td class="fw-semibold"><?= esc($project['title'] ?? 'Untitled') ?></td>
+                                    <td>
+                                        <div><span class="text-muted">Internal:</span> <?= esc($intTitle) ?></div>
+                                        <?php if ($crossTitle): ?><div class="mt-1"><span class="text-muted">Cross-Agency:</span> <?= esc($crossTitle) ?></div><?php endif; ?>
+                                    </td>
                                     <td><?= esc($project['created_by_name'] ?? 'Unknown') ?></td>
                                     <td><?= esc($project['department_name'] ?? 'N/A') ?></td>
                                     <td>₱<?= number_format((float) ($project['budget'] ?? 0), 2) ?></td>
                                     <td class="text-muted"><?= esc($project['submitted_at'] ?? $project['created_at'] ?? '-') ?></td>
                                     <td>
-                                        <span class="badge badge-soft" style="font-size:.7rem;padding:4px 10px;
-                                            <?php if ($project['status'] === 'pending'): ?>background:#fef7e0;color:#8a6d1e;border-color:#f5e6b8;
-                                            <?php elseif ($project['status'] === 'endorsed'): ?>background:#e8f0fe;color:#2a5c8a;border-color:#c5d9f0;
-                                            <?php elseif ($project['status'] === 'approved'): ?>background:#e6f4ea;color:#1e6f3f;border-color:#c3e6cb;
-                                            <?php elseif ($project['status'] === 'rejected'): ?>background:#fce8e8;color:#a13d3d;border-color:#f0c8c8;
-                                            <?php endif; ?>">
-                                            <?= esc(ucfirst($project['status'])) ?>
+                                <span class="badge badge-soft" style="font-size:.7rem;padding:4px 10px;
+                                    <?php if ($project['status'] === 'pending'): ?>background:#fef3c7;color:#92400e;border-color:#fde68a;
+                                    <?php elseif ($project['status'] === 'endorsed'): ?>background:#e8f0fe;color:#2a5c8a;border-color:#c5d9f0;
+                                    <?php elseif ($project['status'] === 'approved'): ?>background:#dcfce7;color:#166534;border-color:#bbf7d0;
+                                    <?php elseif ($project['status'] === 'rejected'): ?>background:#fee2e2;color:#991b1b;border-color:#fecaca;
+                                    <?php elseif ($project['status'] === 'returned'): ?>background:#ffedd5;color:#9a3412;border-color:#fed7aa;
+                                    <?php endif; ?>">
+                                    <?= esc(ucfirst($project['status'])) ?>
                                         </span>
                                     </td>
                                     <td class="text-center">
@@ -254,6 +259,10 @@ $pieCanvasData = json_encode(array_map(function ($seg) {
                                                         <i class="fa-solid fa-check"></i>
                                                     </button>
                                                 </form>
+                                            <?php elseif ($project['status'] === 'endorsed'): ?>
+                                                <button class="btn btn-outline-secondary icon-btn" type="button" title="Already endorsed" disabled style="opacity:0.35;cursor:not-allowed;pointer-events:none;">
+                                                    <i class="fa-solid fa-check"></i>
+                                                </button>
                                             <?php endif; ?>
                                         </div>
                                     </td>
@@ -290,7 +299,8 @@ $pieCanvasData = json_encode(array_map(function ($seg) {
             </div>
             <div class="modal-body">
                 <div class="detail-grid">
-                    <div class="key">Title</div><div class="val" id="viewProjectTitle">-</div>
+                    <div class="key">Internal Title</div><div class="val" id="viewProjectTitle">-</div>
+                    <div class="key">Cross-Agency Title</div><div class="val" id="viewProjectCrossTitle">-</div>
                     <div class="key">Description</div><div class="val" id="viewProjectDescription">-</div>
                     <div class="key">Budget</div><div class="val" id="viewProjectBudget">-</div>
                     <div class="key">Status</div><div class="val" id="viewProjectStatus">-</div>
@@ -404,6 +414,7 @@ document.addEventListener('DOMContentLoaded', function() {
             try {
                 var project = JSON.parse(this.getAttribute('data-project'));
                 document.getElementById('viewProjectTitle').textContent = project.title || '-';
+                document.getElementById('viewProjectCrossTitle').textContent = project.cross_title || '-';
                 document.getElementById('viewProjectDescription').textContent = project.description || '-';
                 document.getElementById('viewProjectBudget').textContent = project.budget ? '₱' + parseFloat(project.budget).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '-';
                 document.getElementById('viewProjectStatus').textContent = project.status ? project.status.charAt(0).toUpperCase() + project.status.slice(1) : '-';

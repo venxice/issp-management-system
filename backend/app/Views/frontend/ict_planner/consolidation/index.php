@@ -5,23 +5,32 @@
 <div class="row g-0">
     <div class="col-12">
         <section class="panel mb-0">
-            <div class="panel-header d-flex align-items-center gap-3 flex-wrap">
+            <div class="panel-header d-flex align-items-center justify-content-between" style="border-bottom:none;padding-bottom:6px;">
                 <div>
                     <h2 class="panel-title">All Submissions</h2>
                     <p class="panel-subtitle">Consolidated list of all ISSP project submissions.</p>
                 </div>
-                <form class="d-flex align-items-center toolbar-form ms-auto" method="get" action="<?= site_url('ict-planner/consolidation') ?>">
-                    <input class="form-control form-control-sm" name="q" value="<?= esc($query ?? '') ?>" placeholder="Search projects, users, departments">
+                <form class="d-flex align-items-center toolbar-form flex-shrink-0" method="get" action="<?= site_url('ict-planner/consolidation') ?>">
+                    <input type="hidden" name="status" value="<?= esc($statusFilter) ?>">
+                    <input class="form-control form-control-sm" name="q" value="<?= esc($query ?? '') ?>" placeholder="Search" style="width:140px; flex-shrink:0;">
+                    <button class="btn btn-sm btn-outline-primary flex-shrink-0" type="button" id="selectAllBtn" onclick="toggleSelectAll()">
+                        <i class="fa-regular fa-square me-1"></i> Select All
+                    </button>
                     <div class="position-relative date-range-picker-wrapper">
                         <input class="form-control form-control-sm" name="date_range" type="text" value="<?= esc($date_range ?? '') ?>" placeholder="" id="dateRangePicker" readonly>
                         <button type="button" class="date-picker-icon-btn" id="datePickerToggleBtn">
                             <i class="fa-solid fa-calendar-days"></i>
                         </button>
                     </div>
-                    <button class="btn btn-sm btn-outline-primary" type="button" id="selectAllBtn" onclick="toggleSelectAll()">
-                        <i class="fa-regular fa-square me-1"></i> Select All
-                    </button>
                 </form>
+            </div>
+            <div class="status-tabs d-flex align-items-center gap-1 px-3 pt-3 pb-3" style="background:#f8f9fa;border-bottom:1px solid #e9ecef;">
+                <a href="<?= site_url('ict-planner/consolidation?' . http_build_query(array_filter(['q' => $query, 'date_range' => $date_range]))) ?>" class="btn btn-sm <?= $statusFilter === '' ? 'btn-primary' : 'btn-outline-secondary' ?>">All</a>
+                <a href="<?= site_url('ict-planner/consolidation?' . http_build_query(array_filter(['status' => 'pending', 'q' => $query, 'date_range' => $date_range]))) ?>" class="btn btn-sm <?= $statusFilter === 'pending' ? 'btn-primary' : 'btn-outline-secondary' ?>">Pending (<?= $statusCounts['pending'] ?>)</a>
+                <a href="<?= site_url('ict-planner/consolidation?' . http_build_query(array_filter(['status' => 'endorsed', 'q' => $query, 'date_range' => $date_range]))) ?>" class="btn btn-sm <?= $statusFilter === 'endorsed' ? 'btn-primary' : 'btn-outline-secondary' ?>">Endorsed (<?= $statusCounts['endorsed'] ?>)</a>
+                <a href="<?= site_url('ict-planner/consolidation?' . http_build_query(array_filter(['status' => 'approved', 'q' => $query, 'date_range' => $date_range]))) ?>" class="btn btn-sm <?= $statusFilter === 'approved' ? 'btn-primary' : 'btn-outline-secondary' ?>">Approved (<?= $statusCounts['approved'] ?>)</a>
+                <a href="<?= site_url('ict-planner/consolidation?' . http_build_query(array_filter(['status' => 'rejected', 'q' => $query, 'date_range' => $date_range]))) ?>" class="btn btn-sm <?= $statusFilter === 'rejected' ? 'btn-primary' : 'btn-outline-secondary' ?>">Rejected (<?= $statusCounts['rejected'] ?>)</a>
+                <a href="<?= site_url('ict-planner/consolidation?' . http_build_query(array_filter(['status' => 'returned', 'q' => $query, 'date_range' => $date_range]))) ?>" class="btn btn-sm <?= $statusFilter === 'returned' ? 'btn-primary' : 'btn-outline-secondary' ?>">Returned (<?= $statusCounts['returned'] ?>)</a>
             </div>
             <div id="bulkBar" class="bulk-bar" style="display:none;">
                 <div class="bulk-bar-inner">
@@ -38,7 +47,7 @@
                         <thead>
                             <tr>
                                 <th style="width:36px;"><input type="checkbox" id="checkAll" onchange="toggleAllCheckboxes(this)"></th>
-                                <th>ICT Project Title</th>
+                                <th>Internal / Cross-Agency Project Title</th>
                                 <th>User</th>
                                 <th>Department</th>
                                 <th>Budget</th>
@@ -50,27 +59,33 @@
                         <tbody>
                             <?php if ($projects !== []): ?>
                                 <?php foreach ($projects as $project): ?>
+                                    <?php $fd = !empty($project['form_data']) ? json_decode($project['form_data'], true) : []; $ict = $fd['ict-projects-form'] ?? []; $intTitle = $ict['internal_project_title'] ?? $project['title'] ?? 'Untitled'; $crossTitle = $ict['cross_project_title'] ?? ''; ?>
                                     <tr>
                                         <td><input type="checkbox" name="project_ids[]" value="<?= $project['id'] ?>" class="project-checkbox" onchange="onCheckboxChange()"></td>
-                                        <td class="fw-semibold"><?= esc($project['title'] ?? 'Untitled') ?></td>
+                                        <td>
+                                            <div><span class="text-muted">Internal:</span> <?= esc($intTitle) ?></div>
+                                            <?php if ($crossTitle): ?><div class="mt-1"><span class="text-muted">Cross-Agency:</span> <?= esc($crossTitle) ?></div><?php endif; ?>
+                                        </td>
                                         <td><?= esc($project['created_by_name'] ?? 'Unknown') ?></td>
                                         <td><?= esc($project['department_name'] ?? 'N/A') ?></td>
                                         <td>₱<?= number_format((float) ($project['budget'] ?? 0), 2) ?></td>
                                         <td class="text-muted"><?= esc($project['submitted_at'] ?? $project['created_at'] ?? '-') ?></td>
                                         <td>
-                                            <span class="badge badge-soft" style="font-size:.7rem;padding:4px 10px;
-                                                <?php if ($project['status'] === 'pending'): ?>background:#fef7e0;color:#8a6d1e;border-color:#f5e6b8;
-                                                <?php elseif ($project['status'] === 'endorsed'): ?>background:#e8f0fe;color:#2a5c8a;border-color:#c5d9f0;
-                                                <?php elseif ($project['status'] === 'approved'): ?>background:#e6f4ea;color:#1e6f3f;border-color:#c3e6cb;
-                                                <?php elseif ($project['status'] === 'rejected'): ?>background:#fce8e8;color:#a13d3d;border-color:#f0c8c8;
-                                                <?php endif; ?>">
-                                                <?= esc(ucfirst($project['status'])) ?>
+                                <span class="badge badge-soft" style="font-size:.7rem;padding:4px 10px;
+                                    <?php if ($project['status'] === 'pending'): ?>background:#fef3c7;color:#92400e;border-color:#fde68a;
+                                    <?php elseif ($project['status'] === 'endorsed'): ?>background:#e8f0fe;color:#2a5c8a;border-color:#c5d9f0;
+                                    <?php elseif ($project['status'] === 'approved'): ?>background:#dcfce7;color:#166534;border-color:#bbf7d0;
+                                    <?php elseif ($project['status'] === 'rejected'): ?>background:#fee2e2;color:#991b1b;border-color:#fecaca;
+                                    <?php elseif ($project['status'] === 'returned'): ?>background:#ffedd5;color:#9a3412;border-color:#fed7aa;
+                                    <?php endif; ?>">
+                                    <?= esc(ucfirst($project['status'])) ?>
                                             </span>
                                         </td>
                                         <td class="text-center">
                                             <div class="d-flex gap-1 justify-content-center">
                                                 <button class="btn btn-outline-primary icon-btn" type="button" title="View" data-project='<?= json_encode([
-                                                    'title' => $project['title'] ?? '',
+                                                    'title' => $intTitle,
+                                                    'cross_title' => $crossTitle,
                                                     'description' => $project['description'] ?? '',
                                                     'budget' => $project['budget'] ?? '',
                                                     'status' => $project['status'] ?? '',
@@ -87,12 +102,13 @@
                                                     <i class="fa-solid fa-download"></i>
                                                 </a>
                                                 <?php if ($project['status'] === 'pending'): ?>
-                                                    <form method="post" action="<?= site_url('ict-planner/endorse/' . $project['id']) ?>" class="d-inline" onsubmit="return confirm('Endorse this project to Director General for approval?')">
-                                                        <?= csrf_field() ?>
-                                                        <button class="btn btn-outline-primary icon-btn" type="submit" title="Endorse to Director General">
-                                                            <i class="fa-solid fa-check"></i>
-                                                        </button>
-                                                    </form>
+                                                    <button class="btn btn-outline-primary icon-btn" type="button" title="Endorse to Director General" onclick="openEndorseModal('<?= $project['id'] ?>')">
+                                                        <i class="fa-solid fa-check"></i>
+                                                    </button>
+                                                <?php elseif ($project['status'] === 'endorsed'): ?>
+                                                    <button class="btn btn-outline-secondary icon-btn" type="button" title="Already endorsed" disabled style="opacity:0.35;cursor:not-allowed;pointer-events:none;">
+                                                        <i class="fa-solid fa-check"></i>
+                                                    </button>
                                                 <?php endif; ?>
                                             </div>
                                         </td>
@@ -117,7 +133,7 @@
                     <ul class="pagination mb-0">
                         <?php if ($currentPage > 1): ?>
                         <li class="page-item">
-                            <a class="page-link" href="<?= site_url('ict-planner/consolidation') ?>?<?= http_build_query(array_filter(['q' => $query, 'date_range' => $date_range, 'page' => $currentPage - 1])) ?>">Previous</a>
+                            <a class="page-link" href="<?= site_url('ict-planner/consolidation') ?>?<?= http_build_query(array_filter(['status' => $statusFilter, 'q' => $query, 'date_range' => $date_range, 'page' => $currentPage - 1])) ?>">Previous</a>
                         </li>
                         <?php endif; ?>
 
@@ -127,7 +143,7 @@
                         $endPage = min($totalPages, $currentPage + 2);
 
                         if ($startPage > 1): ?>
-                            <li class="page-item"><a class="page-link" href="<?= site_url('ict-planner/consolidation') ?>?<?= http_build_query(array_filter(['q' => $query, 'date_range' => $date_range, 'page' => 1])) ?>">1</a></li>
+                            <li class="page-item"><a class="page-link" href="<?= site_url('ict-planner/consolidation') ?>?<?= http_build_query(array_filter(['status' => $statusFilter, 'q' => $query, 'date_range' => $date_range, 'page' => 1])) ?>">1</a></li>
                             <?php if ($startPage > 2): ?>
                             <li class="page-item disabled"><span class="page-link">...</span></li>
                             <?php endif; ?>
@@ -135,7 +151,7 @@
 
                         <?php for ($i = $startPage; $i <= $endPage; $i++): ?>
                             <li class="page-item <?= $i === $currentPage ? 'active' : '' ?>">
-                                <a class="page-link" href="<?= site_url('ict-planner/consolidation') ?>?<?= http_build_query(array_filter(['q' => $query, 'date_range' => $date_range, 'page' => $i])) ?>"><?= $i ?></a>
+                                <a class="page-link" href="<?= site_url('ict-planner/consolidation') ?>?<?= http_build_query(array_filter(['status' => $statusFilter, 'q' => $query, 'date_range' => $date_range, 'page' => $i])) ?>"><?= $i ?></a>
                             </li>
                         <?php endfor; ?>
 
@@ -143,12 +159,12 @@
                             <?php if ($endPage < $totalPages - 1): ?>
                             <li class="page-item disabled"><span class="page-link">...</span></li>
                             <?php endif; ?>
-                            <li class="page-item"><a class="page-link" href="<?= site_url('ict-planner/consolidation') ?>?<?= http_build_query(array_filter(['q' => $query, 'date_range' => $date_range, 'page' => $totalPages])) ?>"><?= $totalPages ?></a></li>
+                            <li class="page-item"><a class="page-link" href="<?= site_url('ict-planner/consolidation') ?>?<?= http_build_query(array_filter(['status' => $statusFilter, 'q' => $query, 'date_range' => $date_range, 'page' => $totalPages])) ?>"><?= $totalPages ?></a></li>
                         <?php endif; ?>
 
                         <?php if ($currentPage < $totalPages): ?>
                         <li class="page-item">
-                            <a class="page-link" href="<?= site_url('ict-planner/consolidation') ?>?<?= http_build_query(array_filter(['q' => $query, 'date_range' => $date_range, 'page' => $currentPage + 1])) ?>">Next</a>
+                            <a class="page-link" href="<?= site_url('ict-planner/consolidation') ?>?<?= http_build_query(array_filter(['status' => $statusFilter, 'q' => $query, 'date_range' => $date_range, 'page' => $currentPage + 1])) ?>">Next</a>
                         </li>
                         <?php endif; ?>
                     </ul>
@@ -183,6 +199,8 @@
 
 .toolbar-form {
     gap: 8px;
+    flex-shrink: 0;
+    white-space: nowrap;
 }
 
 .modal-content { border-radius: 14px; overflow: hidden; border: 1px solid #e9ecef; background: #fff; }
@@ -287,40 +305,45 @@
 }
 </style>
 
-<div class="custom-modal" id="viewProjectModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;z-index:1060;align-items:center;justify-content:center;">
-    <div class="modal-dialog modal-dialog-scrollable modal-lg" style="width:100%;max-width:700px;margin:0;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Project Overview</h5>
-                <button type="button" class="btn-close" onclick="closeViewProjectModal()"></button>
-            </div>
-            <div class="modal-body">
-                <div class="detail-grid">
-                    <div class="key">Title</div><div class="val" id="viewProjectTitle">-</div>
-                    <div class="key">Description</div><div class="val" id="viewProjectDescription">-</div>
-                    <div class="key">Budget</div><div class="val" id="viewProjectBudget">-</div>
-                    <div class="key">Status</div><div class="val" id="viewProjectStatus">-</div>
-                    <div class="key">Department</div><div class="val" id="viewProjectDepartment">-</div>
-                    <div class="key">Last Updated</div><div class="val" id="viewProjectUpdated">-</div>
-                    <div class="key">Created</div><div class="val" id="viewProjectCreated">-</div>
-                </div>
-            </div>
+<div class="custom-modal" id="endorseModal" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:1060;background:#fff;border-radius:6px;box-shadow:0 18px 40px rgba(15,23,42,.18);min-width:320px;max-width:400px;overflow:hidden;">
+    <div style="background:#536783;color:#fff;padding:12px 14px;font-size:.94rem;font-weight:700;"><i class="fa-solid fa-check-circle me-2" style="color:#4ade80;"></i> Endorse to Director General</div>
+    <div style="padding:14px 14px;font-size:.82rem;color:#1f2a3a;"><p class="mb-0">Are you sure you want to endorse this project to the Director General for approval?</p></div>
+    <div style="padding:8px 12px;border-top:1px solid #e1e6ee;display:flex;justify-content:flex-end;gap:8px;">
+        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="closeCustomModals()">Cancel</button>
+        <form method="post" id="actionEndorseForm" action="" class="d-inline">
+            <?= csrf_field() ?>
+            <button type="submit" class="btn btn-primary btn-sm">Endorse</button>
+        </form>
+    </div>
+</div>
+
+<div class="custom-modal" id="viewProjectModal" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:1060;background:#fff;border-radius:6px;box-shadow:0 18px 40px rgba(15,23,42,.18);min-width:360px;max-width:640px;overflow:hidden;">
+    <div style="background:#536783;color:#fff;padding:12px 14px;font-size:.94rem;font-weight:700;"><i class="fa-regular fa-eye me-2"></i> Project Overview</div>
+    <div style="padding:14px 14px;font-size:.82rem;color:#1f2a3a;">
+        <div class="detail-grid">
+            <div class="key">Internal Title</div><div class="val" id="viewProjectTitle">-</div>
+            <div class="cross-row" id="viewCrossRow"><div class="key">Cross-Agency Title</div><div class="val" id="viewProjectCrossTitle">-</div></div>
+            <div class="key">Description</div><div class="val" id="viewProjectDescription">-</div>
+            <div class="key">Budget</div><div class="val" id="viewProjectBudget">-</div>
+            <div class="key">Status</div><div class="val" id="viewProjectStatus">-</div>
+            <div class="key">Department</div><div class="val" id="viewProjectDepartment">-</div>
+            <div class="key">Last Updated</div><div class="val" id="viewProjectUpdated">-</div>
+            <div class="key">Created</div><div class="val" id="viewProjectCreated">-</div>
         </div>
+    </div>
+    <div style="padding:8px 12px;border-top:1px solid #e1e6ee;display:flex;justify-content:flex-end;gap:8px;">
+        <button type="button" class="btn btn-primary btn-sm" onclick="closeCustomModals()">Close</button>
     </div>
 </div>
 
 <script>
 function showViewProjectModal() {
-    document.getElementById('viewProjectModal').style.display = 'flex';
-    document.getElementById('customModalOverlay').style.display = 'block';
-    document.body.style.overflow = 'hidden';
-    document.getElementById('customModalOverlay').onclick = closeViewProjectModal;
+    showCustomModal('viewProjectModal');
 }
-function closeViewProjectModal() {
-    document.getElementById('viewProjectModal').style.display = 'none';
-    document.getElementById('customModalOverlay').style.display = 'none';
-    document.body.style.overflow = '';
-    document.getElementById('customModalOverlay').onclick = closeCustomModals;
+
+function openEndorseModal(projectId) {
+    document.getElementById('actionEndorseForm').action = '<?= site_url('ict-planner/endorse/') ?>' + projectId;
+    showCustomModal('endorseModal');
 }
 
 function toggleAllCheckboxes(master) {
@@ -374,6 +397,14 @@ document.addEventListener('DOMContentLoaded', function() {
             try {
                 var project = JSON.parse(this.getAttribute('data-project'));
                 document.getElementById('viewProjectTitle').textContent = project.title || '-';
+                var crossRow = document.getElementById('viewCrossRow');
+                var crossTitleEl = document.getElementById('viewProjectCrossTitle');
+                if (project.cross_title) {
+                    crossTitleEl.textContent = project.cross_title;
+                    crossRow.style.display = '';
+                } else {
+                    crossRow.style.display = 'none';
+                }
                 document.getElementById('viewProjectDescription').textContent = project.description || '-';
                 document.getElementById('viewProjectBudget').textContent = project.budget ? '₱' + parseFloat(project.budget).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '-';
                 document.getElementById('viewProjectStatus').textContent = project.status ? project.status.charAt(0).toUpperCase() + project.status.slice(1) : '-';

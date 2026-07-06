@@ -733,22 +733,6 @@ input[type="checkbox"] {
                             </div>
                         </div>
 
-                        <!-- Agency Details -->
-                        <div class="form-section-label">
-                            Agency Details
-                        </div>
-                        
-                        <div class="row g-3 mb-4">
-                            <div class="col-md-6">
-                                <label class="form-label">Lead Agency</label>
-                                <input type="text" class="form-control" name="cross_lead_agency" placeholder="Enter the lead agency">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Implementing Agency</label>
-                                <input type="text" class="form-control" name="cross_implementing_agency" placeholder="Enter the implementing agency">
-                            </div>
-                        </div>
-
                         <!-- Implementation Details -->
                         <div class="form-section-label">
                             Implementation Details

@@ -31,7 +31,7 @@
                 <table class="table table-logs align-middle mb-0">
                     <thead>
                     <tr>
-                        <th>ICT Project Title</th>
+                        <th>Internal / Cross-Agency Project Title</th>
                         <th>Description</th>
                         <th>Budget</th>
                         <th>Status</th>
@@ -41,8 +41,12 @@
                     </thead>
                     <tbody>
                     <?php foreach ($recentRecords ?? [] as $record): ?>
+                        <?php $fd = !empty($record['form_data']) ? json_decode($record['form_data'], true) : []; $ict = $fd['ict-projects-form'] ?? []; $intTitle = $ict['internal_project_title'] ?? $record['title'] ?? '---'; $crossTitle = $ict['cross_project_title'] ?? ''; ?>
                         <tr>
-                            <td><?= esc($record['title'] ?: '---') ?></td>
+                            <td>
+                                <div><span class="text-muted">Internal:</span> <?= esc($intTitle) ?></div>
+                                <?php if ($crossTitle): ?><div class="mt-1"><span class="text-muted">Cross-Agency:</span> <?= esc($crossTitle) ?></div><?php endif; ?>
+                            </td>
                             <td><span class="activity-meta activity-summary"><?= esc($record['description'] ?: '---') ?></span></td>
                             <td><?= esc($record['budget'] ? '₱' . number_format($record['budget'], 2) : '-') ?></td>
                             <td>
@@ -100,7 +104,8 @@
             </div>
             <div class="modal-body">
                 <div class="detail-grid">
-                    <div class="key">Title</div><div class="val" id="viewProjectTitle">-</div>
+                    <div class="key">Internal Title</div><div class="val" id="viewProjectTitle">-</div>
+                    <div class="key">Cross-Agency Title</div><div class="val" id="viewProjectCrossTitle">-</div>
                     <div class="key">Description</div><div class="val" id="viewProjectDescription">-</div>
                     <div class="key">Budget</div><div class="val" id="viewProjectBudget">-</div>
                     <div class="key">Status</div><div class="val" id="viewProjectStatus">-</div>
@@ -133,6 +138,7 @@ document.addEventListener('DOMContentLoaded', function() {
             try {
                 var project = JSON.parse(this.getAttribute('data-project'));
                 document.getElementById('viewProjectTitle').textContent = project.title || '-';
+                document.getElementById('viewProjectCrossTitle').textContent = project.cross_title || '-';
                 document.getElementById('viewProjectDescription').textContent = project.description || '-';
                 document.getElementById('viewProjectBudget').textContent = project.budget ? '₱' + parseFloat(project.budget).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '-';
                 document.getElementById('viewProjectStatus').textContent = project.status ? project.status.charAt(0).toUpperCase() + project.status.slice(1) : '-';

@@ -334,13 +334,14 @@
         <div class="project-hero__meta-item">
             <span class="project-hero__meta-label">Status</span>
             <span class="project-hero__meta-value">
-                <span class="badge badge-soft" style="font-size:.72rem;padding:4px 12px;
-                    <?php if ($project['status'] === 'pending'): ?>background:#fef7e0;color:#8a6d1e;border-color:#f5e6b8;
-                    <?php elseif ($project['status'] === 'endorsed'): ?>background:#e8f0fe;color:#2a5c8a;border-color:#c5d9f0;
-                    <?php elseif ($project['status'] === 'approved'): ?>background:#e6f4ea;color:#1e6f3f;border-color:#c3e6cb;
-                    <?php elseif ($project['status'] === 'rejected'): ?>background:#fce8e8;color:#a13d3d;border-color:#f0c8c8;
-                    <?php endif; ?>">
-                    <?= esc(ucfirst($project['status'])) ?>
+                                <span class="badge badge-soft" style="font-size:.72rem;padding:4px 12px;
+                                    <?php if ($project['status'] === 'pending'): ?>background:#fef3c7;color:#92400e;border-color:#fde68a;
+                                    <?php elseif ($project['status'] === 'endorsed'): ?>background:#e8f0fe;color:#2a5c8a;border-color:#c5d9f0;
+                                    <?php elseif ($project['status'] === 'approved'): ?>background:#dcfce7;color:#166534;border-color:#bbf7d0;
+                                    <?php elseif ($project['status'] === 'rejected'): ?>background:#fee2e2;color:#991b1b;border-color:#fecaca;
+                                    <?php elseif ($project['status'] === 'returned'): ?>background:#ffedd5;color:#9a3412;border-color:#fed7aa;
+                                    <?php endif; ?>">
+                                    <?= esc(ucfirst($project['status'])) ?>
                 </span>
             </span>
         </div>
@@ -381,6 +382,10 @@
                     <i class="fa-solid fa-check"></i>
                 </button>
             </form>
+        <?php elseif ($project['status'] === 'endorsed'): ?>
+            <button class="btn btn-outline-secondary icon-btn" type="button" title="Already endorsed" disabled style="opacity:0.35;cursor:not-allowed;pointer-events:none;">
+                <i class="fa-solid fa-check"></i>
+            </button>
         <?php endif; ?>
     </div>
 </div>
@@ -464,7 +469,7 @@ $fieldLabels = [
         'pia_1'                     => 'Privacy Impact Assessment (PIA)',
     ],
     'ict-projects-form' => [
-        'internal_project_title'    => 'Project Title',
+        'internal_project_title'    => 'Internal Project Title',
         'internal_description'      => 'Description',
         'internal_objectives'       => 'Objectives',
         'internal_strategic_pip'    => 'Public Investment Program',
@@ -486,7 +491,7 @@ $fieldLabels = [
         'internal_implementing_unit' => 'Implementing Unit',
         'internal_total_cost'       => 'Total Cost',
         'internal_funding_source'   => 'Funding Source',
-        'cross_project_title'       => 'Project Title',
+        'cross_project_title'       => 'Cross-Agency Project Title',
         'cross_description'         => 'Description',
         'cross_objectives'          => 'Objectives',
         'cross_lead_agency'         => 'Lead Agency',

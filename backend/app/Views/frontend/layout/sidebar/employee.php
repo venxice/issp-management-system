@@ -444,8 +444,8 @@ function saveDraft() {
 
 function areAllFormsComplete() {
     var sections = {
-        'network-infrastructure-form': { label: 'Network Infrastructure', skip: ['dept_network_diagram','regional_network_diagram'] },
-        'enterprise-architecture-form': { label: 'Enterprise Architecture', skip: ['ea_diagram'] },
+        'network-infrastructure-form': { label: 'Network Infrastructure', skip: [] },
+        'enterprise-architecture-form': { label: 'Enterprise Architecture', skip: [] },
         'ict-human-capital-form': { label: 'ICT Human Capital', skip: [] },
         'information-systems-form': { label: 'Information Systems', skip: ['interop1_internal_system','interop1_external_system','online_link_1','system_usage_1','interop1_sub','owner_1','dev_strategy_1','platform_1','database_1','storage_1'] },
         'ict-projects-form': { label: 'ICT Projects', skip: ['internal_strategic_others_text','cross_strategic_others_text'] },
@@ -460,6 +460,25 @@ function areAllFormsComplete() {
         }
     } catch(e) {
         return { valid: false, message: 'ICT Projects section is empty. Please fill in required fields.' };
+    }
+
+    // Required file uploads
+    var requiredFiles = {
+        'network-infrastructure-form': ['dept_network_diagram', 'regional_network_diagram'],
+        'enterprise-architecture-form': ['ea_diagram']
+    };
+    for (var sectionKey in requiredFiles) {
+        try {
+            var sectionData = JSON.parse(localStorage.getItem(sectionKey)) || {};
+            var fileFields = requiredFiles[sectionKey];
+            for (var i = 0; i < fileFields.length; i++) {
+                var f = fileFields[i];
+                var val = sectionData[f];
+                if (!val || typeof val !== 'string' || val.trim() === '') {
+                    return { valid: false, message: sections[sectionKey].label + ' requires a file upload. Please upload the required diagram(s).' };
+                }
+            }
+        } catch(e) {}
     }
 
     for (var key in sections) {

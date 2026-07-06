@@ -85,10 +85,10 @@ class DashboardController extends BaseController
             $isspRecordModel = new ISspRecordModel();
             $json = $this->request->getJSON(true);
 
+            $currentUserId = (int) session()->get('user_id');
             $id = $json['id'] ?? null;
             if (!$id) {
                 // Create a new submission record
-                $currentUserId = (int) session()->get('user_id');
                 $formData = $json['form_data'] ?? [];
                 if (!$this->isFormComplete($formData)) {
                     return $this->response->setJSON([
@@ -135,11 +135,56 @@ class DashboardController extends BaseController
 
             $this->writeLog('issp.submitted', 'Submitted ISSP #' . $id, $json['form_data']['ict-projects-form']['internal_project_title'] ?? '');
 
-            return $this->response->setJSON([
+            $responseData = [
                 'success' => true,
                 'id' => $id,
                 'message' => 'ISSP submitted successfully for review.'
-            ]);
+            ];
+
+            session_write_close();
+
+            if (function_exists('fastcgi_finish_request')) {
+                if (!headers_sent()) {
+                    $this->response->setContentType('application/json');
+                    $this->response->setBody(json_encode($responseData));
+                    $this->response->send();
+                }
+                fastcgi_finish_request();
+
+                try {
+                    $userModel = new UserModel();
+                    $employee = $userModel->findWithRole($currentUserId);
+                    $project = [
+                        'id' => $id,
+                        'title' => $formData['ict-projects-form']['internal_project_title'] ?? 'ISSP Submission',
+                    ];
+                    $ictPlanners = $userModel->getUsersByRole('ict_planner');
+                    if (!empty($ictPlanners)) {
+                        sendSubmissionNotification($project, $employee, $ictPlanners);
+                    }
+                } catch (\Exception $e) {
+                    log_message('error', 'Failed to send submission notification: ' . $e->getMessage());
+                }
+
+                return;
+            }
+
+            try {
+                $userModel = new UserModel();
+                $employee = $userModel->findWithRole($currentUserId);
+                $project = [
+                    'id' => $id,
+                    'title' => $formData['ict-projects-form']['internal_project_title'] ?? 'ISSP Submission',
+                ];
+                $ictPlanners = $userModel->getUsersByRole('ict_planner');
+                if (!empty($ictPlanners)) {
+                    sendSubmissionNotification($project, $employee, $ictPlanners);
+                }
+            } catch (\Exception $e) {
+                log_message('error', 'Failed to send submission notification: ' . $e->getMessage());
+            }
+
+            return $this->response->setJSON($responseData);
 
         } catch (\Exception $e) {
             return $this->response->setJSON([
@@ -183,6 +228,24 @@ class DashboardController extends BaseController
             }
             if (!$hasValue) {
                 return false;
+            }
+        }
+
+        // Required file uploads
+        $requiredFiles = [
+            'network-infrastructure-form' => ['dept_network_diagram', 'regional_network_diagram'],
+            'enterprise-architecture-form' => ['ea_diagram'],
+        ];
+        foreach ($requiredFiles as $section => $fields) {
+            foreach ($fields as $field) {
+                $val = $formData[$section][$field] ?? '';
+                if (!is_string($val) || trim($val) === '') {
+                    return false;
+                }
+                // Must be a data URL or server file path
+                if (!str_starts_with($val, 'data:') && !str_starts_with($val, 'uploads/')) {
+                    return false;
+                }
             }
         }
 

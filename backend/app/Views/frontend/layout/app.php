@@ -439,7 +439,7 @@ $active = $active ?? '';
             justify-content: center;
             gap: 12px;
             height: 200px;
-            padding: 20px 60px 30px 60px;
+            padding: 35px 60px 10px 60px;
             width: 100%;
             overflow-x: auto;
             overflow-y: visible;
@@ -672,30 +672,50 @@ $active = $active ?? '';
 
         .badge-status {
             border: 1px solid transparent;
+            font-size: .7rem;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-weight: 600;
+            line-height: 1.1;
         }
         .badge-status-draft {
-            background: #8896a8;
-            color: #fff;
+            background: #e2e8f0;
+            color: #475569;
         }
         .badge-status-pending {
-            background: #fef7e0;
-            color: #8a6d1e;
+            background: #fef3c7;
+            color: #92400e;
+            border-color: #fde68a;
         }
         .badge-status-approved {
-            background: #4a8c5c;
-            color: #fff;
+            background: #dcfce7;
+            color: #166534;
+            border-color: #bbf7d0;
         }
         .badge-status-rejected {
-            background: #b34a4a;
-            color: #fff;
+            background: #fee2e2;
+            color: #991b1b;
+            border-color: #fecaca;
         }
         .badge-status-submitted {
-            background: #4f6584;
-            color: #fff;
+            background: #e0e7ff;
+            color: #4338ca;
+            border-color: #c7d2fe;
         }
         .badge-status-revision {
-            background: #c97d3b;
-            color: #fff;
+            background: #fef9c3;
+            color: #854d0e;
+            border-color: #fef08a;
+        }
+        .badge-status-endorsed {
+            background: #e8f0fe;
+            color: #2a5c8a;
+            border-color: #c5d9f0;
+        }
+        .badge-status-returned {
+            background: #ffedd5;
+            color: #9a3412;
+            border-color: #fed7aa;
         }
         .badge-soft {
             background: #edf2f7;
@@ -1114,7 +1134,7 @@ $active = $active ?? '';
 
             .css-bar-chart {
                 gap: 8px;
-                padding: 20px 50px 25px 50px;
+                padding: 30px 50px 8px 50px;
                 height: 180px;
             }
 
@@ -1197,7 +1217,7 @@ $active = $active ?? '';
 
             .css-bar-chart {
                 gap: 6px;
-                padding: 20px 40px 20px 40px;
+                padding: 25px 40px 6px 40px;
                 height: 160px;
             }
 
