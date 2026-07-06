@@ -84,10 +84,8 @@ $routes->group('employee', ['filter' => 'role:employee'], static function (Route
     });
 });
 
-// Resource Requirements Routes
+
       $routes->group('ict-planner', ['filter' => 'role:ict_planner'], static function (RouteCollection $routes): void {
-
-
 
     $routes->get('dashboard', 'IctPlanner\DashboardController::index');
     $routes->get('consolidation', 'IctPlanner\ConsolidationController::index');
@@ -96,6 +94,9 @@ $routes->group('employee', ['filter' => 'role:employee'], static function (Route
     $routes->get('download/(:num)', 'IctPlanner\ConsolidationController::download/$1');
     $routes->post('download-batch', 'IctPlanner\ConsolidationController::batchDownload');
 
+  });  
+
+// Resource Requirements Routes
 $routes->group('employee', ['filter' => 'role:employee'], static function (RouteCollection $routes): void {
 
     $routes->group('resource-requirements', static function (RouteCollection $routes): void {
