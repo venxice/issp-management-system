@@ -37,10 +37,10 @@ class ConsolidationController extends BaseController
             ->select('issp_records.*, departments.name AS department_name, users.name AS created_by_name')
             ->join('departments', 'departments.id = issp_records.department_id', 'left')
             ->join('users', 'users.id = issp_records.created_by', 'left')
-            ->where('issp_records.status !=', 'draft')
+            ->notDraftFilter()
             ->orderBy('issp_records.created_at', 'DESC');
 
-        if ($statusFilter !== '' && in_array($statusFilter, ['pending', 'endorsed', 'approved', 'rejected', 'returned'])) {
+        if ($statusFilter !== '' && in_array($statusFilter, ['pending', 'endorsed', 'approved', 'rejected', 'returned', 'resubmitted'])) {
             $builder->where('issp_records.status', $statusFilter);
         }
 
@@ -54,6 +54,7 @@ class ConsolidationController extends BaseController
             'approved' => $isspModel->where('status', 'approved')->countAllResults(),
             'rejected' => $isspModel->where('status', 'rejected')->countAllResults(),
             'returned' => $isspModel->where('status', 'returned')->countAllResults(),
+            'resubmitted' => $isspModel->where('status', 'resubmitted')->countAllResults(),
         ];
 
         return view('frontend/ict_planner/consolidation/index', [

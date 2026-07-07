@@ -403,8 +403,6 @@
                 <div class="subsection-body">
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <div class="form-section-label" style="margin:0;border:none;padding:0;">
-                            <span>Stakeholders Transaction Complexity</span>
-                            <i class="fa-solid fa-circle-question help-icon" data-tooltip="Identify stakeholder groups affected by your ICT programs and categorize the complexity of their transactions as Simple, Complex, or Highly Technical. Include citizens, other government agencies, LGUs, private sector partners, NGOs, and others who benefit from or contribute to your ICT programs."></i>
                         </div>
                         <button type="button" class="add-position-btn" onclick="addStakeholderRow()">
                             <i class="fa-solid fa-plus"></i>
@@ -422,7 +420,34 @@
                                 </tr>
                             </thead>
                             <tbody id="stakeholderTableBody">
-                                <!-- rows added via JS -->
+                                <?php
+                                $stakeholders = [];
+                                if (!empty($saved['stakeholder_data'])) {
+                                    $decoded = json_decode($saved['stakeholder_data'], true);
+                                    if (is_array($decoded)) {
+                                        $stakeholders = $decoded;
+                                    }
+                                }
+                                if (!empty($stakeholders)):
+                                    foreach ($stakeholders as $s): ?>
+                                    <tr>
+                                        <td><input type="text" class="form-control form-control-sm" name="stakeholder_name[]" value="<?= esc($s['name'] ?? '') ?>" placeholder="Enter stakeholder name"></td>
+                                        <td><input type="text" class="form-control form-control-sm" name="stakeholder_transaction[]" value="<?= esc($s['transaction'] ?? '') ?>" placeholder="Enter transaction processed"></td>
+                                        <td>
+                                            <select class="form-select form-select-sm" name="stakeholder_complexity[]" style="font-size:.78rem;padding:6px 10px;border:1px solid #d0dae6;border-radius:4px;width:100%;">
+                                                <option value="Simple" <?= ($s['complexity'] ?? '') === 'Simple' ? 'selected' : '' ?>>Simple</option>
+                                                <option value="Complex" <?= ($s['complexity'] ?? '') === 'Complex' ? 'selected' : '' ?>>Complex</option>
+                                                <option value="Highly Technical" <?= ($s['complexity'] ?? '') === 'Highly Technical' ? 'selected' : '' ?>>Highly Technical</option>
+                                            </select>
+                                        </td>
+                                        <td class="text-center">
+                                            <button type="button" class="delete-btn" onclick="deleteStakeholderRow(this)">
+                                                <i class="fa-solid fa-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <?php endforeach;
+                                endif; ?>
                             </tbody>
                         </table>
                     </div>
@@ -513,23 +538,25 @@ window.saveFormData = function() {
 };
 
 window.loadSavedData = function() {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (!saved) {
+    const tbody = document.getElementById('stakeholderTableBody');
+    if (tbody.children.length === 0) {
         addStakeholderRow();
         return;
     }
-    try {
-        const data = JSON.parse(saved);
-        if (data.rows && data.rows.length > 0) {
-            data.rows.forEach(function(row) {
-                addStakeholderRow(row);
-            });
-        } else {
-            addStakeholderRow();
+    // Check localStorage for rows that DB doesn't have yet
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+        try {
+            const data = JSON.parse(saved);
+            if (data.rows && data.rows.length > 0 && tbody.children.length === 0) {
+                tbody.innerHTML = '';
+                data.rows.forEach(function(row) {
+                    addStakeholderRow(row);
+                });
+            }
+        } catch (e) {
+            console.error('Error loading saved data:', e);
         }
-    } catch (e) {
-        console.error('Error loading saved data:', e);
-        addStakeholderRow();
     }
 };
 
@@ -553,11 +580,7 @@ window.clearForm = function() {
 
 window.saveChanges = function() {
     saveFormData();
-    if (typeof showAlertModal === 'function') {
-        showAlertModal('Success', 'Changes saved successfully.');
-    } else {
-        alert('Changes saved successfully.');
-    }
+    document.querySelector('#mainForm').submit();
 };
 
 window.navigateToPage = function(url) {

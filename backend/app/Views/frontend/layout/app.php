@@ -641,6 +641,13 @@ $active = $active ?? '';
             place-items: center;
             border-radius: 6px;
         }
+        .icon-btn:disabled,
+        .icon-btn.disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+            pointer-events: none;
+            text-decoration: line-through;
+        }
 
         .icon-btn .fa-solid,
         .icon-btn .fa-regular {
@@ -716,6 +723,11 @@ $active = $active ?? '';
             background: #ffedd5;
             color: #9a3412;
             border-color: #fed7aa;
+        }
+        .badge-status-resubmitted {
+            background: #e0e7ff;
+            color: #4338ca;
+            border-color: #c7d2fe;
         }
         .badge-soft {
             background: #edf2f7;
@@ -1367,6 +1379,9 @@ document.addEventListener('DOMContentLoaded', function() {
             sidebarClose.addEventListener('click', closeSidebar);
         }
     }
+
+    // Initialize Bootstrap tooltips
+    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => new bootstrap.Tooltip(el));
 
     const navLinks = document.querySelectorAll('.sidebar-nav .nav-link');
     navLinks.forEach(link => {

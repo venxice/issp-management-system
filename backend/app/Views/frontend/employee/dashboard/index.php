@@ -41,7 +41,7 @@
                     </thead>
                     <tbody>
                     <?php foreach ($recentRecords ?? [] as $record): ?>
-                        <?php $fd = !empty($record['form_data']) ? json_decode($record['form_data'], true) : []; $ict = $fd['ict-projects-form'] ?? []; $intTitle = $ict['internal_project_title'] ?? $record['title'] ?? '---'; $crossTitle = $ict['cross_project_title'] ?? ''; ?>
+                        <?php $fd = !empty($record['form_data']) ? json_decode($record['form_data'], true) : []; $ict = $fd['ict-projects-form'] ?? []; $intTitle = $ict['internal_project_title'] ?? $record['title'] ?? '---'; $crossTitle = $ict['cross_project_title'] ?? ''; $s = !empty($record['status']) ? $record['status'] : 'draft'; $canEdit = $s === 'draft' || $s === 'returned'; $isDraft = $s === 'draft'; $isReturned = $s === 'returned'; ?>
                         <tr>
                             <td>
                                 <div><span class="text-muted">Internal:</span> <?= esc($intTitle) ?></div>
@@ -50,26 +50,43 @@
                             <td><span class="activity-meta activity-summary"><?= esc($record['description'] ?: '---') ?></span></td>
                             <td><?= esc($record['budget'] ? '₱' . number_format($record['budget'], 2) : '-') ?></td>
                             <td>
-                                <?php $status = !empty($record['status']) ? $record['status'] : 'draft'; ?>
-                                <span class="badge badge-status badge-status-<?= $status ?>"><?= esc(ucfirst($status)) ?></span>
+                                <span class="badge badge-status badge-status-<?= $s ?>"><?= esc(ucfirst($s)) ?></span>
                             </td>
                             <td><?= esc($record['updated_at'] ?? $record['created_at'] ?? '') ?></td>
                             <td class="text-center">
                                 <div class="d-inline-flex gap-1">
                                     <button class="btn btn-outline-primary icon-btn" type="button" title="View" data-project='<?= json_encode([
-                                        'title' => $record['title'] ?? '',
+                                        'title' => $intTitle ?? $record['title'] ?? '',
+                                        'cross_title' => $crossTitle ?? '',
                                         'description' => $record['description'] ?? '',
                                         'budget' => $record['budget'] ?? '',
-                                        'status' => $record['status'] ?? '',
+                                        'status' => $s,
                                         'department' => $record['department_name'] ?? '',
                                         'updated' => $record['updated_at'] ?? $record['created_at'] ?? '',
-                                        'created' => $record['created_at'] ?? ''
+                                        'created' => $record['created_at'] ?? '',
+                                        'remarks' => $record['remarks'] ?? ''
                                     ]) ?>'>
                                         <i class="fa-regular fa-eye"></i>
                                     </button>
-                                    <button class="btn btn-outline-secondary icon-btn" type="button" title="Edit" data-record-id="<?= $record['id'] ?>" data-status="<?= $record['status'] ?? '' ?>" <?= ($record['status'] ?? '') !== 'draft' ? 'disabled' : '' ?>>
+                                    <a href="<?= site_url('employee/view-full-ict-document/' . $record['id']) ?>" class="btn btn-outline-primary icon-btn" type="button" title="View Full ICT Document">
+                                        <i class="fa-solid fa-expand"></i>
+                                    </a>
+                                    <button class="btn btn-outline-secondary icon-btn edit-btn" type="button" title="Edit" data-record-id="<?= $record['id'] ?>" <?= !$canEdit ? 'disabled' : '' ?>>
                                         <i class="fa-regular fa-pen-to-square"></i>
                                     </button>
+                                    <?php if ($isDraft): ?>
+                                    <button class="btn btn-outline-primary icon-btn" type="button" title="Submit" data-record-id="<?= $record['id'] ?>" data-action="submit">
+                                        <i class="fa-regular fa-paper-plane"></i>
+                                    </button>
+                                    <?php elseif ($isReturned): ?>
+                                    <button class="btn btn-outline-primary icon-btn" type="button" title="Resubmit" data-record-id="<?= $record['id'] ?>" data-action="resubmit">
+                                        <i class="fa-regular fa-paper-plane"></i>
+                                    </button>
+                                    <?php else: ?>
+                                    <button class="btn btn-outline-secondary icon-btn" type="button" title="Submit" disabled>
+                                        <i class="fa-regular fa-paper-plane"></i>
+                                    </button>
+                                    <?php endif; ?>
                                 </div>
                             </td>
                         </tr>
@@ -93,6 +110,10 @@
 .detail-grid { display: grid; grid-template-columns: 170px 1fr; gap: 12px 18px; }
 .key { font-size: .8rem; color: #6c757d; font-weight: 600; }
 .val { font-size: .9rem; color: #212529; word-break: break-word; }
+.remarks-in-modal { margin-top: 18px; }
+.remarks-in-modal__divider { height: 1px; background: #eef2f6; margin-bottom: 14px; }
+.remarks-in-modal__label { display: flex; align-items: center; gap: 6px; font-size: .7rem; font-weight: 700; color: #536783; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 8px; }
+.remarks-in-modal__body { background: #f8fafc; border: 1px solid #eef2f6; border-radius: 8px; padding: 14px 16px; font-size: .88rem; color: #1e293b; line-height: 1.7; }
 </style>
 
 <div class="custom-modal" id="viewProjectModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;z-index:1060;align-items:center;justify-content:center;">
@@ -112,6 +133,11 @@
                     <div class="key">Department</div><div class="val" id="viewProjectDepartment">-</div>
                     <div class="key">Last Updated</div><div class="val" id="viewProjectUpdated">-</div>
                     <div class="key">Created</div><div class="val" id="viewProjectCreated">-</div>
+                </div>
+                <div class="remarks-in-modal" id="viewProjectRemarksWrap" style="display:none;">
+                    <div class="remarks-in-modal__divider"></div>
+                    <div class="remarks-in-modal__label"><i class="fa-solid fa-rotate-left"></i> DG Remarks</div>
+                    <div class="remarks-in-modal__body" id="viewProjectRemarks">-</div>
                 </div>
             </div>
         </div>
@@ -145,6 +171,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById('viewProjectDepartment').textContent = project.department || '-';
                 document.getElementById('viewProjectUpdated').textContent = project.updated || '-';
                 document.getElementById('viewProjectCreated').textContent = project.created || '-';
+                var remarks = project.remarks || '';
+                var remarksWrap = document.getElementById('viewProjectRemarksWrap');
+                if (remarks) {
+                    document.getElementById('viewProjectRemarks').textContent = remarks;
+                    remarksWrap.style.display = '';
+                } else {
+                    remarksWrap.style.display = 'none';
+                }
                 showViewProjectModal();
             } catch(e) {
                 showAlertModal('Error', 'Error loading project details.');
@@ -155,10 +189,75 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('button[data-record-id]:not([disabled])').forEach(function(btn) {
         btn.addEventListener('click', function() {
             var id = this.getAttribute('data-record-id');
+            var action = this.getAttribute('data-action');
+
+            if (action === 'submit') {
+                showConfirmModal('Are you sure you want to submit this draft for review?', function() {
+                    var csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+                    fetch('<?= site_url('employee/submit-issp') ?>', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: JSON.stringify({
+                            csrf_test_name: csrfToken,
+                            id: id
+                        })
+                    })
+                    .then(function(r) { return r.json(); })
+                    .then(function(data) {
+                        if (data.success) {
+                            location.reload();
+                        } else {
+                            showAlertModal('Error', data.message || 'Please try again.');
+                        }
+                    });
+                });
+                return;
+            }
+
+            if (action === 'resubmit') {
+                showConfirmModal('Are you sure you want to resubmit this returned project?', function() {
+                    var csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+                    fetch('<?= site_url('employee/resubmit-project') ?>/' + id, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: JSON.stringify({
+                            csrf_test_name: csrfToken
+                        })
+                    })
+                    .then(function(r) { return r.json(); })
+                    .then(function(data) {
+                        if (data.success) {
+                            location.reload();
+                        } else {
+                            showAlertModal('Error', data.message || 'Please try again.');
+                        }
+                    });
+                });
+                return;
+            }
+
+            var currentProjectId = localStorage.getItem('edit_project_id');
+            if (currentProjectId === id) {
+                window.location.href = '<?= site_url('employee/edit-ict-project') ?>/' + id + '/network-infrastructure';
+                return;
+            }
             fetch('<?= site_url('employee/load-form-data') ?>/' + id)
                 .then(function(r) { return r.json(); })
                 .then(function(data) {
                     if (data.success && data.form_data) {
+                        var newProjBackup = {};
+                        var formKeys = ['network-infrastructure-form','enterprise-architecture-form','ict-human-capital-form','information-systems-form','ict-projects-form','performance-measurement-form'];
+                        formKeys.forEach(function(k) {
+                            newProjBackup[k] = localStorage.getItem(k) || '';
+                        });
+                        localStorage.clear();
+                        localStorage.setItem('new-project-backup', JSON.stringify(newProjBackup));
                         Object.keys(data.form_data).forEach(function(key) {
                             localStorage.setItem(key, JSON.stringify(data.form_data[key]));
                         });

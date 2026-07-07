@@ -814,6 +814,8 @@ window.navigateToPage = function(url) {
                         })
                     );
                     }
+                } else if (value instanceof File) {
+                    // Empty file input — skip
                 } else {
                     formDataObj[key] = value;
                 }
@@ -839,7 +841,11 @@ window.navigateToPage = function(url) {
                 }
             });
             const jsonStr = JSON.stringify(formDataObj);
-            localStorage.setItem('enterprise-architecture-form', jsonStr);
+            try {
+                localStorage.setItem('enterprise-architecture-form', jsonStr);
+            } catch (e) {
+                console.error('localStorage save failed:', e);
+            }
             if (typeof updateStatusIndicators === 'function') updateStatusIndicators();
             window.location.href = url;
         };

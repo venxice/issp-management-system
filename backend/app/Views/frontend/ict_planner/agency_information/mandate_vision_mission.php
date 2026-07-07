@@ -280,13 +280,13 @@
                             <div class="form-section-label">
                                 <span>Legal Basis</span>
                             </div>
-                            <textarea class="form-control" name="legal_basis" rows="3" placeholder="e.g., RA 10844 - Department of Information and Communications Technology Act of 2015"></textarea>
+                            <textarea class="form-control" name="legal_basis" rows="3" placeholder="e.g., RA 10844 - Department of Information and Communications Technology Act of 2015"><?= old('legal_basis', $saved['legal_basis'] ?? '') ?></textarea>
                         </div>
                         <div class="col-md-12">
                             <div class="form-section-label">
                                 <span>Function</span>
                             </div>
-                            <textarea class="form-control" name="function" rows="4" placeholder="List the functions of your agency as defined by the legal basis..."></textarea>
+                            <textarea class="form-control" name="function" rows="4" placeholder="List the functions of your agency as defined by the legal basis..."><?= old('function', $saved['function'] ?? '') ?></textarea>
                         </div>
                     </div>
                 </div>
@@ -305,7 +305,7 @@
                             <div class="form-section-label">
                                 <span>Vision Statement</span>
                             </div>
-                            <textarea class="form-control" name="vision_statement" rows="4" placeholder="Enter the agency's vision statement..."></textarea>
+                            <textarea class="form-control" name="vision_statement" rows="4" placeholder="Enter the agency's vision statement..."><?= old('vision_statement', $saved['vision_statement'] ?? '') ?></textarea>
                         </div>
                     </div>
                 </div>
@@ -324,7 +324,7 @@
                             <div class="form-section-label">
                                 <span>Mission Statement</span>
                             </div>
-                            <textarea class="form-control" name="mission_statement" rows="4" placeholder="Enter the agency's mission statement..."></textarea>
+                            <textarea class="form-control" name="mission_statement" rows="4" placeholder="Enter the agency's mission statement..."><?= old('mission_statement', $saved['mission_statement'] ?? '') ?></textarea>
                         </div>
                     </div>
                 </div>
@@ -343,7 +343,7 @@
                             <div class="form-section-label">
                                 <span>Organizational Outcome</span>
                             </div>
-                            <textarea class="form-control" name="organizational_outcome" rows="5" placeholder="List organizational outcomes and their corresponding programs..."></textarea>
+                            <textarea class="form-control" name="organizational_outcome" rows="5" placeholder="List organizational outcomes and their corresponding programs..."><?= old('organizational_outcome', $saved['organizational_outcome'] ?? '') ?></textarea>
                         </div>
                     </div>
                 </div>
@@ -392,7 +392,7 @@ window.loadSavedData = function() {
         const data = JSON.parse(saved);
         const form = document.querySelector('#mainForm');
         form.querySelectorAll('input[name], textarea[name], select[name]').forEach(function(el) {
-            if (el.name in data && data[el.name] !== null) {
+            if (el.name in data && data[el.name] !== null && !el.value) {
                 el.value = data[el.name];
             }
         });
@@ -435,11 +435,7 @@ window.clearForm = function() {
 
 window.saveChanges = function() {
     saveFormData();
-    if (typeof showAlertModal === 'function') {
-        showAlertModal('Success', 'Changes saved successfully.');
-    } else {
-        alert('Changes saved successfully.');
-    }
+    document.querySelector('#mainForm').submit();
 };
 
 window.navigateToPage = function(url) {

@@ -21,11 +21,12 @@ class DashboardController extends BaseController
             ->where('created_by', $currentUserId)
             ->findAll();
 
-        $submittedProjects = count(array_filter($allUserRecords, fn($r) => $r['status'] !== 'draft'));
+        $isNotDraft = fn($r) => !empty($r['status']) && $r['status'] !== 'draft';
+        $submittedProjects = count(array_filter($allUserRecords, $isNotDraft));
         $approvedProjects = count(array_filter($allUserRecords, fn($r) => $r['status'] === 'approved'));
-        $needRevision = count(array_filter($allUserRecords, fn($r) => $r['status'] === 'rejected'));
+        $needRevision = count(array_filter($allUserRecords, fn($r) => in_array($r['status'], ['rejected', 'returned'])));
         $totalBudget = array_sum(array_column(
-            array_filter($allUserRecords, fn($r) => $r['status'] !== 'draft'),
+            array_filter($allUserRecords, $isNotDraft),
             'budget'
         ));
 
@@ -47,15 +48,154 @@ class DashboardController extends BaseController
         $userModel = new UserModel();
         $isspRecordModel = new ISspRecordModel();
 
-        $allRecords = $isspRecordModel->getRecentRecordsByUser($currentUserId, 100);
-        $submittedProjects = array_filter($allRecords, fn($r) => ($r['status'] ?? '') !== 'draft');
+        $query = trim((string) $this->request->getGet('q'));
+        $dateRange = trim((string) $this->request->getGet('date_range'));
+
+        $isspRecordModel->select('issp_records.*, departments.name AS department_name')
+            ->join('departments', 'departments.id = issp_records.department_id', 'left')
+            ->where('issp_records.created_by', $currentUserId)
+            ->where('issp_records.status IS NOT NULL')
+            ->where('issp_records.status !=', '')
+            ->where('issp_records.status !=', 'draft')
+            ->orderBy('COALESCE(issp_records.updated_at, issp_records.created_at)', 'DESC', false)
+            ->limit(100);
+
+        if ($query !== '') {
+            $isspRecordModel->like('issp_records.title', $query);
+        }
+        if ($dateRange !== '') {
+            $dates = explode(' to ', $dateRange);
+            if (count($dates) === 2) {
+                $isspRecordModel->where('issp_records.created_at >=', trim($dates[0]) . ' 00:00:00')
+                    ->where('issp_records.created_at <=', trim($dates[1]) . ' 23:59:59');
+            }
+        }
+
+        $submittedProjects = $isspRecordModel->findAll();
 
         return view('frontend/employee/submitted-ict-projects/index', [
             'title' => 'Submitted ICT Projects',
             'active' => 'submitted-ict-projects',
             'currentUser' => $userModel->findWithRole($currentUserId),
             'submittedProjects' => $submittedProjects,
+            'query' => $query,
+            'date_range' => $dateRange,
         ]);
+    }
+
+    public function viewFullIctDocument(int $id)
+    {
+        $currentUserId = (int) session()->get('user_id');
+        $isspModel = new ISspRecordModel();
+        $userModel = new UserModel();
+
+        $project = $isspModel
+            ->select('issp_records.*, departments.name AS department_name, users.name AS created_by_name')
+            ->join('departments', 'departments.id = issp_records.department_id', 'left')
+            ->join('users', 'users.id = issp_records.created_by', 'left')
+            ->where('issp_records.id', $id)
+            ->where('issp_records.created_by', $currentUserId)
+            ->first();
+
+        if ($project === null) {
+            return redirect()->to('employee/submitted-ict-projects')->with('error', 'Project not found.');
+        }
+
+        $formData = [];
+        if (!empty($project['form_data'])) {
+            $decoded = json_decode($project['form_data'], true);
+            if (is_array($decoded)) {
+                $formData = $decoded;
+            }
+        }
+
+        return view('frontend/employee/submitted-ict-projects/view_full', [
+            'title' => 'View Full ICT Document',
+            'active' => 'submitted-ict-projects',
+            'currentUser' => $userModel->findWithRole($currentUserId),
+            'project' => $project,
+            'formData' => $formData,
+        ]);
+    }
+
+    public function resubmitProject(int $id)
+    {
+        $this->response->setContentType('application/json');
+
+        try {
+            $currentUserId = (int) session()->get('user_id');
+            $isspRecordModel = new ISspRecordModel();
+            $record = $isspRecordModel->find($id);
+
+            if (!$record || (int) $record['created_by'] !== $currentUserId) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Project not found.'
+                ]);
+            }
+
+            if ($record['status'] !== 'returned') {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Only returned projects can be resubmitted.'
+                ]);
+            }
+
+            $json = $this->request->getJSON(true);
+            $formData = $json['form_data'] ?? [];
+
+            if (empty($formData)) {
+                if (!empty($record['form_data'])) {
+                    $formData = json_decode($record['form_data'], true) ?? [];
+                }
+            }
+
+            $completion = $this->isFormComplete($formData);
+            if (!$completion['success']) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => $completion['message']
+                ]);
+            }
+
+            $updateData = [
+                'status' => 'resubmitted',
+                'updated_at' => date('Y-m-d H:i:s'),
+            ];
+            if (!empty($formData)) {
+                $updateData['form_data'] = json_encode($formData);
+                $updateData['title'] = $formData['ict-projects-form']['internal_project_title'] ?? $record['title'];
+                $updateData['description'] = $formData['ict-projects-form']['internal_description'] ?? '';
+                $updateData['budget'] = $formData['ict-projects-form']['internal_total_cost'] ?? 0;
+            }
+
+            $isspRecordModel->update($id, $updateData);
+
+            $this->writeLog('issp.resubmitted', 'Resubmitted ISSP #' . $id, $formData['ict-projects-form']['internal_project_title'] ?? '');
+
+            helper('notification');
+            $userModel = new UserModel();
+            $employee = $userModel->findWithRole($currentUserId);
+            $project = [
+                'id' => $id,
+                'title' => $formData['ict-projects-form']['internal_project_title'] ?? 'ISSP Submission',
+            ];
+            $directorGenerals = $userModel->getUsersByRole('director_general');
+            if (!empty($directorGenerals)) {
+                sendSubmissionNotification($project, $employee, $directorGenerals);
+            }
+
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'Project resubmitted successfully for review.'
+            ]);
+
+        } catch (\Exception $e) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
     }
 
     public function draftIctProjects()
@@ -64,14 +204,40 @@ class DashboardController extends BaseController
         $userModel = new UserModel();
         $isspRecordModel = new ISspRecordModel();
 
-        $allProjects = $isspRecordModel->getRecentRecordsByUser($currentUserId, 100);
-        $draftProjects = array_filter($allProjects, fn($r) => ($r['status'] ?? '') === 'draft');
+        $query = trim((string) $this->request->getGet('q'));
+        $dateRange = trim((string) $this->request->getGet('date_range'));
+
+        $isspRecordModel->select('issp_records.*, departments.name AS department_name')
+            ->join('departments', 'departments.id = issp_records.department_id', 'left')
+            ->where('issp_records.created_by', $currentUserId)
+            ->groupStart()
+                ->where('issp_records.status IS NULL')
+                ->orWhere('issp_records.status', '')
+                ->orWhere('issp_records.status', 'draft')
+            ->groupEnd()
+            ->orderBy('COALESCE(issp_records.updated_at, issp_records.created_at)', 'DESC', false)
+            ->limit(100);
+
+        if ($query !== '') {
+            $isspRecordModel->like('issp_records.title', $query);
+        }
+        if ($dateRange !== '') {
+            $dates = explode(' to ', $dateRange);
+            if (count($dates) === 2) {
+                $isspRecordModel->where('issp_records.created_at >=', trim($dates[0]) . ' 00:00:00')
+                    ->where('issp_records.created_at <=', trim($dates[1]) . ' 23:59:59');
+            }
+        }
+
+        $draftProjects = $isspRecordModel->findAll();
 
         return view('frontend/employee/draft-ict-projects/index', [
             'title' => 'Draft ICT Projects',
             'active' => 'draft-ict-projects',
             'currentUser' => $userModel->findWithRole($currentUserId),
             'draftProjects' => $draftProjects,
+            'query' => $query,
+            'date_range' => $dateRange,
         ]);
     }
 
@@ -90,10 +256,11 @@ class DashboardController extends BaseController
             if (!$id) {
                 // Create a new submission record
                 $formData = $json['form_data'] ?? [];
-                if (!$this->isFormComplete($formData)) {
+                $completion = $this->isFormComplete($formData);
+                if (!$completion['success']) {
                     return $this->response->setJSON([
                         'success' => false,
-                        'message' => 'Please complete all required fields before submitting.'
+                        'message' => $completion['message']
                     ]);
                 }
                 $id = $isspRecordModel->insert([
@@ -117,13 +284,16 @@ class DashboardController extends BaseController
                         $formData = json_decode($record['form_data'], true) ?? [];
                     }
                 }
-                if (!$this->isFormComplete($formData)) {
+                $completion = $this->isFormComplete($formData);
+                if (!$completion['success']) {
                     return $this->response->setJSON([
                         'success' => false,
-                        'message' => 'Please complete all required fields before submitting.'
+                        'message' => $completion['message']
                     ]);
                 }
-                $updateData = ['status' => 'pending', 'updated_at' => date('Y-m-d H:i:s')];
+                $record = $record ?? $isspRecordModel->find($id);
+                $newStatus = ($record && $record['status'] === 'returned') ? 'resubmitted' : 'pending';
+                $updateData = ['status' => $newStatus, 'updated_at' => date('Y-m-d H:i:s')];
                 if (!empty($formData)) {
                     $updateData['form_data'] = json_encode($formData);
                     $updateData['title'] = $formData['ict-projects-form']['internal_project_title'] ?? $updateData['title'] ?? 'ISSP Submission';
@@ -158,9 +328,10 @@ class DashboardController extends BaseController
                         'id' => $id,
                         'title' => $formData['ict-projects-form']['internal_project_title'] ?? 'ISSP Submission',
                     ];
-                    $ictPlanners = $userModel->getUsersByRole('ict_planner');
-                    if (!empty($ictPlanners)) {
-                        sendSubmissionNotification($project, $employee, $ictPlanners);
+                    $notifyRole = ($newStatus ?? 'pending') === 'resubmitted' ? 'director_general' : 'ict_planner';
+                    $recipients = $userModel->getUsersByRole($notifyRole);
+                    if (!empty($recipients)) {
+                        sendSubmissionNotification($project, $employee, $recipients);
                     }
                 } catch (\Exception $e) {
                     log_message('error', 'Failed to send submission notification: ' . $e->getMessage());
@@ -176,9 +347,10 @@ class DashboardController extends BaseController
                     'id' => $id,
                     'title' => $formData['ict-projects-form']['internal_project_title'] ?? 'ISSP Submission',
                 ];
-                $ictPlanners = $userModel->getUsersByRole('ict_planner');
-                if (!empty($ictPlanners)) {
-                    sendSubmissionNotification($project, $employee, $ictPlanners);
+                $notifyRole = ($newStatus ?? 'pending') === 'resubmitted' ? 'director_general' : 'ict_planner';
+                $recipients = $userModel->getUsersByRole($notifyRole);
+                if (!empty($recipients)) {
+                    sendSubmissionNotification($project, $employee, $recipients);
                 }
             } catch (\Exception $e) {
                 log_message('error', 'Failed to send submission notification: ' . $e->getMessage());
@@ -194,27 +366,25 @@ class DashboardController extends BaseController
         }
     }
 
-    private function isFormComplete(array $formData): bool
+    private function isFormComplete(array $formData): array
     {
-        $requiredKeys = [
-            'network-infrastructure-form',
-            'enterprise-architecture-form',
-            'ict-human-capital-form',
-            'information-systems-form',
-            'ict-projects-form',
-            'performance-measurement-form'
+        $sectionLabels = [
+            'network-infrastructure-form'     => 'Network Infrastructure (Section A)',
+            'enterprise-architecture-form'    => 'Enterprise Architecture (Section B)',
+            'ict-human-capital-form'          => 'ICT Human Capital (Section C)',
+            'information-systems-form'        => 'Information Systems (Section D)',
+            'ict-projects-form'               => 'ICT Projects (Section E)',
+            'performance-measurement-form'    => 'Performance Measurement & KPIs (Section F)',
         ];
 
-        // Project title is required
         $title = $formData['ict-projects-form']['internal_project_title'] ?? '';
         if (trim($title) === '') {
-            return false;
+            return ['success' => false, 'message' => 'Project Title in ICT Projects (Section E) is required.'];
         }
 
-        // Each section must have at least one non-empty field
-        foreach ($requiredKeys as $key) {
+        foreach ($sectionLabels as $key => $label) {
             if (empty($formData[$key]) || !is_array($formData[$key])) {
-                return false;
+                return ['success' => false, 'message' => "$label is incomplete."];
             }
             $hasValue = false;
             foreach ($formData[$key] as $field => $value) {
@@ -227,29 +397,28 @@ class DashboardController extends BaseController
                 }
             }
             if (!$hasValue) {
-                return false;
+                return ['success' => false, 'message' => "$label - at least one field is required."];
             }
         }
 
-        // Required file uploads
         $requiredFiles = [
-            'network-infrastructure-form' => ['dept_network_diagram', 'regional_network_diagram'],
-            'enterprise-architecture-form' => ['ea_diagram'],
+            'network-infrastructure-form' => ['dept_network_diagram' => 'Department Network Diagram', 'regional_network_diagram' => 'Regional Network Diagram'],
+            'enterprise-architecture-form' => ['ea_diagram' => 'Enterprise Architecture Diagram'],
         ];
         foreach ($requiredFiles as $section => $fields) {
-            foreach ($fields as $field) {
+            $label = $sectionLabels[$section];
+            foreach ($fields as $field => $fieldLabel) {
                 $val = $formData[$section][$field] ?? '';
                 if (!is_string($val) || trim($val) === '') {
-                    return false;
+                    return ['success' => false, 'message' => "$fieldLabel in $label is required."];
                 }
-                // Must be a data URL or server file path
                 if (!str_starts_with($val, 'data:') && !str_starts_with($val, 'uploads/')) {
-                    return false;
+                    return ['success' => false, 'message' => "$fieldLabel in $label has an invalid file."];
                 }
             }
         }
 
-        return true;
+        return ['success' => true, 'message' => ''];
     }
 
     private function writeLog(string $action, string $description, string $title = ''): void
@@ -448,6 +617,30 @@ class DashboardController extends BaseController
         }
         if (!$db->fieldExists('updated_at', 'issp_records')) {
             $db->query("ALTER TABLE issp_records ADD COLUMN updated_at DATETIME NULL AFTER `created_at`");
+        }
+        if (!$db->fieldExists('remarks', 'issp_records')) {
+            $db->query("ALTER TABLE issp_records ADD COLUMN remarks TEXT NULL AFTER `status`");
+        }
+        // Ensure ENUM includes returned and resubmitted
+        $db->query("ALTER TABLE issp_records MODIFY COLUMN status ENUM('draft','pending','endorsed','approved','rejected','revision','returned','resubmitted') DEFAULT 'draft'");
+        // Performance indexes
+        $this->ensureIndex($db, 'issp_records', 'idx_status', 'status');
+        $this->ensureIndex($db, 'issp_records', 'idx_created_by', 'created_by');
+        $this->ensureIndex($db, 'issp_records', 'idx_created_at', 'created_at');
+        $this->ensureIndex($db, 'issp_records', 'idx_status_created_by', 'status, created_by');
+        $this->ensureIndex($db, 'logs', 'idx_user_id', 'user_id');
+        $this->ensureIndex($db, 'logs', 'idx_action', 'action');
+        $this->ensureIndex($db, 'logs', 'idx_created_at', 'created_at');
+        $this->ensureIndex($db, 'ci_sessions', 'idx_timestamp', 'timestamp');
+        // Session cleanup — remove expired sessions
+        $db->query("DELETE FROM ci_sessions WHERE timestamp < UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 24 HOUR))");
+    }
+
+    private function ensureIndex($db, string $table, string $indexName, string $columns): void
+    {
+        $result = $db->query("SHOW INDEX FROM `{$table}` WHERE Key_name = '{$indexName}'");
+        if ($result->getNumRows() === 0) {
+            $db->query("ALTER TABLE `{$table}` ADD INDEX `{$indexName}` ({$columns})");
         }
     }
 }

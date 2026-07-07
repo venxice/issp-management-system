@@ -122,7 +122,7 @@ CREATE TABLE `issp_records` (
   `description` text,
   `department_id` int NOT NULL,
   `created_by` int NOT NULL,
-  `status` enum('draft','pending','approved','rejected','revision') DEFAULT 'draft',
+  `status` enum('draft','pending','endorsed','approved','rejected','revision','returned','resubmitted') DEFAULT 'draft',
   `budget` decimal(12,2) DEFAULT '0.00',
   `start_date` date DEFAULT NULL,
   `end_date` date DEFAULT NULL,

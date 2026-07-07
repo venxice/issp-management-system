@@ -15,23 +15,27 @@ class DashboardController extends BaseController
         $userModel = new UserModel();
         $isspModel = new ISspRecordModel();
 
-        (new AuditLogModel())->insert([
-            'user_id' => $currentUserId,
-            'action' => 'dashboard.viewed',
-            'description' => 'Viewed Director General dashboard',
-            'created_at' => date('Y-m-d H:i:s'),
-        ]);
+        $dgStats = $isspModel->select("
+            COALESCE(SUM(CASE WHEN status = 'endorsed' THEN 1 ELSE 0 END), 0) AS endorsed,
+            COALESCE(SUM(CASE WHEN status = 'approved' THEN 1 ELSE 0 END), 0) AS approved,
+            COALESCE(SUM(CASE WHEN status = 'rejected' THEN 1 ELSE 0 END), 0) AS rejected,
+            COALESCE(SUM(CASE WHEN status = 'returned' THEN 1 ELSE 0 END), 0) AS returned,
+            COALESCE(SUM(CASE WHEN status = 'resubmitted' THEN 1 ELSE 0 END), 0) AS resubmitted,
+            COALESCE(SUM(CASE WHEN status IN ('endorsed','approved','rejected','returned','resubmitted') THEN budget ELSE 0 END), 0) AS total_budget
+        ")
+            ->get()
+            ->getRowArray();
 
-        $pendingApproval = $isspModel->where('status', 'endorsed')->countAllResults();
-        $totalApprovedProjects = $isspModel->where('status', 'approved')->countAllResults();
-        $totalProposedBudget = $isspModel->selectSum('budget')->whereIn('status', ['endorsed', 'approved', 'rejected'])->get()->getRowArray()['budget'] ?? 0;
-        $totalDepartments = $isspModel->select('department_id')->distinct()->whereIn('status', ['endorsed', 'approved', 'rejected'])->countAllResults();
+        $pendingApproval = (int) (($dgStats['endorsed'] ?? 0) + ($dgStats['resubmitted'] ?? 0));
+        $totalApprovedProjects = (int) ($dgStats['approved'] ?? 0);
+        $totalProposedBudget = (float) ($dgStats['total_budget'] ?? 0);
+        $totalDepartments = $isspModel->select('department_id')->distinct()->whereIn('status', ['endorsed', 'approved', 'rejected', 'resubmitted'])->countAllResults();
 
         $submissionsByMonth = $isspModel->getSubmissionsByMonth();
         $recentProjects = $isspModel->select('issp_records.*, departments.name AS department_name, users.name AS created_by_name')
             ->join('departments', 'departments.id = issp_records.department_id', 'left')
             ->join('users', 'users.id = issp_records.created_by', 'left')
-            ->whereIn('issp_records.status', ['endorsed', 'returned'])
+            ->whereIn('issp_records.status', ['endorsed', 'returned', 'resubmitted', 'approved', 'rejected'])
             ->orderBy('COALESCE(issp_records.updated_at, issp_records.created_at)', 'DESC', false)
             ->limit(10)
             ->findAll();
@@ -49,10 +53,11 @@ class DashboardController extends BaseController
         }
         unset($project);
 
-        $approvedCount = $isspModel->where('status', 'approved')->countAllResults();
-        $pendingCount = $isspModel->where('status', 'endorsed')->countAllResults();
-        $rejectedCount = $isspModel->where('status', 'rejected')->countAllResults();
-        $returnedCount = $isspModel->where('status', 'returned')->countAllResults();
+        $approvedCount = (int) ($dgStats['approved'] ?? 0);
+        $pendingCount = (int) ($dgStats['endorsed'] ?? 0);
+        $rejectedCount = (int) ($dgStats['rejected'] ?? 0);
+        $returnedCount = (int) ($dgStats['returned'] ?? 0);
+        $resubmittedCount = (int) ($dgStats['resubmitted'] ?? 0);
 
         return view('frontend/director_general/dashboard/index', [
             'title' => 'Director General Dashboard',
@@ -68,6 +73,7 @@ class DashboardController extends BaseController
             'pendingCount' => $pendingCount,
             'rejectedCount' => $rejectedCount,
             'returnedCount' => $returnedCount,
+            'resubmittedCount' => $resubmittedCount,
         ]);
     }
 
@@ -80,8 +86,8 @@ class DashboardController extends BaseController
             return redirect()->back()->with('error', 'Project not found.');
         }
 
-        if ($record['status'] !== 'endorsed') {
-            return redirect()->back()->with('error', 'Only endorsed projects can be approved.');
+        if (!in_array($record['status'], ['endorsed', 'resubmitted'])) {
+            return redirect()->back()->with('error', 'Only endorsed or resubmitted projects can be approved.');
         }
 
         $isspModel->update($id, [
@@ -111,8 +117,8 @@ class DashboardController extends BaseController
             return redirect()->back()->with('error', 'Project not found.');
         }
 
-        if ($record['status'] !== 'endorsed') {
-            return redirect()->back()->with('error', 'Only endorsed projects can be rejected.');
+        if (!in_array($record['status'], ['endorsed', 'resubmitted'])) {
+            return redirect()->back()->with('error', 'Only endorsed or resubmitted projects can be rejected.');
         }
 
         $isspModel->update($id, [
@@ -142,8 +148,8 @@ class DashboardController extends BaseController
             return redirect()->back()->with('error', 'Project not found.');
         }
 
-        if ($record['status'] !== 'endorsed') {
-            return redirect()->back()->with('error', 'Only endorsed projects can be returned.');
+        if (!in_array($record['status'], ['endorsed', 'resubmitted'])) {
+            return redirect()->back()->with('error', 'Only endorsed or resubmitted projects can be returned.');
         }
 
         $remarks = $this->request->getPost('remarks');

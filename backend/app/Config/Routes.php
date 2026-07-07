@@ -42,6 +42,11 @@ $routes->group('', ['filter' => 'role:admin'], static function (RouteCollection 
 
 $routes->group('director-general', ['filter' => 'role:director_general'], static function (RouteCollection $routes): void {
     $routes->get('dashboard', 'DirectorGeneral\DashboardController::index');
+    $routes->get('view-full/(:num)', 'DirectorGeneral\DashboardController::viewFull/$1');
+    $routes->get('download/(:num)', 'DirectorGeneral\DashboardController::download/$1');
+    $routes->post('approve/(:num)', 'DirectorGeneral\DashboardController::approve/$1');
+    $routes->post('reject/(:num)', 'DirectorGeneral\DashboardController::reject/$1');
+    $routes->post('return/(:num)', 'DirectorGeneral\DashboardController::return/$1');
 });
 
 $routes->group('employee', ['filter' => 'role:employee'], static function (RouteCollection $routes): void {
@@ -55,6 +60,8 @@ $routes->group('employee', ['filter' => 'role:employee'], static function (Route
     $routes->post('save-edit-draft/(:num)', 'Employee\DashboardController::saveEditDraft/$1');
     $routes->post('submit-edit-project/(:num)', 'Employee\DashboardController::submitEditProject/$1');
     $routes->post('upload-file', 'Employee\DashboardController::uploadFile');
+    $routes->get('view-full-ict-document/(:num)', 'Employee\DashboardController::viewFullIctDocument/$1');
+    $routes->post('resubmit-project/(:num)', 'Employee\DashboardController::resubmitProject/$1');
     
     // Proposed ICT Strategy Routes
     $routes->group('proposed-ict-strategy', static function (RouteCollection $routes): void {
@@ -140,17 +147,7 @@ $routes->group('ict-planner', ['filter' => 'role:ict_planner'], static function 
 });
 
 $routes->group('director-general', ['filter' => 'role:director_general'], static function (RouteCollection $routes): void {
-    $routes->get('dashboard', 'DashboardController::index');
     $routes->get('pending-approval', 'DirectorGeneral\PendingApprovalController::index');
     $routes->get('approved-projects', 'DirectorGeneral\ApprovedProjectsController::index');
-    $routes->post('approve/(:num)', 'DirectorGeneral\DashboardController::approve/$1');
-    $routes->post('reject/(:num)', 'DirectorGeneral\DashboardController::reject/$1');
-    $routes->post('return/(:num)', 'DirectorGeneral\DashboardController::return/$1');
-    $routes->get('view-full/(:num)', 'DirectorGeneral\DashboardController::viewFull/$1');
-    $routes->get('download/(:num)', 'DirectorGeneral\DashboardController::download/$1');
-});
-
-$routes->group('employee', ['filter' => 'role:employee'], static function (RouteCollection $routes): void {
-    $routes->get('dashboard', 'DashboardController::index');
 });
 

@@ -14,21 +14,9 @@
     text-decoration: none;
     transition: color 0.2s;
 }
-.breadcrumb-nav a:hover {
-    color: var(--brand);
-}
-.breadcrumb-nav .sep {
-    color: #c5ccd6;
-    font-size: .7rem;
-}
-.breadcrumb-nav .current {
-    color: var(--ink);
-    font-weight: 600;
-    max-width: 400px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
+.breadcrumb-nav a:hover { color: var(--brand); }
+.breadcrumb-nav .sep { color: #c5ccd6; font-size: .7rem; }
+.breadcrumb-nav .current { color: var(--ink); font-weight: 600; max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .project-hero {
     background: #fff;
     border: 1px solid #dde4ed;
@@ -37,42 +25,18 @@
     margin-bottom: 20px;
     box-shadow: 0 8px 20px rgba(15,23,42,.04);
 }
-.project-hero__title {
-    font-size: 1.2rem;
-    font-weight: 800;
-    line-height: 1.2;
-    letter-spacing: -.01em;
-    margin: 0 0 14px;
-}
-.project-hero__meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 16px 28px;
-}
-.project-hero__meta-item {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-.project-hero__meta-label {
-    font-size: .7rem;
-    color: var(--muted);
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: .03em;
-}
-.project-hero__meta-value {
-    font-size: .88rem;
-    color: var(--ink);
-    font-weight: 500;
-}
-.project-hero__actions {
-    display: flex;
-    gap: 6px;
-    margin-top: 16px;
-    padding-top: 14px;
-    border-top: 1px solid #eef2f6;
-}
+.project-hero__title { font-size: 1.2rem; font-weight: 800; line-height: 1.2; letter-spacing: -.01em; margin: 0 0 14px; }
+.project-hero__meta { display: flex; flex-wrap: wrap; gap: 16px 28px; }
+.project-hero__meta-item { display: flex; flex-direction: column; gap: 2px; }
+.project-hero__meta-label { font-size: .7rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .03em; }
+.project-hero__meta-value { font-size: .88rem; color: var(--ink); font-weight: 500; }
+.project-hero__actions { display: flex; gap: 6px; margin-top: 16px; padding-top: 14px; border-top: 1px solid #eef2f6; }
+<?php if (!empty($project['remarks']) && $project['status'] === 'returned'): ?>
+.remarks-note { margin-top: 16px; padding: 4px 0 8px 0; }
+.remarks-note__header { display: flex; align-items: center; gap: 6px; font-size: .7rem; font-weight: 700; color: #536783; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 2px; }
+.remarks-note__divider { border: none; border-top: 1px solid #e2e8f0; margin: 0 0 8px 0; }
+.remarks-note__body { font-size: .85rem; color: #475569; line-height: 1.6; }
+<?php endif; ?>
 .form-section {
     background: #fff;
     border: 1px solid #dde4ed;
@@ -92,245 +56,64 @@
     user-select: none;
     transition: background 0.15s;
 }
-.form-section__header:hover {
-    background: linear-gradient(180deg, #f0f4f8 0%, #e5ecf3 100%);
-}
+.form-section__header:hover { background: linear-gradient(180deg, #f0f4f8 0%, #e5ecf3 100%); }
 .form-section__header-icon {
-    width: 28px;
-    height: 28px;
-    border-radius: 6px;
+    width: 28px; height: 28px; border-radius: 6px;
     background: linear-gradient(180deg, #566d8b 0%, #3f5673 100%);
-    color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: .78rem;
-    flex-shrink: 0;
+    color: #fff; display: flex; align-items: center; justify-content: center;
+    font-size: .78rem; flex-shrink: 0;
 }
-.form-section__header-title {
-    font-size: .9rem;
-    font-weight: 700;
-    flex: 1;
-}
-.form-section__header-count {
-    font-size: .72rem;
-    color: var(--muted);
-    background: #e8ecf1;
-    padding: 2px 10px;
-    border-radius: 10px;
-    font-weight: 600;
-}
-.form-section__toggle {
-    color: #9aa6b8;
-    font-size: .8rem;
-    transition: transform 0.2s;
-}
-.form-section__toggle.open {
-    transform: rotate(180deg);
-}
-.form-section__body {
-    padding: 14px 16px;
-    display: none;
-}
-.form-section__body.open {
-    display: block;
-}
-.detail-row {
-    display: grid;
-    grid-template-columns: 200px 1fr;
-    gap: 6px 16px;
-    padding: 6px 0;
-    border-bottom: 1px solid #f2f5f8;
-}
-.detail-row:last-child {
-    border-bottom: none;
-}
-.detail-row__key {
-    font-size: .78rem;
-    color: var(--muted);
-    font-weight: 600;
-    padding: 2px 0;
-}
-.detail-row__val {
-    font-size: .85rem;
-    color: var(--ink);
-    word-break: break-word;
-    padding: 2px 0;
-}
-.detail-row__val.empty {
-    color: #c5ccd6;
-    font-style: italic;
-}
-.sub-header {
-    font-size: .78rem;
-    font-weight: 700;
-    color: var(--brand-dark);
-    text-transform: uppercase;
-    letter-spacing: .01em;
-    padding: 8px 0;
-    margin: 16px 0 10px;
-    border-bottom: 1px solid #d0dae6;
-}
-.sub-header:first-of-type {
-    margin-top: 0;
-}
-.cyber-category {
-    margin-bottom: 20px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid #e8ecf1;
-}
-.cyber-category:last-child {
-    border-bottom: none;
-    margin-bottom: 0;
-    padding-bottom: 0;
-}
-.cyber-category__header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-}
-.cyber-category__title {
-    font-size: .88rem;
-    font-weight: 700;
-    color: var(--brand-dark);
-    text-transform: uppercase;
-    letter-spacing: .02em;
-}
-.cyber-category__count {
-    font-size: .75rem;
-    font-weight: 600;
-    color: var(--muted);
-    background: #f0f2f5;
-    padding: 2px 10px;
-    border-radius: 10px;
-}
-.cyber-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 7px 10px;
-    margin-bottom: 4px;
-    border-radius: 6px;
-    background: #f8fafc;
-    gap: 10px;
-}
-.cyber-item__info {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex: 1;
-}
-.cyber-item__icon {
-    width: 18px;
-    text-align: center;
-    font-size: .78rem;
-    flex-shrink: 0;
-}
-.cyber-item__icon.checked {
-    color: #166534;
-}
-.cyber-item__icon.unchecked {
-    color: #c5ccd6;
-}
-.cyber-item__label {
-    font-size: .82rem;
-    font-weight: 500;
-    color: var(--ink);
-}
-.cyber-item__badge {
-    display: inline-block;
-    padding: 1px 8px;
-    border-radius: 4px;
-    font-size: .68rem;
-    font-weight: 600;
-    white-space: nowrap;
-    flex-shrink: 0;
-}
-.cyber-item__badge.mandatory {
-    background: #566d8b;
-    color: #fff;
-}
-.cyber-item__badge.optional {
-    background: #8898aa;
-    color: #fff;
-}
-.cyber-item__badge.notspecified {
-    background: #6c757d;
-    color: #fff;
-}
-.view-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 12px;
-    font-size: .82rem;
-}
-.view-table th {
-    background: #f0f4f8;
-    font-weight: 700;
-    color: var(--ink);
-    padding: 8px 10px;
-    border-bottom: 2px solid #d0dae6;
-    text-align: left;
-    font-size: .78rem;
-    text-transform: uppercase;
-    letter-spacing: .01em;
-}
-.view-table td {
-    padding: 8px 10px;
-    border-bottom: 1px solid #e8ecf1;
-    vertical-align: top;
-}
-.view-table tr:last-child td {
-    border-bottom: none;
-}
-.view-table .row-label {
-    font-weight: 700;
-    color: var(--brand-dark);
-    background: #f8fafc;
-    white-space: nowrap;
-    width: 1%;
-}
-.kpi-sub-header {
-    font-size: .75rem;
-    font-weight: 700;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: .02em;
-    padding: 10px 0 6px;
-    margin-top: 12px;
-    border-bottom: 1px solid #eef2f6;
-}
-.kpi-project-title {
-    font-size: .85rem;
-    font-weight: 700;
-    color: var(--brand-dark);
-    margin: 10px 0 8px;
-    padding: 6px 10px;
-    background: #f8fafc;
-    border-radius: 4px;
-    border-left: 3px solid var(--brand);
-}
-.info-badge {
-    display: inline-block;
-    background: #e8ecf1;
-    color: var(--muted);
-    font-size: .7rem;
-    font-weight: 600;
-    padding: 2px 8px;
-    border-radius: 4px;
-}
-.remarks-note { margin-top: 16px; padding: 4px 0 8px 0; }
-.remarks-note__header { display: flex; align-items: center; gap: 6px; font-size: .7rem; font-weight: 700; color: #536783; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 2px; }
-.remarks-note__divider { border: none; border-top: 1px solid #e2e8f0; margin: 0 0 8px 0; }
-.remarks-note__body { font-size: .85rem; color: #475569; line-height: 1.6; }
+.form-section__header-title { font-size: .9rem; font-weight: 700; flex: 1; }
+.form-section__header-count { font-size: .72rem; color: var(--muted); background: #e8ecf1; padding: 2px 10px; border-radius: 10px; font-weight: 600; }
+.form-section__toggle { color: #9aa6b8; font-size: .8rem; transition: transform 0.2s; }
+.form-section__toggle.open { transform: rotate(180deg); }
+.form-section__body { padding: 14px 16px; display: none; }
+.form-section__body.open { display: block; }
+.detail-row { display: grid; grid-template-columns: 200px 1fr; gap: 6px 16px; padding: 6px 0; border-bottom: 1px solid #f2f5f8; }
+.detail-row:last-child { border-bottom: none; }
+.detail-row__key { font-size: .78rem; color: var(--muted); font-weight: 600; padding: 2px 0; }
+.detail-row__val { font-size: .85rem; color: var(--ink); word-break: break-word; padding: 2px 0; }
+.detail-row__val.empty { color: #c5ccd6; font-style: italic; }
+.sub-header { font-size: .78rem; font-weight: 700; color: var(--brand-dark); text-transform: uppercase; letter-spacing: .01em; padding: 8px 0; margin: 16px 0 10px; border-bottom: 1px solid #d0dae6; }
+.sub-header:first-of-type { margin-top: 0; }
+.cyber-category { margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid #e8ecf1; }
+.cyber-category:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+.cyber-category__header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.cyber-category__title { font-size: .88rem; font-weight: 700; color: var(--brand-dark); text-transform: uppercase; letter-spacing: .02em; }
+.cyber-category__count { font-size: .75rem; font-weight: 600; color: var(--muted); background: #f0f2f5; padding: 2px 10px; border-radius: 10px; }
+.cyber-item { display: flex; align-items: center; justify-content: space-between; padding: 7px 10px; margin-bottom: 4px; border-radius: 6px; background: #f8fafc; gap: 10px; }
+.cyber-item__info { display: flex; align-items: center; gap: 10px; flex: 1; }
+.cyber-item__icon { width: 18px; text-align: center; font-size: .78rem; flex-shrink: 0; }
+.cyber-item__icon.checked { color: #166534; }
+.cyber-item__icon.unchecked { color: #c5ccd6; }
+.cyber-item__label { font-size: .82rem; font-weight: 500; color: var(--ink); }
+.cyber-item__badge { display: inline-block; padding: 1px 8px; border-radius: 4px; font-size: .68rem; font-weight: 600; white-space: nowrap; flex-shrink: 0; }
+.cyber-item__badge.mandatory { background: #566d8b; color: #fff; }
+.cyber-item__badge.optional { background: #8898aa; color: #fff; }
+.cyber-item__badge.notspecified { background: #6c757d; color: #fff; }
+.view-table { width: 100%; border-collapse: collapse; margin-bottom: 12px; font-size: .82rem; }
+.view-table th { background: #f0f4f8; font-weight: 700; color: var(--ink); padding: 8px 10px; border-bottom: 2px solid #d0dae6; text-align: left; font-size: .78rem; text-transform: uppercase; letter-spacing: .01em; }
+.view-table td { padding: 8px 10px; border-bottom: 1px solid #e8ecf1; vertical-align: top; }
+.view-table tr:last-child td { border-bottom: none; }
+.view-table .row-label { font-weight: 700; color: var(--brand-dark); background: #f8fafc; white-space: nowrap; width: 1%; }
+.kpi-sub-header { font-size: .75rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .02em; padding: 10px 0 6px; margin-top: 12px; border-bottom: 1px solid #eef2f6; }
+.kpi-project-title { font-size: .85rem; font-weight: 700; color: var(--brand-dark); margin: 10px 0 8px; padding: 6px 10px; background: #f8fafc; border-radius: 4px; border-left: 3px solid var(--brand); }
+.info-badge { display: inline-block; background: #e8ecf1; color: var(--muted); font-size: .7rem; font-weight: 600; padding: 2px 8px; border-radius: 4px; }
 </style>
 
 <div class="breadcrumb-nav">
-    <a href="<?= site_url('ict-planner/consolidation') ?>">Consolidation</a>
+    <a href="<?= site_url('employee/submitted-ict-projects') ?>">Submitted ICT Projects</a>
     <span class="sep"><i class="fa-solid fa-chevron-right"></i></span>
     <span class="current"><?= esc($project['title'] ?? 'Untitled') ?></span>
 </div>
+
+<?php if (!empty($project['remarks']) && $project['status'] === 'returned'): ?>
+<div class="remarks-note">
+    <div class="remarks-note__header"><i class="fa-solid fa-rotate-left"></i> DG Remarks</div>
+    <hr class="remarks-note__divider">
+    <div class="remarks-note__body"><?= esc($project['remarks']) ?></div>
+</div>
+<?php endif; ?>
 
 <div class="project-hero">
     <h1 class="project-hero__title"><?= esc($project['title'] ?? 'Untitled') ?></h1>
@@ -338,15 +121,15 @@
         <div class="project-hero__meta-item">
             <span class="project-hero__meta-label">Status</span>
             <span class="project-hero__meta-value">
-                                <span class="badge badge-soft" style="font-size:.72rem;padding:4px 12px;
-                                    <?php if ($project['status'] === 'pending'): ?>background:#fef3c7;color:#92400e;border-color:#fde68a;
-                                    <?php elseif ($project['status'] === 'endorsed'): ?>background:#e8f0fe;color:#2a5c8a;border-color:#c5d9f0;
-                                    <?php elseif ($project['status'] === 'approved'): ?>background:#dcfce7;color:#166534;border-color:#bbf7d0;
-                                    <?php elseif ($project['status'] === 'rejected'): ?>background:#fee2e2;color:#991b1b;border-color:#fecaca;
-                                    <?php elseif ($project['status'] === 'returned'): ?>background:#ffedd5;color:#9a3412;border-color:#fed7aa;
-                                    <?php elseif ($project['status'] === 'resubmitted'): ?>background:#e0e7ff;color:#4338ca;border-color:#c7d2fe;
-                                    <?php endif; ?>">
-                                    <?= esc(ucfirst($project['status'])) ?>
+                <span class="badge badge-soft" style="font-size:.72rem;padding:4px 12px;
+                    <?php if ($project['status'] === 'pending'): ?>background:#fef3c7;color:#92400e;border-color:#fde68a;
+                    <?php elseif ($project['status'] === 'endorsed'): ?>background:#e8f0fe;color:#2a5c8a;border-color:#c5d9f0;
+                    <?php elseif ($project['status'] === 'approved'): ?>background:#dcfce7;color:#166534;border-color:#bbf7d0;
+                    <?php elseif ($project['status'] === 'rejected'): ?>background:#fee2e2;color:#991b1b;border-color:#fecaca;
+                    <?php elseif ($project['status'] === 'returned'): ?>background:#ffedd5;color:#9a3412;border-color:#fed7aa;
+                    <?php elseif ($project['status'] === 'resubmitted'): ?>background:#e0e7ff;color:#4338ca;border-color:#c7d2fe;
+                    <?php endif; ?>">
+                    <?= esc(ucfirst($project['status'])) ?>
                 </span>
             </span>
         </div>
@@ -363,10 +146,6 @@
             <span class="project-hero__meta-value">₱<?= number_format((float) ($project['budget'] ?? 0), 2) ?></span>
         </div>
         <div class="project-hero__meta-item">
-            <span class="project-hero__meta-label">Submitted Date</span>
-            <span class="project-hero__meta-value"><?= esc($project['submitted_at'] ?? $project['created_at'] ?? '-') ?></span>
-        </div>
-        <div class="project-hero__meta-item">
             <span class="project-hero__meta-label">Last Updated</span>
             <span class="project-hero__meta-value"><?= esc($project['updated_at'] ?? $project['created_at'] ?? '-') ?></span>
         </div>
@@ -376,27 +155,6 @@
         <?= esc($project['description']) ?>
     </div>
     <?php endif; ?>
-    <?php if ($project['status'] === 'returned' && !empty($project['remarks'])): ?>
-    <div class="remarks-note">
-        <div class="remarks-note__header"><i class="fa-solid fa-rotate-left"></i> DG Remarks</div>
-        <hr class="remarks-note__divider">
-        <div class="remarks-note__body"><?= esc($project['remarks']) ?></div>
-    </div>
-    <?php endif; ?>
-    <div class="project-hero__actions">
-        <a href="<?= site_url('ict-planner/download/' . $project['id']) ?>" class="btn btn-outline-primary icon-btn" type="button" title="Download">
-            <i class="fa-solid fa-download"></i>
-        </a>
-        <?php if ($project['status'] === 'pending'): ?>
-            <button class="btn btn-outline-primary icon-btn" type="button" title="Endorse to Director General" onclick="openEndorseModal('<?= $project['id'] ?>')">
-                <i class="fa-solid fa-check"></i>
-            </button>
-        <?php elseif (in_array($project['status'], ['resubmitted', 'endorsed'])): ?>
-            <button class="btn btn-outline-secondary icon-btn" type="button" title="Already endorsed" disabled style="opacity:0.35;cursor:not-allowed;pointer-events:none;">
-                <i class="fa-solid fa-check"></i>
-            </button>
-        <?php endif; ?>
-    </div>
 </div>
 
 <?php
@@ -663,7 +421,6 @@ foreach ($sectionLabels as $key => $label):
     $fields = array_filter($fields, fn($k) => !str_starts_with($k, 'csrf_'), ARRAY_FILTER_USE_KEY);
     $icon = $sectionIcons[$key] ?? 'fa-file';
 
-    // Compute total/filled per section
     if ($key === 'network-infrastructure-form') {
         $lanWanDisplay = []; $cyberDisplay = [];
         foreach ($fields as $fn => $fv) {
@@ -873,7 +630,6 @@ foreach ($sectionLabels as $key => $label):
         </div>
         <?php endif; ?>
         <?php
-        // Display any other HC fields not in rows 1-4
         $extraHC = [];
         foreach ($fields as $fn => $fv) {
             if (!str_starts_with($fn, 'position_') && !str_starts_with($fn, 'status_') && !str_starts_with($fn, 'count_')) {
@@ -1059,7 +815,6 @@ foreach ($sectionLabels as $key => $label):
         <?php endif; endif; ?>
 
         <?php
-        // Render additional dynamic projects
         if (isset($fields['projects']) && is_array($fields['projects'])):
             foreach ($fields['projects'] as $projIdx => $projData):
                 if (!is_array($projData)) continue;
@@ -1105,7 +860,6 @@ foreach ($sectionLabels as $key => $label):
         <?php endif; endforeach; endif; ?>
 
         <?php
-        // Remaining flat fields
         foreach ($fields as $fn => $fv) {
             if (in_array($fn, ['internal_projects', 'cross_projects', 'projects'])) continue;
             if (str_starts_with($fn, 'projects[')) continue;
@@ -1125,24 +879,7 @@ foreach ($sectionLabels as $key => $label):
 </div>
 <?php $firstSection = false; endforeach; ?>
 
-<div class="custom-modal" id="endorseModal" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:1060;background:#fff;border-radius:6px;box-shadow:0 18px 40px rgba(15,23,42,.18);min-width:320px;max-width:400px;overflow:hidden;">
-    <div style="background:#536783;color:#fff;padding:12px 14px;font-size:.94rem;font-weight:700;"><i class="fa-solid fa-check-circle me-2" style="color:#4ade80;"></i> Endorse to Director General</div>
-    <div style="padding:14px 14px;font-size:.82rem;color:#1f2a3a;"><p class="mb-0">Are you sure you want to endorse this project to the Director General for approval?</p></div>
-    <div style="padding:8px 12px;border-top:1px solid #e1e6ee;display:flex;justify-content:flex-end;gap:8px;">
-        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="closeCustomModals()">Cancel</button>
-        <form method="post" id="actionEndorseForm" action="" class="d-inline">
-            <?= csrf_field() ?>
-            <button type="submit" class="btn btn-primary btn-sm">Endorse</button>
-        </form>
-    </div>
-</div>
-
 <script>
-function openEndorseModal(projectId) {
-    document.getElementById('actionEndorseForm').action = '<?= site_url('ict-planner/endorse/') ?>' + projectId;
-    showCustomModal('endorseModal');
-}
-
 function toggleSection(header) {
     var body = header.nextElementSibling;
     var toggle = header.querySelector('.form-section__toggle');
