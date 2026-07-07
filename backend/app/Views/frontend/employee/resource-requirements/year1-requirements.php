@@ -152,7 +152,7 @@ if (
 
             <small class="text-muted">
 
-                <?= esc($row['office']) ?>
+                <?= esc($row['office_location'] ?? '') ?>
 
                 <?php if(!empty($row['object_of_expenditure'])): ?>
 
@@ -178,7 +178,7 @@ if (
     class="btn btn-sm btn-outline-primary mt-2 edit-btn"
     data-id="<?= $row['id'] ?>"
     data-item="<?= esc($row['item']) ?>"
-    data-office="<?= esc($row['office']) ?>"
+    data-office="<?= esc($row['office_location'] ?? '') ?>"
     data-fund="<?= esc($row['fund_source']) ?>"
     data-unit="<?= $row['unit_cost'] ?>"
     data-target="<?= $row['physical_target'] ?>"
@@ -251,6 +251,7 @@ if (
                  
                 <input type="hidden" name="strategic_category" id="strategic_category">
                 <input type="hidden" name="expenditure_type" id="expenditure_type">
+                <input type="hidden" name="year" value="1">
 
                 <div class="modal-header">
 

@@ -229,21 +229,24 @@ $pieCanvasData = json_encode(array_map(function ($seg) {
                                     <?php elseif ($project['status'] === 'approved'): ?>background:#dcfce7;color:#166534;border-color:#bbf7d0;
                                     <?php elseif ($project['status'] === 'rejected'): ?>background:#fee2e2;color:#991b1b;border-color:#fecaca;
                                     <?php elseif ($project['status'] === 'returned'): ?>background:#ffedd5;color:#9a3412;border-color:#fed7aa;
+                                    <?php elseif ($project['status'] === 'resubmitted'): ?>background:#e0e7ff;color:#4338ca;border-color:#c7d2fe;
                                     <?php endif; ?>">
                                     <?= esc(ucfirst($project['status'])) ?>
                                         </span>
                                     </td>
                                     <td class="text-center">
                                         <div class="d-flex gap-1 justify-content-center">
-                                            <button class="btn btn-outline-primary icon-btn" type="button" title="View" data-project='<?= json_encode([
-                                                'title' => $project['title'] ?? '',
-                                                'description' => $project['description'] ?? '',
-                                                'budget' => $project['budget'] ?? '',
-                                                'status' => $project['status'] ?? '',
-                                                'department' => $project['department_name'] ?? '',
-                                                'updated' => $project['updated_at'] ?? $project['created_at'] ?? '',
-                                                'created' => $project['created_at'] ?? ''
-                                            ]) ?>'>
+                                             <button class="btn btn-outline-primary icon-btn" type="button" title="View" data-project='<?= json_encode([
+                                                 'title' => $project['title'] ?? '',
+                                                 'cross_title' => $project['cross_title'] ?? '',
+                                                 'description' => $project['description'] ?? '',
+                                                 'budget' => $project['budget'] ?? '',
+                                                 'status' => $project['status'] ?? '',
+                                                 'department' => $project['department_name'] ?? '',
+                                                 'updated' => $project['updated_at'] ?? $project['created_at'] ?? '',
+                                                 'created' => $project['created_at'] ?? '',
+                                                 'remarks' => $project['remarks'] ?? ''
+                                             ]) ?>'>
                                                 <i class="fa-regular fa-eye"></i>
                                             </button>
                                             <a href="<?= site_url('ict-planner/view-full/' . $project['id']) ?>" class="btn btn-outline-primary icon-btn" type="button" title="Open Full Submission">
@@ -253,13 +256,10 @@ $pieCanvasData = json_encode(array_map(function ($seg) {
                                                 <i class="fa-solid fa-download"></i>
                                             </a>
                                             <?php if ($project['status'] === 'pending'): ?>
-                                                <form method="post" action="<?= site_url('ict-planner/endorse/' . $project['id']) ?>" class="d-inline" onsubmit="return confirm('Endorse this project to Director General for approval?')">
-                                                    <?= csrf_field() ?>
-                                                    <button class="btn btn-outline-primary icon-btn" type="submit" title="Endorse to Director General">
-                                                        <i class="fa-solid fa-check"></i>
-                                                    </button>
-                                                </form>
-                                            <?php elseif ($project['status'] === 'endorsed'): ?>
+                                                <button class="btn btn-outline-primary icon-btn" type="button" title="Endorse to Director General" onclick="openEndorseModal('<?= $project['id'] ?>')">
+                                                    <i class="fa-solid fa-check"></i>
+                                                </button>
+                                            <?php elseif (in_array($project['status'], ['resubmitted', 'endorsed'])): ?>
                                                 <button class="btn btn-outline-secondary icon-btn" type="button" title="Already endorsed" disabled style="opacity:0.35;cursor:not-allowed;pointer-events:none;">
                                                     <i class="fa-solid fa-check"></i>
                                                 </button>
@@ -288,6 +288,11 @@ $pieCanvasData = json_encode(array_map(function ($seg) {
 .detail-grid { display: grid; grid-template-columns: 170px 1fr; gap: 12px 18px; }
 .key { font-size: .8rem; color: #6c757d; font-weight: 600; }
 .val { font-size: .9rem; color: #212529; word-break: break-word; }
+.cross-row { display: contents; }
+.remarks-in-modal { margin-top: 18px; }
+.remarks-in-modal__divider { height: 1px; background: #eef2f6; margin-bottom: 14px; }
+.remarks-in-modal__label { display: flex; align-items: center; gap: 6px; font-size: .7rem; font-weight: 700; color: #536783; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 8px; }
+.remarks-in-modal__body { background: #f8fafc; border: 1px solid #eef2f6; border-radius: 8px; padding: 14px 16px; font-size: .88rem; color: #1e293b; line-height: 1.7; }
 </style>
 
 <div class="custom-modal" id="viewProjectModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;z-index:1060;align-items:center;justify-content:center;">
@@ -300,7 +305,7 @@ $pieCanvasData = json_encode(array_map(function ($seg) {
             <div class="modal-body">
                 <div class="detail-grid">
                     <div class="key">Internal Title</div><div class="val" id="viewProjectTitle">-</div>
-                    <div class="key">Cross-Agency Title</div><div class="val" id="viewProjectCrossTitle">-</div>
+                    <div class="cross-row" id="viewCrossRow"><div class="key">Cross-Agency Title</div><div class="val" id="viewProjectCrossTitle">-</div></div>
                     <div class="key">Description</div><div class="val" id="viewProjectDescription">-</div>
                     <div class="key">Budget</div><div class="val" id="viewProjectBudget">-</div>
                     <div class="key">Status</div><div class="val" id="viewProjectStatus">-</div>
@@ -308,8 +313,25 @@ $pieCanvasData = json_encode(array_map(function ($seg) {
                     <div class="key">Last Updated</div><div class="val" id="viewProjectUpdated">-</div>
                     <div class="key">Created</div><div class="val" id="viewProjectCreated">-</div>
                 </div>
+                <div class="remarks-in-modal" id="viewProjectRemarksWrap" style="display:none;">
+                    <div class="remarks-in-modal__divider"></div>
+                    <div class="remarks-in-modal__label"><i class="fa-solid fa-rotate-left"></i> DG Remarks</div>
+                    <div class="remarks-in-modal__body" id="viewProjectRemarks">-</div>
+                </div>
             </div>
         </div>
+    </div>
+</div>
+
+<div class="custom-modal" id="endorseModal" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:1060;background:#fff;border-radius:6px;box-shadow:0 18px 40px rgba(15,23,42,.18);min-width:320px;max-width:400px;overflow:hidden;">
+    <div style="background:#536783;color:#fff;padding:12px 14px;font-size:.94rem;font-weight:700;"><i class="fa-solid fa-check-circle me-2" style="color:#4ade80;"></i> Endorse to Director General</div>
+    <div style="padding:14px 14px;font-size:.82rem;color:#1f2a3a;"><p class="mb-0">Are you sure you want to endorse this project to the Director General for approval?</p></div>
+    <div style="padding:8px 12px;border-top:1px solid #e1e6ee;display:flex;justify-content:flex-end;gap:8px;">
+        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="closeCustomModals()">Cancel</button>
+        <form method="post" id="actionEndorseForm" action="" class="d-inline">
+            <?= csrf_field() ?>
+            <button type="submit" class="btn btn-primary btn-sm">Endorse</button>
+        </form>
     </div>
 </div>
 
@@ -323,6 +345,11 @@ function closeViewProjectModal() {
     document.getElementById('viewProjectModal').style.display = 'none';
     document.getElementById('customModalOverlay').style.display = 'none';
     document.getElementById('customModalOverlay').onclick = closeCustomModals;
+}
+
+function openEndorseModal(projectId) {
+    document.getElementById('actionEndorseForm').action = '<?= site_url('ict-planner/endorse/') ?>' + projectId;
+    showCustomModal('endorseModal');
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -414,13 +441,28 @@ document.addEventListener('DOMContentLoaded', function() {
             try {
                 var project = JSON.parse(this.getAttribute('data-project'));
                 document.getElementById('viewProjectTitle').textContent = project.title || '-';
-                document.getElementById('viewProjectCrossTitle').textContent = project.cross_title || '-';
+                var crossRow = document.getElementById('viewCrossRow');
+                var crossTitleEl = document.getElementById('viewProjectCrossTitle');
+                if (project.cross_title) {
+                    crossTitleEl.textContent = project.cross_title;
+                    crossRow.style.display = '';
+                } else {
+                    crossRow.style.display = 'none';
+                }
                 document.getElementById('viewProjectDescription').textContent = project.description || '-';
                 document.getElementById('viewProjectBudget').textContent = project.budget ? '₱' + parseFloat(project.budget).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '-';
                 document.getElementById('viewProjectStatus').textContent = project.status ? project.status.charAt(0).toUpperCase() + project.status.slice(1) : '-';
                 document.getElementById('viewProjectDepartment').textContent = project.department || '-';
                 document.getElementById('viewProjectUpdated').textContent = project.updated || '-';
                 document.getElementById('viewProjectCreated').textContent = project.created || '-';
+                var remarks = project.remarks || '';
+                var remarksWrap = document.getElementById('viewProjectRemarksWrap');
+                if (remarks) {
+                    document.getElementById('viewProjectRemarks').textContent = remarks;
+                    remarksWrap.style.display = '';
+                } else {
+                    remarksWrap.style.display = 'none';
+                }
                 showViewProjectModal();
             } catch(e) {
                 showAlertModal('Error', 'Error loading project details.');

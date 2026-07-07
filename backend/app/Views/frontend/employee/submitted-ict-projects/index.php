@@ -10,8 +10,11 @@
                     <h2 class="panel-title">Submitted ICT Projects</h2>
                     <p class="panel-subtitle">View and manage your submitted ICT projects.</p>
                 </div>
-                <form class="d-flex flex-wrap align-items-center gap-2 toolbar-form" method="get" action="<?= site_url('employee/submitted-ict-projects') ?>">
-                    <input class="form-control form-control-sm" name="q" value="<?= esc($query ?? '') ?>" placeholder="Search Projects" style="width: 168px;">
+                <form class="d-flex flex-wrap align-items-center gap-2 toolbar-form" method="get" action="<?= site_url('employee/submitted-ict-projects') ?>" id="searchForm">
+                    <div class="input-group input-group-sm" style="width:200px;">
+                        <input class="form-control" name="q" value="<?= esc($query ?? '') ?>" placeholder="Search Projects">
+                        <button class="btn btn-outline-secondary" type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
+                    </div>
                     <div class="position-relative date-range-picker-wrapper">
                         <input class="form-control form-control-sm" name="date_range" type="text" value="<?= esc($date_range ?? '') ?>" placeholder="" id="dateRangePicker" readonly>
                         <button type="button" class="date-picker-icon-btn" id="datePickerToggleBtn">
@@ -34,7 +37,7 @@
                     </thead>
                     <tbody>
                     <?php foreach ($submittedProjects ?? [] as $project): ?>
-                        <?php $fd = !empty($project['form_data']) ? json_decode($project['form_data'], true) : []; $ict = $fd['ict-projects-form'] ?? []; $intTitle = $ict['internal_project_title'] ?? $project['title'] ?? '---'; $crossTitle = $ict['cross_project_title'] ?? ''; ?>
+                        <?php $fd = !empty($project['form_data']) ? json_decode($project['form_data'], true) : []; $ict = $fd['ict-projects-form'] ?? []; $intTitle = $ict['internal_project_title'] ?? $project['title'] ?? '---'; $crossTitle = $ict['cross_project_title'] ?? ''; $s = !empty($project['status']) ? $project['status'] : 'draft'; $canEdit = $s === 'draft' || $s === 'returned'; $isDraft = $s === 'draft'; $isReturned = $s === 'returned'; ?>
                         <tr>
                             <td>
                                 <div><span class="text-muted">Internal:</span> <?= esc($intTitle) ?></div>
@@ -43,8 +46,7 @@
                             <td><span class="activity-meta activity-summary"><?= esc($project['description'] ?: '---') ?></span></td>
                             <td><?= esc($project['budget'] ? '₱' . number_format($project['budget'], 2) : '-') ?></td>
                             <td>
-                                <?php $status = !empty($project['status']) ? $project['status'] : 'draft'; ?>
-                                <span class="badge badge-status badge-status-<?= $status ?>"><?= esc(ucfirst($status)) ?></span>
+                                <span class="badge badge-status badge-status-<?= $s ?>"><?= esc(ucfirst($s)) ?></span>
                             </td>
                             <td><?= esc($project['updated_at'] ?? $project['created_at'] ?? '') ?></td>
                             <td class="text-center">
@@ -54,13 +56,33 @@
                                         'cross_title' => $crossTitle,
                                         'description' => $project['description'] ?? '',
                                         'budget' => $project['budget'] ?? '',
-                                        'status' => $project['status'] ?? '',
+                                        'status' => $s,
                                         'department' => $project['department_name'] ?? '',
                                         'updated' => $project['updated_at'] ?? $project['created_at'] ?? '',
-                                        'created' => $project['created_at'] ?? ''
+                                        'created' => $project['created_at'] ?? '',
+                                        'remarks' => $project['remarks'] ?? ''
                                     ]) ?>'>
                                         <i class="fa-regular fa-eye"></i>
                                     </button>
+                                    <a href="<?= site_url('employee/view-full-ict-document/' . $project['id']) ?>" class="btn btn-outline-primary icon-btn" type="button" title="View Full ICT Document">
+                                        <i class="fa-solid fa-expand"></i>
+                                    </a>
+                                    <button class="btn btn-outline-secondary icon-btn edit-btn" type="button" title="Edit" data-record-id="<?= $project['id'] ?>" <?= !$canEdit ? 'disabled' : '' ?>>
+                                        <i class="fa-regular fa-pen-to-square"></i>
+                                    </button>
+                                    <?php if ($isReturned): ?>
+                                    <button class="btn btn-outline-primary icon-btn" type="button" title="Resubmit" data-record-id="<?= $project['id'] ?>" data-action="resubmit">
+                                        <i class="fa-regular fa-paper-plane"></i>
+                                    </button>
+                                    <?php elseif ($isDraft): ?>
+                                    <button class="btn btn-outline-primary icon-btn" type="button" title="Submit" data-record-id="<?= $project['id'] ?>" data-action="submit">
+                                        <i class="fa-regular fa-paper-plane"></i>
+                                    </button>
+                                    <?php else: ?>
+                                    <button class="btn btn-outline-secondary icon-btn" type="button" title="Submit" disabled>
+                                        <i class="fa-regular fa-paper-plane"></i>
+                                    </button>
+                                    <?php endif; ?>
                                 </div>
                             </td>
                         </tr>
@@ -84,6 +106,10 @@
 .detail-grid { display: grid; grid-template-columns: 170px 1fr; gap: 12px 18px; }
 .key { font-size: .8rem; color: #6c757d; font-weight: 600; }
 .val { font-size: .9rem; color: #212529; word-break: break-word; }
+.remarks-in-modal { margin-top: 18px; }
+.remarks-in-modal__divider { height: 1px; background: #eef2f6; margin-bottom: 14px; }
+.remarks-in-modal__label { display: flex; align-items: center; gap: 6px; font-size: .7rem; font-weight: 700; color: #536783; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 8px; }
+.remarks-in-modal__body { background: #f8fafc; border: 1px solid #eef2f6; border-radius: 8px; padding: 14px 16px; font-size: .88rem; color: #1e293b; line-height: 1.7; }
 </style>
 
 <div class="custom-modal" id="viewProjectModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;z-index:1060;align-items:center;justify-content:center;">
@@ -103,6 +129,11 @@
                     <div class="key">Department</div><div class="val" id="viewProjectDepartment">-</div>
                     <div class="key">Last Updated</div><div class="val" id="viewProjectUpdated">-</div>
                     <div class="key">Created</div><div class="val" id="viewProjectCreated">-</div>
+                </div>
+                <div class="remarks-in-modal" id="viewProjectRemarksWrap" style="display:none;">
+                    <div class="remarks-in-modal__divider"></div>
+                    <div class="remarks-in-modal__label"><i class="fa-solid fa-rotate-left"></i> DG Remarks</div>
+                    <div class="remarks-in-modal__body" id="viewProjectRemarks">-</div>
                 </div>
             </div>
         </div>
@@ -221,12 +252,12 @@ function closeViewProjectModal() {
 }
 </style>
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-    const form = document.querySelector('form[action="<?= site_url('employee/submitted-ict-projects') ?>"]');
-    const dateRangeInput = document.getElementById('dateRangePicker');
-    const datePickerToggleBtn = document.getElementById('datePickerToggleBtn');
+try {
+    var dateRangeInput = document.getElementById('dateRangePicker');
+    var datePickerToggleBtn = document.getElementById('datePickerToggleBtn');
 
-    if (dateRangeInput) {
+    if (dateRangeInput && typeof flatpickr === 'function') {
+        const form = document.getElementById('searchForm');
         const fp = flatpickr(dateRangeInput, {
             mode: 'range',
             dateFormat: 'Y-m-d',
@@ -263,7 +294,10 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
     }
-
+} catch(e) {}
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('button[title="View"]').forEach(function(btn) {
         btn.addEventListener('click', function() {
             try {
@@ -276,10 +310,76 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('viewProjectDepartment').textContent = project.department || '-';
                 document.getElementById('viewProjectUpdated').textContent = project.updated || '-';
                 document.getElementById('viewProjectCreated').textContent = project.created || '-';
+                var remarks = project.remarks || '';
+                var remarksWrap = document.getElementById('viewProjectRemarksWrap');
+                if (remarks) {
+                    document.getElementById('viewProjectRemarks').textContent = remarks;
+                    remarksWrap.style.display = '';
+                } else {
+                    remarksWrap.style.display = 'none';
+                }
                 showViewProjectModal();
             } catch(e) {
                 showAlertModal('Error', 'Error loading project details.');
             }
+        });
+    });
+
+    document.querySelectorAll('button[data-action="resubmit"]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var id = this.getAttribute('data-record-id');
+            showConfirmModal('Are you sure you want to resubmit this returned project?', function() {
+                var csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+                fetch('<?= site_url('employee/resubmit-project') ?>/' + id, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({
+                        csrf_test_name: csrfToken
+                    })
+                })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        showAlertModal('Error', data.message || 'Please try again.');
+                    }
+                });
+            });
+        });
+    });
+
+    document.querySelectorAll('.edit-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var id = this.getAttribute('data-record-id');
+            var currentProjectId = localStorage.getItem('edit_project_id');
+            if (currentProjectId === id) {
+                window.location.href = '<?= site_url('employee/edit-ict-project') ?>/' + id + '/network-infrastructure';
+                return;
+            }
+            fetch('<?= site_url('employee/load-form-data') ?>/' + id)
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (data.success && data.form_data) {
+                        var newProjBackup = {};
+                        var formKeys = ['network-infrastructure-form','enterprise-architecture-form','ict-human-capital-form','information-systems-form','ict-projects-form','performance-measurement-form'];
+                        formKeys.forEach(function(k) {
+                            newProjBackup[k] = localStorage.getItem(k) || '';
+                        });
+                        localStorage.clear();
+                        localStorage.setItem('new-project-backup', JSON.stringify(newProjBackup));
+                        Object.keys(data.form_data).forEach(function(key) {
+                            localStorage.setItem(key, JSON.stringify(data.form_data[key]));
+                        });
+                        localStorage.setItem('edit_project_id', id);
+                        window.location.href = '<?= site_url('employee/edit-ict-project') ?>/' + id + '/network-infrastructure';
+                    } else {
+                        showAlertModal('Error', 'Error loading form data.');
+                    }
+                });
         });
     });
 });

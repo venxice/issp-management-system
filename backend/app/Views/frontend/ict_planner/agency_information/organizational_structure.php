@@ -358,23 +358,23 @@
                     <div class="row g-3">
                         <div class="col-md-6">
                             <div class="form-label">Name of CIO</div>
-                            <input type="text" class="form-control" name="cio_name" placeholder="Enter name of CIO">
+                            <input type="text" class="form-control" name="cio_name" placeholder="Enter name of CIO" value="<?= old('cio_name', $saved['cio_name'] ?? '') ?>">
                         </div>
                         <div class="col-md-6">
                             <div class="form-label">Plantilla Position</div>
-                            <input type="text" class="form-control" name="cio_plantilla" placeholder="Enter plantilla position">
+                            <input type="text" class="form-control" name="cio_plantilla" placeholder="Enter plantilla position" value="<?= old('cio_plantilla', $saved['cio_plantilla'] ?? '') ?>">
                         </div>
                         <div class="col-md-6">
                             <div class="form-label">Organizational Unit</div>
-                            <input type="text" class="form-control" name="cio_unit" placeholder="Enter organizational unit">
+                            <input type="text" class="form-control" name="cio_unit" placeholder="Enter organizational unit" value="<?= old('cio_unit', $saved['cio_unit'] ?? '') ?>">
                         </div>
                         <div class="col-md-6">
                             <div class="form-label">E-mail Address</div>
-                            <input type="email" class="form-control" name="cio_email" placeholder="Enter e-mail address">
+                            <input type="email" class="form-control" name="cio_email" placeholder="Enter e-mail address" value="<?= old('cio_email', $saved['cio_email'] ?? '') ?>">
                         </div>
                         <div class="col-md-6">
                             <div class="form-label">Contact Number/s</div>
-                            <input type="text" class="form-control" name="cio_contact" placeholder="Enter contact number/s">
+                            <input type="text" class="form-control" name="cio_contact" placeholder="Enter contact number/s" value="<?= old('cio_contact', $saved['cio_contact'] ?? '') ?>">
                         </div>
                     </div>
                 </div>
@@ -390,23 +390,23 @@
                     <div class="row g-3">
                         <div class="col-md-6">
                             <div class="form-label">Name of ISSP Focal</div>
-                            <input type="text" class="form-control" name="focal_name" placeholder="Enter name of ISSP focal">
+                            <input type="text" class="form-control" name="focal_name" placeholder="Enter name of ISSP focal" value="<?= old('focal_name', $saved['focal_name'] ?? '') ?>">
                         </div>
                         <div class="col-md-6">
                             <div class="form-label">Position</div>
-                            <input type="text" class="form-control" name="focal_position" placeholder="Enter position">
+                            <input type="text" class="form-control" name="focal_position" placeholder="Enter position" value="<?= old('focal_position', $saved['focal_position'] ?? '') ?>">
                         </div>
                         <div class="col-md-6">
                             <div class="form-label">Organizational Unit</div>
-                            <input type="text" class="form-control" name="focal_unit" placeholder="Enter organizational unit">
+                            <input type="text" class="form-control" name="focal_unit" placeholder="Enter organizational unit" value="<?= old('focal_unit', $saved['focal_unit'] ?? '') ?>">
                         </div>
                         <div class="col-md-6">
                             <div class="form-label">E-mail Address</div>
-                            <input type="email" class="form-control" name="focal_email" placeholder="Enter e-mail address">
+                            <input type="email" class="form-control" name="focal_email" placeholder="Enter e-mail address" value="<?= old('focal_email', $saved['focal_email'] ?? '') ?>">
                         </div>
                         <div class="col-md-6">
                             <div class="form-label">Contact Number/s</div>
-                            <input type="text" class="form-control" name="focal_contact" placeholder="Enter contact number/s">
+                            <input type="text" class="form-control" name="focal_contact" placeholder="Enter contact number/s" value="<?= old('focal_contact', $saved['focal_contact'] ?? '') ?>">
                         </div>
                     </div>
                 </div>
@@ -437,24 +437,24 @@
                             <tbody>
                                 <tr>
                                     <td>Plantilla</td>
-                                    <td><input type="number" class="count-input" name="plantilla_it" min="0" placeholder="0" oninput="calculateGrandTotals()"></td>
-                                    <td><input type="number" class="count-input" name="plantilla_non_it" min="0" placeholder="0" oninput="calculateGrandTotals()"></td>
-                                    <td><input type="number" class="count-input" name="plantilla_male" min="0" placeholder="0" oninput="calculateGrandTotals()"></td>
-                                    <td><input type="number" class="count-input" name="plantilla_female" min="0" placeholder="0" oninput="calculateGrandTotals()"></td>
+                                    <td><input type="number" class="count-input" name="plantilla_it" min="0" placeholder="0" value="<?= old('plantilla_it', $saved['plantilla_it'] ?? 0) ?>" oninput="calculateGrandTotals()"></td>
+                                    <td><input type="number" class="count-input" name="plantilla_non_it" min="0" placeholder="0" value="<?= old('plantilla_non_it', $saved['plantilla_non_it'] ?? 0) ?>" oninput="calculateGrandTotals()"></td>
+                                    <td><input type="number" class="count-input" name="plantilla_male" min="0" placeholder="0" value="<?= old('plantilla_male', $saved['plantilla_male'] ?? 0) ?>" oninput="calculateGrandTotals()"></td>
+                                    <td><input type="number" class="count-input" name="plantilla_female" min="0" placeholder="0" value="<?= old('plantilla_female', $saved['plantilla_female'] ?? 0) ?>" oninput="calculateGrandTotals()"></td>
                                 </tr>
                                 <tr>
                                     <td>Contractual</td>
-                                    <td><input type="number" class="count-input" name="contractual_it" min="0" placeholder="0" oninput="calculateGrandTotals()"></td>
-                                    <td><input type="number" class="count-input" name="contractual_non_it" min="0" placeholder="0" oninput="calculateGrandTotals()"></td>
-                                    <td><input type="number" class="count-input" name="contractual_male" min="0" placeholder="0" oninput="calculateGrandTotals()"></td>
-                                    <td><input type="number" class="count-input" name="contractual_female" min="0" placeholder="0" oninput="calculateGrandTotals()"></td>
+                                    <td><input type="number" class="count-input" name="contractual_it" min="0" placeholder="0" value="<?= old('contractual_it', $saved['contractual_it'] ?? 0) ?>" oninput="calculateGrandTotals()"></td>
+                                    <td><input type="number" class="count-input" name="contractual_non_it" min="0" placeholder="0" value="<?= old('contractual_non_it', $saved['contractual_non_it'] ?? 0) ?>" oninput="calculateGrandTotals()"></td>
+                                    <td><input type="number" class="count-input" name="contractual_male" min="0" placeholder="0" value="<?= old('contractual_male', $saved['contractual_male'] ?? 0) ?>" oninput="calculateGrandTotals()"></td>
+                                    <td><input type="number" class="count-input" name="contractual_female" min="0" placeholder="0" value="<?= old('contractual_female', $saved['contractual_female'] ?? 0) ?>" oninput="calculateGrandTotals()"></td>
                                 </tr>
                                 <tr>
                                     <td>Outsourced (JO, COS, and HTC)</td>
-                                    <td><input type="number" class="count-input" name="outsourced_it" min="0" placeholder="0" oninput="calculateGrandTotals()"></td>
-                                    <td><input type="number" class="count-input" name="outsourced_non_it" min="0" placeholder="0" oninput="calculateGrandTotals()"></td>
-                                    <td><input type="number" class="count-input" name="outsourced_male" min="0" placeholder="0" oninput="calculateGrandTotals()"></td>
-                                    <td><input type="number" class="count-input" name="outsourced_female" min="0" placeholder="0" oninput="calculateGrandTotals()"></td>
+                                    <td><input type="number" class="count-input" name="outsourced_it" min="0" placeholder="0" value="<?= old('outsourced_it', $saved['outsourced_it'] ?? 0) ?>" oninput="calculateGrandTotals()"></td>
+                                    <td><input type="number" class="count-input" name="outsourced_non_it" min="0" placeholder="0" value="<?= old('outsourced_non_it', $saved['outsourced_non_it'] ?? 0) ?>" oninput="calculateGrandTotals()"></td>
+                                    <td><input type="number" class="count-input" name="outsourced_male" min="0" placeholder="0" value="<?= old('outsourced_male', $saved['outsourced_male'] ?? 0) ?>" oninput="calculateGrandTotals()"></td>
+                                    <td><input type="number" class="count-input" name="outsourced_female" min="0" placeholder="0" value="<?= old('outsourced_female', $saved['outsourced_female'] ?? 0) ?>" oninput="calculateGrandTotals()"></td>
                                 </tr>
                                 <tr>
                                     <td>Grand Total</td>
@@ -538,19 +538,20 @@ window.saveFormData = function() {
 
 window.loadSavedData = function() {
     const saved = localStorage.getItem(STORAGE_KEY);
-    if (!saved) return;
-    try {
-        const data = JSON.parse(saved);
-        const form = document.querySelector('#mainForm');
-        form.querySelectorAll('input[name], textarea[name], select[name]').forEach(function(el) {
-            if (el.name in data && data[el.name] !== null) {
-                el.value = data[el.name];
-            }
-        });
-        calculateGrandTotals();
-    } catch (e) {
-        console.error('Error loading saved data:', e);
+    if (saved) {
+        try {
+            const data = JSON.parse(saved);
+            const form = document.querySelector('#mainForm');
+            form.querySelectorAll('input[name], textarea[name], select[name]').forEach(function(el) {
+                if (el.name in data && data[el.name] !== null && !el.value) {
+                    el.value = data[el.name];
+                }
+            });
+        } catch (e) {
+            console.error('Error loading saved data:', e);
+        }
     }
+    calculateGrandTotals();
 };
 
 window.clearForm = function() {
@@ -589,11 +590,7 @@ window.clearForm = function() {
 
 window.saveChanges = function() {
     saveFormData();
-    if (typeof showAlertModal === 'function') {
-        showAlertModal('Success', 'Changes saved successfully.');
-    } else {
-        alert('Changes saved successfully.');
-    }
+    document.querySelector('#mainForm').submit();
 };
 
 window.navigateToPage = function(url) {

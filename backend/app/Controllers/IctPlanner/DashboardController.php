@@ -15,21 +15,15 @@ class DashboardController extends BaseController
         $userModel = new UserModel();
         $isspModel = new ISspRecordModel();
 
-        (new AuditLogModel())->insert([
-            'user_id' => $currentUserId,
-            'action' => 'dashboard.viewed',
-            'description' => 'Viewed ICT Planner dashboard',
-            'created_at' => date('Y-m-d H:i:s'),
-        ]);
-
-        $submittedProjects = $isspModel->countSubmitted();
-        $totalConsolidates = $isspModel->countAllResults();
-        $pendingConsolidation = $isspModel->countPending();
-        $endorsedCount = $isspModel->countEndorsed();
-        $totalProposedBudget = $isspModel->sumSubmittedBudget();
+        $stats = $isspModel->getStatusSummary();
+        $submittedProjects = (int) $stats['total'];
+        $totalConsolidates = $submittedProjects;
+        $pendingConsolidation = (int) $stats['pending'] + (int) $stats['resubmitted'];
+        $endorsedCount = (int) $stats['endorsed'];
+        $totalProposedBudget = (float) $stats['total_budget'];
         $submissionsByMonth = $isspModel->getSubmissionsByMonth();
         $divisionData = $isspModel->getProjectsPerDivision();
-        $recentProjects = $isspModel->getRecentSubmittedRecords(10);
+        $recentProjects = $isspModel->getRecentSubmittedRecords(50);
 
         return view('frontend/ict_planner/dashboard/index', [
             'title' => 'ICT Planner Dashboard',
@@ -79,6 +73,11 @@ class DashboardController extends BaseController
 
         foreach ($directorGenerals as $dg) {
             sendEndorsementNotification($record, $currentUser, $dg);
+        }
+
+        $employee = (new UserModel())->findWithRole((int) $record['created_by']);
+        if ($employee && !empty($employee['email'])) {
+            sendEndorsementToEmployeeNotification($record, $currentUser, $employee);
         }
 
         return redirect()->back()->with('success', 'Project endorsed to Director General for approval.');

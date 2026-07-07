@@ -1270,25 +1270,33 @@ window.navigateToPage = function(url) {
         const fileReads = [];
         formData.forEach((value, key) => {
             if (value instanceof File && value.name) {
-                fileReads.push(
-                    new Promise(resolve => {
-                        const reader = new FileReader();
-                        reader.onload = () => {
-                            const dataUrl = reader.result;
-                            const b64Idx = dataUrl.indexOf(';base64,');
-                            if (b64Idx !== -1) {
-                                const beforeBase64 = dataUrl.substring(0, b64Idx);
-                                const afterBase64 = dataUrl.substring(b64Idx);
-                                formDataObj[key] = beforeBase64 + ';name=' + encodeURIComponent(value.name) + afterBase64;
-                            } else {
-                                const parts = dataUrl.split(',');
-                                formDataObj[key] = parts[0] + ';name=' + encodeURIComponent(value.name) + ',' + parts.slice(1).join(',');
-                            }
-                            resolve();
-                        };
-                        reader.readAsDataURL(value);
-                    })
-                );
+                var fileInput = form.querySelector('[name="' + key + '"]');
+                var uploadedPath = fileInput ? fileInput.getAttribute('data-uploaded-path') : null;
+                if (uploadedPath) {
+                    formDataObj[key] = uploadedPath;
+                } else {
+                    fileReads.push(
+                        new Promise(resolve => {
+                            const reader = new FileReader();
+                            reader.onload = () => {
+                                const dataUrl = reader.result;
+                                const b64Idx = dataUrl.indexOf(';base64,');
+                                if (b64Idx !== -1) {
+                                    const beforeBase64 = dataUrl.substring(0, b64Idx);
+                                    const afterBase64 = dataUrl.substring(b64Idx);
+                                    formDataObj[key] = beforeBase64 + ';name=' + encodeURIComponent(value.name) + afterBase64;
+                                } else {
+                                    const parts = dataUrl.split(',');
+                                    formDataObj[key] = parts[0] + ';name=' + encodeURIComponent(value.name) + ',' + parts.slice(1).join(',');
+                                }
+                                resolve();
+                            };
+                            reader.readAsDataURL(value);
+                        })
+                    );
+                }
+            } else if (value instanceof File) {
+                // Empty file input — skip
             } else {
                 formDataObj[key] = value;
             }
@@ -1314,7 +1322,11 @@ window.navigateToPage = function(url) {
                 }
             });
             const jsonStr = JSON.stringify(formDataObj);
-            localStorage.setItem('information-systems-form', jsonStr);
+            try {
+                localStorage.setItem('information-systems-form', jsonStr);
+            } catch (e) {
+                console.error('localStorage save failed:', e);
+            }
             if (typeof updateStatusIndicators === 'function') updateStatusIndicators();
             window.location.href = url;
         };
