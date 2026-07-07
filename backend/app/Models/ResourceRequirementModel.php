@@ -14,7 +14,7 @@ class ResourceRequirementModel extends Model
         'year',
         'strategic_category',
         'item',
-        'office',
+        'office_location',
         'fund_source',
         'unit_cost',
         'physical_target',

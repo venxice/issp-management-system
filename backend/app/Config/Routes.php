@@ -133,9 +133,6 @@ $routes->group('employee', ['filter' => 'role:employee'], static function (Route
 });
       });
 
-$routes->group('ict-planner', ['filter' => 'role:ict_planner'], static function (RouteCollection $routes): void {
-    $routes->get('dashboard', 'IctPlanner\DashboardController::index');
-});
 $routes->group('director-general', ['filter' => 'role:director_general'], static function (RouteCollection $routes): void {
     $routes->get('pending-approval', 'DirectorGeneral\PendingApprovalController::index');
     $routes->get('approved-projects', 'DirectorGeneral\ApprovedProjectsController::index');
