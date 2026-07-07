@@ -37,14 +37,20 @@
                     </thead>
                     <tbody>
                     <?php foreach ($submittedProjects ?? [] as $project): ?>
-                        <?php $fd = !empty($project['form_data']) ? json_decode($project['form_data'], true) : []; $ict = $fd['ict-projects-form'] ?? []; $intTitle = $ict['internal_project_title'] ?? $project['title'] ?? '---'; $crossTitle = $ict['cross_project_title'] ?? ''; $s = !empty($project['status']) ? $project['status'] : 'draft'; $canEdit = $s === 'draft' || $s === 'returned'; $isDraft = $s === 'draft'; $isReturned = $s === 'returned'; ?>
+                        <?php $fd = !empty($project['form_data']) ? json_decode($project['form_data'], true) : []; $ict = $fd['ict-projects-form'] ?? []; $intTitle = $ict['internal_project_title'] ?? $project['title'] ?? '---'; $crossTitle = $ict['cross_project_title'] ?? ''; $intDesc = $ict['internal_description'] ?? $project['description'] ?? '---'; $crossDesc = $ict['cross_description'] ?? ''; $intBudget = $ict['internal_total_cost'] ?? $project['budget'] ?? 0; $crossBudget = $ict['cross_total_cost'] ?? 0; $s = !empty($project['status']) ? $project['status'] : 'draft'; $canEdit = $s === 'draft' || $s === 'returned'; $isDraft = $s === 'draft'; $isReturned = $s === 'returned'; ?>
                         <tr>
                             <td>
                                 <div><span class="text-muted">Internal:</span> <?= esc($intTitle) ?></div>
                                 <?php if ($crossTitle): ?><div class="mt-1"><span class="text-muted">Cross-Agency:</span> <?= esc($crossTitle) ?></div><?php endif; ?>
                             </td>
-                            <td><span class="activity-meta activity-summary"><?= esc($project['description'] ?: '---') ?></span></td>
-                            <td><?= esc($project['budget'] ? '₱' . number_format($project['budget'], 2) : '-') ?></td>
+                            <td>
+                                <div><span class="text-muted">Internal:</span> <?= esc($intDesc) ?></div>
+                                <?php if ($crossDesc): ?><div class="mt-1"><span class="text-muted">Cross-Agency:</span> <?= esc($crossDesc) ?></div><?php endif; ?>
+                            </td>
+                            <td>
+                                <div><span class="text-muted">Internal:</span> <?= is_numeric($intBudget) ? '₱' . number_format($intBudget, 2) : '-' ?></div>
+                                <?php if ($crossBudget && is_numeric($crossBudget)): ?><div class="mt-1"><span class="text-muted">Cross-Agency:</span> <?= '₱' . number_format($crossBudget, 2) ?></div><?php endif; ?>
+                            </td>
                             <td>
                                 <span class="badge badge-status badge-status-<?= $s ?>"><?= esc(ucfirst($s)) ?></span>
                             </td>

@@ -201,27 +201,30 @@ $pieCanvasData = json_encode(array_map(function ($seg) {
                     <thead>
                         <tr>
                             <th>Internal / Cross-Agency Project Title</th>
-                            <th>User</th>
-                            <th>Department</th>
+                            <th>Description</th>
                             <th>Budget</th>
-                            <th>Submitted Date</th>
                             <th>Status</th>
+                            <th>Last Updated</th>
                             <th class="text-center">Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php if ($recentProjects !== []): ?>
                             <?php foreach ($recentProjects as $project): ?>
-                                <?php $fd = !empty($project['form_data']) ? json_decode($project['form_data'], true) : []; $ict = $fd['ict-projects-form'] ?? []; $intTitle = $ict['internal_project_title'] ?? $project['title'] ?? 'Untitled'; $crossTitle = $ict['cross_project_title'] ?? ''; ?>
+                                <?php $fd = !empty($project['form_data']) ? json_decode($project['form_data'], true) : []; $ict = $fd['ict-projects-form'] ?? []; $intTitle = $ict['internal_project_title'] ?? $project['title'] ?? 'Untitled'; $crossTitle = $ict['cross_project_title'] ?? ''; $intDesc = $ict['internal_description'] ?? $project['description'] ?? '---'; $crossDesc = $ict['cross_description'] ?? ''; $intBudget = $ict['internal_total_cost'] ?? $project['budget'] ?? 0; $crossBudget = $ict['cross_total_cost'] ?? 0; ?>
                                 <tr>
                                     <td>
                                         <div><span class="text-muted">Internal:</span> <?= esc($intTitle) ?></div>
                                         <?php if ($crossTitle): ?><div class="mt-1"><span class="text-muted">Cross-Agency:</span> <?= esc($crossTitle) ?></div><?php endif; ?>
                                     </td>
-                                    <td><?= esc($project['created_by_name'] ?? 'Unknown') ?></td>
-                                    <td><?= esc($project['department_name'] ?? 'N/A') ?></td>
-                                    <td>₱<?= number_format((float) ($project['budget'] ?? 0), 2) ?></td>
-                                    <td class="text-muted"><?= esc($project['submitted_at'] ?? $project['created_at'] ?? '-') ?></td>
+                                    <td>
+                                        <div><span class="text-muted">Internal:</span> <?= esc($intDesc) ?></div>
+                                        <?php if ($crossDesc): ?><div class="mt-1"><span class="text-muted">Cross-Agency:</span> <?= esc($crossDesc) ?></div><?php endif; ?>
+                                    </td>
+                                    <td>
+                                        <div><span class="text-muted">Internal:</span> <?= is_numeric($intBudget) ? '₱' . number_format($intBudget, 2) : '-' ?></div>
+                                        <?php if ($crossBudget && is_numeric($crossBudget)): ?><div class="mt-1"><span class="text-muted">Cross-Agency:</span> <?= '₱' . number_format($crossBudget, 2) ?></div><?php endif; ?>
+                                    </td>
                                     <td>
                                 <span class="badge badge-soft" style="font-size:.7rem;padding:4px 10px;
                                     <?php if ($project['status'] === 'pending'): ?>background:#fef3c7;color:#92400e;border-color:#fde68a;
@@ -234,13 +237,16 @@ $pieCanvasData = json_encode(array_map(function ($seg) {
                                     <?= esc(ucfirst($project['status'])) ?>
                                         </span>
                                     </td>
+                                    <td class="text-muted"><?= esc($project['updated_at'] ?? $project['created_at'] ?? '-') ?></td>
                                     <td class="text-center">
                                         <div class="d-flex gap-1 justify-content-center">
                                              <button class="btn btn-outline-primary icon-btn" type="button" title="View" data-project='<?= json_encode([
-                                                 'title' => $project['title'] ?? '',
-                                                 'cross_title' => $project['cross_title'] ?? '',
-                                                 'description' => $project['description'] ?? '',
-                                                 'budget' => $project['budget'] ?? '',
+                                                 'title' => $intTitle ?? '',
+                                                 'cross_title' => $crossTitle ?? '',
+                                                 'description' => $intDesc ?? '',
+                                                 'cross_description' => $crossDesc ?? '',
+                                                 'budget' => $intBudget ?? '',
+                                                 'cross_budget' => $crossBudget ?? '',
                                                  'status' => $project['status'] ?? '',
                                                  'department' => $project['department_name'] ?? '',
                                                  'updated' => $project['updated_at'] ?? $project['created_at'] ?? '',
@@ -259,8 +265,8 @@ $pieCanvasData = json_encode(array_map(function ($seg) {
                                                 <button class="btn btn-outline-primary icon-btn" type="button" title="Endorse to Director General" onclick="openEndorseModal('<?= $project['id'] ?>')">
                                                     <i class="fa-solid fa-check"></i>
                                                 </button>
-                                            <?php elseif (in_array($project['status'], ['resubmitted', 'endorsed'])): ?>
-                                                <button class="btn btn-outline-secondary icon-btn" type="button" title="Already endorsed" disabled style="opacity:0.35;cursor:not-allowed;pointer-events:none;">
+                                            <?php else: ?>
+                                                <button class="btn btn-outline-secondary icon-btn" type="button" title="Endorse to Director General" disabled style="opacity:0.35;cursor:not-allowed;pointer-events:none;">
                                                     <i class="fa-solid fa-check"></i>
                                                 </button>
                                             <?php endif; ?>
@@ -306,8 +312,10 @@ $pieCanvasData = json_encode(array_map(function ($seg) {
                 <div class="detail-grid">
                     <div class="key">Internal Title</div><div class="val" id="viewProjectTitle">-</div>
                     <div class="cross-row" id="viewCrossRow"><div class="key">Cross-Agency Title</div><div class="val" id="viewProjectCrossTitle">-</div></div>
-                    <div class="key">Description</div><div class="val" id="viewProjectDescription">-</div>
-                    <div class="key">Budget</div><div class="val" id="viewProjectBudget">-</div>
+                    <div class="key">Internal Description</div><div class="val" id="viewProjectDescription">-</div>
+                    <div class="cross-row" id="viewCrossDescRow"><div class="key">Cross-Agency Description</div><div class="val" id="viewProjectCrossDescription">-</div></div>
+                    <div class="key">Internal Budget</div><div class="val" id="viewProjectBudget">-</div>
+                    <div class="cross-row" id="viewCrossBudgetRow"><div class="key">Cross-Agency Budget</div><div class="val" id="viewProjectCrossBudget">-</div></div>
                     <div class="key">Status</div><div class="val" id="viewProjectStatus">-</div>
                     <div class="key">Department</div><div class="val" id="viewProjectDepartment">-</div>
                     <div class="key">Last Updated</div><div class="val" id="viewProjectUpdated">-</div>
@@ -324,7 +332,7 @@ $pieCanvasData = json_encode(array_map(function ($seg) {
 </div>
 
 <div class="custom-modal" id="endorseModal" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:1060;background:#fff;border-radius:6px;box-shadow:0 18px 40px rgba(15,23,42,.18);min-width:320px;max-width:400px;overflow:hidden;">
-    <div style="background:#536783;color:#fff;padding:12px 14px;font-size:.94rem;font-weight:700;"><i class="fa-solid fa-check-circle me-2" style="color:#4ade80;"></i> Endorse to Director General</div>
+    <div style="background:#536783;color:#fff;padding:12px 14px;font-size:.94rem;font-weight:700;margin:0 -14px 12px -14px;"><i class="fa-solid fa-check-circle me-2" style="color:#4ade80;"></i> Endorse to Director General</div>
     <div style="padding:14px 14px;font-size:.82rem;color:#1f2a3a;"><p class="mb-0">Are you sure you want to endorse this project to the Director General for approval?</p></div>
     <div style="padding:8px 12px;border-top:1px solid #e1e6ee;display:flex;justify-content:flex-end;gap:8px;">
         <button type="button" class="btn btn-outline-secondary btn-sm" onclick="closeCustomModals()">Cancel</button>
@@ -450,7 +458,23 @@ document.addEventListener('DOMContentLoaded', function() {
                     crossRow.style.display = 'none';
                 }
                 document.getElementById('viewProjectDescription').textContent = project.description || '-';
+                var crossDescRow = document.getElementById('viewCrossDescRow');
+                var crossDescEl = document.getElementById('viewProjectCrossDescription');
+                if (project.cross_description) {
+                    crossDescEl.textContent = project.cross_description;
+                    crossDescRow.style.display = '';
+                } else {
+                    crossDescRow.style.display = 'none';
+                }
                 document.getElementById('viewProjectBudget').textContent = project.budget ? '₱' + parseFloat(project.budget).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '-';
+                var crossBudgetRow = document.getElementById('viewCrossBudgetRow');
+                var crossBudgetEl = document.getElementById('viewProjectCrossBudget');
+                if (project.cross_budget && !isNaN(project.cross_budget)) {
+                    crossBudgetEl.textContent = '₱' + parseFloat(project.cross_budget).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                    crossBudgetRow.style.display = '';
+                } else {
+                    crossBudgetRow.style.display = 'none';
+                }
                 document.getElementById('viewProjectStatus').textContent = project.status ? project.status.charAt(0).toUpperCase() + project.status.slice(1) : '-';
                 document.getElementById('viewProjectDepartment').textContent = project.department || '-';
                 document.getElementById('viewProjectUpdated').textContent = project.updated || '-';

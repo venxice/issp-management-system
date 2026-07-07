@@ -389,7 +389,7 @@
 
     <div class="main-section-card">
         <div class="main-header">
-            <h2 class="main-title">Stakeholder Analysis</h2>
+            <h2 class="main-title">C. Stakeholder Analysis</h2>
         </div>
 
         <div style="padding: 22px;">
