@@ -391,8 +391,8 @@
             <button class="btn btn-outline-primary icon-btn" type="button" title="Endorse to Director General" onclick="openEndorseModal('<?= $project['id'] ?>')">
                 <i class="fa-solid fa-check"></i>
             </button>
-        <?php elseif (in_array($project['status'], ['resubmitted', 'endorsed'])): ?>
-            <button class="btn btn-outline-secondary icon-btn" type="button" title="Already endorsed" disabled style="opacity:0.35;cursor:not-allowed;pointer-events:none;">
+        <?php else: ?>
+            <button class="btn btn-outline-secondary icon-btn" type="button" title="Endorse to Director General" disabled style="opacity:0.35;cursor:not-allowed;pointer-events:none;">
                 <i class="fa-solid fa-check"></i>
             </button>
         <?php endif; ?>
