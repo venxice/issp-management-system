@@ -14,7 +14,7 @@ class ResourceRequirementModel extends Model
         'year',
         'strategic_category',
         'item',
-        'office_location',
+        'office',
         'fund_source',
         'unit_cost',
         'physical_target',
@@ -39,4 +39,69 @@ class ResourceRequirementModel extends Model
                     ->where('year', $year)
                     ->first();
     }
+
+public function getGeneralSummary()
+{
+    return $this->db->query("
+        SELECT
+            strategic_category,
+            SUM(CASE WHEN year = 1 THEN total_cost ELSE 0 END) AS year1,
+            SUM(CASE WHEN year = 2 THEN total_cost ELSE 0 END) AS year2,
+            SUM(CASE WHEN year = 3 THEN total_cost ELSE 0 END) AS year3,
+            SUM(total_cost) AS total
+        FROM resource_requirements
+        WHERE strategic_category IS NOT NULL
+        GROUP BY strategic_category
+        ORDER BY strategic_category
+    ")->getResultArray();
+}
+
+public function getFundSourceSummary()
+{
+    return $this->db->query("
+        SELECT
+            fund_source,
+            SUM(CASE WHEN year = 1 THEN total_cost ELSE 0 END) AS year1,
+            SUM(CASE WHEN year = 2 THEN total_cost ELSE 0 END) AS year2,
+            SUM(CASE WHEN year = 3 THEN total_cost ELSE 0 END) AS year3,
+            SUM(total_cost) AS total
+        FROM resource_requirements
+        WHERE fund_source IS NOT NULL
+        GROUP BY fund_source
+        ORDER BY fund_source
+    ")->getResultArray();
+}
+
+public function getStatementOfExpenditureSummary()
+{
+    return $this->db->query("
+        SELECT
+            expenditure_type,
+            SUM(CASE WHEN year = 1 THEN total_cost ELSE 0 END) AS year1,
+            SUM(CASE WHEN year = 2 THEN total_cost ELSE 0 END) AS year2,
+            SUM(CASE WHEN year = 3 THEN total_cost ELSE 0 END) AS year3,
+            SUM(total_cost) AS total
+        FROM resource_requirements
+        WHERE expenditure_type IS NOT NULL
+        GROUP BY expenditure_type
+        ORDER BY expenditure_type
+    ")->getResultArray();
+}
+
+public function getObjectOfExpenditureSummary()
+{
+    return $this->db->query("
+        SELECT
+            uacs_code,
+            object_of_expenditure,
+            SUM(CASE WHEN year = 1 THEN total_cost ELSE 0 END) AS year1,
+            SUM(CASE WHEN year = 2 THEN total_cost ELSE 0 END) AS year2,
+            SUM(CASE WHEN year = 3 THEN total_cost ELSE 0 END) AS year3,
+            SUM(total_cost) AS total
+        FROM resource_requirements
+        WHERE uacs_code IS NOT NULL
+        GROUP BY uacs_code, object_of_expenditure
+        ORDER BY uacs_code
+    ")->getResultArray();
+}
 }

@@ -214,20 +214,8 @@ $isIsspPage = strpos($currentPage, 'proposed-ict-strategy') !== false ||
     <span class="status-indicator not-started"></span> Year 3 Requirements
 </a>
 
-<a class="nav-link <?= $active === 'general-summary' ? 'active' : '' ?>" href="<?= site_url('employee/resource-requirements/general-summary') ?>">
-    <span class="status-indicator not-started"></span> General Summary
-</a>
-
-<a class="nav-link <?= $active === 'fund-source' ? 'active' : '' ?>" href="<?= site_url('employee/resource-requirements/fund-source') ?>">
-    <span class="status-indicator not-started"></span> Fund Source
-</a>
-
-<a class="nav-link <?= $active === 'statement-expenditure' ? 'active' : '' ?>" href="<?= site_url('employee/resource-requirements/statement-expenditure') ?>">
-    <span class="status-indicator not-started"></span> Statement of Expenditure
-</a>
-
-<a class="nav-link <?= $active === 'object-expenditure' ? 'active' : '' ?>" href="<?= site_url('employee/resource-requirements/object-expenditure') ?>">
-    <span class="status-indicator not-started"></span> Object of Expenditure
+<a class="nav-link <?= $active === 'general-summary' ? 'active' : '' ?>" href="<?= site_url('employee/resource-requirements/summary-of-investments') ?>">
+    <span class="status-indicator not-started"></span> Summary of Investments
 </a>
 
 

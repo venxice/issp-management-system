@@ -29,7 +29,7 @@
                 <input type="hidden" name="redirect" value="<?= esc(service('request')->getGet('redirect') ?? session()->get('intended_url') ?? '') ?>">
                 <div>
                     <label class="form-label fw-semibold" for="email">Email</label>
-                    <input class="form-control" id="email" name="email" type="email" value="<?= esc(old('email')) ?>" placeholder="Enter your registered emailfi" autocomplete="email" required>
+                    <input class="form-control" id="email" name="email" type="email" value="<?= esc(old('email')) ?>" placeholder="Enter your registered email" autocomplete="email" required>
                 </div>
 
                 <div>
