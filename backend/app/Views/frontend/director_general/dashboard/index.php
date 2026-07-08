@@ -2,7 +2,7 @@
 
 <?= $this->section('content') ?>
 <?php
-$budgetDisplay = '₱' . number_format($totalProposedBudget, 2);
+$budgetDisplay = '₱' . number_format($totalApprovedBudget, 2);
 
 $pieColors = ['#4f6180', '#7e93b6', '#b8c9e0', '#d0dcec', '#a3b8d4'];
 $pieLabels = ['Approved', 'Pending', 'Rejected', 'Returned', 'Resubmitted'];
@@ -157,7 +157,7 @@ $chartSource = $submissionsByMonth ?? [];
     </div>
     <div class="col-3 d-flex">
         <div class="stat-card stat-card-soft flex-fill">
-            <div><div class="label">Total Proposed Budget</div><div class="value"><?= $budgetDisplay ?></div></div>
+            <div><div class="label">Total Approved Budget</div><div class="value"><?= $budgetDisplay ?></div></div>
             <div class="stat-icon"><i class="fa-solid fa-peso-sign"></i></div>
         </div>
     </div>
@@ -317,7 +317,9 @@ $chartSource = $submissionsByMonth ?? [];
                                                 'title' => $project['int_title'] ?? $project['title'] ?? '',
                                                 'cross_title' => $project['cross_title'] ?? '',
                                                 'description' => $project['description'] ?? '',
+                                                'cross_description' => $crossDesc ?? '',
                                                 'budget' => $project['budget'] ?? '',
+                                                'cross_budget' => $crossBudget ?? '',
                                                 'status' => $label,
                                                 'department' => $project['department_name'] ?? '',
                                                 'updated' => $project['updated_at'] ?? $project['created_at'] ?? '',
@@ -422,10 +424,14 @@ $chartSource = $submissionsByMonth ?? [];
 .val { font-size: .9rem; color: #212529; word-break: break-word; }
 .cross-row { display: contents; }
 .remarks-in-modal { margin-top: 18px; }
-.remarks-in-modal__divider { height: 1px; background: #eef2f6; margin-bottom: 14px; }
-.remarks-in-modal__divider { height: 1px; background: #eef2f6; margin-bottom: 14px; }
-.remarks-in-modal__label { display: flex; align-items: center; gap: 6px; font-size: .7rem; font-weight: 700; color: #536783; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 8px; }
-.remarks-in-modal__body { background: #f8fafc; border: 1px solid #eef2f6; border-radius: 8px; padding: 14px 16px; font-size: .88rem; color: #1e293b; line-height: 1.7; }
+.remarks-in-modal__card {
+    background: #f0f4f9;
+    border: 1px solid #c5d9f0;
+    border-radius: 8px;
+    padding: 14px 16px;
+}
+.remarks-in-modal__label { display: flex; align-items: center; gap: 8px; font-size: .7rem; font-weight: 600; color: #2a5c8a; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 6px; }
+.remarks-in-modal__body { font-size: .85rem; color: #334155; line-height: 1.7; }
 </style>
 
 <div class="custom-modal" id="viewProjectModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;z-index:1060;align-items:center;justify-content:center;">
@@ -445,11 +451,21 @@ $chartSource = $submissionsByMonth ?? [];
                         <div class="val" id="viewProjectCrossTitle">-</div>
                     </div>
 
-                    <div class="key">Description</div>
+                    <div class="key">Internal Description</div>
                     <div class="val" id="viewProjectDescription">-</div>
 
-                    <div class="key">Budget</div>
+                    <div class="cross-row" id="viewCrossDescRow">
+                        <div class="key">Cross-Agency Description</div>
+                        <div class="val" id="viewProjectCrossDescription">-</div>
+                    </div>
+
+                    <div class="key">Internal Budget</div>
                     <div class="val" id="viewProjectBudget">-</div>
+
+                    <div class="cross-row" id="viewCrossBudgetRow">
+                        <div class="key">Cross-Agency Budget</div>
+                        <div class="val" id="viewProjectCrossBudget">-</div>
+                    </div>
 
                     <div class="key">Status</div>
                     <div class="val" id="viewProjectStatus">-</div>
@@ -464,9 +480,10 @@ $chartSource = $submissionsByMonth ?? [];
                     <div class="val" id="viewProjectCreated">-</div>
                 </div>
                 <div class="remarks-in-modal" id="viewProjectRemarksWrap" style="display:none;">
-                    <div class="remarks-in-modal__divider"></div>
-                    <div class="remarks-in-modal__label"><i class="fa-solid fa-rotate-left"></i> DG Remarks</div>
-                    <div class="remarks-in-modal__body" id="viewProjectRemarks">-</div>
+                    <div class="remarks-in-modal__card">
+                        <div class="remarks-in-modal__label"><i class="fa-solid fa-rotate-left"></i> DG Remarks</div>
+                        <div class="remarks-in-modal__body" id="viewProjectRemarks">-</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -655,8 +672,23 @@ document.addEventListener('DOMContentLoaded', function() {
                     crossRow.style.display = 'none';
                 }
                 document.getElementById('viewProjectDescription').textContent = project.description || '-';
-                document.getElementById('viewProjectDescription').textContent = project.description || '-';
+                var crossDescRow = document.getElementById('viewCrossDescRow');
+                var crossDescEl = document.getElementById('viewProjectCrossDescription');
+                if (project.cross_description) {
+                    crossDescEl.textContent = project.cross_description;
+                    crossDescRow.style.display = '';
+                } else {
+                    crossDescRow.style.display = 'none';
+                }
                 document.getElementById('viewProjectBudget').textContent = project.budget ? '₱' + parseFloat(project.budget).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '-';
+                var crossBudgetRow = document.getElementById('viewCrossBudgetRow');
+                var crossBudgetEl = document.getElementById('viewProjectCrossBudget');
+                if (project.cross_budget && parseFloat(project.cross_budget) > 0) {
+                    crossBudgetEl.textContent = '₱' + parseFloat(project.cross_budget).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                    crossBudgetRow.style.display = '';
+                } else {
+                    crossBudgetRow.style.display = 'none';
+                }
                 var statusMap = {'endorsed':'Pending','returned':'Returned','approved':'Approved','rejected':'Rejected'};
                 document.getElementById('viewProjectStatus').textContent = statusMap[project.status] || project.status || '-';
                 document.getElementById('viewProjectDepartment').textContent = project.department || '-';

@@ -19,7 +19,7 @@ class DashboardController extends BaseController
         $submittedProjects = (int) $stats['total'];
         $totalConsolidates = $submittedProjects;
         $pendingConsolidation = (int) $stats['pending'] + (int) $stats['resubmitted'];
-        $endorsedCount = (int) $stats['endorsed'];
+        $endorsedCount = (int) $stats['endorsed'] + (int) $stats['approved'] + (int) $stats['rejected'] + (int) $stats['returned'];
         $totalProposedBudget = (float) $stats['total_budget'];
         $submissionsByMonth = $isspModel->getSubmissionsByMonth();
         $divisionData = $isspModel->getProjectsPerDivision();
@@ -37,6 +37,11 @@ class DashboardController extends BaseController
             'submissionsByMonth' => $submissionsByMonth,
             'divisionData' => $divisionData,
             'recentProjects' => $recentProjects,
+            'pendingCount' => (int) $stats['pending'],
+            'approvedCount' => (int) $stats['approved'],
+            'rejectedCount' => (int) $stats['rejected'],
+            'returnedCount' => (int) $stats['returned'],
+            'resubmittedCount' => (int) $stats['resubmitted'],
         ]);
     }
 

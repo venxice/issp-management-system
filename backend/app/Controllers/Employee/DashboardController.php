@@ -17,7 +17,7 @@ class DashboardController extends BaseController
 
         $recentRecords = $isspRecordModel->getRecentRecordsByUser($currentUserId, 10);
 
-        $allUserRecords = $isspRecordModel->select('status, budget')
+        $allUserRecords = $isspRecordModel->select('status, budget, form_data')
             ->where('created_by', $currentUserId)
             ->findAll();
 
@@ -25,10 +25,17 @@ class DashboardController extends BaseController
         $submittedProjects = count(array_filter($allUserRecords, $isNotDraft));
         $approvedProjects = count(array_filter($allUserRecords, fn($r) => $r['status'] === 'approved'));
         $needRevision = count(array_filter($allUserRecords, fn($r) => in_array($r['status'], ['rejected', 'returned'])));
-        $totalBudget = array_sum(array_column(
+        $totalBudget = array_reduce(
             array_filter($allUserRecords, $isNotDraft),
-            'budget'
-        ));
+            function ($carry, $r) {
+                $fd = !empty($r['form_data']) ? json_decode($r['form_data'], true) : [];
+                $ict = $fd['ict-projects-form'] ?? [];
+                $internal = (float) ($ict['internal_total_cost'] ?? $r['budget'] ?? 0);
+                $cross = (float) ($ict['cross_total_cost'] ?? 0);
+                return $carry + $internal + $cross;
+            },
+            0
+        );
 
         return view('frontend/employee/dashboard/index', [
             'title' => 'Employee Dashboard',
