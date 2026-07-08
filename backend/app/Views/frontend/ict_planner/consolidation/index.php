@@ -93,7 +93,9 @@
                                                     'title' => $intTitle,
                                                     'cross_title' => $crossTitle,
                                                     'description' => $project['description'] ?? '',
+                                                    'cross_description' => $crossDesc,
                                                     'budget' => $project['budget'] ?? '',
+                                                    'cross_budget' => $crossBudget,
                                                     'status' => $project['status'] ?? '',
                                                     'department' => $project['department_name'] ?? '',
                                                     'updated' => $project['updated_at'] ?? $project['created_at'] ?? '',
@@ -220,9 +222,14 @@
 .val { font-size: .9rem; color: #212529; word-break: break-word; }
 .cross-row { display: contents; }
 .remarks-in-modal { margin-top: 18px; }
-.remarks-in-modal__divider { height: 1px; background: #eef2f6; margin-bottom: 14px; }
-.remarks-in-modal__label { display: flex; align-items: center; gap: 6px; font-size: .7rem; font-weight: 700; color: #536783; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 8px; }
-.remarks-in-modal__body { background: #f8fafc; border: 1px solid #eef2f6; border-radius: 8px; padding: 14px 16px; font-size: .88rem; color: #1e293b; line-height: 1.7; }
+.remarks-in-modal__card {
+    background: #f0f4f9;
+    border: 1px solid #c5d9f0;
+    border-radius: 8px;
+    padding: 14px 16px;
+}
+.remarks-in-modal__label { display: flex; align-items: center; gap: 8px; font-size: .7rem; font-weight: 600; color: #2a5c8a; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 6px; }
+.remarks-in-modal__body { font-size: .85rem; color: #334155; line-height: 1.7; }
 
 .date-range-picker-wrapper {
     width: 42px;
@@ -350,9 +357,10 @@
                     <div class="key">Created</div><div class="val" id="viewProjectCreated">-</div>
                 </div>
                 <div class="remarks-in-modal" id="viewProjectRemarksWrap" style="display:none;">
-                    <div class="remarks-in-modal__divider"></div>
-                    <div class="remarks-in-modal__label"><i class="fa-solid fa-rotate-left"></i> DG Remarks</div>
-                    <div class="remarks-in-modal__body" id="viewProjectRemarks">-</div>
+                    <div class="remarks-in-modal__card">
+                        <div class="remarks-in-modal__label"><i class="fa-solid fa-rotate-left"></i> DG Remarks</div>
+                        <div class="remarks-in-modal__body" id="viewProjectRemarks">-</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -438,7 +446,23 @@ document.addEventListener('DOMContentLoaded', function() {
                     crossRow.style.display = 'none';
                 }
                 document.getElementById('viewProjectDescription').textContent = project.description || '-';
+                var crossDescRow = document.getElementById('viewCrossDescRow');
+                var crossDescEl = document.getElementById('viewProjectCrossDescription');
+                if (project.cross_description) {
+                    crossDescEl.textContent = project.cross_description;
+                    crossDescRow.style.display = '';
+                } else {
+                    crossDescRow.style.display = 'none';
+                }
                 document.getElementById('viewProjectBudget').textContent = project.budget ? '₱' + parseFloat(project.budget).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '-';
+                var crossBudgetRow = document.getElementById('viewCrossBudgetRow');
+                var crossBudgetEl = document.getElementById('viewProjectCrossBudget');
+                if (project.cross_budget && parseFloat(project.cross_budget) > 0) {
+                    crossBudgetEl.textContent = '₱' + parseFloat(project.cross_budget).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                    crossBudgetRow.style.display = '';
+                } else {
+                    crossBudgetRow.style.display = 'none';
+                }
                 document.getElementById('viewProjectStatus').textContent = project.status ? project.status.charAt(0).toUpperCase() + project.status.slice(1) : '-';
                 document.getElementById('viewProjectDepartment').textContent = project.department || '-';
                 document.getElementById('viewProjectUpdated').textContent = project.updated || '-';

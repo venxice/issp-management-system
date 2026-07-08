@@ -181,8 +181,16 @@ $pieCanvasData = json_encode(array_map(function ($seg) {
                                 <div id="pieTooltip" class="pie-tooltip"></div>
                             </div>
                         </div>
+                        <div class="d-flex justify-content-center gap-4 mt-3">
+                            <?php foreach ($pieSegments as $seg): ?>
+                                <div class="d-flex align-items-center gap-1">
+                                    <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:<?= $seg['color'] ?>;"></span>
+                                    <span style="font-size:.78rem;color:#475569;"><?= $seg['name'] ?> (<?= $seg['total'] ?>)</span>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
                     <?php else: ?>
-                        <div class="w-100 text-center text-muted-strong py-4">No division data available.</div>
+                        <div class="w-100 text-center text-muted-strong py-4">No project data available.</div>
                     <?php endif; ?>
                 </div>
             </div>
@@ -361,88 +369,69 @@ function openEndorseModal(projectId) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    (function() {
-        var segs = <?= $pieCanvasData ?>;
-        var canvas = document.getElementById('pieCanvas');
-        var tooltip = document.getElementById('pieTooltip');
-        if (!canvas || !tooltip || !segs.length) return;
-        var ctx = canvas.getContext('2d');
-        var W = 180, H = 180, cx = 90, cy = 90, outerR = 81, innerR = 49.5;
-        var hoveredIndex = -1;
+    <?php if ($pieSegments !== []): ?>
+    const canvas = document.getElementById('pieCanvas');
+    const tooltip = document.getElementById('pieTooltip');
+    if (canvas && tooltip) {
+        const ctx = canvas.getContext('2d');
+        const w = canvas.width, h = canvas.height;
+        const cx = w / 2, cy = h / 2, r = 80;
 
-        function draw(index) {
-            ctx.clearRect(0, 0, W, H);
-            var startAngle = -Math.PI / 2;
-            segs.forEach(function(s, i) {
-                var sliceRad = (s.end - s.start) * Math.PI / 180;
-                var endAngle = startAngle + sliceRad;
+        const segments = <?= $pieCanvasData ?>;
+
+        function drawPie() {
+            ctx.clearRect(0, 0, w, h);
+            segments.forEach(function(seg) {
+                const startRad = (seg.start - 90) * Math.PI / 180;
+                const endRad = (seg.end - 90) * Math.PI / 180;
                 ctx.beginPath();
-                ctx.arc(cx, cy, outerR, startAngle, endAngle);
-                ctx.arc(cx, cy, innerR, endAngle, startAngle, true);
+                ctx.moveTo(cx, cy);
+                ctx.arc(cx, cy, r, startRad, endRad);
                 ctx.closePath();
-                ctx.fillStyle = s.color;
+                ctx.fillStyle = seg.color;
                 ctx.fill();
-                startAngle = endAngle;
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 2;
+                ctx.stroke();
             });
-            ctx.beginPath();
-            ctx.arc(cx, cy, innerR, 0, Math.PI * 2);
-            ctx.fillStyle = '#fff';
-            ctx.fill();
-            if (index >= 0) {
-                var s = segs[index];
-                var sa = -Math.PI / 2;
-                for (var j = 0; j < index; j++)
-                    sa += (segs[j].end - segs[j].start) * Math.PI / 180;
-                var ea = sa + (s.end - s.start) * Math.PI / 180;
-                ctx.beginPath();
-                ctx.arc(cx, cy, outerR, sa, ea);
-                ctx.arc(cx, cy, innerR, ea, sa, true);
-                ctx.closePath();
-                ctx.fillStyle = 'rgba(255,255,255,0.15)';
-                ctx.fill();
+        }
+        drawPie();
+
+        function getMouseSegment(e) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = w / rect.width;
+            const scaleY = h / rect.height;
+            const mx = (e.clientX - rect.left) * scaleX;
+            const my = (e.clientY - rect.top) * scaleY;
+            const dx = mx - cx, dy = my - cy;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist > r) return null;
+            let deg = Math.atan2(dy, dx) * 180 / Math.PI + 90;
+            if (deg < 0) deg += 360;
+            for (let i = 0; i < segments.length; i++) {
+                if (deg >= segments[i].start && deg < segments[i].end) return segments[i];
             }
+            return null;
         }
 
-        draw(-1);
-
         canvas.addEventListener('mousemove', function(e) {
-            var rect = canvas.getBoundingClientRect();
-            var x = e.clientX - rect.left;
-            var y = e.clientY - rect.top;
-            var dx = x - cx, dy = y - cy;
-            var dist = Math.sqrt(dx * dx + dy * dy);
-            if (dist < innerR || dist > outerR) {
-                if (hoveredIndex !== -1) { hoveredIndex = -1; draw(-1); tooltip.classList.remove('visible'); }
-                return;
-            }
-            var deg = (Math.atan2(dy, dx) * 180 / Math.PI + 90 + 360) % 360;
-            var found = -1;
-            for (var i = 0; i < segs.length; i++) {
-                if (deg >= segs[i].start && deg < segs[i].end) { found = i; break; }
-            }
-            if (found !== hoveredIndex) {
-                hoveredIndex = found;
-                draw(hoveredIndex);
-                if (found >= 0) {
-                    var s = segs[found];
-                    tooltip.textContent = s.name + ' \u2014 ' + s.total + ' (' + s.pct + '%)';
-                    tooltip.style.left = (e.clientX + 12) + 'px';
-                    tooltip.style.top = (e.clientY - 8) + 'px';
-                    tooltip.classList.add('visible');
-                } else {
-                    tooltip.classList.remove('visible');
-                }
-            } else if (found >= 0) {
+            const seg = getMouseSegment(e);
+            if (seg) {
+                tooltip.textContent = seg.name + ': ' + seg.total + ' (' + seg.pct + '%)';
                 tooltip.style.left = (e.clientX + 12) + 'px';
-                tooltip.style.top = (e.clientY - 8) + 'px';
+                tooltip.style.top = (e.clientY + 12) + 'px';
+                tooltip.classList.add('visible');
+                canvas.style.cursor = 'pointer';
+            } else {
+                tooltip.classList.remove('visible');
+                canvas.style.cursor = 'default';
             }
         });
-
         canvas.addEventListener('mouseleave', function() {
-            if (hoveredIndex !== -1) { hoveredIndex = -1; draw(-1); }
             tooltip.classList.remove('visible');
         });
-    })();
+    }
+    <?php endif; ?>
 
     document.querySelectorAll('button[title="View"]').forEach(function(btn) {
         btn.addEventListener('click', function() {

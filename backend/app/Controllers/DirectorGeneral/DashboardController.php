@@ -20,15 +20,24 @@ class DashboardController extends BaseController
             COALESCE(SUM(CASE WHEN status = 'approved' THEN 1 ELSE 0 END), 0) AS approved,
             COALESCE(SUM(CASE WHEN status = 'rejected' THEN 1 ELSE 0 END), 0) AS rejected,
             COALESCE(SUM(CASE WHEN status = 'returned' THEN 1 ELSE 0 END), 0) AS returned,
-            COALESCE(SUM(CASE WHEN status = 'resubmitted' THEN 1 ELSE 0 END), 0) AS resubmitted,
-            COALESCE(SUM(CASE WHEN status IN ('endorsed','approved','rejected','returned','resubmitted') THEN budget ELSE 0 END), 0) AS total_budget
+            COALESCE(SUM(CASE WHEN status = 'resubmitted' THEN 1 ELSE 0 END), 0) AS resubmitted
         ")
             ->get()
             ->getRowArray();
 
         $pendingApproval = (int) (($dgStats['endorsed'] ?? 0) + ($dgStats['resubmitted'] ?? 0));
         $totalApprovedProjects = (int) ($dgStats['approved'] ?? 0);
-        $totalProposedBudget = (float) ($dgStats['total_budget'] ?? 0);
+
+        $approvedRecords = $isspModel->select('budget, form_data')
+            ->where('status', 'approved')
+            ->findAll();
+        $totalApprovedBudget = array_reduce($approvedRecords, function ($carry, $r) {
+            $fd = !empty($r['form_data']) ? json_decode($r['form_data'], true) : [];
+            $ict = $fd['ict-projects-form'] ?? [];
+            $internal = (float) ($ict['internal_total_cost'] ?? $r['budget'] ?? 0);
+            $cross = (float) ($ict['cross_total_cost'] ?? 0);
+            return $carry + $internal + $cross;
+        }, 0);
         $totalDepartments = $isspModel->select('department_id')->distinct()->whereIn('status', ['endorsed', 'approved', 'rejected', 'resubmitted'])->countAllResults();
 
         $submissionsByMonth = $isspModel->getSubmissionsByMonth();
@@ -65,7 +74,7 @@ class DashboardController extends BaseController
             'currentUser' => $userModel->findWithRole($currentUserId),
             'pendingApproval' => $pendingApproval,
             'totalApprovedProjects' => $totalApprovedProjects,
-            'totalProposedBudget' => (float) $totalProposedBudget,
+            'totalApprovedBudget' => $totalApprovedBudget,
             'totalDepartments' => $totalDepartments,
             'submissionsByMonth' => $submissionsByMonth,
             'recentProjects' => $recentProjects,

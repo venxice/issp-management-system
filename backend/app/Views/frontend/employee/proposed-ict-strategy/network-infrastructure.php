@@ -681,9 +681,9 @@
                         </div>
                     </div>
                     
-                    <!-- A.1.ii Central Office to Branches -->
+                    <!-- A.2 Central Office to Branches -->
                     <div class="form-section-label">
-                        A.1.ii Central Office to Branches/Regional Offices
+                        A.2 Central Office to Branches/Regional Offices
                     </div>
                     
                     <div class="row g-3">

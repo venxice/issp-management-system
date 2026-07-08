@@ -64,8 +64,10 @@
                                     <button class="btn btn-outline-primary icon-btn" type="button" title="View" data-project='<?= json_encode([
                                         'title' => $intTitle ?? $record['title'] ?? '',
                                         'cross_title' => $crossTitle ?? '',
-                                        'description' => $record['description'] ?? '',
+                                        'description' => $intDesc ?? $record['description'] ?? '',
+                                        'cross_description' => $crossDesc ?? '',
                                         'budget' => $record['budget'] ?? '',
+                                        'cross_budget' => $crossBudget ?? '',
                                         'status' => $s,
                                         'department' => $record['department_name'] ?? '',
                                         'updated' => $record['updated_at'] ?? $record['created_at'] ?? '',
@@ -116,6 +118,7 @@
 .detail-grid { display: grid; grid-template-columns: 170px 1fr; gap: 12px 18px; }
 .key { font-size: .8rem; color: #6c757d; font-weight: 600; }
 .val { font-size: .9rem; color: #212529; word-break: break-word; }
+.cross-row { display: contents; }
 .remarks-in-modal { margin-top: 18px; }
 .remarks-in-modal__divider { height: 1px; background: #eef2f6; margin-bottom: 14px; }
 .remarks-in-modal__label { display: flex; align-items: center; gap: 6px; font-size: .7rem; font-weight: 700; color: #536783; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 8px; }
@@ -132,9 +135,11 @@
             <div class="modal-body">
                 <div class="detail-grid">
                     <div class="key">Internal Title</div><div class="val" id="viewProjectTitle">-</div>
-                    <div class="key">Cross-Agency Title</div><div class="val" id="viewProjectCrossTitle">-</div>
-                    <div class="key">Description</div><div class="val" id="viewProjectDescription">-</div>
-                    <div class="key">Budget</div><div class="val" id="viewProjectBudget">-</div>
+                    <div class="cross-row" id="viewCrossRow"><div class="key">Cross-Agency Title</div><div class="val" id="viewProjectCrossTitle">-</div></div>
+                    <div class="key">Internal Description</div><div class="val" id="viewProjectDescription">-</div>
+                    <div class="cross-row" id="viewCrossDescRow"><div class="key">Cross-Agency Description</div><div class="val" id="viewProjectCrossDescription">-</div></div>
+                    <div class="key">Internal Budget</div><div class="val" id="viewProjectBudget">-</div>
+                    <div class="cross-row" id="viewCrossBudgetRow"><div class="key">Cross-Agency Budget</div><div class="val" id="viewProjectCrossBudget">-</div></div>
                     <div class="key">Status</div><div class="val" id="viewProjectStatus">-</div>
                     <div class="key">Department</div><div class="val" id="viewProjectDepartment">-</div>
                     <div class="key">Last Updated</div><div class="val" id="viewProjectUpdated">-</div>
@@ -170,9 +175,32 @@ document.addEventListener('DOMContentLoaded', function() {
             try {
                 var project = JSON.parse(this.getAttribute('data-project'));
                 document.getElementById('viewProjectTitle').textContent = project.title || '-';
-                document.getElementById('viewProjectCrossTitle').textContent = project.cross_title || '-';
+                var crossRow = document.getElementById('viewCrossRow');
+                var crossTitleEl = document.getElementById('viewProjectCrossTitle');
+                if (project.cross_title) {
+                    crossTitleEl.textContent = project.cross_title;
+                    crossRow.style.display = '';
+                } else {
+                    crossRow.style.display = 'none';
+                }
                 document.getElementById('viewProjectDescription').textContent = project.description || '-';
+                var crossDescRow = document.getElementById('viewCrossDescRow');
+                var crossDescEl = document.getElementById('viewProjectCrossDescription');
+                if (project.cross_description) {
+                    crossDescEl.textContent = project.cross_description;
+                    crossDescRow.style.display = '';
+                } else {
+                    crossDescRow.style.display = 'none';
+                }
                 document.getElementById('viewProjectBudget').textContent = project.budget ? '₱' + parseFloat(project.budget).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '-';
+                var crossBudgetRow = document.getElementById('viewCrossBudgetRow');
+                var crossBudgetEl = document.getElementById('viewProjectCrossBudget');
+                if (project.cross_budget && parseFloat(project.cross_budget) > 0) {
+                    crossBudgetEl.textContent = '₱' + parseFloat(project.cross_budget).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                    crossBudgetRow.style.display = '';
+                } else {
+                    crossBudgetRow.style.display = 'none';
+                }
                 document.getElementById('viewProjectStatus').textContent = project.status ? project.status.charAt(0).toUpperCase() + project.status.slice(1) : '-';
                 document.getElementById('viewProjectDepartment').textContent = project.department || '-';
                 document.getElementById('viewProjectUpdated').textContent = project.updated || '-';

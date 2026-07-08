@@ -9,5 +9,5 @@ $active ??= '';
     <i class="fa-solid fa-clock"></i> Pending Approval
 </a>
 <a class="nav-link <?= $active === 'approved-projects' ? 'active' : '' ?>" href="<?= site_url('director-general/approved-projects') ?>">
-    <i class="fa-solid fa-check-circle"></i> Approved Projects
+    <i class="fa-solid fa-check-circle"></i> Reviewed Projects
 </a>

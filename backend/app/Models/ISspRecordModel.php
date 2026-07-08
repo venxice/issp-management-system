@@ -63,23 +63,13 @@ class ISspRecordModel extends Model
 
     public function getStatusSummary(): array
     {
-        $row = $this->select("
-            COALESCE(SUM(CASE WHEN status IN ('pending','endorsed','approved','rejected','returned','resubmitted') THEN budget ELSE 0 END), 0) AS total_budget,
-            COALESCE(SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END), 0) AS pending,
-            COALESCE(SUM(CASE WHEN status = 'endorsed' THEN 1 ELSE 0 END), 0) AS endorsed,
-            COALESCE(SUM(CASE WHEN status = 'approved' THEN 1 ELSE 0 END), 0) AS approved,
-            COALESCE(SUM(CASE WHEN status = 'rejected' THEN 1 ELSE 0 END), 0) AS rejected,
-            COALESCE(SUM(CASE WHEN status = 'returned' THEN 1 ELSE 0 END), 0) AS returned,
-            COALESCE(SUM(CASE WHEN status = 'resubmitted' THEN 1 ELSE 0 END), 0) AS resubmitted,
-            COALESCE(SUM(CASE WHEN status IN ('pending','endorsed','approved','rejected','returned','resubmitted') THEN 1 ELSE 0 END), 0) AS total
-        ")
+        $rows = $this->select("status, budget, form_data")
             ->where('issp_records.status IS NOT NULL')
             ->where('issp_records.status !=', '')
             ->where('issp_records.status !=', 'draft')
-            ->get()
-            ->getRowArray();
+            ->findAll();
 
-        return $row ?: [
+        $stats = [
             'total_budget' => 0,
             'pending' => 0,
             'endorsed' => 0,
@@ -89,6 +79,22 @@ class ISspRecordModel extends Model
             'resubmitted' => 0,
             'total' => 0,
         ];
+
+        foreach ($rows as $r) {
+            $status = $r['status'] ?? '';
+            if (!isset($stats[$status])) continue;
+
+            $stats[$status]++;
+            $stats['total']++;
+
+            $fd = !empty($r['form_data']) ? json_decode($r['form_data'], true) : [];
+            $ict = $fd['ict-projects-form'] ?? [];
+            $internal = (float) ($ict['internal_total_cost'] ?? $r['budget'] ?? 0);
+            $cross = (float) ($ict['cross_total_cost'] ?? 0);
+            $stats['total_budget'] += $internal + $cross;
+        }
+
+        return $stats;
     }
 
     public function countSubmitted(): int
