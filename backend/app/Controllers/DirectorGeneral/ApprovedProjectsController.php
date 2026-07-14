@@ -9,11 +9,17 @@ class ApprovedProjectsController extends BaseController
 {
     public function index()
     {
-        $isspModel = new ISspRecordModel();
-
         $query = trim((string) $this->request->getGet('q'));
         $dateRange = trim((string) $this->request->getGet('date_range'));
+        $statusFilter = trim((string) $this->request->getGet('status'));
 
+        $counts = [
+            'approved'  => (new ISspRecordModel())->where('status', 'approved')->countAllResults(),
+            'rejected'  => (new ISspRecordModel())->where('status', 'rejected')->countAllResults(),
+            'returned'  => (new ISspRecordModel())->where('status', 'returned')->countAllResults(),
+        ];
+
+        $isspModel = new ISspRecordModel();
         $isspModel->select('issp_records.*, departments.name AS department_name, users.name AS created_by_name')
             ->join('departments', 'departments.id = issp_records.department_id', 'left')
             ->join('users', 'users.id = issp_records.created_by', 'left')
@@ -29,6 +35,10 @@ class ApprovedProjectsController extends BaseController
                 $isspModel->where('issp_records.created_at >=', trim($dates[0]) . ' 00:00:00')
                     ->where('issp_records.created_at <=', trim($dates[1]) . ' 23:59:59');
             }
+        }
+
+        if ($statusFilter !== '' && in_array($statusFilter, ['approved', 'rejected', 'returned'])) {
+            $isspModel->where('issp_records.status', $statusFilter);
         }
 
         $decidedProjects = $isspModel->findAll();
@@ -57,6 +67,8 @@ class ApprovedProjectsController extends BaseController
             'decidedProjects' => $decidedProjects,
             'query' => $query,
             'date_range' => $dateRange,
+            'statusFilter' => $statusFilter,
+            'statusCounts' => $counts,
         ]);
     }
 }

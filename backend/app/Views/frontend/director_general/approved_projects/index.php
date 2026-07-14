@@ -14,11 +14,11 @@
                     <h2 class="panel-title">All Reviewed Projects</h2>
                     <p class="panel-subtitle">Projects that have been reviewed by the Director General.</p>
                 </div>
-                <form class="d-flex flex-wrap align-items-center gap-2 toolbar-form" method="get" action="<?= site_url('director-general/approved-projects') ?>" id="searchForm">
-                    <div class="input-group input-group-sm" style="width:200px;">
-                        <input class="form-control" name="q" value="<?= esc($query ?? '') ?>" placeholder="Search Projects">
-                        <button class="btn btn-outline-secondary" type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
-                    </div>
+                <form class="d-flex align-items-center toolbar-form flex-shrink-0" method="get" action="<?= site_url('director-general/approved-projects') ?>" id="searchForm">
+                    <input class="form-control form-control-sm" name="q" value="<?= esc($query ?? '') ?>" placeholder="Search" style="width:140px; flex-shrink:0;">
+                    <button class="btn btn-sm btn-outline-primary flex-shrink-0" type="button" id="selectAllBtn" onclick="toggleSelectAll()">
+                        <i class="fa-regular fa-square me-1"></i> Select All
+                    </button>
                     <div class="position-relative date-range-picker-wrapper">
                         <input class="form-control form-control-sm" name="date_range" type="text" value="<?= esc($date_range ?? '') ?>" placeholder="" id="dateRangePicker" readonly>
                         <button type="button" class="date-picker-icon-btn" id="datePickerToggleBtn">
@@ -27,10 +27,25 @@
                     </div>
                 </form>
             </div>
+            <div class="status-tabs d-flex align-items-center gap-1 px-3 pt-3 pb-3" style="background:#f8f9fa;border-bottom:1px solid #e9ecef;">
+                <a href="<?= site_url('director-general/approved-projects?' . http_build_query(array_filter(['q' => $query, 'date_range' => $date_range]))) ?>" class="btn btn-sm <?= $statusFilter === '' ? 'btn-primary' : 'btn-outline-secondary' ?>">All</a>
+                <a href="<?= site_url('director-general/approved-projects?' . http_build_query(array_filter(['status' => 'approved', 'q' => $query, 'date_range' => $date_range]))) ?>" class="btn btn-sm <?= $statusFilter === 'approved' ? 'btn-primary' : 'btn-outline-secondary' ?>">Approved (<?= $statusCounts['approved'] ?>)</a>
+                <a href="<?= site_url('director-general/approved-projects?' . http_build_query(array_filter(['status' => 'rejected', 'q' => $query, 'date_range' => $date_range]))) ?>" class="btn btn-sm <?= $statusFilter === 'rejected' ? 'btn-primary' : 'btn-outline-secondary' ?>">Rejected (<?= $statusCounts['rejected'] ?>)</a>
+                <a href="<?= site_url('director-general/approved-projects?' . http_build_query(array_filter(['status' => 'returned', 'q' => $query, 'date_range' => $date_range]))) ?>" class="btn btn-sm <?= $statusFilter === 'returned' ? 'btn-primary' : 'btn-outline-secondary' ?>">Returned (<?= $statusCounts['returned'] ?>)</a>
+            </div>
+            <div id="bulkBar" class="bulk-bar" style="display:none;">
+                <div class="bulk-bar-inner">
+                    <span class="bulk-label" id="selectedCount"></span>
+                    <button class="btn btn-sm btn-primary" type="button" onclick="downloadSelected()">
+                        <i class="fa-solid fa-download me-1"></i> Download Selected
+                    </button>
+                </div>
+            </div>
             <div class="table-responsive mb-0">
                 <table class="table table-ict-projects align-middle mb-0">
                     <thead>
                         <tr>
+                            <th style="width:36px;"><input type="checkbox" id="checkAll" onchange="toggleAllCheckboxes(this)"></th>
                             <th>Internal / Cross-Agency Project Title</th>
                             <th>Description</th>
                             <th>Budget</th>
@@ -44,6 +59,7 @@
                             <?php foreach ($decidedProjects as $project): ?>
                                 <?php $intTitle = $project['int_title'] ?? 'Untitled'; $crossTitle = $project['cross_title'] ?? ''; $intDesc = $project['int_desc'] ?? '---'; $crossDesc = $project['cross_desc'] ?? ''; $intBudget = $project['int_budget'] ?? 0; $crossBudget = $project['cross_budget'] ?? 0; ?>
                                 <tr>
+                                        <td><input type="checkbox" name="project_ids[]" value="<?= $project['id'] ?>" class="project-checkbox" data-url="<?= site_url('director-general/download/' . $project['id']) ?>" onchange="onCheckboxChange()"></td>
                                     <td>
                                         <div><span class="text-muted">Internal:</span> <?= esc($intTitle) ?></div>
                                         <?php if ($crossTitle): ?><div class="mt-1"><span class="text-muted">Cross-Agency:</span> <?= esc($crossTitle) ?></div><?php endif; ?>
@@ -164,20 +180,39 @@
 </div>
 
 <style>
-.table-ict-projects th:nth-child(1),
-.table-ict-projects td:nth-child(1) { width: 22%; min-width: 160px; }
-.table-ict-projects th:nth-child(2),
-.table-ict-projects td:nth-child(2) { width: 14%; min-width: 110px; }
-.table-ict-projects th:nth-child(3),
-.table-ict-projects td:nth-child(3) { width: 14%; min-width: 110px; }
-.table-ict-projects th:nth-child(4),
-.table-ict-projects td:nth-child(4) { width: 12%; min-width: 90px; }
-.table-ict-projects th:nth-child(5),
-.table-ict-projects td:nth-child(5) { width: 14%; min-width: 120px; }
-.table-ict-projects th:nth-child(6),
-.table-ict-projects td:nth-child(6) { width: 10%; min-width: 80px; }
-.table-ict-projects th:nth-child(7),
-.table-ict-projects td:nth-child(7) { width: 14%; min-width: 160px; }
+.bulk-bar {
+    background: #edf2f7;
+    border-bottom: 1px solid #d9e0ea;
+    padding: 6px 14px;
+    transition: opacity .15s ease;
+}
+.bulk-bar-inner {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.bulk-label {
+    font-size: .8rem;
+    font-weight: 600;
+    color: #344863;
+}
+.bulk-label::before {
+    content: '\2713 ';
+    font-weight: 700;
+}
+.toolbar-form {
+    gap: 8px;
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+.table-ict-projects th:first-child,
+.table-ict-projects td:first-child {
+    width: 36px;
+    max-width: 36px;
+    padding: 4px 6px !important;
+    text-align: center;
+    vertical-align: middle;
+}
 .modal-content { border-radius: 14px; overflow: hidden; border: 1px solid #e9ecef; background: #fff; }
 .modal-header { background: #536783; border-bottom: none; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; }
 .modal-title { font-size: 1.1rem; font-weight: 700; color: #fff; margin: 0; }
@@ -211,6 +246,57 @@
 </style>
 
 <script>
+function toggleAllCheckboxes(master) {
+    var cbs = document.querySelectorAll('.project-checkbox');
+    cbs.forEach(function(cb, i) { cb.checked = master.checked; });
+    updateBulkBar();
+}
+
+function updateBulkBar() {
+    var cbs = document.querySelectorAll('.project-checkbox:checked');
+    var count = cbs.length;
+    var bar = document.getElementById('bulkBar');
+    if (count > 0) {
+        document.getElementById('selectedCount').textContent = count + (count === 1 ? ' project selected' : ' projects selected');
+        bar.style.display = 'block';
+    } else {
+        bar.style.display = 'none';
+    }
+}
+
+function onCheckboxChange() {
+    updateBulkBar();
+    var allChecked = document.querySelectorAll('.project-checkbox:checked').length === document.querySelectorAll('.project-checkbox').length;
+    document.getElementById('checkAll').checked = allChecked;
+}
+
+function toggleSelectAll() {
+    var master = document.getElementById('checkAll');
+    master.checked = !master.checked;
+    toggleAllCheckboxes(master);
+}
+
+function downloadSelected() {
+    var cbs = document.querySelectorAll('.project-checkbox:checked');
+    if (cbs.length === 0) {
+        if (typeof showAlertModal === 'function') {
+            showAlertModal('No Selection', 'Please select at least one project to download.');
+        }
+        return;
+    }
+    cbs.forEach(function(cb, i) {
+        var url = cb.getAttribute('data-url');
+        if (url) {
+            setTimeout(function() {
+                var f = document.createElement('iframe');
+                f.style.display = 'none';
+                f.src = url;
+                document.body.appendChild(f);
+            }, i * 500);
+        }
+    });
+}
+
 function showViewProjectModal() {
     document.getElementById('viewProjectModal').style.display = 'flex';
     document.getElementById('customModalOverlay').style.display = 'block';
@@ -278,6 +364,17 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+
+    var searchForm = document.getElementById('searchForm');
+    var searchInput = searchForm ? searchForm.querySelector('input[name="q"]') : null;
+    if (searchInput) {
+        searchInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                searchForm.submit();
+            }
+        });
+    }
 
     var dateRangeInput = document.getElementById('dateRangePicker');
     var datePickerToggleBtn = document.getElementById('datePickerToggleBtn');

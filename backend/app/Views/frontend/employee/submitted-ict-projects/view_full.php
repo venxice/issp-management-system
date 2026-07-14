@@ -2,23 +2,6 @@
 
 <?= $this->section('content') ?>
 <style>
-.btn-back {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-size: .82rem;
-    font-weight: 600;
-    color: #536783;
-    text-decoration: none;
-    padding: 6px 14px;
-    border-radius: 8px;
-    transition: all .15s;
-    margin-bottom: 14px;
-}
-.btn-back:hover {
-    background: #edf2f7;
-    color: #2a3f5a;
-}
 .project-hero {
     background: #fff;
     border: 1px solid #dde4ed;
@@ -136,9 +119,6 @@
 .checklist-count { font-weight: 400; color: #8898aa; font-size: .72rem; margin-left: 8px; }
 </style>
 
-<a href="<?= site_url('employee/submitted-ict-projects') ?>" class="btn-back">
-    <i class="fa-solid fa-arrow-left"></i> Back
-</a>
 
 <?php
 $ict = $formData['ict-projects-form'] ?? [];
