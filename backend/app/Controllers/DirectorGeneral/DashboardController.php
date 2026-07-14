@@ -264,7 +264,11 @@ class DashboardController extends BaseController
         $dompdf->loadHtml(mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8'));
         $dompdf->setPaper('A4', 'landscape');
         $dompdf->render();
-        $dompdf->stream('project-' . $id . '.pdf', ['Attachment' => 1]);
+        $fd = !empty($project['form_data']) ? json_decode($project['form_data'], true) : [];
+        $ict = $fd['ict-projects-form'] ?? [];
+        $title = $ict['internal_project_title'] ?? $project['title'] ?? 'submission';
+        $filename = 'ISSP_' . preg_replace('/[^a-zA-Z0-9]/', '_', $title) . '_' . $id . '.pdf';
+        $dompdf->stream($filename, ['Attachment' => 1]);
         exit;
     }
     public function batchDownload()
