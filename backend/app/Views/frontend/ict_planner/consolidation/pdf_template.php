@@ -153,43 +153,42 @@ $hasRes = !empty($rY1) || !empty($rY2) || !empty($rY3);
 <meta charset="utf-8">
 <style>
 @page { margin: 15mm 12mm 15mm 12mm; size: A4 landscape; }
-body { font-family: 'Palatino Linotype', 'Palatino', 'Book Antiqua', serif; font-size: 9pt; color: #000; line-height: 1.15; margin: 0; padding: 0; }
+* { box-sizing: border-box; }
+body { font-family: 'Palatino Linotype', 'Palatino', 'Book Antiqua', serif; font-size: 9pt; color: #000; line-height: 1.2; margin: 0; padding: 0; }
 
-/* Cover Page */
-.cover-page { text-align: center; padding-top: 12mm; page-break-after: always; }
-.cover-title { font-size: 18pt; font-weight: bold; text-decoration: underline; margin-bottom: 3mm; }
-.cover-sub { font-size: 11pt; margin-bottom: 2mm; }
-.cover-agency { font-size: 14pt; font-weight: bold; margin-bottom: 2mm; }
-.cover-block { text-align: left; margin-top: 8mm; margin-bottom: 6mm; font-size: 9pt; }
+.cover-page { text-align: center; padding-top: 15mm; page-break-after: always; }
+.cover-title { font-size: 20pt; font-weight: bold; text-decoration: underline; margin-bottom: 4mm; }
+.cover-sub { font-size: 12pt; margin-bottom: 3mm; }
+.cover-agency { font-size: 14pt; font-weight: bold; margin-bottom: 3mm; }
+.cover-block { text-align: left; margin-top: 10mm; margin-bottom: 8mm; font-size: 9pt; }
 .cover-block-label { font-weight: bold; margin-bottom: 1mm; }
 .cover-block-sign { padding-bottom: 6mm; border-bottom: 1px solid #333; margin-bottom: 4mm; margin-left: 2mm; }
 .cover-scope { text-align: left; margin-top: 2mm; font-size: 8.5pt; line-height: 1.6; margin-left: 4mm; }
 .cover-scope-title { font-weight: bold; margin-bottom: 1mm; }
 
-/* TOC */
-.toc-page { page-break-after: always; padding-top: 8mm; }
-.toc-title { font-size: 16pt; font-weight: bold; text-align: center; margin-bottom: 6mm; }
-.toc-part { font-weight: bold; font-size: 9.5pt; margin-top: 4mm; margin-bottom: 1mm; }
+.toc-page { page-break-after: always; padding-top: 10mm; }
+.toc-title { font-size: 16pt; font-weight: bold; text-align: center; margin-bottom: 8mm; }
+.toc-part { font-weight: bold; font-size: 9.5pt; margin-top: 5mm; margin-bottom: 1mm; }
 .toc-sub { font-size: 9pt; margin-bottom: 1mm; margin-left: 4mm; }
 .toc-item { font-size: 8.5pt; margin-bottom: 0.8mm; margin-left: 8mm; }
 
-/* Headings */
-.part-heading { font-size: 16pt; font-weight: bold; text-decoration: underline; margin-top: 8mm; margin-bottom: 4mm; page-break-before: always; }
-.section-heading { font-size: 12pt; font-weight: bold; text-decoration: underline; margin-top: 6mm; margin-bottom: 3mm; }
+.part-heading { font-size: 16pt; font-weight: bold; text-decoration: underline; margin-top: 6mm; margin-bottom: 4mm; }
+.part-heading:first-of-type { page-break-before: always; }
+.section-heading { font-size: 12pt; font-weight: bold; text-decoration: underline; margin-top: 5mm; margin-bottom: 3mm; }
 .subsection-heading { font-size: 11pt; font-weight: bold; text-decoration: underline; margin-top: 4mm; margin-bottom: 2mm; }
 .body-text { font-size: 9pt; margin-bottom: 2mm; }
 .field-label { font-size: 9pt; font-weight: bold; }
 
-/* Tables */
-table.dt { width: 100%; border-collapse: collapse; font-size: 8.5pt; margin: 2mm 0; }
-table.dt th { border: 1px solid #000; padding: 1.5mm 2mm; font-weight: bold; text-align: center; background: #f0f0f0; vertical-align: middle; }
+table.dt { width: 100%; border-collapse: collapse; font-size: 8.5pt; margin: 2mm 0; page-break-inside: avoid; }
+table.dt th { border: 1px solid #000; padding: 1.5mm 2mm; font-weight: bold; text-align: center; background: #d9d9d9; vertical-align: middle; }
 table.dt td { border: 1px solid #000; padding: 1.5mm 2mm; vertical-align: top; }
 table.dt td.c { text-align: center; } table.dt td.b { font-weight: bold; }
 table.dt td.r { text-align: right; } table.dt td.gt { font-weight: bold; border-top: 2px solid #000; }
 table.dt td.ch { font-weight: bold; }
 table.dt td.nb { border: none; background: none; }
+table.dt tr.group-header td { background: #d9d9d9; font-weight: bold; text-align: center; }
 .empty { color: #888; font-size: 8pt; text-align: center; padding: 2mm; }
-.footer { text-align: center; font-size: 7pt; color: #888; margin-top: 10mm; border-top: 1px solid #ccc; padding-top: 2mm; }
+.footer { text-align: center; font-size: 7pt; color: #888; margin-top: 8mm; border-top: 1px solid #ccc; padding-top: 2mm; }
 </style>
 <?php if (!$batchMode): ?>
 </head>
@@ -198,12 +197,12 @@ table.dt td.nb { border: none; background: none; }
 
 <!-- ==================== COVER PAGE ==================== -->
 <div class="cover-page">
-    <p style="font-size:9pt;color:#666;margin-bottom:10mm;">(Replace with agency's logo)</p>
+    <p style="font-size:9pt;color:#666;margin-bottom:12mm;">(Replace with agency's logo)</p>
     <div class="cover-title">INFORMATION SYSTEMS STRATEGIC PLAN (ISSP)</div>
     <div class="cover-sub">REGULAR ISSP &nbsp; AMENDMENT &lt; 1st/2nd/3rd &gt;</div>
     <div class="cover-sub">For the period <?= ve($startYear) ?> to <?= ve($endYear) ?></div>
     <div class="cover-agency"><?= ve($department) ?></div>
-    <p style="font-size:9pt;margin-bottom:6mm;">&nbsp;</p>
+    <p style="font-size:9pt;margin-bottom:8mm;">&nbsp;</p>
 
     <div class="cover-block">
         <div class="cover-block-label">PREPARED BY:</div>
@@ -231,7 +230,7 @@ table.dt td.nb { border: none; background: none; }
         <div class="cover-block-sign">Name &amp; Signature of Agency Head</div>
     </div>
 
-    <p style="margin-top:12mm;font-size:8pt;color:#999;">
+    <p style="margin-top:15mm;font-size:8pt;color:#999;">
         This document was generated from the ISSP Management System on <?= ve(date('F d, Y')) ?>.
     </p>
 </div>
@@ -301,11 +300,11 @@ table.dt td.nb { border: none; background: none; }
 <div class="section-heading">B. ORGANIZATIONAL STRUCTURE</div>
 <div class="subsection-heading">B.1. CHIEF INFORMATION OFFICER (CIO)</div>
 <table class="dt">
-    <tr><td style="width:25%;font-weight:bold;">Name of CIO:</td><td><?= !isEmpty($agencyData['cio_name'] ?? '') ? v($agencyData['cio_name']) : '<span class="empty">[To be completed]</span>' ?></td></tr>
-    <tr><td style="font-weight:bold;">Plantilla Position:</td><td><?= !isEmpty($agencyData['cio_plantilla'] ?? '') ? v($agencyData['cio_plantilla']) : '<span class="empty">[To be completed]</span>' ?></td></tr>
-    <tr><td style="font-weight:bold;">Organizational Unit:</td><td><?= !isEmpty($agencyData['cio_unit'] ?? '') ? v($agencyData['cio_unit']) : '<span class="empty">[To be completed]</span>' ?></td></tr>
-    <tr><td style="font-weight:bold;">E-mail Address:</td><td><?= !isEmpty($agencyData['cio_email'] ?? '') ? v($agencyData['cio_email']) : '<span class="empty">[To be completed]</span>' ?></td></tr>
-    <tr><td style="font-weight:bold;">Contact Number/s:</td><td><?= !isEmpty($agencyData['cio_contact'] ?? '') ? v($agencyData['cio_contact']) : '<span class="empty">[To be completed]</span>' ?></td></tr>
+    <tr><td style="width:25%;font-weight:bold;background:#d9d9d9;">Name of CIO:</td><td><?= !isEmpty($agencyData['cio_name'] ?? '') ? v($agencyData['cio_name']) : '<span class="empty">[To be completed]</span>' ?></td></tr>
+    <tr><td style="font-weight:bold;background:#d9d9d9;">Plantilla Position:</td><td><?= !isEmpty($agencyData['cio_plantilla'] ?? '') ? v($agencyData['cio_plantilla']) : '<span class="empty">[To be completed]</span>' ?></td></tr>
+    <tr><td style="font-weight:bold;background:#d9d9d9;">Organizational Unit:</td><td><?= !isEmpty($agencyData['cio_unit'] ?? '') ? v($agencyData['cio_unit']) : '<span class="empty">[To be completed]</span>' ?></td></tr>
+    <tr><td style="font-weight:bold;background:#d9d9d9;">E-mail Address:</td><td><?= !isEmpty($agencyData['cio_email'] ?? '') ? v($agencyData['cio_email']) : '<span class="empty">[To be completed]</span>' ?></td></tr>
+    <tr><td style="font-weight:bold;background:#d9d9d9;">Contact Number/s:</td><td><?= !isEmpty($agencyData['cio_contact'] ?? '') ? v($agencyData['cio_contact']) : '<span class="empty">[To be completed]</span>' ?></td></tr>
 </table>
 
 <div class="subsection-heading">B.2. HUMAN CAPITAL</div>
@@ -362,10 +361,23 @@ $hasExistingLan = false; $hasExistingReg = false;
 foreach ($existingLanF as $f) { if (!isEmpty($ni[$f] ?? '')) { $hasExistingLan = true; break; } }
 foreach ($existingRegF as $f) { if (!isEmpty($ni[$f] ?? '')) { $hasExistingReg = true; break; } }
 ?>
-<table class="dt"><tr><th style="width:35%;">Item</th><th>Details</th></tr>
-<?php if ($hasExistingLan): ?><tr><td colspan="2" style="font-weight:bold;text-align:center;">Department / Central Office</td></tr><?php foreach ($existingLanF as $f): $vl = v($ni[$f] ?? ''); if ($vl === '') continue; if (strpos($vl, 'data:') === 0 || strpos($vl, 'uploads/') === 0) $vl = '[File uploaded]'; ?><tr><td class="b"><?= ve(fl('network-infrastructure-form', $f)) ?></td><td><?= $vl ?></td></tr><?php endforeach; ?><?php endif; ?>
-<?php if ($hasExistingReg): ?><tr><td colspan="2" style="font-weight:bold;text-align:center;">Regional / Branch Offices</td></tr><?php foreach ($existingRegF as $f): $vl = v($ni[$f] ?? ''); if ($vl === '') continue; if (strpos($vl, 'data:') === 0 || strpos($vl, 'uploads/') === 0) $vl = '[File uploaded]'; ?><tr><td class="b"><?= ve(fl('network-infrastructure-form', $f)) ?></td><td><?= $vl ?></td></tr><?php endforeach; ?><?php endif; ?>
-<?php if (!$hasExistingLan && !$hasExistingReg): ?><tr><td colspan="2" class="empty">[To be completed by agency]</td></tr><?php endif; ?>
+<table class="dt">
+    <tr><th style="width:35%;">Item</th><th>Details</th></tr>
+<?php if ($hasExistingLan): ?>
+    <tr><td colspan="2" class="group-header">Department / Central Office</td></tr>
+<?php foreach ($existingLanF as $f): $vl = v($ni[$f] ?? ''); if ($vl === '') continue; if (strpos($vl, 'data:') === 0 || strpos($vl, 'uploads/') === 0) $vl = '[File uploaded]'; ?>
+    <tr><td class="b"><?= ve(fl('network-infrastructure-form', $f)) ?></td><td><?= $vl ?></td></tr>
+<?php endforeach; ?>
+<?php endif; ?>
+<?php if ($hasExistingReg): ?>
+    <tr><td colspan="2" class="group-header">Regional / Branch Offices</td></tr>
+<?php foreach ($existingRegF as $f): $vl = v($ni[$f] ?? ''); if ($vl === '') continue; if (strpos($vl, 'data:') === 0 || strpos($vl, 'uploads/') === 0) $vl = '[File uploaded]'; ?>
+    <tr><td class="b"><?= ve(fl('network-infrastructure-form', $f)) ?></td><td><?= $vl ?></td></tr>
+<?php endforeach; ?>
+<?php endif; ?>
+<?php if (!$hasExistingLan && !$hasExistingReg): ?>
+    <tr><td colspan="2" class="empty">[To be completed by agency]</td></tr>
+<?php endif; ?>
 </table>
 
 <div class="subsection-heading">B2. CYBERSECURITY CONTROL CHECKLIST</div>
@@ -392,7 +404,10 @@ foreach ($existingRegF as $f) { if (!isEmpty($ni[$f] ?? '')) { $hasExistingReg =
 </table>
 
 <div class="section-heading">D. E-GOVERNMENT PROGRAMS (EGP) CHECKLIST</div>
-<table class="dt"><tr><th style="width:25%;">EGP Program</th><th>Status</th><th>Details</th></tr><tr><td colspan="3" class="empty">[To be completed by agency]</td></tr></table>
+<table class="dt">
+    <tr><th style="width:25%;">EGP Program</th><th>Status</th><th>Details</th></tr>
+    <tr><td colspan="3" class="empty">[To be completed by agency]</td></tr>
+</table>
 
 <!-- ==================== PART III ==================== -->
 <div class="part-heading">PART III. PROPOSED ICT STRATEGY</div>
@@ -404,8 +419,8 @@ foreach ($existingRegF as $f) { if (!isEmpty($ni[$f] ?? '')) { $hasExistingReg =
     <?php $lanF = ['dept_network_diagram','dept_connectivity_type','dept_ipv6_ready','dept_upload_speed','dept_download_speed','dept_description'];
     $regF = ['regional_network_diagram','regional_connectivity_type','regional_ipv6_ready','regional_upload_speed','regional_download_speed','regional_offices_details'];
     $hasLan = false; $hasReg = false; foreach ($lanF as $f) { if (!isEmpty($ni[$f] ?? '')) { $hasLan = true; break; } } foreach ($regF as $f) { if (!isEmpty($ni[$f] ?? '')) { $hasReg = true; break; } } ?>
-    <?php if ($hasLan): ?><tr><td colspan="2" style="font-weight:bold;text-align:center;">Department / Central Office</td></tr><?php foreach ($lanF as $f): $vl = v($ni[$f] ?? ''); if ($vl === '') continue; if (strpos($vl, 'data:') === 0 || strpos($vl, 'uploads/') === 0) $vl = '[File uploaded]'; ?><tr><td class="b"><?= ve(fl('network-infrastructure-form', $f)) ?></td><td><?= $vl ?></td></tr><?php endforeach; ?><?php endif; ?>
-    <?php if ($hasReg): ?><tr><td colspan="2" style="font-weight:bold;text-align:center;">Regional / Branch Offices</td></tr><?php foreach ($regF as $f): $vl = v($ni[$f] ?? ''); if ($vl === '') continue; if (strpos($vl, 'data:') === 0 || strpos($vl, 'uploads/') === 0) $vl = '[File uploaded]'; ?><tr><td class="b"><?= ve(fl('network-infrastructure-form', $f)) ?></td><td><?= $vl ?></td></tr><?php endforeach; ?><?php endif; ?>
+    <?php if ($hasLan): ?><tr><td colspan="2" class="group-header">Department / Central Office</td></tr><?php foreach ($lanF as $f): $vl = v($ni[$f] ?? ''); if ($vl === '') continue; if (strpos($vl, 'data:') === 0 || strpos($vl, 'uploads/') === 0) $vl = '[File uploaded]'; ?><tr><td class="b"><?= ve(fl('network-infrastructure-form', $f)) ?></td><td><?= $vl ?></td></tr><?php endforeach; ?><?php endif; ?>
+    <?php if ($hasReg): ?><tr><td colspan="2" class="group-header">Regional / Branch Offices</td></tr><?php foreach ($regF as $f): $vl = v($ni[$f] ?? ''); if ($vl === '') continue; if (strpos($vl, 'data:') === 0 || strpos($vl, 'uploads/') === 0) $vl = '[File uploaded]'; ?><tr><td class="b"><?= ve(fl('network-infrastructure-form', $f)) ?></td><td><?= $vl ?></td></tr><?php endforeach; ?><?php endif; ?>
     <?php if (!$hasLan && !$hasReg): ?><tr><td colspan="2" class="empty">No data provided.</td></tr><?php endif; ?>
 </table>
 
@@ -442,7 +457,7 @@ foreach ($existingRegF as $f) { if (!isEmpty($ni[$f] ?? '')) { $hasExistingReg =
 <table class="dt">
     <tr><th style="width:35%;">Item</th><th>Details</th></tr>
     <?php if ($hasIs): foreach ($isGs as $gN => $gFs): $gH = false; foreach ($gFs as $f) { if (!isEmpty($is[$f] ?? '')) { $gH = true; break; } } if (!$gH) continue; ?>
-    <tr><td colspan="2" style="font-weight:bold;text-align:center;"><?= ve($gN) ?></td></tr>
+    <tr><td colspan="2" class="group-header"><?= ve($gN) ?></td></tr>
     <?php foreach ($gFs as $f): $vl = v($is[$f] ?? ''); if ($vl === '') continue; ?><tr><td class="b"><?= ve(fl('information-systems-form', $f)) ?></td><td><?= $vl ?></td></tr><?php endforeach; ?>
     <?php endforeach; else: ?><tr><td colspan="2" class="empty">No data provided.</td></tr><?php endif; ?>
 </table>
@@ -453,14 +468,14 @@ foreach ($existingRegF as $f) { if (!isEmpty($ni[$f] ?? '')) { $hasExistingReg =
 <?php $crossSg = ['PROJECT DETAILS' => ['cross_project_title','cross_description','cross_objectives','cross_lead_agency','cross_implementing_agency'], 'STRATEGIC ALIGNMENT' => ['cross_strategic_pip','cross_strategic_ncp','cross_strategic_egov','cross_strategic_pcb','cross_strategic_others','cross_strategic_others_text'], 'HARMONIZATION' => ['cross_harmonization_1','cross_harmonization_2','cross_harmonization_3','cross_harmonization_4','cross_harmonization_5'], 'DURATION' => ['cross_start_date','cross_end_date'], 'DELIVERABLES' => ['cross_year1_deliverables','cross_year2_deliverables','cross_year3_deliverables'], 'IMPLEMENTATION' => ['cross_implementing_unit','cross_total_cost','cross_funding_source']]; ?>
 <?php if ($hasInt): ?><table class="dt"><tr><th style="width:35%;">Item</th><th>Details</th></tr>
 <?php foreach ($intSg as $sgN => $sgFs): $sH = false; foreach ($sgFs as $f) { if (!isEmpty($proj[$f] ?? '')) { $sH = true; break; } } if (!$sH) continue; ?>
-<tr><td colspan="2" style="font-weight:bold;text-align:center;"><?= ve($sgN) ?></td></tr>
+<tr><td colspan="2" class="group-header"><?= ve($sgN) ?></td></tr>
 <?php foreach ($sgFs as $f): $vl = v($proj[$f] ?? ''); if ($vl === '') continue; ?><tr><td class="b"><?= ve(fl('ict-projects-form', $f)) ?></td><td><?= $vl ?></td></tr><?php endforeach; endforeach; ?>
 </table><?php else: ?><table class="dt"><tr><td class="empty">No internal ICT project data provided.</td></tr></table><?php endif; ?>
 
 <div class="subsection-heading">CROSS-AGENCY ICT PROJECTS</div>
 <?php if ($hasCross): ?><table class="dt"><tr><th style="width:35%;">Item</th><th>Details</th></tr>
 <?php foreach ($crossSg as $sgN => $sgFs): $sH = false; foreach ($sgFs as $f) { if (!isEmpty($proj[$f] ?? '')) { $sH = true; break; } } if (!$sH) continue; ?>
-<tr><td colspan="2" style="font-weight:bold;text-align:center;"><?= ve($sgN) ?></td></tr>
+<tr><td colspan="2" class="group-header"><?= ve($sgN) ?></td></tr>
 <?php foreach ($sgFs as $f): $vl = v($proj[$f] ?? ''); if ($vl === '') continue; ?><tr><td class="b"><?= ve(fl('ict-projects-form', $f)) ?></td><td><?= $vl ?></td></tr><?php endforeach; endforeach; ?>
 </table><?php else: ?><table class="dt"><tr><td class="empty">No cross-agency ICT project data provided.</td></tr></table><?php endif; ?>
 
@@ -468,7 +483,7 @@ foreach ($existingRegF as $f) { if (!isEmpty($ni[$f] ?? '')) { $hasExistingReg =
 <?php foreach ($pmProjects as $pk => $pl): $kpD = $pm[$pk] ?? null; $kpi = is_array($kpD) ? ($kpD['kpi'] ?? $kpD) : []; $hKpi = false;
 if (is_array($kpi)) { foreach ($levels as $lk => $lv) { $row = $kpi[$lk] ?? []; if (!is_array($row)) continue; foreach ($cols as $ck => $cl) { if (!isEmpty($row[$ck] ?? '')) { $hKpi = true; break 2; } } } } ?>
 <div class="subsection-heading"><?= ve($pl) ?></div>
-<?php if ($hKpi): ?><div style="text-align:center;font-weight:bold;font-size:9pt;margin:2mm 0;">KEY PERFORMANCE INDICATORS (KPIs)</div>
+<?php if ($hKpi): ?>
 <table class="dt"><tr><th style="width:16%;">Hierarchy of Targeted Results</th><?php foreach ($cols as $cl): ?><th><?= ve($cl) ?></th><?php endforeach; ?></tr>
 <?php foreach ($levels as $lk => $lv): $row = $kpi[$lk] ?? []; if (!is_array($row)) continue; $rH = false; foreach ($cols as $ck => $cl) { if (!isEmpty($row[$ck] ?? '')) { $rH = true; break; } } if (!$rH) continue; ?>
 <tr><td class="b"><?= ve($lv) ?></td><?php foreach ($cols as $ck => $cl): $cv = v($row[$ck] ?? ''); ?><td><?= $cv !== '' ? $cv : '<span class="empty">-</span>' ?></td><?php endforeach; ?></tr>
@@ -484,7 +499,7 @@ if (is_array($kpi)) { foreach ($levels as $lk => $lv) { $row = $kpi[$lk] ?? []; 
 <table class="dt">
     <tr><th style="width:5%;">ITEM</th><th style="width:14%;">ITEM DESCRIPTION</th><th style="width:10%;">OFFICE LOCATION</th><th style="width:10%;">FUND SOURCE</th><th style="width:10%;">UNIT COST</th><th style="width:10%;">PHYSICAL TARGET</th><th style="width:12%;">TOTAL COST</th></tr>
     <?php if (!empty($items)): $cats = []; foreach ($items as $it) { $c = $it['strategic_category'] ?? 'Uncategorized'; $cats[$c][] = $it; } $yrT = 0; foreach ($cats as $cN => $cI): $cT = 0; ?>
-    <tr><td colspan="7" class="b" style="background:#f5f5f5;"><?= ve($cN) ?></td></tr>
+    <tr><td colspan="7" class="group-header"><?= ve($cN) ?></td></tr>
     <?php foreach ($cI as $it): $tc = (float)($it['total_cost'] ?? 0); $yrT += $tc; $cT += $tc; ?>
     <tr><td></td><td><?= ve($it['item'] ?? '') ?></td><td><?= ve($it['office_location'] ?? '') ?></td><td><?= ve($it['fund_source'] ?? '') ?></td><td class="r"><?= number_format((float)($it['unit_cost'] ?? 0), 2) ?></td><td class="c"><?= ve($it['physical_target'] ?? '') ?></td><td class="r"><?= number_format($tc, 2) ?></td></tr>
     <?php endforeach; endforeach; ?>
