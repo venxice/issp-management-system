@@ -6,6 +6,7 @@ use App\Controllers\BaseController;
 use App\Models\UserModel;
 use App\Models\AuditLogModel;
 use App\Models\ISspRecordModel;
+use App\Models\ResourceRequirementModel;
 
 class DashboardController extends BaseController
 {
@@ -237,9 +238,25 @@ class DashboardController extends BaseController
             }
         }
 
+        $resourceModel = new ResourceRequirementModel();
+        $resourceData = [
+            'year1' => $resourceModel->getByYear(1),
+            'year2' => $resourceModel->getByYear(2),
+            'year3' => $resourceModel->getByYear(3),
+            'generalSummary' => $resourceModel->getGeneralSummary(),
+            'fundSource' => $resourceModel->getFundSourceSummary(),
+            'statementOfExpenditure' => $resourceModel->getStatementOfExpenditureSummary(),
+            'objectOfExpenditure' => $resourceModel->getObjectOfExpenditureSummary(),
+        ];
+
+        $agencyModel = new \App\Models\AgencyInformationModel();
+        $agencyData = $agencyModel->orderBy('id', 'DESC')->first() ?? [];
+
         $html = view('frontend/ict_planner/consolidation/pdf_template', [
             'project' => $project,
             'formData' => $formData,
+            'resourceData' => $resourceData,
+            'agencyData' => $agencyData,
             'batchMode' => false,
         ]);
 
@@ -249,5 +266,154 @@ class DashboardController extends BaseController
         $dompdf->render();
         $dompdf->stream('project-' . $id . '.pdf', ['Attachment' => 1]);
         exit;
+    }
+    public function batchDownload()
+    {
+        $projectIds = $this->request->getPost('project_ids');
+        if (empty($projectIds) || !is_array($projectIds)) {
+            return redirect()->to('director-general/pending-approval')->with('error', 'No projects selected.');
+        }
+
+        $projectIds = array_map('intval', $projectIds);
+        $isspModel = new ISspRecordModel();
+        $resourceModel = new ResourceRequirementModel();
+        $resourceData = [
+            'year1' => $resourceModel->getByYear(1),
+            'year2' => $resourceModel->getByYear(2),
+            'year3' => $resourceModel->getByYear(3),
+            'generalSummary' => $resourceModel->getGeneralSummary(),
+            'fundSource' => $resourceModel->getFundSourceSummary(),
+            'statementOfExpenditure' => $resourceModel->getStatementOfExpenditureSummary(),
+            'objectOfExpenditure' => $resourceModel->getObjectOfExpenditureSummary(),
+        ];
+
+        $agencyModel = new \App\Models\AgencyInformationModel();
+        $agencyData = $agencyModel->orderBy('id', 'DESC')->first() ?? [];
+
+        $files = [];
+
+        foreach ($projectIds as $id) {
+            $project = $isspModel
+                ->select('issp_records.*, departments.name AS department_name, users.name AS created_by_name')
+                ->join('departments', 'departments.id = issp_records.department_id', 'left')
+                ->join('users', 'users.id = issp_records.created_by', 'left')
+                ->where('issp_records.id', $id)
+                ->first();
+
+            if ($project === null) continue;
+
+            $formData = [];
+            if (!empty($project['form_data'])) {
+                $decoded = json_decode($project['form_data'], true);
+                if (is_array($decoded)) {
+                    $formData = $decoded;
+                }
+            }
+
+            $html = view('frontend/ict_planner/consolidation/pdf_template', [
+                'project' => $project,
+                'formData' => $formData,
+                'resourceData' => $resourceData,
+                'agencyData' => $agencyData,
+                'batchMode' => true,
+            ]);
+
+            $dompdf = new \Dompdf\Dompdf();
+            $dompdf->loadHtml(mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8'));
+            $dompdf->setPaper('A4', 'landscape');
+            $dompdf->render();
+
+            $safeTitle = preg_replace('/[^a-zA-Z0-9]/', '_', $project['title'] ?? 'submission');
+            $filename = 'ISSP_' . $safeTitle . '_' . $id . '.pdf';
+            $files[$filename] = $dompdf->output();
+        }
+
+        if (empty($files)) {
+            return redirect()->to('director-general/pending-approval')->with('error', 'No valid projects found.');
+        }
+
+        if (count($files) === 1) {
+            $name = array_key_first($files);
+            header('Content-Type: application/pdf');
+            header('Content-Disposition: attachment; filename="' . $name . '"');
+            header('Content-Length: ' . strlen($files[$name]));
+            echo $files[$name];
+            exit;
+        }
+
+        $zipData = $this->buildZip($files);
+        $zipName = 'ISSP_Batch_' . date('Ymd_His') . '.zip';
+        header('Content-Type: application/zip');
+        header('Content-Disposition: attachment; filename="' . $zipName . '"');
+        header('Content-Length: ' . strlen($zipData));
+        echo $zipData;
+        exit;
+    }
+
+    private function buildZip(array $files): string
+    {
+        $centralDir = '';
+        $localFiles = '';
+        $offset = 0;
+
+        foreach ($files as $name => $data) {
+            $nameLen = strlen($name);
+            $dataLen = strlen($data);
+            $crc = crc32($data);
+
+            $localHeader = pack('VvvvvvVVVv',
+                0x04034b50,
+                20,
+                0,
+                0,
+                0,
+                0,
+                $crc,
+                $dataLen,
+                $dataLen,
+                $nameLen
+            ) . $name;
+
+            $localFiles .= $localHeader . $data;
+
+            $centralDir .= pack('VvvvvvvVVVVvvvvvVV',
+                0x02014b50,
+                20,
+                20,
+                0,
+                0,
+                0,
+                0,
+                $crc,
+                $dataLen,
+                $dataLen,
+                $nameLen,
+                0,
+                0,
+                0,
+                0,
+                0,
+                $offset
+            ) . $name;
+
+            $offset += strlen($localHeader) + $dataLen;
+        }
+
+        $centralDirOffset = $offset;
+        $centralDirSize = strlen($centralDir);
+        $count = count($files);
+
+        $eocd = pack('VvvvvVV',
+            0x06054b50,
+            0,
+            0,
+            $count,
+            $count,
+            $centralDirSize,
+            $centralDirOffset,
+            0
+        );
+
+        return $localFiles . $centralDir . $eocd;
     }
 }

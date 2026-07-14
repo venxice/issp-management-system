@@ -136,5 +136,6 @@ $routes->group('employee', ['filter' => 'role:employee'], static function (Route
 $routes->group('director-general', ['filter' => 'role:director_general'], static function (RouteCollection $routes): void {
     $routes->get('pending-approval', 'DirectorGeneral\PendingApprovalController::index');
     $routes->get('approved-projects', 'DirectorGeneral\ApprovedProjectsController::index');
+    $routes->post('download-batch', 'DirectorGeneral\DashboardController::batchDownload');
 });
 

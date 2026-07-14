@@ -41,9 +41,7 @@
                     </button>
                 </div>
             </div>
-            <form id="batchDownloadForm" method="post" action="<?= site_url('ict-planner/download-batch') ?>">
-                <?= csrf_field() ?>
-                <div class="table-responsive mb-0">
+            <div class="table-responsive mb-0">
                     <table class="table table-ict-projects align-middle mb-0">
                         <thead>
                             <tr>
@@ -61,7 +59,7 @@
                                 <?php foreach ($projects as $project): ?>
                                     <?php $fd = !empty($project['form_data']) ? json_decode($project['form_data'], true) : []; $ict = $fd['ict-projects-form'] ?? []; $intTitle = $ict['internal_project_title'] ?? $project['title'] ?? 'Untitled'; $crossTitle = $ict['cross_project_title'] ?? ''; $intDesc = $ict['internal_description'] ?? $project['description'] ?? '---'; $crossDesc = $ict['cross_description'] ?? ''; $intBudget = $ict['internal_total_cost'] ?? $project['budget'] ?? 0; $crossBudget = $ict['cross_total_cost'] ?? 0; ?>
                                     <tr>
-                                        <td><input type="checkbox" name="project_ids[]" value="<?= $project['id'] ?>" class="project-checkbox" onchange="onCheckboxChange()"></td>
+                                        <td><input type="checkbox" name="project_ids[]" value="<?= $project['id'] ?>" class="project-checkbox" data-url="<?= site_url('ict-planner/download/' . $project['id']) ?>" onchange="onCheckboxChange()"></td>
                                         <td>
                                             <div><span class="text-muted">Internal:</span> <?= esc($intTitle) ?></div>
                                             <?php if ($crossTitle): ?><div class="mt-1"><span class="text-muted">Cross-Agency:</span> <?= esc($crossTitle) ?></div><?php endif; ?>
@@ -131,7 +129,6 @@
                         </tbody>
                     </table>
                 </div>
-            </form>
 
             <?php if ($pager && $total > $perPage): ?>
             <div class="d-flex justify-content-between align-items-center mt-3 px-3 pb-3">
@@ -388,7 +385,7 @@ function openEndorseModal(projectId) {
 
 function toggleAllCheckboxes(master) {
     var cbs = document.querySelectorAll('.project-checkbox');
-    cbs.forEach(function(cb) { cb.checked = master.checked; });
+    cbs.forEach(function(cb, i) { cb.checked = master.checked; });
     updateBulkBar();
 }
 
@@ -428,7 +425,17 @@ function downloadSelected() {
         showAlertModal('No Selection', 'Please select at least one project to download.');
         return;
     }
-    document.getElementById('batchDownloadForm').submit();
+    cbs.forEach(function(cb, i) {
+        var url = cb.getAttribute('data-url');
+        if (url) {
+            setTimeout(function() {
+                var f = document.createElement('iframe');
+                f.style.display = 'none';
+                f.src = url;
+                document.body.appendChild(f);
+            }, i * 500);
+        }
+    });
 }
 
 document.addEventListener('DOMContentLoaded', function() {

@@ -4,6 +4,8 @@ namespace App\Controllers\IctPlanner;
 
 use App\Controllers\BaseController;
 use App\Models\ISspRecordModel;
+use App\Models\ResourceRequirementModel;
+use App\Models\AgencyInformationModel;
 
 class ConsolidationController extends BaseController
 {
@@ -14,6 +16,15 @@ class ConsolidationController extends BaseController
         $statusFilter = trim((string) $this->request->getGet('status'));
         $page = (int) ($this->request->getGet('page') ?? 1);
         $perPage = 25;
+
+        $statusCounts = [
+            'pending'     => (new ISspRecordModel())->where('status', 'pending')->countAllResults(),
+            'endorsed'    => (new ISspRecordModel())->where('status', 'endorsed')->countAllResults(),
+            'approved'    => (new ISspRecordModel())->where('status', 'approved')->countAllResults(),
+            'rejected'    => (new ISspRecordModel())->where('status', 'rejected')->countAllResults(),
+            'returned'    => (new ISspRecordModel())->where('status', 'returned')->countAllResults(),
+            'resubmitted' => (new ISspRecordModel())->where('status', 'resubmitted')->countAllResults(),
+        ];
 
         $isspModel = new ISspRecordModel();
 
@@ -47,15 +58,6 @@ class ConsolidationController extends BaseController
         $total = $builder->countAllResults(false);
         $projects = $builder->paginate($perPage, 'default', $page);
         $pager = $isspModel->pager;
-
-        $statusCounts = [
-            'pending' => $isspModel->where('status', 'pending')->countAllResults(),
-            'endorsed' => $isspModel->where('status', 'endorsed')->countAllResults(),
-            'approved' => $isspModel->where('status', 'approved')->countAllResults(),
-            'rejected' => $isspModel->where('status', 'rejected')->countAllResults(),
-            'returned' => $isspModel->where('status', 'returned')->countAllResults(),
-            'resubmitted' => $isspModel->where('status', 'resubmitted')->countAllResults(),
-        ];
 
         return view('frontend/ict_planner/consolidation/index', [
             'title' => 'Consolidation',
@@ -129,6 +131,27 @@ class ConsolidationController extends BaseController
         return $formData;
     }
 
+    private function loadResourceData(): array
+    {
+        $resourceModel = new ResourceRequirementModel();
+        return [
+            'year1' => $resourceModel->getByYear(1),
+            'year2' => $resourceModel->getByYear(2),
+            'year3' => $resourceModel->getByYear(3),
+            'generalSummary' => $resourceModel->getGeneralSummary(),
+            'fundSource' => $resourceModel->getFundSourceSummary(),
+            'statementOfExpenditure' => $resourceModel->getStatementOfExpenditureSummary(),
+            'objectOfExpenditure' => $resourceModel->getObjectOfExpenditureSummary(),
+        ];
+    }
+
+    private function loadAgencyData(): array
+    {
+        $model = new AgencyInformationModel();
+        $record = $model->orderBy('id', 'DESC')->first();
+        return $record ?? [];
+    }
+
     public function download(int $id)
     {
         $project = $this->loadProject($id);
@@ -138,10 +161,14 @@ class ConsolidationController extends BaseController
         }
 
         $formData = $this->extractFormData($project);
+        $resourceData = $this->loadResourceData();
+        $agencyData = $this->loadAgencyData();
 
         $html = view('frontend/ict_planner/consolidation/pdf_template', [
             'project' => $project,
             'formData' => $formData,
+            'resourceData' => $resourceData,
+            'agencyData' => $agencyData,
             'batchMode' => false,
         ]);
 
@@ -164,8 +191,9 @@ class ConsolidationController extends BaseController
         }
 
         $projectIds = array_map('intval', $projectIds);
-        $allHtml = '';
-        $count = 0;
+        $files = [];
+        $resourceData = $this->loadResourceData();
+        $agencyData = $this->loadAgencyData();
 
         foreach ($projectIds as $id) {
             $project = $this->loadProject($id);
@@ -176,40 +204,107 @@ class ConsolidationController extends BaseController
             $html = view('frontend/ict_planner/consolidation/pdf_template', [
                 'project' => $project,
                 'formData' => $formData,
+                'resourceData' => $resourceData,
+                'agencyData' => $agencyData,
                 'batchMode' => true,
             ]);
 
-            $allHtml .= $html;
-            $count++;
+            $dompdf = new \Dompdf\Dompdf();
+            $dompdf->loadHtml(mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8'));
+            $dompdf->setPaper('A4', 'landscape');
+            $dompdf->render();
+
+            $safeTitle = preg_replace('/[^a-zA-Z0-9]/', '_', $project['title'] ?? 'submission');
+            $filename = 'ISSP_' . $safeTitle . '_' . $id . '.pdf';
+            $files[$filename] = $dompdf->output();
         }
 
-        if ($count === 0) {
+        if (empty($files)) {
             return redirect()->to('ict-planner/consolidation')->with('error', 'No valid projects found.');
         }
 
-        $headHtml = view('frontend/ict_planner/consolidation/pdf_template', [
-            'project' => $project ?? [],
-            'formData' => [],
-            'batchMode' => true,
-        ]);
+        if (count($files) === 1) {
+            $name = array_key_first($files);
+            header('Content-Type: application/pdf');
+            header('Content-Disposition: attachment; filename="' . $name . '"');
+            header('Content-Length: ' . strlen($files[$name]));
+            echo $files[$name];
+            exit;
+        }
 
-        preg_match('/<style>(.*?)<\/style>/s', $headHtml, $styleMatch);
-        $styles = $styleMatch[1] ?? '';
-
-        $finalHtml = '<!DOCTYPE html><html><head><meta charset="utf-8"><style>' . $styles . '</style></head><body>';
-
-        $finalHtml .= $allHtml;
-
-        $finalHtml .= '</body></html>';
-
-        $dompdf = new \Dompdf\Dompdf();
-        $dompdf->loadHtml(mb_convert_encoding($finalHtml, 'HTML-ENTITIES', 'UTF-8'));
-        $dompdf->setPaper('A4', 'landscape');
-        $dompdf->render();
-
-        $filename = 'ISSP_Batch_Download_' . date('Ymd_His') . '.pdf';
-
-        $dompdf->stream($filename, ['Attachment' => true]);
+        $zipData = $this->buildZip($files);
+        $zipName = 'ISSP_Batch_' . date('Ymd_His') . '.zip';
+        header('Content-Type: application/zip');
+        header('Content-Disposition: attachment; filename="' . $zipName . '"');
+        header('Content-Length: ' . strlen($zipData));
+        echo $zipData;
         exit;
+    }
+
+    private function buildZip(array $files): string
+    {
+        $centralDir = '';
+        $localFiles = '';
+        $offset = 0;
+
+        foreach ($files as $name => $data) {
+            $nameLen = strlen($name);
+            $dataLen = strlen($data);
+            $crc = crc32($data);
+
+            $localHeader = pack('VvvvvvVVVv',
+                0x04034b50,
+                20,
+                0,
+                0,
+                0,
+                0,
+                $crc,
+                $dataLen,
+                $dataLen,
+                $nameLen
+            ) . $name;
+
+            $localFiles .= $localHeader . $data;
+
+            $centralDir .= pack('VvvvvvvVVVVvvvvvVV',
+                0x02014b50,
+                20,
+                20,
+                0,
+                0,
+                0,
+                0,
+                $crc,
+                $dataLen,
+                $dataLen,
+                $nameLen,
+                0,
+                0,
+                0,
+                0,
+                0,
+                $offset
+            ) . $name;
+
+            $offset += strlen($localHeader) + $dataLen;
+        }
+
+        $centralDirOffset = $offset;
+        $centralDirSize = strlen($centralDir);
+        $count = count($files);
+
+        $eocd = pack('VvvvvVV',
+            0x06054b50,
+            0,
+            0,
+            $count,
+            $count,
+            $centralDirSize,
+            $centralDirOffset,
+            0
+        );
+
+        return $localFiles . $centralDir . $eocd;
     }
 }
