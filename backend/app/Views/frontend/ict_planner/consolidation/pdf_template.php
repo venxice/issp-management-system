@@ -138,9 +138,7 @@ $hasHc = false; for ($i = 1; $i <= 4; $i++) { if (!isEmpty($hc['position_'.$i] ?
 $hasIs = false; foreach ($is as $vv) { if (!isEmpty($vv)) { $hasIs = true; break; } }
 $intFlds = ['internal_project_title','internal_description','internal_objectives','internal_total_cost','internal_funding_source','internal_start_date','internal_end_date','internal_implementing_unit','internal_year1_deliverables','internal_year2_deliverables','internal_year3_deliverables'];
 $hasInt = false; foreach ($intFlds as $f) { if (!isEmpty($proj[$f] ?? '')) { $hasInt = true; break; } }
-$crossFlds = ['cross_project_title','cross_description','cross_objectives','cross_total_cost','cross_funding_source','cross_lead_agency','cross_implementing_agency','cross_start_date','cross_end_date','cross_implementing_unit','cross_year1_deliverables','cross_year2_deliverables','cross_year3_deliverables'];
-$hasCross = false; foreach ($crossFlds as $f) { if (!isEmpty($proj[$f] ?? '')) { $hasCross = true; break; } }
-$hasPm = false; $pmProjects = ['internal_projects' => 'INTERNAL ICT PROJECTS', 'cross_projects' => 'CROSS-AGENCY ICT PROJECTS'];
+$hasPm = false; $pmProjects = ['internal_projects' => 'INTERNAL ICT PROJECTS'];
 $levels = ['intermediate' => 'INTERMEDIATE OUTCOME', 'immediate' => 'IMMEDIATE OUTCOME', 'output' => 'OUTPUT'];
 $cols = ['indicator' => 'Key Performance Indicators', 'baseline' => 'Baseline Data', 'target' => 'Targets', 'method' => 'Data Collection Methods', 'responsibility' => 'Responsibility'];
 foreach ($pmProjects as $pk => $pl): $kpData = $pm[$pk] ?? null; $kpi = is_array($kpData) ? ($kpData['kpi'] ?? $kpData) : [];
@@ -152,43 +150,57 @@ $hasRes = !empty($rY1) || !empty($rY2) || !empty($rY3);
 <head>
 <meta charset="utf-8">
 <style>
-@page { margin: 15mm 12mm 15mm 12mm; size: A4 landscape; }
+@page { margin: 25.4mm; size: A4 landscape; }
 * { box-sizing: border-box; }
-body { font-family: 'Palatino Linotype', 'Palatino', 'Book Antiqua', serif; font-size: 9pt; color: #000; line-height: 1.2; margin: 0; padding: 0; }
+body { font-family: 'Palatino Linotype', 'Palatino', 'Book Antiqua', serif; font-size: 11pt; color: #000; line-height: 1.5; margin: 0; padding: 0; }
 
-.cover-page { text-align: center; padding-top: 15mm; page-break-after: always; }
-.cover-title { font-size: 20pt; font-weight: bold; text-decoration: underline; margin-bottom: 4mm; }
-.cover-sub { font-size: 12pt; margin-bottom: 3mm; }
-.cover-agency { font-size: 14pt; font-weight: bold; margin-bottom: 3mm; }
-.cover-block { text-align: left; margin-top: 10mm; margin-bottom: 8mm; font-size: 9pt; }
+.cover-page { text-align: center; padding-top: 10mm; page-break-after: always; }
+.cover-title { font-size: 22pt; font-weight: bold; margin-bottom: 3mm; }
+.cover-type { font-size: 11pt; margin-bottom: 2mm; display: flex; align-items: center; justify-content: center; gap: 6mm; }
+.cover-type-label { display: inline-flex; align-items: center; gap: 2mm; }
+.cover-type-check { font-size: 11pt; }
+.cover-sub { font-size: 11pt; margin-bottom: 2mm; }
+.cover-agency { font-size: 11pt; font-weight: bold; margin-bottom: 10mm; }
+.cover-agency-sub { font-size: 11pt; margin-bottom: 4mm; }
+.cover-two-col { display: table; width: 100%; margin-top: 5mm; }
+.cover-two-col-left { display: table-cell; width: 50%; vertical-align: top; padding-right: 8mm; text-align: left; padding-left: 15mm; }
+.cover-two-col-right { display: table-cell; width: 50%; vertical-align: top; text-align: left; padding-left: 20mm; }
+.cover-block { margin-bottom: 8mm; font-size: 11pt; }
 .cover-block-label { font-weight: bold; margin-bottom: 1mm; }
-.cover-block-sign { padding-bottom: 6mm; border-bottom: 1px solid #333; margin-bottom: 4mm; margin-left: 2mm; }
-.cover-scope { text-align: left; margin-top: 2mm; font-size: 8.5pt; line-height: 1.6; margin-left: 4mm; }
+.cover-block-sign { display: block; width: 70%; margin-left: 15mm; margin-top: 5mm; border-top: 1px solid #333; padding-top: 2mm; text-align: left; font-size: 10pt; white-space: nowrap; }
+.cover-scope { margin-top: 2mm; font-size: 11pt; line-height: 1.5; margin-left: 4mm; }
 .cover-scope-title { font-weight: bold; margin-bottom: 1mm; }
 
 .toc-page { page-break-after: always; padding-top: 10mm; }
-.toc-title { font-size: 16pt; font-weight: bold; text-align: center; margin-bottom: 8mm; }
-.toc-part { font-weight: bold; font-size: 9.5pt; margin-top: 5mm; margin-bottom: 1mm; }
-.toc-sub { font-size: 9pt; margin-bottom: 1mm; margin-left: 4mm; }
-.toc-item { font-size: 8.5pt; margin-bottom: 0.8mm; margin-left: 8mm; }
+.toc-title { font-size: 18pt; font-weight: bold; text-align: left; margin-bottom: 8mm; }
+.toc-part { font-weight: bold; font-size: 11pt; margin-top: 5mm; margin-bottom: 1mm; }
+.toc-sub { font-size: 11pt; margin-bottom: 1mm; margin-left: 4mm; }
+.toc-item { font-size: 11pt; margin-bottom: 0.8mm; margin-left: 8mm; }
+.toc-row { font-size: 11pt; margin-bottom: 1mm; display: table; width: 100%; }
+.toc-row-part { font-weight: bold; margin-top: 5mm; }
+.toc-label-toc { display: table-cell; padding-left: 0; }
+.toc-row-sub .toc-label-toc { padding-left: 4mm; }
+.toc-row-item .toc-label-toc { padding-left: 8mm; }
+.toc-page-num { display: table-cell; text-align: right; width: 20px; }
 
-.part-heading { font-size: 16pt; font-weight: bold; text-decoration: underline; margin-top: 6mm; margin-bottom: 4mm; }
+.part-heading { font-size: 16pt; font-weight: bold;  margin-top: 6mm; margin-bottom: 4mm; }
 .part-heading:first-of-type { page-break-before: always; }
-.section-heading { font-size: 12pt; font-weight: bold; text-decoration: underline; margin-top: 5mm; margin-bottom: 3mm; }
-.subsection-heading { font-size: 11pt; font-weight: bold; text-decoration: underline; margin-top: 4mm; margin-bottom: 2mm; }
-.body-text { font-size: 9pt; margin-bottom: 2mm; }
-.field-label { font-size: 9pt; font-weight: bold; }
+.section-heading { font-size: 14pt; font-weight: bold;  margin-top: 5mm; margin-bottom: 3mm; }
+.subsection-heading { font-size: 12pt; font-weight: bold;  margin-top: 4mm; margin-bottom: 2mm; margin-left: 8mm; }
+.body-text { font-size: 11pt; margin-bottom: 2mm; margin-left: 16mm; }
+.field-label { font-size: 11pt; font-weight: bold; }
 
-table.dt { width: 100%; border-collapse: collapse; font-size: 8.5pt; margin: 2mm 0; page-break-inside: avoid; }
+table.dt { width: 100%; border-collapse: collapse; font-size: 11pt; margin: 2mm 0; page-break-inside: avoid; }
 table.dt th { border: 1px solid #000; padding: 1.5mm 2mm; font-weight: bold; text-align: center; background: #d9d9d9; vertical-align: middle; }
 table.dt td { border: 1px solid #000; padding: 1.5mm 2mm; vertical-align: top; }
-table.dt td.c { text-align: center; } table.dt td.b { font-weight: bold; }
+table.dt td.c { text-align: center; } table.dt td.b { font-weight: bold; } table.dt-d td:first-child { text-transform: uppercase; }
 table.dt td.r { text-align: right; } table.dt td.gt { font-weight: bold; border-top: 2px solid #000; }
+table.dt td.gt:first-child { background: #d9d9d9; }
 table.dt td.ch { font-weight: bold; }
 table.dt td.nb { border: none; background: none; }
 table.dt tr.group-header td { background: #d9d9d9; font-weight: bold; text-align: center; }
-.empty { color: #888; font-size: 8pt; text-align: center; padding: 2mm; }
-.footer { text-align: center; font-size: 7pt; color: #888; margin-top: 8mm; border-top: 1px solid #ccc; padding-top: 2mm; }
+.empty { color: #888; font-size: 11pt; text-align: center; padding: 2mm; }
+.footer { text-align: center; font-size: 9pt; color: #888; margin-top: 8mm; border-top: 1px solid #ccc; padding-top: 2mm; }
 </style>
 <?php if (!$batchMode): ?>
 </head>
@@ -197,94 +209,122 @@ table.dt tr.group-header td { background: #d9d9d9; font-weight: bold; text-align
 
 <!-- ==================== COVER PAGE ==================== -->
 <div class="cover-page">
-    <p style="font-size:9pt;color:#666;margin-bottom:12mm;">(Replace with agency's logo)</p>
+    <p style="font-size:11pt;color:#666;margin-bottom:12mm;">(Replace with agency's logo)</p>
     <div class="cover-title">INFORMATION SYSTEMS STRATEGIC PLAN (ISSP)</div>
-    <div class="cover-sub">REGULAR ISSP &nbsp; AMENDMENT &lt; 1st/2nd/3rd &gt;</div>
-    <div class="cover-sub">For the period <?= ve($startYear) ?> to <?= ve($endYear) ?></div>
-    <div class="cover-agency"><?= ve($department) ?></div>
-    <p style="font-size:9pt;margin-bottom:8mm;">&nbsp;</p>
-
-    <div class="cover-block">
-        <div class="cover-block-label">PREPARED BY:</div>
-        <div class="cover-block-sign">Name &amp; Signature of Chief Information Officer</div>
+    <div class="cover-type">
+        <span class="cover-type-label"><span class="cover-type-check">[<?= v($issp_type ?? '') === 'regular' ? 'X' : ' ' ?>]</span> REGULAR ISSP</span>
+        <span class="cover-type-label"><span class="cover-type-check">[<?= v($issp_type ?? '') === 'amendment' ? 'X' : ' ' ?>]</span> AMENDMENT <small>&lt; 1st / 2nd / 3rd &gt;</small></span>
     </div>
+    <div class="cover-sub">For the period <?= ve($startYear) ?> to <?= ve($endYear) ?></div>
+    <div class="cover-agency">Philippine Information Agency</div>
 
-    <div class="cover-block">
-        <div class="cover-scope-title">Scope</div>
-        <div class="cover-scope">
-            [ ] Department-Wide<br>
-            [ ] Department - Central Office / Head Office<br>
-            &nbsp;&nbsp;&nbsp;&nbsp;[ ] Central Office only<br>
-            &nbsp;&nbsp;&nbsp;&nbsp;[ ] With Regional Offices / Field Offices<br>
-            &nbsp;&nbsp;&nbsp;&nbsp;[ ] With Bureaus<br>
-            [ ] Agency-Wide<br>
-            &nbsp;&nbsp;&nbsp;&nbsp;[ ] Central Office only<br>
-            &nbsp;&nbsp;&nbsp;&nbsp;[ ] With Regional Offices / Field Offices<br>
-            [ ] Other Government Entity<br>
-            [ ] LGU
+    <div class="cover-two-col">
+        <div class="cover-two-col-left">
+            <div class="cover-block">
+                <div class="cover-block-label">PREPARED BY:</div>
+                <div class="cover-block-sign">Name &amp; Signature of Chief Information Officer</div>
+            </div>
+            <div style="height:8mm;"></div>
+            <div class="cover-block">
+                <div class="cover-block-label">APPROVED BY:</div>
+                <div class="cover-block-sign">Name &amp; Signature of Agency Head</div>
+            </div>
+        </div>
+        <div class="cover-two-col-right">
+            <div class="cover-scope-title">Scope</div>
+            <div class="cover-scope">
+                <table style="border-collapse:collapse;margin:0;padding:0;font-size:11pt;line-height:1.5;">
+                    <tr><td style="padding:0;white-space:nowrap;vertical-align:top;">[ ] Department-Wide</td><td></td></tr>
+                    <tr><td style="padding:0;white-space:nowrap;vertical-align:top;">[ ] Department - Central Office / Head Office</td><td></td></tr>
+                    <tr><td style="padding:0;white-space:nowrap;vertical-align:top;">&nbsp;&nbsp;&nbsp;&nbsp;[ ] Central Office only</td><td></td></tr>
+                    <tr><td style="padding:0;white-space:nowrap;vertical-align:top;">&nbsp;&nbsp;&nbsp;&nbsp;[ ] With Regional Offices / Field Offices</td><td></td></tr>
+                    <tr><td style="padding:0;white-space:nowrap;vertical-align:top;">&nbsp;&nbsp;&nbsp;&nbsp;[ ] With Bureaus</td><td></td></tr>
+                    <tr><td style="padding:0;white-space:nowrap;vertical-align:top;">[ ] Agency-Wide</td><td></td></tr>
+                    <tr><td style="padding:0;white-space:nowrap;vertical-align:top;">&nbsp;&nbsp;&nbsp;&nbsp;[ ] Central Office only</td><td></td></tr>
+                    <tr><td style="padding:0;white-space:nowrap;vertical-align:top;">&nbsp;&nbsp;&nbsp;&nbsp;[ ] With Regional Offices / Field Offices</td><td></td></tr>
+                    <tr><td style="padding:0;white-space:nowrap;vertical-align:top;">&nbsp;&nbsp;&nbsp;&nbsp;[ ] Other Government Entity</td><td></td></tr>
+                    <tr><td style="padding:0;white-space:nowrap;vertical-align:top;">[ ] LGU</td><td></td></tr>
+                </table>
+            </div>
         </div>
     </div>
 
-    <div class="cover-block">
-        <div class="cover-block-label">APPROVED BY:</div>
-        <div class="cover-block-sign">Name &amp; Signature of Agency Head</div>
-    </div>
-
-    <p style="margin-top:15mm;font-size:8pt;color:#999;">
-        This document was generated from the ISSP Management System on <?= ve(date('F d, Y')) ?>.
-    </p>
 </div>
 
 <!-- ==================== TABLE OF CONTENTS ==================== -->
 <div class="toc-page">
     <div class="toc-title">Table of Contents</div>
 
-    <div class="toc-part">PART I. AGENCY PROFILE &amp; STRATEGIC CONTEXT</div>
-    <div class="toc-sub">A. Mandate, Vision, Mission, and Organizational Outcome</div>
-    <div class="toc-item">A.1. Mandate</div>
-    <div class="toc-item">A.2. Vision Statement</div>
-    <div class="toc-item">A.3. Mission Statement</div>
-    <div class="toc-item">A.4. Organizational Outcome</div>
-    <div class="toc-sub">B. Organizational Structure</div>
-    <div class="toc-item">B.1. Chief Information Officer (CIO)</div>
-    <div class="toc-item">B.2. Human Capital</div>
-    <div class="toc-sub">C. Stakeholder Analysis</div>
+    <div class="toc-row toc-row-sub" style="font-weight:bold;"><span class="toc-label-toc">Definition of Terms</span><span class="toc-page-num">4</span></div>
 
-    <div class="toc-part">PART II. CURRENT ICT ASSESSMENT</div>
-    <div class="toc-sub">A. Strategic Concerns for ICT Use</div>
-    <div class="toc-sub">B. Existing Network Infrastructure</div>
-    <div class="toc-item">B1. LAN/WAN Set-up Including Connectivity Type and Bandwidth</div>
-    <div class="toc-item">B2. Cybersecurity Control Checklist</div>
-    <div class="toc-sub">C. Existing/Operational Information Systems (IS) Inventory</div>
-    <div class="toc-sub">D. E-Government Programs (EGP) Checklist</div>
+    <div class="toc-row toc-row-part"><span class="toc-label-toc">PART I. AGENCY PROFILE &amp; STRATEGIC CONTEXT</span><span class="toc-page-num">5</span></div>
+    <div class="toc-row toc-row-sub"><span class="toc-label-toc">A. Mandate, Vision, Mission, and Organizational Outcome</span><span class="toc-page-num">3</span></div>
+    <div class="toc-row toc-row-item"><span class="toc-label-toc">A.1. Mandate</span><span class="toc-page-num">3</span></div>
+    <div class="toc-row toc-row-item"><span class="toc-label-toc">A.2. Vision Statement</span><span class="toc-page-num">3</span></div>
+    <div class="toc-row toc-row-item"><span class="toc-label-toc">A.3. Mission Statement</span><span class="toc-page-num">3</span></div>
+    <div class="toc-row toc-row-item"><span class="toc-label-toc">A.4. Organizational Outcome</span><span class="toc-page-num">3</span></div>
+    <div class="toc-row toc-row-sub"><span class="toc-label-toc">B. Organizational Structure</span><span class="toc-page-num">4</span></div>
+    <div class="toc-row toc-row-item"><span class="toc-label-toc">B.1. Chief Information Officer (CIO)</span><span class="toc-page-num">4</span></div>
+    <div class="toc-row toc-row-item"><span class="toc-label-toc">B.2. Human Capital</span><span class="toc-page-num">4</span></div>
+    <div class="toc-row toc-row-sub"><span class="toc-label-toc">C. Stakeholder Analysis</span><span class="toc-page-num">5</span></div>
 
-    <div class="toc-part">PART III. PROPOSED ICT STRATEGY</div>
-    <div class="toc-sub">A. Proposed Network Infrastructure</div>
-    <div class="toc-item">A.1. LAN/WAN Set-up Including Connectivity Type and Bandwidth</div>
-    <div class="toc-item">A.2. Cybersecurity Control Checklist</div>
-    <div class="toc-sub">B. Enterprise Architecture</div>
-    <div class="toc-sub">C. Proposed ICT Human Capital</div>
-    <div class="toc-sub">D. Proposed Information Systems</div>
-    <div class="toc-sub">E. ICT Projects</div>
-    <div class="toc-item">Internal ICT Projects</div>
-    <div class="toc-item">Cross-Agency ICT Projects</div>
-    <div class="toc-sub">F. Performance Measurement Framework</div>
-    <div class="toc-item">Internal ICT Projects</div>
-    <div class="toc-item">Cross-Agency ICT Projects</div>
+    <div class="toc-row toc-row-part"><span class="toc-label-toc">PART II. CURRENT ICT ASSESSMENT</span><span class="toc-page-num">6</span></div>
+    <div class="toc-row toc-row-sub"><span class="toc-label-toc">A. Strategic Concerns for ICT Use</span><span class="toc-page-num">6</span></div>
+    <div class="toc-row toc-row-sub"><span class="toc-label-toc">B. Existing Network Infrastructure</span><span class="toc-page-num">6</span></div>
+    <div class="toc-row toc-row-item"><span class="toc-label-toc">B1. LAN/WAN Set-up Including Connectivity Type and Bandwidth</span><span class="toc-page-num">6</span></div>
+    <div class="toc-row toc-row-item"><span class="toc-label-toc">B2. Cybersecurity Control Checklist</span><span class="toc-page-num">7</span></div>
+    <div class="toc-row toc-row-sub"><span class="toc-label-toc">C. Existing/Operational Information Systems (IS) Inventory</span><span class="toc-page-num">8</span></div>
+    <div class="toc-row toc-row-sub"><span class="toc-label-toc">D. E-Government Programs (EGP) Checklist</span><span class="toc-page-num">9</span></div>
 
-    <div class="toc-part">PART IV. RESOURCE REQUIREMENTS</div>
-    <div class="toc-sub">Detailed Resource Deployment and Cost Breakdown</div>
-    <div class="toc-item">Year #1</div>
-    <div class="toc-item">Year #2</div>
-    <div class="toc-item">Year #3</div>
-    <div class="toc-sub">Summary of Investments</div>
-    <div class="toc-item">General Summary</div>
-    <div class="toc-item">Fund Source</div>
-    <div class="toc-item">Statement of Expenditure</div>
-    <div class="toc-item">Object of Expenditure</div>
+    <div class="toc-row toc-row-part"><span class="toc-label-toc">PART III. PROPOSED ICT STRATEGY</span><span class="toc-page-num">10</span></div>
+    <div class="toc-row toc-row-sub"><span class="toc-label-toc">A. Proposed Network Infrastructure</span><span class="toc-page-num">10</span></div>
+    <div class="toc-row toc-row-item"><span class="toc-label-toc">A.1. LAN/WAN Set-up Including Connectivity Type and Bandwidth</span><span class="toc-page-num">10</span></div>
+    <div class="toc-row toc-row-item"><span class="toc-label-toc">A.2. Cybersecurity Control Checklist</span><span class="toc-page-num">11</span></div>
+    <div class="toc-row toc-row-sub"><span class="toc-label-toc">B. Enterprise Architecture</span><span class="toc-page-num">12</span></div>
+    <div class="toc-row toc-row-sub"><span class="toc-label-toc">C. Proposed ICT Human Capital</span><span class="toc-page-num">13</span></div>
+    <div class="toc-row toc-row-sub"><span class="toc-label-toc">D. Proposed Information Systems</span><span class="toc-page-num">14</span></div>
+    <div class="toc-row toc-row-sub"><span class="toc-label-toc">E. ICT Projects</span><span class="toc-page-num">16</span></div>
+    <div class="toc-row toc-row-sub"><span class="toc-label-toc">F. Performance Measurement Framework</span><span class="toc-page-num">18</span></div>
+
+    <div class="toc-row toc-row-part"><span class="toc-label-toc">PART IV. RESOURCE REQUIREMENTS</span><span class="toc-page-num">23</span></div>
+    <div class="toc-row toc-row-sub"><span class="toc-label-toc">A. Detailed Resource Deployment and Cost Breakdown</span><span class="toc-page-num">23</span></div>
+    <div class="toc-row toc-row-item"><span class="toc-label-toc">A.1. Year #1</span><span class="toc-page-num">23</span></div>
+    <div class="toc-row toc-row-item"><span class="toc-label-toc">A.2. Year #2</span><span class="toc-page-num">27</span></div>
+    <div class="toc-row toc-row-item"><span class="toc-label-toc">A.3. Year #3</span><span class="toc-page-num">31</span></div>
+    <div class="toc-row toc-row-sub"><span class="toc-label-toc">B. Summary of Investments</span><span class="toc-page-num">35</span></div>
+    <div class="toc-row toc-row-item"><span class="toc-label-toc">B.1. General Summary</span><span class="toc-page-num">35</span></div>
+    <div class="toc-row toc-row-item"><span class="toc-label-toc">B.2. Fund Source</span><span class="toc-page-num">35</span></div>
+    <div class="toc-row toc-row-item"><span class="toc-label-toc">B.3. Statement of Expenditure</span><span class="toc-page-num">35</span></div>
+    <div class="toc-row toc-row-item"><span class="toc-label-toc">B.4. Object of Expenditure</span><span class="toc-page-num">36</span></div>
 </div>
 
+<!-- ==================== DEFINITION OF TERMS ==================== -->
+<div style="font-size: 20pt; font-weight: bold; margin-bottom: 6mm;">DEFINITION OF TERMS</div>
+<table style="width: 100%; border-collapse: collapse; font-size: 11pt; line-height: 1.5;">
+    <thead>
+        <tr>
+            <th style="width: 50%; border: 1px solid #000; padding: 4px 6px; text-align: left; font-weight: bold;">Terms</th>
+            <th style="width: 50%; border: 1px solid #000; padding: 4px 6px; text-align: left; font-weight: bold;">Definition</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td style="border: 1px solid #000; padding: 4px 6px; vertical-align: top;">Agency</td>
+            <td style="border: 1px solid #000; padding: 4px 6px; vertical-align: top;">Refers to any bureau, office, commission, authority, or instrumentality of the national government, including government-owned or–controlled corporations (GOCC), authorized by law or by their respective charters to contract for or undertake information and communications technology networks and databases, infrastructure or development projects.</td>
+        </tr>
+        <tr>
+            <td style="border: 1px solid #000; padding: 4px 6px; vertical-align: top;">Business Process</td>
+            <td style="border: 1px solid #000; padding: 4px 6px; vertical-align: top;">A collection of business transactions between business partners and/or internal activities within one business. These transactions and/or activities together support the objective of the business process.</td>
+        </tr>
+        <tr>
+            <td style="border: 1px solid #000; padding: 4px 6px; vertical-align: top;">Chief Information Officer</td>
+            <td style="border: 1px solid #000; padding: 4px 6px; vertical-align: top;">Refers to a senior officer responsible for the development, planning, and implementation of the government entity's information systems strategic plan (ISSP) or ICT plan, and management of the agency's ICT systems, platforms, and applications.</td>
+        </tr>
+    </tbody>
+</table>
+
 <!-- ==================== PART I ==================== -->
+<div style="page-break-before: always;"></div>
 <div class="part-heading">PART I. AGENCY PROFILE &amp; STRATEGIC CONTEXT</div>
 <div class="section-heading">A. MANDATE, VISION, MISSION, AND ORGANIZATIONAL OUTCOME</div>
 <div class="subsection-heading">A.1. MANDATE</div>
@@ -299,13 +339,11 @@ table.dt tr.group-header td { background: #d9d9d9; font-weight: bold; text-align
 
 <div class="section-heading">B. ORGANIZATIONAL STRUCTURE</div>
 <div class="subsection-heading">B.1. CHIEF INFORMATION OFFICER (CIO)</div>
-<table class="dt">
-    <tr><td style="width:25%;font-weight:bold;background:#d9d9d9;">Name of CIO:</td><td><?= !isEmpty($agencyData['cio_name'] ?? '') ? v($agencyData['cio_name']) : '<span class="empty">[To be completed]</span>' ?></td></tr>
-    <tr><td style="font-weight:bold;background:#d9d9d9;">Plantilla Position:</td><td><?= !isEmpty($agencyData['cio_plantilla'] ?? '') ? v($agencyData['cio_plantilla']) : '<span class="empty">[To be completed]</span>' ?></td></tr>
-    <tr><td style="font-weight:bold;background:#d9d9d9;">Organizational Unit:</td><td><?= !isEmpty($agencyData['cio_unit'] ?? '') ? v($agencyData['cio_unit']) : '<span class="empty">[To be completed]</span>' ?></td></tr>
-    <tr><td style="font-weight:bold;background:#d9d9d9;">E-mail Address:</td><td><?= !isEmpty($agencyData['cio_email'] ?? '') ? v($agencyData['cio_email']) : '<span class="empty">[To be completed]</span>' ?></td></tr>
-    <tr><td style="font-weight:bold;background:#d9d9d9;">Contact Number/s:</td><td><?= !isEmpty($agencyData['cio_contact'] ?? '') ? v($agencyData['cio_contact']) : '<span class="empty">[To be completed]</span>' ?></td></tr>
-</table>
+<div class="body-text"><span class="field-label">Name of CIO:</span> <?= !isEmpty($agencyData['cio_name'] ?? '') ? v($agencyData['cio_name']) : '<span class="empty">[To be completed]</span>' ?></div>
+<div class="body-text"><span class="field-label">Plantilla Position:</span> <?= !isEmpty($agencyData['cio_plantilla'] ?? '') ? v($agencyData['cio_plantilla']) : '<span class="empty">[To be completed]</span>' ?></div>
+<div class="body-text"><span class="field-label">Organizational Unit:</span> <?= !isEmpty($agencyData['cio_unit'] ?? '') ? v($agencyData['cio_unit']) : '<span class="empty">[To be completed]</span>' ?></div>
+<div class="body-text"><span class="field-label">E-mail Address:</span> <?= !isEmpty($agencyData['cio_email'] ?? '') ? v($agencyData['cio_email']) : '<span class="empty">[To be completed]</span>' ?></div>
+<div class="body-text"><span class="field-label">Contact Number/s:</span> <?= !isEmpty($agencyData['cio_contact'] ?? '') ? v($agencyData['cio_contact']) : '<span class="empty">[To be completed]</span>' ?></div>
 
 <div class="subsection-heading">B.2. HUMAN CAPITAL</div>
 <?php
@@ -347,101 +385,58 @@ if (!empty($agencyData['stakeholder_data'])) {
 <!-- ==================== PART II ==================== -->
 <div class="part-heading">PART II. CURRENT ICT ASSESSMENT</div>
 <div class="section-heading">A. STRATEGIC CONCERNS FOR ICT USE</div>
-<table class="dt">
-    <tr><th>OO/SO/MFO</th><th>Critical Management, Operating, or Business System</th><th>Problem</th><th>Intended Use of ICT</th></tr>
-    <tr><td colspan="4" class="empty">[To be completed by agency]</td></tr>
-</table>
-
 <div class="section-heading">B. EXISTING NETWORK INFRASTRUCTURE</div>
 <div class="subsection-heading">B1. LAN/WAN SET-UP INCLUDING CONNECTIVITY TYPE AND BANDWIDTH</div>
-<?php
-$existingLanF = ['dept_connectivity_type','dept_ipv6_ready','dept_upload_speed','dept_download_speed','dept_description','dept_network_diagram'];
-$existingRegF = ['regional_connectivity_type','regional_ipv6_ready','regional_upload_speed','regional_download_speed','regional_offices_details','regional_network_diagram'];
-$hasExistingLan = false; $hasExistingReg = false;
-foreach ($existingLanF as $f) { if (!isEmpty($ni[$f] ?? '')) { $hasExistingLan = true; break; } }
-foreach ($existingRegF as $f) { if (!isEmpty($ni[$f] ?? '')) { $hasExistingReg = true; break; } }
-?>
-<table class="dt">
-    <tr><th style="width:35%;">Item</th><th>Details</th></tr>
-<?php if ($hasExistingLan): ?>
-    <tr><td colspan="2" class="group-header">Department / Central Office</td></tr>
-<?php foreach ($existingLanF as $f): $vl = v($ni[$f] ?? ''); if ($vl === '') continue; if (strpos($vl, 'data:') === 0 || strpos($vl, 'uploads/') === 0) $vl = '[File uploaded]'; ?>
-    <tr><td class="b"><?= ve(fl('network-infrastructure-form', $f)) ?></td><td><?= $vl ?></td></tr>
-<?php endforeach; ?>
-<?php endif; ?>
-<?php if ($hasExistingReg): ?>
-    <tr><td colspan="2" class="group-header">Regional / Branch Offices</td></tr>
-<?php foreach ($existingRegF as $f): $vl = v($ni[$f] ?? ''); if ($vl === '') continue; if (strpos($vl, 'data:') === 0 || strpos($vl, 'uploads/') === 0) $vl = '[File uploaded]'; ?>
-    <tr><td class="b"><?= ve(fl('network-infrastructure-form', $f)) ?></td><td><?= $vl ?></td></tr>
-<?php endforeach; ?>
-<?php endif; ?>
-<?php if (!$hasExistingLan && !$hasExistingReg): ?>
-    <tr><td colspan="2" class="empty">[To be completed by agency]</td></tr>
-<?php endif; ?>
-</table>
-
 <div class="subsection-heading">B2. CYBERSECURITY CONTROL CHECKLIST</div>
-<table class="dt">
-    <tr><th style="width:22%;"></th><th style="width:39%;">MANDATORY</th><th style="width:39%;">OPTIONAL</th></tr>
-    <?php foreach ($cybersecurityCategories as $catName => $catItems): ?>
-    <tr>
-        <td class="ch"><?= ve($catName) ?></td>
-        <td><?php foreach ($catItems as $cfn => $citem): ?><?php if ($citem['badge'] !== 'Optional'): ?><div><?= (isset($ni[$cfn]) && v($ni[$cfn]) === '1') ? '&#9745;' : '&#9744;' ?> <?= ve($citem['label']) ?></div><?php endif; ?><?php endforeach; ?></td>
-        <td><?php foreach ($catItems as $cfn => $citem): ?><?php if ($citem['badge'] === 'Optional'): ?><div><?= (isset($ni[$cfn]) && v($ni[$cfn]) === '1') ? '&#9745;' : '&#9744;' ?> <?= ve($citem['label']) ?></div><?php endif; ?><?php endforeach; ?></td>
-    </tr>
-    <?php endforeach; ?>
-</table>
-
 <div class="section-heading">C. EXISTING/OPERATIONAL INFORMATION SYSTEMS (IS) INVENTORY</div>
-<?php $isExistingGs = ['SYSTEM DETAILS' => ['is_name_1','status_1','classification_1','description_1'], 'DEPLOYMENT' => ['deployment_1','owner_1','dev_strategy_1','platform_1','database_1','storage_1'], 'USERS' => ['internal_users_1','external_users_1','system_usage_1','online_link_1'], 'SERVICE TYPE' => ['frontline_1','non_frontline_1','online_1','on_premise_1','hybrid_1'], 'INTEROPERABILITY' => ['interop1_main','interop1_internal_system','interop1_sub','interop1_external_system'], 'PRIVACY IMPACT ASSESSMENT' => ['pia_1']]; ?>
-<table class="dt">
-    <tr><th style="width:25%;">INFORMATION SYSTEM NAME</th><th>CLASSIFICATION</th><th>DESCRIPTION / PURPOSE</th><th>DEPLOYMENT</th><th>SYSTEM OWNER</th></tr>
-    <?php if ($hasIs): ?>
-    <tr><td><?= v($is['is_name_1'] ?? '') ?></td><td><?= v($is['classification_1'] ?? '') ?></td><td><?= v($is['description_1'] ?? '') ?></td><td><?= v($is['deployment_1'] ?? '') ?></td><td><?= v($is['owner_1'] ?? '') ?></td></tr>
-    <?php else: ?>
-    <tr><td colspan="5" class="empty">[To be completed by agency]</td></tr>
-    <?php endif; ?>
-</table>
-
 <div class="section-heading">D. E-GOVERNMENT PROGRAMS (EGP) CHECKLIST</div>
-<table class="dt">
-    <tr><th style="width:25%;">EGP Program</th><th>Status</th><th>Details</th></tr>
-    <tr><td colspan="3" class="empty">[To be completed by agency]</td></tr>
-</table>
 
 <!-- ==================== PART III ==================== -->
 <div class="part-heading">PART III. PROPOSED ICT STRATEGY</div>
 
 <div class="section-heading">A. PROPOSED NETWORK INFRASTRUCTURE</div>
 <div class="subsection-heading">A.1. LAN/WAN SET-UP INCLUDING CONNECTIVITY TYPE AND BANDWIDTH</div>
-<table class="dt">
-    <tr><th style="width:35%;">Item</th><th>Details</th></tr>
-    <?php $lanF = ['dept_network_diagram','dept_connectivity_type','dept_ipv6_ready','dept_upload_speed','dept_download_speed','dept_description'];
-    $regF = ['regional_network_diagram','regional_connectivity_type','regional_ipv6_ready','regional_upload_speed','regional_download_speed','regional_offices_details'];
-    $hasLan = false; $hasReg = false; foreach ($lanF as $f) { if (!isEmpty($ni[$f] ?? '')) { $hasLan = true; break; } } foreach ($regF as $f) { if (!isEmpty($ni[$f] ?? '')) { $hasReg = true; break; } } ?>
-    <?php if ($hasLan): ?><tr><td colspan="2" class="group-header">Department / Central Office</td></tr><?php foreach ($lanF as $f): $vl = v($ni[$f] ?? ''); if ($vl === '') continue; if (strpos($vl, 'data:') === 0 || strpos($vl, 'uploads/') === 0) $vl = '[File uploaded]'; ?><tr><td class="b"><?= ve(fl('network-infrastructure-form', $f)) ?></td><td><?= $vl ?></td></tr><?php endforeach; ?><?php endif; ?>
-    <?php if ($hasReg): ?><tr><td colspan="2" class="group-header">Regional / Branch Offices</td></tr><?php foreach ($regF as $f): $vl = v($ni[$f] ?? ''); if ($vl === '') continue; if (strpos($vl, 'data:') === 0 || strpos($vl, 'uploads/') === 0) $vl = '[File uploaded]'; ?><tr><td class="b"><?= ve(fl('network-infrastructure-form', $f)) ?></td><td><?= $vl ?></td></tr><?php endforeach; ?><?php endif; ?>
-    <?php if (!$hasLan && !$hasReg): ?><tr><td colspan="2" class="empty">No data provided.</td></tr><?php endif; ?>
-</table>
 
 <div class="subsection-heading">A.2. CYBERSECURITY CONTROL CHECKLIST</div>
 <table class="dt">
     <tr><th style="width:22%;"></th><th style="width:39%;">MANDATORY</th><th style="width:39%;">OPTIONAL</th></tr>
     <?php foreach ($cybersecurityCategories as $catName => $catItems): ?>
+    <?php if ($catName === 'OTHER MEASURES'): ?>
+    <tr>
+        <td class="ch" style="border-right:none;"><?= ve($catName) ?></td>
+        <td style="border-right:none;"><?php $items = array_values($catItems); $half = ceil(count($items) / 2); foreach (array_slice($items, 0, $half) as $citem): ?><?php $checked = (isset($ni[$citem['label']]) && v($ni[$citem['label']]) === '1'); ?><div>[<?= $checked ? 'X' : ' ' ?>] <?= ve($citem['label']) ?></div><?php endforeach; ?></td>
+        <td style="border-left:none;"><?php foreach (array_slice($items, $half) as $citem): ?><?php $checked = (isset($ni[$citem['label']]) && v($ni[$citem['label']]) === '1'); ?><div>[<?= $checked ? 'X' : ' ' ?>] <?= ve($citem['label']) ?></div><?php endforeach; ?></td>
+    </tr>
+    <?php else: ?>
     <tr>
         <td class="ch"><?= ve($catName) ?></td>
-        <td><?php foreach ($catItems as $cfn => $citem): ?><?php if ($citem['badge'] !== 'Optional'): ?><div><?= (isset($ni[$cfn]) && v($ni[$cfn]) === '1') ? '&#9745;' : '&#9744;' ?> <?= ve($citem['label']) ?></div><?php endif; ?><?php endforeach; ?></td>
-        <td><?php foreach ($catItems as $cfn => $citem): ?><?php if ($citem['badge'] === 'Optional'): ?><div><?= (isset($ni[$cfn]) && v($ni[$cfn]) === '1') ? '&#9745;' : '&#9744;' ?> <?= ve($citem['label']) ?></div><?php endif; ?><?php endforeach; ?></td>
+        <td><?php foreach ($catItems as $cfn => $citem): ?><?php if ($citem['badge'] !== 'Optional'): ?><?php $checked = (isset($ni[$cfn]) && v($ni[$cfn]) === '1'); ?><div>[<?= $checked ? 'X' : ' ' ?>] <?= ve($citem['label']) ?></div><?php endif; ?><?php endforeach; ?></td>
+        <td><?php foreach ($catItems as $cfn => $citem): ?><?php if ($citem['badge'] === 'Optional'): ?><?php $checked = (isset($ni[$cfn]) && v($ni[$cfn]) === '1'); ?><div>[<?= $checked ? 'X' : ' ' ?>] <?= ve($citem['label']) ?></div><?php endif; ?><?php endforeach; ?></td>
     </tr>
+    <?php endif; ?>
     <?php endforeach; ?>
 </table>
 
 <div class="section-heading">B. ENTERPRISE ARCHITECTURE</div>
-<table class="dt">
-    <tr><th style="width:35%;">Item</th><th>Details</th></tr>
-    <?php if ($hasEa): $eaD = v($ea['ea_diagram'] ?? ''); if ($eaD !== '' && strpos($eaD, 'data:') === 0) $eaD = '[Diagram uploaded]'; if ($eaD !== ''): ?><tr><td class="b">Enterprise Architecture Diagram</td><td><?= $eaD ?></td></tr><?php endif; $eaDesc = v($ea['ea_description'] ?? ''); if ($eaDesc !== ''): ?><tr><td class="b">Description</td><td><?= nl2br($eaDesc) ?></td></tr><?php endif; ?>
-    <?php else: ?><tr><td colspan="2" class="empty">No data provided.</td></tr><?php endif; ?>
-</table>
+<?php if ($hasEa): ?>
+    <?php $eaD = v($ea['ea_diagram'] ?? ''); if ($eaD !== ''): ?>
+        <?php if (preg_match('/^data:image\/(png|jpe?g|gif);/', $eaD)): ?>
+            <?php $eaD = preg_replace('/^data:(image\/[a-z0-9+\-.]+);.*;base64,/', 'data:$1;base64,', $eaD); ?>
+            <div style="text-align:center;margin:4mm 0;"><img src="<?= $eaD ?>" style="max-width:100%;max-height:150mm;"></div>
+        <?php elseif (preg_match('/^data:application\/pdf;/', $eaD)): ?>
+            <div class="body-text"><em>[Enterprise Architecture Diagram - PDF uploaded]</em></div>
+        <?php elseif (strpos($eaD, 'uploads/') === 0): ?>
+            <div style="text-align:center;margin:4mm 0;"><img src="<?= base_url($eaD) ?>" style="max-width:100%;max-height:150mm;"></div>
+        <?php else: ?>
+            <div class="body-text"><?= $eaD ?></div>
+        <?php endif; ?>
+    <?php endif; ?>
+    <?php $eaDesc = v($ea['ea_description'] ?? ''); if ($eaDesc !== ''): ?>
+        <div class="body-text"><?= nl2br($eaDesc) ?></div>
+    <?php endif; ?>
+<?php else: ?>
+    <div class="body-text empty">No data provided.</div>
+<?php endif; ?>
 
 <div class="section-heading">C. PROPOSED ICT HUMAN CAPITAL</div>
 <?php $hcRows = []; $hcGT = 0; for ($i = 1; $i <= 4; $i++) { $pos = v($hc['position_'.$i] ?? ''); $stat = v($hc['status_'.$i] ?? ''); $cnt = v($hc['count_'.$i] ?? ''); if ($pos !== '' || $stat !== '' || $cnt !== '') { $cn = is_numeric($cnt) ? (int)$cnt : 0; $hcGT += $cn; $hcRows[] = ['position' => $pos, 'status' => $stat, 'count' => $cnt]; } } ?>
@@ -449,35 +444,81 @@ foreach ($existingRegF as $f) { if (!isEmpty($ni[$f] ?? '')) { $hasExistingReg =
     <tr><th style="width:40%;">IT POSITION</th><th style="width:35%;">EMPLOYMENT STATUS</th><th style="width:15%;">PHYSICAL COUNT</th></tr>
     <?php if (!empty($hcRows)): foreach ($hcRows as $r): ?><tr><td><?= $r['position'] !== '' ? $r['position'] : '<span class="empty">-</span>' ?></td><td><?= $r['status'] !== '' ? $r['status'] : '<span class="empty">-</span>' ?></td><td class="c"><?= $r['count'] !== '' ? $r['count'] : '-' ?></td></tr><?php endforeach; ?>
     <?php else: for ($i = 0; $i < 4; $i++): ?><tr><td class="empty">-</td><td class="empty">-</td><td class="c empty">-</td></tr><?php endfor; endif; ?>
-    <tr><td class="gt" colspan="2" style="text-align:right;">Grand Total</td><td class="c gt"><?= $hcGT ?></td></tr>
+    <tr><td class="gt" colspan="2" style="text-align:left;">Grand Total</td><td class="c gt"><?= $hcGT ?></td></tr>
 </table>
 
 <div class="section-heading">D. PROPOSED INFORMATION SYSTEMS</div>
-<?php $isGs = ['SYSTEM DETAILS' => ['is_name_1','status_1','classification_1','description_1'], 'DEPLOYMENT' => ['deployment_1','owner_1','dev_strategy_1','platform_1','database_1','storage_1'], 'USERS' => ['internal_users_1','external_users_1','system_usage_1','online_link_1'], 'SERVICE TYPE' => ['frontline_1','non_frontline_1','online_1','on_premise_1','hybrid_1'], 'INTEROPERABILITY' => ['interop1_main','interop1_internal_system','interop1_sub','interop1_external_system'], 'PRIVACY IMPACT ASSESSMENT' => ['pia_1']]; ?>
-<table class="dt">
-    <tr><th style="width:35%;">Item</th><th>Details</th></tr>
-    <?php if ($hasIs): foreach ($isGs as $gN => $gFs): $gH = false; foreach ($gFs as $f) { if (!isEmpty($is[$f] ?? '')) { $gH = true; break; } } if (!$gH) continue; ?>
-    <tr><td colspan="2" class="group-header"><?= ve($gN) ?></td></tr>
-    <?php foreach ($gFs as $f): $vl = v($is[$f] ?? ''); if ($vl === '') continue; ?><tr><td class="b"><?= ve(fl('information-systems-form', $f)) ?></td><td><?= $vl ?></td></tr><?php endforeach; ?>
-    <?php endforeach; else: ?><tr><td colspan="2" class="empty">No data provided.</td></tr><?php endif; ?>
+<table class="dt dt-d">
+    <?php if ($hasIs): ?>
+    <tr><td class="b" style="background:#e0e0e0;">Information System Name</td><td><?= v($is['is_name_1'] ?? '') ?></td></tr>
+    <tr><td class="b" style="background:#e0e0e0;">Classification</td><td><?= v($is['classification_1'] ?? '') ?></td></tr>
+    <tr><td class="b" style="background:#e0e0e0;">Service Type</td><td>
+        [<?= (isset($is['frontline_1']) && v($is['frontline_1']) === '1') ? 'X' : ' ' ?>] Frontline Service (directly used for public/client service delivery)<br>
+        [<?= (isset($is['non_frontline_1']) && v($is['non_frontline_1']) === '1') ? 'X' : ' ' ?>] Non-Frontline Service (supports core mandate but not directly used by clients/public)<br><br>
+        Identify if:<br>
+        [<?= (isset($is['online_1']) && v($is['online_1']) === '1') ? 'X' : ' ' ?>] Online<br>
+        [<?= (isset($is['on_premise_1']) && v($is['on_premise_1']) === '1') ? 'X' : ' ' ?>] On-premise<br>
+        [<?= (isset($is['hybrid_1']) && v($is['hybrid_1']) === '1') ? 'X' : ' ' ?>] Hybrid
+    </td></tr>
+    <tr><td class="b" style="background:#e0e0e0;">Description &amp; Purpose</td><td><?= v($is['description_1'] ?? '') ?></td></tr>
+    <tr><td class="b" style="background:#e0e0e0;">Status</td><td><?= v($is['status_1'] ?? '') ?></td></tr>
+    <tr><td class="b" style="background:#e0e0e0;">Development Strategy</td><td><?= v($is['dev_strategy_1'] ?? '') ?></td></tr>
+    <tr><td class="b" style="background:#e0e0e0;">Development Platform</td><td><?= v($is['platform_1'] ?? '') ?></td></tr>
+    <tr><td class="b" style="background:#e0e0e0;">Database Name</td><td><?= v($is['database_1'] ?? '') ?></td></tr>
+    <tr><td class="b" style="background:#e0e0e0;">Data Storage</td><td><?= v($is['storage_1'] ?? '') ?></td></tr>
+    <tr><td class="b" style="background:#e0e0e0;">Internal Users</td><td><?= v($is['internal_users_1'] ?? '') ?></td></tr>
+    <tr><td class="b" style="background:#e0e0e0;">External Users</td><td><?= v($is['external_users_1'] ?? '') ?></td></tr>
+    <tr><td class="b" style="background:#e0e0e0;">Owner</td><td><?= v($is['owner_1'] ?? '') ?></td></tr>
+    <tr><td class="b" style="background:#e0e0e0;font-weight:bold;">INTEROPERABILITY</td><td>
+        [<?= (isset($is['interop1_main']) && v($is['interop1_main']) === '1') ? 'X' : ' ' ?>] Integration with another system (If the system will exchange data or will be technically integrated with another system)<br>
+        If yes, specify the system name &nbsp; Internal System: <?= v($is['interop1_internal_system'] ?? '') ?> &nbsp; External System: <?= v($is['interop1_external_system'] ?? '') ?><br><br>
+        [<?= (isset($is['interop1_sub']) && v($is['interop1_sub']) === 'integration') ? 'X' : ' ' ?>] Generate data that will be utilized by other system<br>
+        [<?= (isset($is['interop1_sub']) && v($is['interop1_sub']) === 'receive') ? 'X' : ' ' ?>] Process data generated from other system<br>
+        [<?= (isset($is['interop1_sub']) && v($is['interop1_sub']) === 'shared') ? 'X' : ' ' ?>] Deployment on a shared platform
+    </td></tr>
+    <tr><td class="b" style="background:#e0e0e0;font-weight:bold;">PRIVACY IMPACT ASSESSMENT</td><td>
+        Will the system process personal information? (Will the system collect, store, or process names, addresses, photos, or any info that can identify an individual?)<br>
+        [<?= (isset($is['pia_1']) && v($is['pia_1']) === '1') ? 'X' : ' ' ?>] Yes &nbsp; [<?= (isset($is['pia_1']) && v($is['pia_1']) === '0') ? 'X' : ' ' ?>] No
+    </td></tr>
+    <?php else: ?>
+    <tr><td colspan="2" class="empty">No data provided.</td></tr>
+    <?php endif; ?>
 </table>
 
 <div class="section-heading">E. ICT PROJECTS</div>
 <div class="subsection-heading">INTERNAL ICT PROJECTS</div>
-<?php $intSg = ['PROJECT DETAILS' => ['internal_project_title','internal_description','internal_objectives'], 'STRATEGIC ALIGNMENT' => ['internal_strategic_pip','internal_strategic_ncp','internal_strategic_egov','internal_strategic_pcb','internal_strategic_others','internal_strategic_others_text'], 'HARMONIZATION' => ['internal_harmonization_1','internal_harmonization_2','internal_harmonization_3','internal_harmonization_4','internal_harmonization_5'], 'DURATION' => ['internal_start_date','internal_end_date'], 'DELIVERABLES' => ['internal_year1_deliverables','internal_year2_deliverables','internal_year3_deliverables'], 'IMPLEMENTATION' => ['internal_implementing_unit','internal_total_cost','internal_funding_source']]; ?>
-<?php $crossSg = ['PROJECT DETAILS' => ['cross_project_title','cross_description','cross_objectives','cross_lead_agency','cross_implementing_agency'], 'STRATEGIC ALIGNMENT' => ['cross_strategic_pip','cross_strategic_ncp','cross_strategic_egov','cross_strategic_pcb','cross_strategic_others','cross_strategic_others_text'], 'HARMONIZATION' => ['cross_harmonization_1','cross_harmonization_2','cross_harmonization_3','cross_harmonization_4','cross_harmonization_5'], 'DURATION' => ['cross_start_date','cross_end_date'], 'DELIVERABLES' => ['cross_year1_deliverables','cross_year2_deliverables','cross_year3_deliverables'], 'IMPLEMENTATION' => ['cross_implementing_unit','cross_total_cost','cross_funding_source']]; ?>
-<?php if ($hasInt): ?><table class="dt"><tr><th style="width:35%;">Item</th><th>Details</th></tr>
-<?php foreach ($intSg as $sgN => $sgFs): $sH = false; foreach ($sgFs as $f) { if (!isEmpty($proj[$f] ?? '')) { $sH = true; break; } } if (!$sH) continue; ?>
-<tr><td colspan="2" class="group-header"><?= ve($sgN) ?></td></tr>
-<?php foreach ($sgFs as $f): $vl = v($proj[$f] ?? ''); if ($vl === '') continue; ?><tr><td class="b"><?= ve(fl('ict-projects-form', $f)) ?></td><td><?= $vl ?></td></tr><?php endforeach; endforeach; ?>
-</table><?php else: ?><table class="dt"><tr><td class="empty">No internal ICT project data provided.</td></tr></table><?php endif; ?>
-
-<div class="subsection-heading">CROSS-AGENCY ICT PROJECTS</div>
-<?php if ($hasCross): ?><table class="dt"><tr><th style="width:35%;">Item</th><th>Details</th></tr>
-<?php foreach ($crossSg as $sgN => $sgFs): $sH = false; foreach ($sgFs as $f) { if (!isEmpty($proj[$f] ?? '')) { $sH = true; break; } } if (!$sH) continue; ?>
-<tr><td colspan="2" class="group-header"><?= ve($sgN) ?></td></tr>
-<?php foreach ($sgFs as $f): $vl = v($proj[$f] ?? ''); if ($vl === '') continue; ?><tr><td class="b"><?= ve(fl('ict-projects-form', $f)) ?></td><td><?= $vl ?></td></tr><?php endforeach; endforeach; ?>
-</table><?php else: ?><table class="dt"><tr><td class="empty">No cross-agency ICT project data provided.</td></tr></table><?php endif; ?>
+<table class="dt dt-d">
+    <?php if ($hasInt): ?>
+    <tr><td class="b" style="background:#e0e0e0;">Project Title</td><td><?= v($proj['internal_project_title'] ?? '') ?></td></tr>
+    <tr><td class="b" style="background:#e0e0e0;">Description</td><td><?= v($proj['internal_description'] ?? '') ?></td></tr>
+    <tr><td class="b" style="background:#e0e0e0;">Objectives</td><td><?= v($proj['internal_objectives'] ?? '') ?></td></tr>
+    <tr><td class="b" style="background:#e0e0e0;">Strategic Alignment</td><td>
+        [<?= (isset($proj['internal_strategic_pip']) && v($proj['internal_strategic_pip']) === '1') ? 'X' : ' ' ?>] Public Investment Program<br>
+        [<?= (isset($proj['internal_strategic_ncp']) && v($proj['internal_strategic_ncp']) === '1') ? 'X' : ' ' ?>] National Cybersecurity Plan<br>
+        [<?= (isset($proj['internal_strategic_egov']) && v($proj['internal_strategic_egov']) === '1') ? 'X' : ' ' ?>] E-Government Master Plan<br>
+        [<?= (isset($proj['internal_strategic_pcb']) && v($proj['internal_strategic_pcb']) === '1') ? 'X' : ' ' ?>] Program Convergence Budgeting<br>
+        [<?= (isset($proj['internal_strategic_others']) && v($proj['internal_strategic_others']) === '1') ? 'X' : ' ' ?>] Others (Specify): <?= v($proj['internal_strategic_others_text'] ?? '') ?>
+    </td></tr>
+    <tr><td class="b" style="background:#e0e0e0;">Harmonization Framework</td><td>
+        [<?= (isset($proj['internal_harmonization_1']) && v($proj['internal_harmonization_1']) === '1') ? 'X' : ' ' ?>] National Prioritization<br>
+        [<?= (isset($proj['internal_harmonization_2']) && v($proj['internal_harmonization_2']) === '1') ? 'X' : ' ' ?>] Resource Optimization<br>
+        [<?= (isset($proj['internal_harmonization_3']) && v($proj['internal_harmonization_3']) === '1') ? 'X' : ' ' ?>] Interoperability Framework<br>
+        [<?= (isset($proj['internal_harmonization_4']) && v($proj['internal_harmonization_4']) === '1') ? 'X' : ' ' ?>] Cross-Agency Collaboration<br>
+        [<?= (isset($proj['internal_harmonization_5']) && v($proj['internal_harmonization_5']) === '1') ? 'X' : ' ' ?>] Scalability and Sustainability
+    </td></tr>
+    <tr><td class="b" style="background:#e0e0e0;">Duration</td><td>
+        Start: <?= v($proj['internal_start_date'] ?? '') ?> &nbsp; End: <?= v($proj['internal_end_date'] ?? '') ?>
+    </td></tr>
+    <tr><td class="b" style="background:#e0e0e0;">Year 1 Deliverables/Milestone</td><td><?= v($proj['internal_year1_deliverables'] ?? '') ?></td></tr>
+    <tr><td class="b" style="background:#e0e0e0;">Year 2 Deliverables/Milestone</td><td><?= v($proj['internal_year2_deliverables'] ?? '') ?></td></tr>
+    <tr><td class="b" style="background:#e0e0e0;">Year 3 Deliverables/Milestone</td><td><?= v($proj['internal_year3_deliverables'] ?? '') ?></td></tr>
+    <tr><td class="b" style="background:#e0e0e0;">Implementing Unit</td><td><?= v($proj['internal_implementing_unit'] ?? '') ?></td></tr>
+    <tr><td class="b" style="background:#e0e0e0;">Total Project Cost</td><td><?= v($proj['internal_total_cost'] ?? '') ?></td></tr>
+    <tr><td class="b" style="background:#e0e0e0;">Funding Source</td><td><?= v($proj['internal_funding_source'] ?? '') ?></td></tr>
+    <?php else: ?>
+    <tr><td colspan="2" class="empty">No internal ICT project data provided.</td></tr>
+    <?php endif; ?>
+</table>
 
 <div class="section-heading">F. PERFORMANCE MEASUREMENT FRAMEWORK</div>
 <?php foreach ($pmProjects as $pk => $pl): $kpD = $pm[$pk] ?? null; $kpi = is_array($kpD) ? ($kpD['kpi'] ?? $kpD) : []; $hKpi = false;
@@ -543,7 +584,6 @@ if (is_array($kpi)) { foreach ($levels as $lk => $lv) { $row = $kpi[$lk] ?? []; 
     <?php endforeach; else: ?><tr><td colspan="6" class="empty">No object of expenditure data available.</td></tr><?php endif; ?>
 </table>
 
-<div class="footer">Generated from the ISSP Management System &mdash; <?= ve(date('F d, Y \a\t h:i A')) ?></div>
 
 <?php if (!$batchMode): ?>
 </body>

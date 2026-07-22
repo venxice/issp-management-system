@@ -402,7 +402,8 @@ function saveDraft() {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest'
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': csrfToken
         },
         body: JSON.stringify({
             csrf_test_name: csrfToken,
@@ -410,7 +411,10 @@ function saveDraft() {
             id: editId || null
         })
     })
-    .then(response => response.json())
+    .then(function(r) {
+        if (!r.ok) throw new Error('Server returned ' + r.status);
+        return r.json();
+    })
     .then(data => {
         if (data.success) {
             localStorage.clear();
@@ -476,6 +480,24 @@ function areAllFormsComplete() {
             if (!data) {
                 return { valid: false, message: section.label + ' section is empty. Please fill in required fields.' };
             }
+            if (key === 'ict-human-capital-form') {
+                var hasAnyRow = false;
+                for (var r = 1; r <= 20; r++) {
+                    var pos = data['position_' + r];
+                    if (typeof pos === 'string' && pos.trim() !== '') {
+                        hasAnyRow = true;
+                        var stat = data['status_' + r];
+                        var cnt = data['count_' + r];
+                        if ((typeof stat !== 'string' || stat.trim() === '') || (typeof cnt !== 'string' || cnt.trim() === '')) {
+                            return { valid: false, message: section.label + ' — Row ' + r + ' has incomplete fields. Please fill in all fields for each row.' };
+                        }
+                    }
+                }
+                if (!hasAnyRow) {
+                    return { valid: false, message: section.label + ' section has empty fields. Please fill in at least one position.' };
+                }
+                continue;
+            }
             for (var field in data) {
                 if (field.startsWith('csrf_') || field === '_token') continue;
                 if (section.skip.indexOf(field) >= 0) continue;
@@ -500,7 +522,6 @@ function submitISSP() {
         return;
     }
 
-    // Show confirmation modal
     showConfirmModal('Are you sure you want to submit your ISSP for review? This action cannot be undone.', function() {
         const submitBtn = document.getElementById('submitIsspBtn');
         submitBtn.disabled = true;
@@ -510,11 +531,13 @@ function submitISSP() {
                          document.querySelector('input[name="csrf_test_name"]')?.value;
 
         var editId = localStorage.getItem('edit_project_id');
-        fetch('<?= site_url('employee/submit-issp') ?>', {
+
+        fetch('<?= site_url('employee/save-draft') ?>', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': csrfToken
             },
             body: JSON.stringify({
                 csrf_test_name: csrfToken,
@@ -522,21 +545,32 @@ function submitISSP() {
                 id: editId || null
             })
         })
-        .then(response => response.json())
+        .then(function(r) {
+            if (!r.ok) throw new Error('Server returned ' + r.status);
+            return r.json();
+        })
         .then(data => {
             if (data.success) {
-                localStorage.clear();
-                showAlertModal('Success', 'ISSP submitted successfully!');
-                window.location.href = '<?= site_url('employee/submitted-ict-projects') ?>';
+                var savedId = data.id || editId;
+                var form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '<?= site_url('employee/submit-issp') ?>/' + savedId;
+                var input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'csrf_test_name';
+                input.value = csrfToken;
+                form.appendChild(input);
+                document.body.appendChild(form);
+                form.submit();
             } else {
-                showAlertModal('Error', 'Error submitting ISSP: ' + (data.message || 'Please try again.'));
+                showAlertModal('Error', 'Failed to save. ' + (data.message || 'Please try again.'));
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane me-2"></i>Submit Project';
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            showAlertModal('Error', 'Error submitting ISSP. Please try again.');
+            showAlertModal('Error', 'Error saving. Please try again.');
             submitBtn.disabled = false;
             submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane me-2"></i>Submit Project';
         });

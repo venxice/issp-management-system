@@ -31,7 +31,7 @@
                 <a href="<?= site_url('ict-planner/consolidation?' . http_build_query(array_filter(['status' => 'approved', 'q' => $query, 'date_range' => $date_range]))) ?>" class="btn btn-sm <?= $statusFilter === 'approved' ? 'btn-primary' : 'btn-outline-secondary' ?>">Approved (<?= $statusCounts['approved'] ?>)</a>
                 <a href="<?= site_url('ict-planner/consolidation?' . http_build_query(array_filter(['status' => 'rejected', 'q' => $query, 'date_range' => $date_range]))) ?>" class="btn btn-sm <?= $statusFilter === 'rejected' ? 'btn-primary' : 'btn-outline-secondary' ?>">Rejected (<?= $statusCounts['rejected'] ?>)</a>
                 <a href="<?= site_url('ict-planner/consolidation?' . http_build_query(array_filter(['status' => 'returned', 'q' => $query, 'date_range' => $date_range]))) ?>" class="btn btn-sm <?= $statusFilter === 'returned' ? 'btn-primary' : 'btn-outline-secondary' ?>">Returned (<?= $statusCounts['returned'] ?>)</a>
-                <a href="<?= site_url('ict-planner/consolidation?' . http_build_query(array_filter(['status' => 'resubmitted', 'q' => $query, 'date_range' => $date_range]))) ?>" class="btn btn-sm <?= $statusFilter === 'resubmitted' ? 'btn-primary' : 'btn-outline-secondary' ?>">Resubmitted (<?= $statusCounts['resubmitted'] ?>)</a>
+                <a href="<?= site_url('ict-planner/consolidation?' . http_build_query(array_filter(['status' => 'resubmitted', 'q' => $query, 'date_range' => $date_range]))) ?>" class="btn btn-sm <?= $statusFilter === 'resubmitted' ? 'btn-primary' : 'btn-outline-secondary' ?>">Pending - Resubmitted (<?= $statusCounts['resubmitted'] ?>)</a>
             </div>
             <div id="bulkBar" class="bulk-bar" style="display:none;">
                 <div class="bulk-bar-inner">
@@ -46,7 +46,7 @@
                         <thead>
                             <tr>
                                 <th style="width:36px;"><input type="checkbox" id="checkAll" onchange="toggleAllCheckboxes(this)"></th>
-                                <th>Internal / Cross-Agency Project Title</th>
+                                <th>Project Title</th>
                                 <th>Description</th>
                                 <th>Budget</th>
                                 <th>Status</th>
@@ -57,20 +57,17 @@
                         <tbody>
                             <?php if ($projects !== []): ?>
                                 <?php foreach ($projects as $project): ?>
-                                    <?php $fd = !empty($project['form_data']) ? json_decode($project['form_data'], true) : []; $ict = $fd['ict-projects-form'] ?? []; $intTitle = $ict['internal_project_title'] ?? $project['title'] ?? 'Untitled'; $crossTitle = $ict['cross_project_title'] ?? ''; $intDesc = $ict['internal_description'] ?? $project['description'] ?? '---'; $crossDesc = $ict['cross_description'] ?? ''; $intBudget = $ict['internal_total_cost'] ?? $project['budget'] ?? 0; $crossBudget = $ict['cross_total_cost'] ?? 0; ?>
+                                    <?php $fd = !empty($project['form_data']) ? json_decode($project['form_data'], true) : []; $ict = $fd['ict-projects-form'] ?? []; $intTitle = $ict['internal_project_title'] ?? $project['title'] ?? 'Untitled'; $intDesc = $ict['internal_description'] ?? $project['description'] ?? '---'; $intBudget = $ict['internal_total_cost'] ?? $project['budget'] ?? 0; ?>
                                     <tr>
                                         <td><input type="checkbox" name="project_ids[]" value="<?= $project['id'] ?>" class="project-checkbox" data-url="<?= site_url('ict-planner/download/' . $project['id']) ?>" onchange="onCheckboxChange()"></td>
                                         <td>
-                                            <div><span class="text-muted">Internal:</span> <?= esc($intTitle) ?></div>
-                                            <?php if ($crossTitle): ?><div class="mt-1"><span class="text-muted">Cross-Agency:</span> <?= esc($crossTitle) ?></div><?php endif; ?>
+                                            <div><?= esc($intTitle) ?></div>
                                         </td>
                                         <td>
-                                            <div><span class="text-muted">Internal:</span> <?= esc($intDesc) ?></div>
-                                            <?php if ($crossDesc): ?><div class="mt-1"><span class="text-muted">Cross-Agency:</span> <?= esc($crossDesc) ?></div><?php endif; ?>
+                                            <div><?= esc($intDesc) ?></div>
                                         </td>
                                         <td>
-                                            <div><span class="text-muted">Internal:</span> <?= is_numeric($intBudget) ? '₱' . number_format($intBudget, 2) : '-' ?></div>
-                                            <?php if ($crossBudget && is_numeric($crossBudget)): ?><div class="mt-1"><span class="text-muted">Cross-Agency:</span> <?= '₱' . number_format($crossBudget, 2) ?></div><?php endif; ?>
+                                            <div><?= is_numeric($intBudget) ? '₱' . number_format($intBudget, 2) : '-' ?></div>
                                         </td>
                                         <td>
                                 <span class="badge badge-soft" style="font-size:.7rem;padding:4px 10px;
@@ -81,7 +78,7 @@
                                     <?php elseif ($project['status'] === 'returned'): ?>background:#ffedd5;color:#9a3412;border-color:#fed7aa;
                                     <?php elseif ($project['status'] === 'resubmitted'): ?>background:#e0e7ff;color:#4338ca;border-color:#c7d2fe;
                                     <?php endif; ?>">
-                                    <?= esc(ucfirst($project['status'])) ?>
+                                    <?= esc($project['status'] === 'resubmitted' ? 'Pending - Resubmitted' : ucfirst($project['status'])) ?>
                                             </span>
                                         </td>
                                         <td class="text-muted"><?= esc($project['updated_at'] ?? $project['created_at'] ?? '-') ?></td>
@@ -89,11 +86,8 @@
                                             <div class="d-flex gap-1 justify-content-center">
                                                 <button class="btn btn-outline-primary icon-btn" type="button" title="View" data-project='<?= json_encode([
                                                     'title' => $intTitle,
-                                                    'cross_title' => $crossTitle,
                                                     'description' => $project['description'] ?? '',
-                                                    'cross_description' => $crossDesc,
                                                     'budget' => $project['budget'] ?? '',
-                                                    'cross_budget' => $crossBudget,
                                                     'status' => $project['status'] ?? '',
                                                     'department' => $project['department_name'] ?? '',
                                                     'updated' => $project['updated_at'] ?? $project['created_at'] ?? '',
@@ -217,7 +211,6 @@
 .detail-grid { display: grid; grid-template-columns: 170px 1fr; gap: 12px 18px; }
 .key { font-size: .8rem; color: #6c757d; font-weight: 600; }
 .val { font-size: .9rem; color: #212529; word-break: break-word; }
-.cross-row { display: contents; }
 .remarks-in-modal { margin-top: 18px; }
 .remarks-in-modal__card {
     background: #f0f4f9;
@@ -342,12 +335,9 @@
             </div>
             <div class="modal-body">
                 <div class="detail-grid">
-                    <div class="key">Internal Title</div><div class="val" id="viewProjectTitle">-</div>
-                    <div class="cross-row" id="viewCrossRow"><div class="key">Cross-Agency Title</div><div class="val" id="viewProjectCrossTitle">-</div></div>
-                    <div class="key">Internal Description</div><div class="val" id="viewProjectDescription">-</div>
-                    <div class="cross-row" id="viewCrossDescRow"><div class="key">Cross-Agency Description</div><div class="val" id="viewProjectCrossDescription">-</div></div>
-                    <div class="key">Internal Budget</div><div class="val" id="viewProjectBudget">-</div>
-                    <div class="cross-row" id="viewCrossBudgetRow"><div class="key">Cross-Agency Budget</div><div class="val" id="viewProjectCrossBudget">-</div></div>
+                    <div class="key">Project Title</div><div class="val" id="viewProjectTitle">-</div>
+                    <div class="key">Description</div><div class="val" id="viewProjectDescription">-</div>
+                    <div class="key">Budget</div><div class="val" id="viewProjectBudget">-</div>
                     <div class="key">Status</div><div class="val" id="viewProjectStatus">-</div>
                     <div class="key">Department</div><div class="val" id="viewProjectDepartment">-</div>
                     <div class="key">Last Updated</div><div class="val" id="viewProjectUpdated">-</div>
@@ -444,33 +434,9 @@ document.addEventListener('DOMContentLoaded', function() {
             try {
                 var project = JSON.parse(this.getAttribute('data-project'));
                 document.getElementById('viewProjectTitle').textContent = project.title || '-';
-                var crossRow = document.getElementById('viewCrossRow');
-                var crossTitleEl = document.getElementById('viewProjectCrossTitle');
-                if (project.cross_title) {
-                    crossTitleEl.textContent = project.cross_title;
-                    crossRow.style.display = '';
-                } else {
-                    crossRow.style.display = 'none';
-                }
                 document.getElementById('viewProjectDescription').textContent = project.description || '-';
-                var crossDescRow = document.getElementById('viewCrossDescRow');
-                var crossDescEl = document.getElementById('viewProjectCrossDescription');
-                if (project.cross_description) {
-                    crossDescEl.textContent = project.cross_description;
-                    crossDescRow.style.display = '';
-                } else {
-                    crossDescRow.style.display = 'none';
-                }
                 document.getElementById('viewProjectBudget').textContent = project.budget ? '₱' + parseFloat(project.budget).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '-';
-                var crossBudgetRow = document.getElementById('viewCrossBudgetRow');
-                var crossBudgetEl = document.getElementById('viewProjectCrossBudget');
-                if (project.cross_budget && parseFloat(project.cross_budget) > 0) {
-                    crossBudgetEl.textContent = '₱' + parseFloat(project.cross_budget).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-                    crossBudgetRow.style.display = '';
-                } else {
-                    crossBudgetRow.style.display = 'none';
-                }
-                document.getElementById('viewProjectStatus').textContent = project.status ? project.status.charAt(0).toUpperCase() + project.status.slice(1) : '-';
+                document.getElementById('viewProjectStatus').textContent = project.status ? (project.status === 'resubmitted' ? 'Pending - Resubmitted' : project.status.charAt(0).toUpperCase() + project.status.slice(1)) : '-';
                 document.getElementById('viewProjectDepartment').textContent = project.department || '-';
                 document.getElementById('viewProjectUpdated').textContent = project.updated || '-';
                 document.getElementById('viewProjectCreated').textContent = project.created || '-';

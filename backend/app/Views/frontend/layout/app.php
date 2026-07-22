@@ -1331,6 +1331,7 @@ $active = $active ?? '';
             </div>
         </header>
         <div class="content-wrap">
+            <?= $this->include('frontend/layout/alerts') ?>
             <?= $this->renderSection('content') ?>
         </div>
     </main>
@@ -1444,7 +1445,18 @@ function closeCustomModals() {
     document.body.style.overflow = '';
 }
 
-window.showConfirmModal = function(message, callback) {
+window.showConfirmModal = function(titleOrMessage, messageOrCallback, maybeCallback) {
+    var title, message, callback;
+    if (typeof messageOrCallback === 'function') {
+        title = 'Confirm';
+        message = titleOrMessage;
+        callback = messageOrCallback;
+    } else {
+        title = titleOrMessage;
+        message = messageOrCallback;
+        callback = maybeCallback;
+    }
+    document.getElementById('confirmModalTitle').textContent = title;
     document.getElementById('confirmMessage').textContent = message;
     const confirmBtn = document.getElementById('confirmModalButton');
     confirmBtn._callback = callback;
@@ -1459,9 +1471,16 @@ window.showConfirmModal = function(message, callback) {
     showCustomModal('confirmModal');
 };
 
-window.showAlertModal = function(title, message) {
+window.showAlertModal = function(title, message, callback) {
     document.getElementById('alertModalLabel').textContent = title;
     document.getElementById('alertMessage').textContent = message;
+    var okBtn = document.querySelector('#alertModal .btn-primary');
+    okBtn.onclick = function() {
+        closeCustomModals();
+        if (typeof callback === 'function') {
+            callback();
+        }
+    };
     showCustomModal('alertModal');
 };
 
@@ -1516,7 +1535,8 @@ window.autoSaveDraft = function() {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest'
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': csrfToken
         },
         body: JSON.stringify({
             csrf_test_name: csrfToken,
@@ -1524,7 +1544,10 @@ window.autoSaveDraft = function() {
             id: editId || null
         })
     })
-    .then(function(r) { return r.json(); })
+    .then(function(r) {
+        if (!r.ok) throw new Error('Server returned ' + r.status);
+        return r.json();
+    })
     .then(function(result) {
         if (result.success && result.id && !editId) {
             localStorage.setItem('edit_project_id', result.id);

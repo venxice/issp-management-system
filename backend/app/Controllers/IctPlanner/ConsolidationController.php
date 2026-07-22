@@ -49,7 +49,7 @@ class ConsolidationController extends BaseController
             ->join('departments', 'departments.id = issp_records.department_id', 'left')
             ->join('users', 'users.id = issp_records.created_by', 'left')
             ->notDraftFilter()
-            ->orderBy('issp_records.created_at', 'DESC');
+            ->orderBy('COALESCE(issp_records.updated_at, issp_records.created_at)', 'DESC', false);
 
         if ($statusFilter !== '' && in_array($statusFilter, ['pending', 'endorsed', 'approved', 'rejected', 'returned', 'resubmitted'])) {
             $builder->where('issp_records.status', $statusFilter);

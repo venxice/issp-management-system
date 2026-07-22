@@ -26,7 +26,7 @@ class DashboardController extends BaseController
             ->get()
             ->getRowArray();
 
-        $pendingApproval = (int) (($dgStats['endorsed'] ?? 0) + ($dgStats['resubmitted'] ?? 0));
+        $pendingApproval = (int) ($dgStats['endorsed'] ?? 0) + (int) ($dgStats['resubmitted'] ?? 0);
         $totalApprovedProjects = (int) ($dgStats['approved'] ?? 0);
 
         $approvedRecords = $isspModel->select('budget, form_data')
@@ -39,13 +39,13 @@ class DashboardController extends BaseController
             $cross = (float) ($ict['cross_total_cost'] ?? 0);
             return $carry + $internal + $cross;
         }, 0);
-        $totalDepartments = $isspModel->select('department_id')->distinct()->whereIn('status', ['endorsed', 'approved', 'rejected', 'resubmitted'])->countAllResults();
+        $totalDepartments = $isspModel->select('department_id')->distinct()->whereIn('status', ['endorsed', 'approved', 'rejected'])->countAllResults();
 
         $submissionsByMonth = $isspModel->getSubmissionsByMonth();
         $recentProjects = $isspModel->select('issp_records.*, departments.name AS department_name, users.name AS created_by_name')
             ->join('departments', 'departments.id = issp_records.department_id', 'left')
             ->join('users', 'users.id = issp_records.created_by', 'left')
-            ->whereIn('issp_records.status', ['endorsed', 'returned', 'resubmitted', 'approved', 'rejected'])
+            ->whereIn('issp_records.status', ['endorsed', 'resubmitted', 'returned', 'approved', 'rejected'])
             ->orderBy('COALESCE(issp_records.updated_at, issp_records.created_at)', 'DESC', false)
             ->limit(10)
             ->findAll();

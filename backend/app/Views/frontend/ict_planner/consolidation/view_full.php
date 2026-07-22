@@ -13,7 +13,7 @@
 .project-hero__titles { margin-bottom: 14px; }
 .project-hero__title-row { display: flex; align-items: baseline; gap: 6px; padding: 2px 0; }
 .project-hero__title-label { font-size: .75rem; font-weight: 600; color: #6c757d; flex-shrink: 0; }
-.project-hero__title-value { font-size: 1rem; font-weight: 600; color: var(--ink); line-height: 1.3; }
+.project-hero__title-value { font-size: .85rem; font-weight: 600; color: var(--ink); line-height: 1.3; }
 .project-hero__meta { display: flex; flex-wrap: wrap; gap: 14px 24px; }
 .project-hero__meta-item { display: flex; flex-direction: column; gap: 2px; }
 .project-hero__meta-label { font-size: .7rem; color: #8898aa; font-weight: 600; text-transform: uppercase; letter-spacing: .03em; }
@@ -332,11 +332,8 @@
 <?php
 $ict = $formData['ict-projects-form'] ?? [];
 $intTitle = $ict['internal_project_title'] ?? $project['title'] ?? 'Untitled';
-$crossTitle = $ict['cross_project_title'] ?? '';
 $intDesc = $ict['internal_description'] ?? $project['description'] ?? '';
-$crossDesc = $ict['cross_description'] ?? '';
 $intBudget = $ict['internal_total_cost'] ?? $project['budget'] ?? 0;
-$crossBudget = $ict['cross_total_cost'] ?? 0;
 ?>
 <?php
 $statusColors = [
@@ -352,22 +349,16 @@ $sc = $statusColors[$project['status']] ?? ['bg' => '#f1f5f9', 'fg' => '#475569'
 <div class="project-hero">
     <div class="project-hero__titles">
         <div class="project-hero__title-row">
-            <span class="project-hero__title-label">Internal</span>
+            <span class="project-hero__title-label">Project Title</span>
             <span class="project-hero__title-value"><?= esc($intTitle) ?></span>
         </div>
-        <?php if ($crossTitle): ?>
-        <div class="project-hero__title-row">
-            <span class="project-hero__title-label">Cross-Agency</span>
-            <span class="project-hero__title-value"><?= esc($crossTitle) ?></span>
-        </div>
-        <?php endif; ?>
     </div>
     <div class="project-hero__meta">
         <div class="project-hero__meta-item">
             <span class="project-hero__meta-label">Status</span>
             <span class="project-hero__meta-value">
                 <span class="badge badge-soft" style="font-size:.72rem;padding:4px 12px;background:<?= $sc['bg'] ?>;color:<?= $sc['fg'] ?>;border-color:<?= $sc['br'] ?>;">
-                    <?= esc(ucfirst($project['status'])) ?>
+                    <?= esc($project['status'] === 'resubmitted' ? 'Pending - Resubmitted' : ucfirst($project['status'])) ?>
                 </span>
             </span>
         </div>
@@ -380,15 +371,9 @@ $sc = $statusColors[$project['status']] ?? ['bg' => '#f1f5f9', 'fg' => '#475569'
             <span class="project-hero__meta-value"><?= esc($project['created_by_name'] ?? '-') ?></span>
         </div>
         <div class="project-hero__meta-item">
-            <span class="project-hero__meta-label">Internal Budget</span>
+            <span class="project-hero__meta-label">Budget</span>
             <span class="project-hero__meta-value">₱<?= number_format((float) $intBudget, 2) ?></span>
         </div>
-        <?php if ($crossBudget > 0): ?>
-        <div class="project-hero__meta-item">
-            <span class="project-hero__meta-label">Cross-Agency Budget</span>
-            <span class="project-hero__meta-value">₱<?= number_format((float) $crossBudget, 2) ?></span>
-        </div>
-        <?php endif; ?>
         <div class="project-hero__meta-item">
             <span class="project-hero__meta-label">Submitted Date</span>
             <span class="project-hero__meta-value"><?= esc($project['submitted_at'] ?? $project['created_at'] ?? '-') ?></span>
@@ -400,14 +385,8 @@ $sc = $statusColors[$project['status']] ?? ['bg' => '#f1f5f9', 'fg' => '#475569'
     </div>
     <?php if ($intDesc): ?>
     <div class="project-hero__desc">
-        <div class="project-hero__desc-label">Internal Description</div>
+        <div class="project-hero__desc-label">Description</div>
         <div class="project-hero__desc-body"><?= esc($intDesc) ?></div>
-    </div>
-    <?php endif; ?>
-    <?php if ($crossDesc): ?>
-    <div class="project-hero__desc">
-        <div class="project-hero__desc-label">Cross-Agency Description</div>
-        <div class="project-hero__desc-body"><?= esc($crossDesc) ?></div>
     </div>
     <?php endif; ?>
     <div class="project-hero__actions">
@@ -523,7 +502,6 @@ $fieldLabels = [
         'internal_harmonization_1'  => 'National Prioritization',
         'internal_harmonization_2'  => 'Resource Optimization',
         'internal_harmonization_3'  => 'Interoperability Framework',
-        'internal_harmonization_4'  => 'Cross-Agency Collaboration',
         'internal_harmonization_5'  => 'Scalability and Sustainability',
         'internal_start_date'       => 'Start Date',
         'internal_end_date'         => 'End Date',
@@ -533,30 +511,6 @@ $fieldLabels = [
         'internal_implementing_unit' => 'Implementing Unit',
         'internal_total_cost'       => 'Total Cost',
         'internal_funding_source'   => 'Funding Source',
-        'cross_project_title'       => 'Cross-Agency Project Title',
-        'cross_description'         => 'Description',
-        'cross_objectives'          => 'Objectives',
-        'cross_lead_agency'         => 'Lead Agency',
-        'cross_implementing_agency' => 'Implementing Agency',
-        'cross_strategic_pip'       => 'Public Investment Program',
-        'cross_strategic_ncp'       => 'National Cybersecurity Plan',
-        'cross_strategic_egov'      => 'E-Government Master Plan',
-        'cross_strategic_pcb'       => 'Program Convergence Budgeting',
-        'cross_strategic_others'    => 'Others (Specify)',
-        'cross_strategic_others_text' => 'Others - Please specify',
-        'cross_harmonization_1'     => 'National Prioritization',
-        'cross_harmonization_2'     => 'Resource Optimization',
-        'cross_harmonization_3'     => 'Interoperability Framework',
-        'cross_harmonization_4'     => 'Cross-Agency Collaboration',
-        'cross_harmonization_5'     => 'Scalability and Sustainability',
-        'cross_start_date'          => 'Start Date',
-        'cross_end_date'            => 'End Date',
-        'cross_year1_deliverables'  => 'Year 1 Deliverables',
-        'cross_year2_deliverables'  => 'Year 2 Deliverables',
-        'cross_year3_deliverables'  => 'Year 3 Deliverables',
-        'cross_implementing_unit'   => 'Implementing Unit',
-        'cross_total_cost'          => 'Total Cost',
-        'cross_funding_source'      => 'Funding Source',
     ],
 ];
 
@@ -961,11 +915,10 @@ foreach ($sectionLabels as $key => $label):
 
 <?php elseif ($key === 'ict-projects-form'): ?>
         <?php
-        $internalFields = []; $crossFields = []; $otherProj = [];
+        $internalFields = []; $otherProj = [];
         foreach ($fields as $fn => $fv) {
             if (str_starts_with($fn, 'internal_')) $internalFields[$fn] = $fv;
-            elseif (str_starts_with($fn, 'cross_')) $crossFields[$fn] = $fv;
-            else $otherProj[$fn] = $fv;
+            elseif (!str_starts_with($fn, 'cross_')) $otherProj[$fn] = $fv;
         }
         ?>
         <?php if (count($internalFields) > 0): ?>
@@ -1023,62 +976,7 @@ foreach ($sectionLabels as $key => $label):
         ?>
         <?php endif; ?>
 
-        <?php if (count($crossFields) > 0): ?>
-        <div class="sub-header" style="<?= count($internalFields) > 0 ? 'margin-top:24px;padding-top:16px;border-top:2px solid #e8ecf1;' : '' ?>">
-            <i class="fa-solid fa-handshake me-1"></i> E.2 Cross-Agency ICT Projects
-        </div>
-        <?php
-        $cgroups = [
-            'Project Details' => ['cross_project_title','cross_description','cross_objectives','cross_lead_agency','cross_implementing_agency'],
-            'Strategic Alignment' => ['cross_strategic_pip','cross_strategic_ncp','cross_strategic_egov','cross_strategic_pcb','cross_strategic_others','cross_strategic_others_text'],
-            'Harmonization Framework' => ['cross_harmonization_1','cross_harmonization_2','cross_harmonization_3','cross_harmonization_4','cross_harmonization_5'],
-            'Duration' => ['cross_start_date','cross_end_date'],
-            'Deliverables' => ['cross_year1_deliverables','cross_year2_deliverables','cross_year3_deliverables'],
-            'Implementation Details' => ['cross_implementing_unit','cross_total_cost','cross_funding_source'],
-        ];
-        $checkboxGroups = ['Strategic Alignment', 'Harmonization Framework'];
-        foreach ($cgroups as $gTitle => $gFields):
-            $isCb = in_array($gTitle, $checkboxGroups);
-            $gHtml = ''; $gHasData = false; $cbChecked = 0; $cbTotal = count($gFields);
-            foreach ($gFields as $gf) {
-                $dl = getFieldLabel($key, $gf, $fieldLabels);
-                if ($isCb) {
-                    $fv = $crossFields[$gf] ?? '';
-                    $checked = $fv === 'on' || $fv === '1';
-                    if ($checked) $cbChecked++;
-                    $gHasData = true;
-                    if ($gf === 'cross_strategic_others') {
-                        $ot = $crossFields['cross_strategic_others_text'] ?? '';
-                        $gHtml .= '<div class="checklist-item">
-                            <div class="checklist-item__icon ' . ($checked ? 'checked' : 'unchecked') . '"><i class="fa-solid ' . ($checked ? 'fa-check-circle' : 'fa-circle') . '"></i></div>
-                            <div class="checklist-item__label' . ($checked ? '' : ' unchecked') . '">' . esc($dl) . '</div>
-                            ' . ($checked && trim($ot) !== '' ? '<div class="checklist-item__text">(' . esc($ot) . ')</div>' : '') . '
-                        </div>';
-                    } else {
-                        $gHtml .= '<div class="checklist-item">
-                            <div class="checklist-item__icon ' . ($checked ? 'checked' : 'unchecked') . '"><i class="fa-solid ' . ($checked ? 'fa-check-circle' : 'fa-circle') . '"></i></div>
-                            <div class="checklist-item__label' . ($checked ? '' : ' unchecked') . '">' . esc($dl) . '</div>
-                        </div>';
-                    }
-                } else {
-                    if (!array_key_exists($gf, $crossFields)) continue;
-                    $fv = $crossFields[$gf];
-                    $dv = is_array($fv) ? json_encode($fv) : (string) $fv;
-                    $ie = trim($dv) === '' || $dv === '[]' || $dv === '""';
-                    if (!$ie) $gHasData = true;
-                    $gHtml .= '<div class="detail-row">
-                        <div class="detail-row__key">' . esc($dl) . '</div>
-                        <div class="detail-row__val' . ($ie ? ' empty' : '') . '">' . ($ie ? 'Not provided' : esc($dv)) . '</div>
-                    </div>';
-                }
-            }
-            if ($gHasData) {
-                $gTitleHtml = $isCb ? esc($gTitle) . ' <span class="checklist-count">' . $cbChecked . '/' . $cbTotal . '</span>' : esc($gTitle);
-                echo '<div class="group-header">' . $gTitleHtml . '</div>' . $gHtml;
-            }
-        endforeach;
-        ?>
-        <?php endif; ?>
+
 
         <?php if (count($otherProj) > 0): ?>
         <?php foreach ($otherProj as $fn => $fv):
@@ -1163,13 +1061,6 @@ foreach ($sectionLabels as $key => $label):
         <?php if ($internalHtml): ?>
         <div class="sub-header"><i class="fa-solid fa-building me-1"></i> F.1 Internal ICT Projects - KPI</div>
         <?= $internalHtml ?>
-        <?php endif; ?>
-
-        <?php if ($crossHtml): ?>
-        <div class="sub-header" style="margin-top:20px;padding-top:16px;border-top:2px solid #e8ecf1;">
-            <i class="fa-solid fa-handshake me-1"></i> F.2 Cross-Agency ICT Projects - KPI
-        </div>
-        <?= $crossHtml ?>
         <?php endif; ?>
 
         <?php

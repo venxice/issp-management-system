@@ -171,10 +171,10 @@ class AuthController extends BaseController
         $intended = session()->get('intended_url');
         if ($intended) {
             session()->remove('intended_url');
-            return redirect()->to($intended)->with('success', 'Successfully signed in');
+            return redirect()->to($intended);
         }
 
-        return redirect()->to(site_url($this->dashboardPathForRole((string) ($user['role_slug'] ?? 'employee'))))->with('success', 'Successfully signed in');
+        return redirect()->to(site_url($this->dashboardPathForRole((string) ($user['role_slug'] ?? 'employee'))));
     }
 
     private function googleSsoConfigured(): bool
