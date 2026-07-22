@@ -88,17 +88,17 @@ $cybersecurityCategories = [
         'security_scanning' => ['label' => 'Regular Security Scanning and Testing', 'badge' => 'Mandatory'],
     ],
     'OTHER MEASURES' => [
-        'vulnerability_assessment' => ['label' => 'Vulnerability Assessment', 'badge' => 'Not Specified'],
-        'patch_management' => ['label' => 'Patch Management', 'badge' => 'Not Specified'],
-        'strong_password' => ['label' => 'Strong Password Policies', 'badge' => 'Not Specified'],
-        'mfa' => ['label' => 'Multi-Factor Authentication (MFA)', 'badge' => 'Not Specified'],
-        'access_reviews' => ['label' => 'Access Reviews', 'badge' => 'Not Specified'],
-        'security_logs' => ['label' => 'Security Logs', 'badge' => 'Not Specified'],
-        'log_analysis' => ['label' => 'Log Analysis', 'badge' => 'Not Specified'],
-        'incident_response' => ['label' => 'Incident Response Plan', 'badge' => 'Not Specified'],
-        'siem' => ['label' => 'Security Information and Event Management (SIEM)', 'badge' => 'Not Specified'],
-        'penetration_testing' => ['label' => 'Penetration Testing', 'badge' => 'Not Specified'],
-        'sdlc' => ['label' => 'Secure Software Development Life Cycle (SDLC)', 'badge' => 'Not Specified'],
+        'vulnerability_assessment' => ['label' => 'Vulnerability Assessment', 'badge' => 'Not Specified', 'field' => 'vulnerability_assessment'],
+        'patch_management' => ['label' => 'Patch Management', 'badge' => 'Not Specified', 'field' => 'patch_management'],
+        'strong_password' => ['label' => 'Strong Password Policies', 'badge' => 'Not Specified', 'field' => 'strong_password'],
+        'mfa' => ['label' => 'Multi-Factor Authentication (MFA)', 'badge' => 'Not Specified', 'field' => 'mfa'],
+        'access_reviews' => ['label' => 'Access Reviews', 'badge' => 'Not Specified', 'field' => 'access_reviews'],
+        'security_logs' => ['label' => 'Security Logs', 'badge' => 'Not Specified', 'field' => 'security_logs'],
+        'log_analysis' => ['label' => 'Log Analysis', 'badge' => 'Not Specified', 'field' => 'log_analysis'],
+        'incident_response' => ['label' => 'Incident Response Plan', 'badge' => 'Not Specified', 'field' => 'incident_response'],
+        'siem' => ['label' => 'Security Information and Event Management (SIEM)', 'badge' => 'Not Specified', 'field' => 'siem'],
+        'penetration_testing' => ['label' => 'Penetration Testing', 'badge' => 'Not Specified', 'field' => 'penetration_testing'],
+        'sdlc' => ['label' => 'Secure Software Development Life Cycle (SDLC)', 'badge' => 'Not Specified', 'field' => 'sdlc'],
     ],
 ];
 
@@ -141,7 +141,29 @@ $hasInt = false; foreach ($intFlds as $f) { if (!isEmpty($proj[$f] ?? '')) { $ha
 $hasPm = false; $pmProjects = ['internal_projects' => 'INTERNAL ICT PROJECTS'];
 $levels = ['intermediate' => 'INTERMEDIATE OUTCOME', 'immediate' => 'IMMEDIATE OUTCOME', 'output' => 'OUTPUT'];
 $cols = ['indicator' => 'Key Performance Indicators', 'baseline' => 'Baseline Data', 'target' => 'Targets', 'method' => 'Data Collection Methods', 'responsibility' => 'Responsibility'];
-foreach ($pmProjects as $pk => $pl): $kpData = $pm[$pk] ?? null; $kpi = is_array($kpData) ? ($kpData['kpi'] ?? $kpData) : [];
+
+function parsePmFlat($fields, $prefix) {
+    $projects = [];
+    foreach ($fields as $fn => $fv) {
+        if (preg_match('/^' . preg_quote($prefix) . '\[(\d+)\]\[kpi\]\[(\w+)\]\[(\w+)\]$/', $fn, $m)) {
+            $projects[(int)$m[1]][$m[2]][$m[3]] = $fv;
+        }
+    }
+    return $projects;
+}
+
+$pmParsed = [];
+foreach ($pmProjects as $pk => $pl) {
+    $kpData = $pm[$pk] ?? null;
+    if (is_array($kpData)) {
+        $pmParsed[$pk] = $kpData;
+    } else {
+        $parsed = parsePmFlat($pm, $pk);
+        $pmParsed[$pk] = empty($parsed) ? null : ['kpi' => reset($parsed)];
+    }
+}
+
+foreach ($pmProjects as $pk => $pl): $kpi = is_array($pmParsed[$pk] ?? null) ? ($pmParsed[$pk]['kpi'] ?? $pmParsed[$pk]) : [];
 if (is_array($kpi)) { foreach ($levels as $lk => $lv) { $row = $kpi[$lk] ?? []; if (!is_array($row)) continue; foreach ($cols as $ck => $cl) { if (!isEmpty($row[$ck] ?? '')) { $hasPm = true; break 3; } } } } endforeach;
 $hasRes = !empty($rY1) || !empty($rY2) || !empty($rY3);
 ?>
@@ -183,21 +205,22 @@ body { font-family: 'Palatino Linotype', 'Palatino', 'Book Antiqua', serif; font
 .toc-row-item .toc-label-toc { padding-left: 8mm; }
 .toc-page-num { display: table-cell; text-align: right; width: 20px; }
 
-.part-heading { font-size: 16pt; font-weight: bold;  margin-top: 6mm; margin-bottom: 4mm; }
-.part-heading:first-of-type { page-break-before: always; }
-.section-heading { font-size: 14pt; font-weight: bold;  margin-top: 5mm; margin-bottom: 3mm; }
-.subsection-heading { font-size: 12pt; font-weight: bold;  margin-top: 4mm; margin-bottom: 2mm; margin-left: 8mm; }
+.part-heading { font-size: 16pt; font-weight: bold;  margin-top: 6mm; margin-bottom: 4mm; page-break-before: always; }
+.section-heading { font-size: 14pt; font-weight: bold;  margin-top: 5mm; margin-bottom: 3mm; page-break-after: avoid; }
+.subsection-heading { font-size: 12pt; font-weight: bold;  margin-top: 4mm; margin-bottom: 2mm; margin-left: 8mm; page-break-after: avoid; }
 .body-text { font-size: 11pt; margin-bottom: 2mm; margin-left: 16mm; }
 .field-label { font-size: 11pt; font-weight: bold; }
 
-table.dt { width: 100%; border-collapse: collapse; font-size: 11pt; margin: 2mm 0; page-break-inside: avoid; }
-table.dt th { border: 1px solid #000; padding: 1.5mm 2mm; font-weight: bold; text-align: center; background: #d9d9d9; vertical-align: middle; }
-table.dt td { border: 1px solid #000; padding: 1.5mm 2mm; vertical-align: top; }
+table.dt { width: 100%; border-collapse: collapse; font-size: 11pt; margin: 2mm 0; }
+table.dt th { border: 1px solid #000; padding: 1.5mm 2mm; font-weight: bold; text-align: center; background: #d9d9d9; vertical-align: middle; white-space: nowrap; }
+table.dt td { border: 1px solid #000; padding: 1.5mm 2mm; vertical-align: top; word-wrap: break-word; overflow-wrap: break-word; }
 table.dt td.c { text-align: center; } table.dt td.b { font-weight: bold; } table.dt-d td:first-child { text-transform: uppercase; }
 table.dt td.r { text-align: right; } table.dt td.gt { font-weight: bold; border-top: 2px solid #000; }
 table.dt td.gt:first-child { background: #d9d9d9; }
 table.dt td.ch { font-weight: bold; }
 table.dt td.nb { border: none; background: none; }
+table.dt.kpi { table-layout: fixed; }
+table.dt.kpi th { white-space: normal; font-size: 10pt; }
 table.dt tr.group-header td { background: #d9d9d9; font-weight: bold; text-align: center; }
 .empty { color: #888; font-size: 11pt; text-align: center; padding: 2mm; }
 .footer { text-align: center; font-size: 9pt; color: #888; margin-top: 8mm; border-top: 1px solid #ccc; padding-top: 2mm; }
@@ -212,8 +235,8 @@ table.dt tr.group-header td { background: #d9d9d9; font-weight: bold; text-align
     <p style="font-size:11pt;color:#666;margin-bottom:12mm;">(Replace with agency's logo)</p>
     <div class="cover-title">INFORMATION SYSTEMS STRATEGIC PLAN (ISSP)</div>
     <div class="cover-type">
-        <span class="cover-type-label"><span class="cover-type-check">[<?= v($issp_type ?? '') === 'regular' ? 'X' : ' ' ?>]</span> REGULAR ISSP</span>
-        <span class="cover-type-label"><span class="cover-type-check">[<?= v($issp_type ?? '') === 'amendment' ? 'X' : ' ' ?>]</span> AMENDMENT <small>&lt; 1st / 2nd / 3rd &gt;</small></span>
+        <span class="cover-type-label"><span class="cover-type-check">[<?= v($issp_type ?? '') === 'regular' ? '/' : ' ' ?>]</span> REGULAR ISSP</span>
+        <span class="cover-type-label"><span class="cover-type-check">[<?= v($issp_type ?? '') === 'amendment' ? '/' : ' ' ?>]</span> AMENDMENT <small>&lt; 1st / 2nd / 3rd &gt;</small></span>
     </div>
     <div class="cover-sub">For the period <?= ve($startYear) ?> to <?= ve($endYear) ?></div>
     <div class="cover-agency">Philippine Information Agency</div>
@@ -324,7 +347,6 @@ table.dt tr.group-header td { background: #d9d9d9; font-weight: bold; text-align
 </table>
 
 <!-- ==================== PART I ==================== -->
-<div style="page-break-before: always;"></div>
 <div class="part-heading">PART I. AGENCY PROFILE &amp; STRATEGIC CONTEXT</div>
 <div class="section-heading">A. MANDATE, VISION, MISSION, AND ORGANIZATIONAL OUTCOME</div>
 <div class="subsection-heading">A.1. MANDATE</div>
@@ -397,6 +419,54 @@ if (!empty($agencyData['stakeholder_data'])) {
 <div class="section-heading">A. PROPOSED NETWORK INFRASTRUCTURE</div>
 <div class="subsection-heading">A.1. LAN/WAN SET-UP INCLUDING CONNECTIVITY TYPE AND BANDWIDTH</div>
 
+<?php
+$deptDiagram = v($ni['dept_network_diagram'] ?? '');
+$regionalDiagram = v($ni['regional_network_diagram'] ?? '');
+$hasDiagrams = $deptDiagram !== '' || $regionalDiagram !== '';
+function renderDiagramPdf($imgSrc, $label) {
+    if (preg_match('/^data:image\/(png|jpe?g|gif|webp);/', $imgSrc)) {
+        $imgSrc = preg_replace('/^data:(image\/[a-z0-9+\-.]+);.*;base64,/', 'data:$1;base64,', $imgSrc);
+        echo '<div style="text-align:center;margin:2mm 0;"><img src="' . $imgSrc . '" style="max-width:100%;max-height:70mm;"></div>';
+    } elseif (preg_match('/^data:application\/pdf;/', $imgSrc)) {
+        echo '<div class="body-text"><em>[' . ve($label) . ' - PDF uploaded]</em></div>';
+    } elseif (strpos($imgSrc, 'uploads/') === 0) {
+        $fullPath = FCPATH . $imgSrc;
+        if (file_exists($fullPath) && is_file($fullPath)) {
+            $mime = mime_content_type($fullPath);
+            if ($mime && str_starts_with($mime, 'image/')) {
+                $b64 = base64_encode(file_get_contents($fullPath));
+                echo '<div style="text-align:center;margin:2mm 0;"><img src="data:' . $mime . ';base64,' . $b64 . '" style="max-width:100%;max-height:70mm;"></div>';
+            } else {
+                echo '<div class="body-text"><em>[' . ve($label) . ' - file uploaded]</em></div>';
+            }
+        } else {
+            echo '<div class="body-text"><em>[' . ve($label) . ' - file not found]</em></div>';
+        }
+    } elseif ($imgSrc !== '') {
+        echo '<div class="body-text">' . ve($imgSrc) . '</div>';
+    }
+}
+?>
+
+<?php if ($deptDiagram !== ''): ?>
+<div style="margin-bottom:3mm;">
+    <div class="body-text" style="font-weight:600;margin-bottom:2mm;">Department Network Diagram</div>
+    <?php renderDiagramPdf($deptDiagram, 'Department Network Diagram'); ?>
+</div>
+<?php endif; ?>
+
+<?php if ($regionalDiagram !== ''): ?>
+<div style="margin-bottom:3mm;">
+    <div class="body-text" style="font-weight:600;margin-bottom:2mm;">Regional Network Diagram</div>
+    <?php renderDiagramPdf($regionalDiagram, 'Regional Network Diagram'); ?>
+</div>
+<?php endif; ?>
+
+<?php if (!$hasDiagrams): ?>
+<div class="body-text empty">No data provided.</div>
+<?php endif; ?>
+
+<div class="section-block">
 <div class="subsection-heading">A.2. CYBERSECURITY CONTROL CHECKLIST</div>
 <table class="dt">
     <tr><th style="width:22%;"></th><th style="width:39%;">MANDATORY</th><th style="width:39%;">OPTIONAL</th></tr>
@@ -404,32 +474,24 @@ if (!empty($agencyData['stakeholder_data'])) {
     <?php if ($catName === 'OTHER MEASURES'): ?>
     <tr>
         <td class="ch" style="border-right:none;"><?= ve($catName) ?></td>
-        <td style="border-right:none;"><?php $items = array_values($catItems); $half = ceil(count($items) / 2); foreach (array_slice($items, 0, $half) as $citem): ?><?php $checked = (isset($ni[$citem['label']]) && v($ni[$citem['label']]) === '1'); ?><div>[<?= $checked ? 'X' : ' ' ?>] <?= ve($citem['label']) ?></div><?php endforeach; ?></td>
-        <td style="border-left:none;"><?php foreach (array_slice($items, $half) as $citem): ?><?php $checked = (isset($ni[$citem['label']]) && v($ni[$citem['label']]) === '1'); ?><div>[<?= $checked ? 'X' : ' ' ?>] <?= ve($citem['label']) ?></div><?php endforeach; ?></td>
+        <td style="border-right:none;"><?php $items = array_values($catItems); $half = ceil(count($items) / 2); foreach (array_slice($items, 0, $half) as $ofn => $ocitem): ?><?php $checked = (isset($ni[$ocitem['field']]) && v($ni[$ocitem['field']]) === '1'); ?><div>[<?= $checked ? '/' : ' ' ?>] <?= ve($ocitem['label']) ?></div><?php endforeach; ?></td>
+        <td style="border-left:none;"><?php foreach (array_slice($items, $half) as $ofn => $ocitem): ?><?php $checked = (isset($ni[$ocitem['field']]) && v($ni[$ocitem['field']]) === '1'); ?><div>[<?= $checked ? '/' : ' ' ?>] <?= ve($ocitem['label']) ?></div><?php endforeach; ?></td>
     </tr>
     <?php else: ?>
     <tr>
         <td class="ch"><?= ve($catName) ?></td>
-        <td><?php foreach ($catItems as $cfn => $citem): ?><?php if ($citem['badge'] !== 'Optional'): ?><?php $checked = (isset($ni[$cfn]) && v($ni[$cfn]) === '1'); ?><div>[<?= $checked ? 'X' : ' ' ?>] <?= ve($citem['label']) ?></div><?php endif; ?><?php endforeach; ?></td>
-        <td><?php foreach ($catItems as $cfn => $citem): ?><?php if ($citem['badge'] === 'Optional'): ?><?php $checked = (isset($ni[$cfn]) && v($ni[$cfn]) === '1'); ?><div>[<?= $checked ? 'X' : ' ' ?>] <?= ve($citem['label']) ?></div><?php endif; ?><?php endforeach; ?></td>
+        <td><?php foreach ($catItems as $cfn => $citem): ?><?php if ($citem['badge'] !== 'Optional'): ?><?php $checked = (isset($ni[$cfn]) && v($ni[$cfn]) === '1'); ?><div>[<?= $checked ? '/' : ' ' ?>] <?= ve($citem['label']) ?></div><?php endif; ?><?php endforeach; ?></td>
+        <td><?php foreach ($catItems as $cfn => $citem): ?><?php if ($citem['badge'] === 'Optional'): ?><?php $checked = (isset($ni[$cfn]) && v($ni[$cfn]) === '1'); ?><div>[<?= $checked ? '/' : ' ' ?>] <?= ve($citem['label']) ?></div><?php endif; ?><?php endforeach; ?></td>
     </tr>
     <?php endif; ?>
     <?php endforeach; ?>
 </table>
+</div>
 
 <div class="section-heading">B. ENTERPRISE ARCHITECTURE</div>
 <?php if ($hasEa): ?>
     <?php $eaD = v($ea['ea_diagram'] ?? ''); if ($eaD !== ''): ?>
-        <?php if (preg_match('/^data:image\/(png|jpe?g|gif);/', $eaD)): ?>
-            <?php $eaD = preg_replace('/^data:(image\/[a-z0-9+\-.]+);.*;base64,/', 'data:$1;base64,', $eaD); ?>
-            <div style="text-align:center;margin:4mm 0;"><img src="<?= $eaD ?>" style="max-width:100%;max-height:150mm;"></div>
-        <?php elseif (preg_match('/^data:application\/pdf;/', $eaD)): ?>
-            <div class="body-text"><em>[Enterprise Architecture Diagram - PDF uploaded]</em></div>
-        <?php elseif (strpos($eaD, 'uploads/') === 0): ?>
-            <div style="text-align:center;margin:4mm 0;"><img src="<?= base_url($eaD) ?>" style="max-width:100%;max-height:150mm;"></div>
-        <?php else: ?>
-            <div class="body-text"><?= $eaD ?></div>
-        <?php endif; ?>
+        <?php renderDiagramPdf($eaD, 'Enterprise Architecture Diagram'); ?>
     <?php endif; ?>
     <?php $eaDesc = v($ea['ea_description'] ?? ''); if ($eaDesc !== ''): ?>
         <div class="body-text"><?= nl2br($eaDesc) ?></div>
@@ -453,12 +515,12 @@ if (!empty($agencyData['stakeholder_data'])) {
     <tr><td class="b" style="background:#e0e0e0;">Information System Name</td><td><?= v($is['is_name_1'] ?? '') ?></td></tr>
     <tr><td class="b" style="background:#e0e0e0;">Classification</td><td><?= v($is['classification_1'] ?? '') ?></td></tr>
     <tr><td class="b" style="background:#e0e0e0;">Service Type</td><td>
-        [<?= (isset($is['frontline_1']) && v($is['frontline_1']) === '1') ? 'X' : ' ' ?>] Frontline Service (directly used for public/client service delivery)<br>
-        [<?= (isset($is['non_frontline_1']) && v($is['non_frontline_1']) === '1') ? 'X' : ' ' ?>] Non-Frontline Service (supports core mandate but not directly used by clients/public)<br><br>
+        [<?= (isset($is['system_usage_1']) && v($is['system_usage_1']) === 'frontline') ? '/' : ' ' ?>] Frontline Service (directly used for public/client service delivery)<br>
+        [<?= (isset($is['system_usage_1']) && v($is['system_usage_1']) === 'non_frontline') ? '/' : ' ' ?>] Non-Frontline Service (supports core mandate but not directly used by clients/public)<br><br>
         Identify if:<br>
-        [<?= (isset($is['online_1']) && v($is['online_1']) === '1') ? 'X' : ' ' ?>] Online<br>
-        [<?= (isset($is['on_premise_1']) && v($is['on_premise_1']) === '1') ? 'X' : ' ' ?>] On-premise<br>
-        [<?= (isset($is['hybrid_1']) && v($is['hybrid_1']) === '1') ? 'X' : ' ' ?>] Hybrid
+        [<?= (isset($is['deployment_type_1']) && v($is['deployment_type_1']) === 'online') ? '/' : ' ' ?>] Online<br>
+        [<?= (isset($is['deployment_type_1']) && v($is['deployment_type_1']) === 'on_premise') ? '/' : ' ' ?>] On-premise<br>
+        [<?= (isset($is['deployment_type_1']) && v($is['deployment_type_1']) === 'hybrid') ? '/' : ' ' ?>] Hybrid
     </td></tr>
     <tr><td class="b" style="background:#e0e0e0;">Description &amp; Purpose</td><td><?= v($is['description_1'] ?? '') ?></td></tr>
     <tr><td class="b" style="background:#e0e0e0;">Status</td><td><?= v($is['status_1'] ?? '') ?></td></tr>
@@ -470,15 +532,15 @@ if (!empty($agencyData['stakeholder_data'])) {
     <tr><td class="b" style="background:#e0e0e0;">External Users</td><td><?= v($is['external_users_1'] ?? '') ?></td></tr>
     <tr><td class="b" style="background:#e0e0e0;">Owner</td><td><?= v($is['owner_1'] ?? '') ?></td></tr>
     <tr><td class="b" style="background:#e0e0e0;font-weight:bold;">INTEROPERABILITY</td><td>
-        [<?= (isset($is['interop1_main']) && v($is['interop1_main']) === '1') ? 'X' : ' ' ?>] Integration with another system (If the system will exchange data or will be technically integrated with another system)<br>
+        [<?= !empty($is['interop1_main']) ? '/' : ' ' ?>] Integration with another system (If the system will exchange data or will be technically integrated with another system)<br>
         If yes, specify the system name &nbsp; Internal System: <?= v($is['interop1_internal_system'] ?? '') ?> &nbsp; External System: <?= v($is['interop1_external_system'] ?? '') ?><br><br>
-        [<?= (isset($is['interop1_sub']) && v($is['interop1_sub']) === 'integration') ? 'X' : ' ' ?>] Generate data that will be utilized by other system<br>
-        [<?= (isset($is['interop1_sub']) && v($is['interop1_sub']) === 'receive') ? 'X' : ' ' ?>] Process data generated from other system<br>
-        [<?= (isset($is['interop1_sub']) && v($is['interop1_sub']) === 'shared') ? 'X' : ' ' ?>] Deployment on a shared platform
+        [<?= (isset($is['interop1_sub']) && v($is['interop1_sub']) === 'generate') ? '/' : ' ' ?>] Generate data that will be utilized by other system<br>
+        [<?= (isset($is['interop1_sub']) && v($is['interop1_sub']) === 'process') ? '/' : ' ' ?>] Process data generated from other system<br>
+        [<?= (isset($is['interop1_sub']) && v($is['interop1_sub']) === 'shared') ? '/' : ' ' ?>] Deployment on a shared platform
     </td></tr>
     <tr><td class="b" style="background:#e0e0e0;font-weight:bold;">PRIVACY IMPACT ASSESSMENT</td><td>
         Will the system process personal information? (Will the system collect, store, or process names, addresses, photos, or any info that can identify an individual?)<br>
-        [<?= (isset($is['pia_1']) && v($is['pia_1']) === '1') ? 'X' : ' ' ?>] Yes &nbsp; [<?= (isset($is['pia_1']) && v($is['pia_1']) === '0') ? 'X' : ' ' ?>] No
+        [<?= (isset($is['pia_1']) && v($is['pia_1']) === 'yes') ? '/' : ' ' ?>] Yes &nbsp; [<?= (isset($is['pia_1']) && v($is['pia_1']) === 'no') ? '/' : ' ' ?>] No
     </td></tr>
     <?php else: ?>
     <tr><td colspan="2" class="empty">No data provided.</td></tr>
@@ -493,18 +555,18 @@ if (!empty($agencyData['stakeholder_data'])) {
     <tr><td class="b" style="background:#e0e0e0;">Description</td><td><?= v($proj['internal_description'] ?? '') ?></td></tr>
     <tr><td class="b" style="background:#e0e0e0;">Objectives</td><td><?= v($proj['internal_objectives'] ?? '') ?></td></tr>
     <tr><td class="b" style="background:#e0e0e0;">Strategic Alignment</td><td>
-        [<?= (isset($proj['internal_strategic_pip']) && v($proj['internal_strategic_pip']) === '1') ? 'X' : ' ' ?>] Public Investment Program<br>
-        [<?= (isset($proj['internal_strategic_ncp']) && v($proj['internal_strategic_ncp']) === '1') ? 'X' : ' ' ?>] National Cybersecurity Plan<br>
-        [<?= (isset($proj['internal_strategic_egov']) && v($proj['internal_strategic_egov']) === '1') ? 'X' : ' ' ?>] E-Government Master Plan<br>
-        [<?= (isset($proj['internal_strategic_pcb']) && v($proj['internal_strategic_pcb']) === '1') ? 'X' : ' ' ?>] Program Convergence Budgeting<br>
-        [<?= (isset($proj['internal_strategic_others']) && v($proj['internal_strategic_others']) === '1') ? 'X' : ' ' ?>] Others (Specify): <?= v($proj['internal_strategic_others_text'] ?? '') ?>
+        [<?= !empty($proj['internal_strategic_pip']) ? '/' : ' ' ?>] Public Investment Program<br>
+        [<?= !empty($proj['internal_strategic_ncp']) ? '/' : ' ' ?>] National Cybersecurity Plan<br>
+        [<?= !empty($proj['internal_strategic_egov']) ? '/' : ' ' ?>] E-Government Master Plan<br>
+        [<?= !empty($proj['internal_strategic_pcb']) ? '/' : ' ' ?>] Program Convergence Budgeting<br>
+        [<?= !empty($proj['internal_strategic_others']) ? '/' : ' ' ?>] Others (Specify): <?= v($proj['internal_strategic_others_text'] ?? '') ?>
     </td></tr>
     <tr><td class="b" style="background:#e0e0e0;">Harmonization Framework</td><td>
-        [<?= (isset($proj['internal_harmonization_1']) && v($proj['internal_harmonization_1']) === '1') ? 'X' : ' ' ?>] National Prioritization<br>
-        [<?= (isset($proj['internal_harmonization_2']) && v($proj['internal_harmonization_2']) === '1') ? 'X' : ' ' ?>] Resource Optimization<br>
-        [<?= (isset($proj['internal_harmonization_3']) && v($proj['internal_harmonization_3']) === '1') ? 'X' : ' ' ?>] Interoperability Framework<br>
-        [<?= (isset($proj['internal_harmonization_4']) && v($proj['internal_harmonization_4']) === '1') ? 'X' : ' ' ?>] Cross-Agency Collaboration<br>
-        [<?= (isset($proj['internal_harmonization_5']) && v($proj['internal_harmonization_5']) === '1') ? 'X' : ' ' ?>] Scalability and Sustainability
+        [<?= !empty($proj['internal_harmonization_1']) ? '/' : ' ' ?>] National Prioritization<br>
+        [<?= !empty($proj['internal_harmonization_2']) ? '/' : ' ' ?>] Resource Optimization<br>
+        [<?= !empty($proj['internal_harmonization_3']) ? '/' : ' ' ?>] Interoperability Framework<br>
+        [<?= !empty($proj['internal_harmonization_4']) ? '/' : ' ' ?>] Cross-Agency Collaboration<br>
+        [<?= !empty($proj['internal_harmonization_5']) ? '/' : ' ' ?>] Scalability and Sustainability
     </td></tr>
     <tr><td class="b" style="background:#e0e0e0;">Duration</td><td>
         Start: <?= v($proj['internal_start_date'] ?? '') ?> &nbsp; End: <?= v($proj['internal_end_date'] ?? '') ?>
@@ -521,11 +583,11 @@ if (!empty($agencyData['stakeholder_data'])) {
 </table>
 
 <div class="section-heading">F. PERFORMANCE MEASUREMENT FRAMEWORK</div>
-<?php foreach ($pmProjects as $pk => $pl): $kpD = $pm[$pk] ?? null; $kpi = is_array($kpD) ? ($kpD['kpi'] ?? $kpD) : []; $hKpi = false;
+<?php foreach ($pmProjects as $pk => $pl): $kpi = is_array($pmParsed[$pk] ?? null) ? ($pmParsed[$pk]['kpi'] ?? $pmParsed[$pk]) : []; $hKpi = false;
 if (is_array($kpi)) { foreach ($levels as $lk => $lv) { $row = $kpi[$lk] ?? []; if (!is_array($row)) continue; foreach ($cols as $ck => $cl) { if (!isEmpty($row[$ck] ?? '')) { $hKpi = true; break 2; } } } } ?>
 <div class="subsection-heading"><?= ve($pl) ?></div>
 <?php if ($hKpi): ?>
-<table class="dt"><tr><th style="width:16%;">Hierarchy of Targeted Results</th><?php foreach ($cols as $cl): ?><th><?= ve($cl) ?></th><?php endforeach; ?></tr>
+<table class="dt kpi" style="width:100%;"><tr><th>HIERARCHY OF TARGETED RESULTS</th><th>KEY PERFORMANCE INDICATORS</th><th>BASELINE DATA</th><th>TARGETS</th><th>DATA COLLECTION METHODS</th><th>RESPONSIBILITY</th></tr>
 <?php foreach ($levels as $lk => $lv): $row = $kpi[$lk] ?? []; if (!is_array($row)) continue; $rH = false; foreach ($cols as $ck => $cl) { if (!isEmpty($row[$ck] ?? '')) { $rH = true; break; } } if (!$rH) continue; ?>
 <tr><td class="b"><?= ve($lv) ?></td><?php foreach ($cols as $ck => $cl): $cv = v($row[$ck] ?? ''); ?><td><?= $cv !== '' ? $cv : '<span class="empty">-</span>' ?></td><?php endforeach; ?></tr>
 <?php endforeach; ?></table>
@@ -549,7 +611,7 @@ if (is_array($kpi)) { foreach ($levels as $lk => $lv) { $row = $kpi[$lk] ?? []; 
 </table>
 <?php endforeach; ?>
 
-<div class="section-heading" style="page-break-before:always;">SUMMARY OF INVESTMENTS</div>
+<div class="section-heading" style="margin-top:8mm;">SUMMARY OF INVESTMENTS</div>
 
 <div class="subsection-heading">GENERAL SUMMARY</div>
 <table class="dt">
