@@ -533,6 +533,17 @@
     accent-color: var(--brand);
 }
 
+.control-checkbox.mandatory:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+    accent-color: var(--brand);
+}
+
+.control-item:has(.control-checkbox.mandatory) {
+    background: #eef2f7;
+    border-left: 3px solid var(--brand);
+}
+
 .control-label {
     font-size: .85rem;
     font-weight: 500;
@@ -764,7 +775,7 @@
                         
                             <div class="control-item">
                                 <div class="control-info">
-                                    <input type="checkbox" class="control-checkbox" name="perimeter_protection" value="1">
+                                    <input type="checkbox" class="control-checkbox mandatory" name="perimeter_protection" value="1" checked disabled>
                                     <span class="control-label">Perimeter Protection</span>
                                 </div>
                                 <span class="control-badge badge-mandatory">Mandatory</span>
@@ -772,7 +783,7 @@
                             
                             <div class="control-item">
                                 <div class="control-info">
-                                    <input type="checkbox" class="control-checkbox" name="access_control" value="1">
+                                    <input type="checkbox" class="control-checkbox mandatory" name="access_control" value="1" checked disabled>
                                     <span class="control-label">Access Control</span>
                                 </div>
                                 <span class="control-badge badge-mandatory">Mandatory</span>
@@ -780,7 +791,7 @@
                             
                             <div class="control-item">
                                 <div class="control-info">
-                                    <input type="checkbox" class="control-checkbox" name="surveillance_system" value="1">
+                                    <input type="checkbox" class="control-checkbox mandatory" name="surveillance_system" value="1" checked disabled>
                                     <span class="control-label">Surveillance System</span>
                                 </div>
                                 <span class="control-badge badge-mandatory">Mandatory</span>
@@ -806,7 +817,7 @@
                         
                             <div class="control-item">
                                 <div class="control-info">
-                                    <input type="checkbox" class="control-checkbox" name="next_gen_firewall" value="1">
+                                    <input type="checkbox" class="control-checkbox mandatory" name="next_gen_firewall" value="1" checked disabled>
                                     <span class="control-label">Next Generation Firewalls</span>
                                 </div>
                                 <span class="control-badge badge-mandatory">Mandatory</span>
@@ -814,7 +825,7 @@
                             
                             <div class="control-item">
                                 <div class="control-info">
-                                    <input type="checkbox" class="control-checkbox" name="ids_ips" value="1">
+                                    <input type="checkbox" class="control-checkbox mandatory" name="ids_ips" value="1" checked disabled>
                                     <span class="control-label">Intrusion Detection/Prevention Systems (IDS/IPS)</span>
                                 </div>
                                 <span class="control-badge badge-mandatory">Mandatory</span>
@@ -822,7 +833,7 @@
                             
                             <div class="control-item">
                                 <div class="control-info">
-                                    <input type="checkbox" class="control-checkbox" name="waf" value="1">
+                                    <input type="checkbox" class="control-checkbox mandatory" name="waf" value="1" checked disabled>
                                     <span class="control-label">Web Application Firewalls (WAFs)</span>
                                 </div>
                                 <span class="control-badge badge-mandatory">Mandatory</span>
@@ -848,7 +859,7 @@
                         
                             <div class="control-item">
                                 <div class="control-info">
-                                    <input type="checkbox" class="control-checkbox" name="data_encryption" value="1">
+                                    <input type="checkbox" class="control-checkbox mandatory" name="data_encryption" value="1" checked disabled>
                                     <span class="control-label">Data Encryption</span>
                                 </div>
                                 <span class="control-badge badge-mandatory">Mandatory</span>
@@ -874,7 +885,7 @@
                         
                             <div class="control-item">
                                 <div class="control-info">
-                                    <input type="checkbox" class="control-checkbox" name="antivirus_antimalware" value="1">
+                                    <input type="checkbox" class="control-checkbox mandatory" name="antivirus_antimalware" value="1" checked disabled>
                                     <span class="control-label">Anti-virus and Anti-malware Software</span>
                                 </div>
                                 <span class="control-badge badge-mandatory">Mandatory</span>
@@ -882,7 +893,7 @@
                             
                             <div class="control-item">
                                 <div class="control-info">
-                                    <input type="checkbox" class="control-checkbox" name="application_control" value="1">
+                                    <input type="checkbox" class="control-checkbox mandatory" name="application_control" value="1" checked disabled>
                                     <span class="control-label">Application Control</span>
                                 </div>
                                 <span class="control-badge badge-mandatory">Mandatory</span>
@@ -890,7 +901,7 @@
                             
                             <div class="control-item">
                                 <div class="control-info">
-                                    <input type="checkbox" class="control-checkbox" name="byod_security" value="1">
+                                    <input type="checkbox" class="control-checkbox mandatory" name="byod_security" value="1" checked disabled>
                                     <span class="control-label">BYOD Security</span>
                                 </div>
                                 <span class="control-badge badge-mandatory">Mandatory</span>
@@ -916,7 +927,7 @@
                         
                             <div class="control-item">
                                 <div class="control-info">
-                                    <input type="checkbox" class="control-checkbox" name="data_classification" value="1">
+                                    <input type="checkbox" class="control-checkbox mandatory" name="data_classification" value="1" checked disabled>
                                     <span class="control-label">Data Classification</span>
                                 </div>
                                 <span class="control-badge badge-mandatory">Mandatory</span>
@@ -924,7 +935,7 @@
                             
                             <div class="control-item">
                                 <div class="control-info">
-                                    <input type="checkbox" class="control-checkbox" name="dlp" value="1">
+                                    <input type="checkbox" class="control-checkbox mandatory" name="dlp" value="1" checked disabled>
                                     <span class="control-label">Data Loss Prevention (DLP)</span>
                                 </div>
                                 <span class="control-badge badge-mandatory">Mandatory</span>
@@ -932,7 +943,7 @@
                             
                             <div class="control-item">
                                 <div class="control-info">
-                                    <input type="checkbox" class="control-checkbox" name="data_backups" value="1">
+                                    <input type="checkbox" class="control-checkbox mandatory" name="data_backups" value="1" checked disabled>
                                     <span class="control-label">Data Backups and Recovery</span>
                                 </div>
                                 <span class="control-badge badge-mandatory">Mandatory</span>
@@ -950,7 +961,7 @@
                         
                             <div class="control-item">
                                 <div class="control-info">
-                                    <input type="checkbox" class="control-checkbox" name="security_scanning" value="1">
+                                    <input type="checkbox" class="control-checkbox mandatory" name="security_scanning" value="1" checked disabled>
                                     <span class="control-label">Regular Security Scanning and Testing</span>
                                 </div>
                                 <span class="control-badge badge-mandatory">Mandatory</span>
@@ -1095,7 +1106,7 @@ function updateCategoryStats() {
         const statItem = section.querySelector('.stat-item');
         
         if (checkboxes.length > 0 && statItem) {
-            const checkedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
+            const checkedCount = Array.from(checkboxes).filter(cb => cb.checked || cb.classList.contains('mandatory')).length;
             const totalCount = checkboxes.length;
             statItem.textContent = `${checkedCount}/${totalCount}`;
         }
@@ -1240,6 +1251,10 @@ window.saveChanges = function(showAlert = true) {
                     } else {
                         formDataObj[key] = value;
                     }
+                });
+                
+                document.querySelectorAll('.control-checkbox.mandatory').forEach(cb => {
+                    formDataObj[cb.name] = '1';
                 });
                 
                 if (fileReads.length > 0) {
@@ -1507,6 +1522,11 @@ window.navigateToPage = function(url) {
                 formDataObj[key] = value;
             }
         });
+
+        document.querySelectorAll('.control-checkbox.mandatory').forEach(cb => {
+            formDataObj[cb.name] = '1';
+        });
+
         const doNav = () => {
             // Merge with previous localStorage data to preserve file previews
             const prevData = JSON.parse(localStorage.getItem('network-infrastructure-form') || '{}');

@@ -233,7 +233,7 @@ $isIsspPage = strpos($currentPage, 'proposed-ict-strategy') !== false ||
 <script>
 function updateStatusIndicators() {
     var skipFields = {
-        'network-infrastructure-form': ['dept_network_diagram','regional_network_diagram'],
+        'network-infrastructure-form': ['dept_network_diagram','regional_network_diagram','perimeter_protection','access_control','surveillance_system','next_gen_firewall','ids_ips','waf','data_encryption','antivirus_antimalware','application_control','byod_security','data_classification','dlp','data_backups','security_scanning'],
         'enterprise-architecture-form': ['ea_diagram'],
         'ict-human-capital-form': [],
         'information-systems-form': [],
