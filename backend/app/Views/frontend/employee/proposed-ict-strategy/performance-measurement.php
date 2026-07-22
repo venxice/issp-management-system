@@ -471,12 +471,7 @@
 <form id="mainForm" action="<?= site_url('employee/proposed-ict-strategy/performance-measurement/save') ?>" method="post">
     <?= csrf_field() ?>
 
-<div class="project-tabs">
-    <button type="button" class="project-tab active" data-tab="internal-kpi">F.1 Internal ICT Projects</button>
-    <button type="button" class="project-tab" data-tab="cross-agency-kpi">F.2 Cross-Agency ICT Projects</button>
-</div>
-
-<div id="internal-kpi" class="tab-content active">
+<div id="internal-kpi">
     <div class="section-card">
         <div class="section-header">
             <div>
@@ -532,68 +527,6 @@
         </tbody>
     </table>
 </div>
-        </div>
-    </div>
-</div>
-
-<div id="cross-agency-kpi" class="tab-content">
-    <div class="section-card">
-        <div class="section-header">
-            <div>
-                <div class="d-flex align-items-center">
-                    <h5 class="section-title mb-0"> Performance Measurement Framework</h5>
-                    <i class="fa-solid fa-circle-question help-icon" data-tooltip="Define KPIs for cross-agency ICT projects to measure progress and outcomes."></i>
-                </div>
-                <p class="section-subtitle">Establish Key Performance Indicators (KPIs) for each cross-agency ICT project.</p>
-            </div>
-            <i class="fa-solid fa-circle-question help-icon" data-tooltip="Define KPIs for cross-agency ICT projects to measure progress and outcomes."></i>
-        </div>
-        <div class="section-body">
-            <div class="form-section-label">
-                <span>F. Key Performance Indicators
-                  <i class="fa-solid fa-circle-question help-icon"
-              data-tooltip="Define Key Performance Indicators for each cross-agency ICT project to measure progress and outcomes."></i>
-            </div>
-            <div class="table-responsive">
-                <table class="kpi-table">
-                    <thead>
-                        <tr>
-                            <th>Hierarchy of Targeted Results</th>
-                            <th>Key Performance Indicators</th>
-                            <th>Baseline Data</th>
-                            <th>Targets</th>
-                            <th>Data Collection Methods</th>
-                            <th>Responsibility</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><b>INTERMEDIATE OUTCOME</b></td>
-                            <td><textarea class="form-control" rows="3" name="cross_projects[1][kpi][intermediate][indicator]" placeholder="Percentage (%), No. of Units, or Ratios"></textarea></td>
-                            <td><textarea class="form-control" rows="3" name="cross_projects[1][kpi][intermediate][baseline]" placeholder="Current Percentage (%), No. of Units, or Ratios"></textarea></td>
-                            <td><textarea class="form-control" rows="3" name="cross_projects[1][kpi][intermediate][target]" placeholder="Additional Percentage (%), No. of Units, or Ratios"></textarea></td>
-                            <td><textarea class="form-control" rows="3" name="cross_projects[1][kpi][intermediate][method]" placeholder="Reports, Modules, etc."></textarea></td>
-                            <td><textarea class="form-control" rows="3" name="cross_projects[1][kpi][intermediate][responsibility]" placeholder="Department or Agency, Bureau, Service, or Office"></textarea></td>
-                        </tr>
-                        <tr>
-                            <td><b>IMMEDIATE OUTCOME</b></td>
-                            <td><textarea class="form-control" rows="3" name="cross_projects[1][kpi][immediate][indicator]" placeholder="Percentage (%), No. of Units, or Ratios"></textarea></td>
-                            <td><textarea class="form-control" rows="3" name="cross_projects[1][kpi][immediate][baseline]" placeholder="Current Percentage (%), No. of Units, or Ratios"></textarea></td>
-                            <td><textarea class="form-control" rows="3" name="cross_projects[1][kpi][immediate][target]" placeholder="Additional Percentage (%), No. of Units, or Ratios"></textarea></td>
-                            <td><textarea class="form-control" rows="3" name="cross_projects[1][kpi][immediate][method]" placeholder="Reports, Modules, etc."></textarea></td>
-                            <td><textarea class="form-control" rows="3" name="cross_projects[1][kpi][immediate][responsibility]" placeholder="Department or Agency, Bureau, Service, or Office"></textarea></td>
-                        </tr>
-                        <tr>
-                            <td><b>OUTPUT</b></td>
-                            <td><textarea class="form-control" rows="3" name="cross_projects[1][kpi][output][indicator]" placeholder="Percentage (%), No. of Units, or Ratios"></textarea></td>
-                            <td><textarea class="form-control" rows="3" name="cross_projects[1][kpi][output][baseline]" placeholder="Current Percentage (%), No. of Units, or Ratios"></textarea></td>
-                            <td><textarea class="form-control" rows="3" name="cross_projects[1][kpi][output][target]" placeholder="Additional Percentage (%), No. of Units, or Ratios"></textarea></td>
-                            <td><textarea class="form-control" rows="3" name="cross_projects[1][kpi][output][method]" placeholder="Reports, Modules, etc."></textarea></td>
-                            <td><textarea class="form-control" rows="3" name="cross_projects[1][kpi][output][responsibility]" placeholder="Department or Agency, Bureau, Service, or Office"></textarea></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
         </div>
     </div>
 </div>
@@ -841,17 +774,6 @@ window.loadSavedData = function() {
 
     }
 };
-
-document.querySelectorAll('.project-tab').forEach(tab => {
-    tab.addEventListener('click', function() {
-        document.querySelectorAll('.project-tab').forEach(t => t.classList.remove('active'));
-        this.classList.add('active');
-        document.querySelectorAll('.tab-content').forEach(content => {
-            content.classList.remove('active');
-        });
-        document.getElementById(this.getAttribute('data-tab')).classList.add('active');
-    });
-});
 
 document.addEventListener('DOMContentLoaded', function() {
     initializeTooltips();

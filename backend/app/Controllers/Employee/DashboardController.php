@@ -6,6 +6,8 @@ use App\Controllers\BaseController;
 use App\Models\UserModel;
 use App\Models\ISspRecordModel;
 use App\Models\AuditLogModel;
+use App\Models\ResourceRequirementModel;
+use App\Models\AgencyInformationModel;
 
 class DashboardController extends BaseController
 {
@@ -127,42 +129,24 @@ class DashboardController extends BaseController
 
     public function resubmitProject(int $id)
     {
-        $this->response->setContentType('application/json');
-
         try {
             $currentUserId = (int) session()->get('user_id');
             $isspRecordModel = new ISspRecordModel();
             $record = $isspRecordModel->find($id);
 
             if (!$record || (int) $record['created_by'] !== $currentUserId) {
-                return $this->response->setJSON([
-                    'success' => false,
-                    'message' => 'Project not found.'
-                ]);
+                return redirect()->back()->with('error', 'Project not found.');
             }
 
             if ($record['status'] !== 'returned') {
-                return $this->response->setJSON([
-                    'success' => false,
-                    'message' => 'Only returned projects can be resubmitted.'
-                ]);
+                return redirect()->back()->with('error', 'Only returned projects can be resubmitted.');
             }
 
-            $json = $this->request->getJSON(true);
-            $formData = $json['form_data'] ?? [];
-
-            if (empty($formData)) {
-                if (!empty($record['form_data'])) {
-                    $formData = json_decode($record['form_data'], true) ?? [];
-                }
-            }
+            $formData = !empty($record['form_data']) ? (json_decode($record['form_data'], true) ?? []) : [];
 
             $completion = $this->isFormComplete($formData);
             if (!$completion['success']) {
-                return $this->response->setJSON([
-                    'success' => false,
-                    'message' => $completion['message']
-                ]);
+                return redirect()->back()->with('error', $completion['message']);
             }
 
             $updateData = [
@@ -187,21 +171,15 @@ class DashboardController extends BaseController
                 'id' => $id,
                 'title' => $formData['ict-projects-form']['internal_project_title'] ?? 'ISSP Submission',
             ];
-            $directorGenerals = $userModel->getUsersByRole('director_general');
-            if (!empty($directorGenerals)) {
-                sendSubmissionNotification($project, $employee, $directorGenerals);
+            $ictPlanners = $userModel->getUsersByRole('ict_planner');
+            if (!empty($ictPlanners)) {
+                sendSubmissionNotification($project, $employee, $ictPlanners);
             }
 
-            return $this->response->setJSON([
-                'success' => true,
-                'message' => 'Project resubmitted successfully for review.'
-            ]);
+            return redirect()->to('employee/dashboard')->with('success', 'Project resubmitted successfully for review.');
 
         } catch (\Exception $e) {
-            return $this->response->setJSON([
-                'success' => false,
-                'message' => $e->getMessage()
-            ]);
+            return redirect()->back()->with('error', $e->getMessage());
         }
     }
 
@@ -248,104 +226,38 @@ class DashboardController extends BaseController
         ]);
     }
 
-    public function submitISSP()
+    public function submitISSP($id = null)
     {
-        $this->response->setContentType('application/json');
-
         try {
             $this->ensureFormDataColumn();
 
             $isspRecordModel = new ISspRecordModel();
-            $json = $this->request->getJSON(true);
-
             $currentUserId = (int) session()->get('user_id');
-            $id = $json['id'] ?? null;
+            $id = $id ?? $this->request->getPost('id');
+
             if (!$id) {
-                // Create a new submission record
-                $formData = $json['form_data'] ?? [];
-                $completion = $this->isFormComplete($formData);
-                if (!$completion['success']) {
-                    return $this->response->setJSON([
-                        'success' => false,
-                        'message' => $completion['message']
-                    ]);
-                }
-                $id = $isspRecordModel->insert([
-                    'title' => $formData['ict-projects-form']['internal_project_title'] ?? 'ISSP Submission',
-                    'description' => $formData['ict-projects-form']['internal_description'] ?? '',
-                    'budget' => $formData['ict-projects-form']['internal_total_cost'] ?? 0,
-                    'department_id' => session()->get('department_id'),
-                    'status' => 'pending',
-                    'created_by' => $currentUserId,
-                    'form_data' => json_encode($formData),
-                    'created_at' => date('Y-m-d H:i:s'),
-                    'updated_at' => date('Y-m-d H:i:s'),
-                ]);
-            } else {
-                // Update existing record
-                $formData = $json['form_data'] ?? [];
-                if (empty($formData)) {
-                    // Form data not sent in request — load from DB (draft table submit)
-                    $record = $isspRecordModel->find($id);
-                    if ($record && !empty($record['form_data'])) {
-                        $formData = json_decode($record['form_data'], true) ?? [];
-                    }
-                }
-                $completion = $this->isFormComplete($formData);
-                if (!$completion['success']) {
-                    return $this->response->setJSON([
-                        'success' => false,
-                        'message' => $completion['message']
-                    ]);
-                }
-                $record = $record ?? $isspRecordModel->find($id);
+                return redirect()->back()->with('error', 'No project ID provided.');
+            }
+
+            $record = $isspRecordModel->find($id);
+            $formData = !empty($record['form_data']) ? (json_decode($record['form_data'], true) ?? []) : [];
+
+            $completion = $this->isFormComplete($formData);
+            if (!$completion['success']) {
+                return redirect()->back()->with('error', $completion['message']);
+            }
+
                 $newStatus = ($record && $record['status'] === 'returned') ? 'resubmitted' : 'pending';
-                $updateData = ['status' => $newStatus, 'updated_at' => date('Y-m-d H:i:s')];
-                if (!empty($formData)) {
-                    $updateData['form_data'] = json_encode($formData);
-                    $updateData['title'] = $formData['ict-projects-form']['internal_project_title'] ?? $updateData['title'] ?? 'ISSP Submission';
-                    $updateData['description'] = $formData['ict-projects-form']['internal_description'] ?? '';
-                    $updateData['budget'] = $formData['ict-projects-form']['internal_total_cost'] ?? 0;
-                }
-                $isspRecordModel->update($id, $updateData);
+            $updateData = ['status' => $newStatus, 'updated_at' => date('Y-m-d H:i:s')];
+            if (!empty($formData)) {
+                $updateData['form_data'] = json_encode($formData);
+                $updateData['title'] = $formData['ict-projects-form']['internal_project_title'] ?? $updateData['title'] ?? 'ISSP Submission';
+                $updateData['description'] = $formData['ict-projects-form']['internal_description'] ?? '';
+                $updateData['budget'] = $formData['ict-projects-form']['internal_total_cost'] ?? 0;
             }
+            $isspRecordModel->update($id, $updateData);
 
-            $this->writeLog('issp.submitted', 'Submitted ISSP #' . $id, $json['form_data']['ict-projects-form']['internal_project_title'] ?? '');
-
-            $responseData = [
-                'success' => true,
-                'id' => $id,
-                'message' => 'ISSP submitted successfully for review.'
-            ];
-
-            session_write_close();
-
-            if (function_exists('fastcgi_finish_request')) {
-                if (!headers_sent()) {
-                    $this->response->setContentType('application/json');
-                    $this->response->setBody(json_encode($responseData));
-                    $this->response->send();
-                }
-                fastcgi_finish_request();
-
-                try {
-                    $userModel = new UserModel();
-                    $employee = $userModel->findWithRole($currentUserId);
-                    $project = [
-                        'id' => $id,
-                        'title' => $formData['ict-projects-form']['internal_project_title'] ?? 'ISSP Submission',
-                    ];
-                    $notifyRole = ($newStatus ?? 'pending') === 'resubmitted' ? 'director_general' : 'ict_planner';
-                    $recipients = $userModel->getUsersByRole($notifyRole);
-                    if (!empty($recipients)) {
-                        sendSubmissionNotification($project, $employee, $recipients);
-                    }
-                } catch (\Exception $e) {
-                    log_message('error', 'Failed to send submission notification: ' . $e->getMessage());
-                }
-
-                return;
-            }
+            $this->writeLog('issp.submitted', 'Submitted ISSP #' . $id, $formData['ict-projects-form']['internal_project_title'] ?? '');
 
             try {
                 $userModel = new UserModel();
@@ -354,7 +266,7 @@ class DashboardController extends BaseController
                     'id' => $id,
                     'title' => $formData['ict-projects-form']['internal_project_title'] ?? 'ISSP Submission',
                 ];
-                $notifyRole = ($newStatus ?? 'pending') === 'resubmitted' ? 'director_general' : 'ict_planner';
+                $notifyRole = 'ict_planner';
                 $recipients = $userModel->getUsersByRole($notifyRole);
                 if (!empty($recipients)) {
                     sendSubmissionNotification($project, $employee, $recipients);
@@ -363,13 +275,10 @@ class DashboardController extends BaseController
                 log_message('error', 'Failed to send submission notification: ' . $e->getMessage());
             }
 
-            return $this->response->setJSON($responseData);
+            return redirect()->to('employee/dashboard')->with('success', 'Project submitted successfully for review.');
 
         } catch (\Exception $e) {
-            return $this->response->setJSON([
-                'success' => false,
-                'message' => $e->getMessage()
-            ]);
+            return redirect()->back()->with('error', $e->getMessage());
         }
     }
 
@@ -392,6 +301,24 @@ class DashboardController extends BaseController
         foreach ($sectionLabels as $key => $label) {
             if (empty($formData[$key]) || !is_array($formData[$key])) {
                 return ['success' => false, 'message' => "$label is incomplete."];
+            }
+            if ($key === 'ict-human-capital-form') {
+                $hasAnyRow = false;
+                for ($r = 1; $r <= 20; $r++) {
+                    $pos = $formData[$key]["position_$r"] ?? '';
+                    if (is_string($pos) && trim($pos) !== '') {
+                        $hasAnyRow = true;
+                        $stat = $formData[$key]["status_$r"] ?? '';
+                        $cnt = $formData[$key]["count_$r"] ?? '';
+                        if (trim($stat) === '' || trim($cnt) === '') {
+                            return ['success' => false, 'message' => "$label — Row $r has incomplete fields."];
+                        }
+                    }
+                }
+                if (!$hasAnyRow) {
+                    return ['success' => false, 'message' => "$label requires at least one position."];
+                }
+                continue;
             }
             $hasValue = false;
             foreach ($formData[$key] as $field => $value) {
@@ -431,7 +358,11 @@ class DashboardController extends BaseController
     private function writeLog(string $action, string $description, string $title = ''): void
     {
         $cleanData = [];
-        $json = $this->request->getJSON(true);
+        try {
+            $json = $this->request->getJSON(true);
+        } catch (\Exception $e) {
+            $json = null;
+        }
         if ($json && isset($json['form_data']) && is_array($json['form_data'])) {
             foreach ($json['form_data'] as $section => $fields) {
                 if (is_array($fields)) {
@@ -480,13 +411,18 @@ class DashboardController extends BaseController
             }
 
             if ($id) {
-                // Update existing draft
+                // Update existing record — preserve status if not a draft
+                $existing = $isspRecordModel->find($id);
+                $newStatus = 'draft';
+                if ($existing && !empty($existing['status']) && $existing['status'] !== 'draft') {
+                    $newStatus = $existing['status'];
+                }
                 $isspRecordModel->update($id, [
                     'title' => $title,
                     'description' => $formData['ict-projects-form']['internal_description'] ?? '',
                     'budget' => $formData['ict-projects-form']['internal_total_cost'] ?? 0,
                     'form_data' => json_encode($formData),
-                    'status' => 'draft',
+                    'status' => $newStatus,
                     'updated_at' => date('Y-m-d H:i:s'),
                 ]);
             } else {
@@ -614,6 +550,64 @@ class DashboardController extends BaseController
                 'message' => $e->getMessage()
             ]);
         }
+    }
+
+    public function download(int $id)
+    {
+        $currentUserId = (int) session()->get('user_id');
+        $isspModel = new ISspRecordModel();
+
+        $project = $isspModel
+            ->select('issp_records.*, departments.name AS department_name, users.name AS created_by_name')
+            ->join('departments', 'departments.id = issp_records.department_id', 'left')
+            ->join('users', 'users.id = issp_records.created_by', 'left')
+            ->where('issp_records.id', $id)
+            ->where('issp_records.created_by', $currentUserId)
+            ->first();
+
+        if ($project === null) {
+            return redirect()->back()->with('error', 'Project not found.');
+        }
+
+        $formData = [];
+        if (!empty($project['form_data'])) {
+            $decoded = json_decode($project['form_data'], true);
+            if (is_array($decoded)) {
+                $formData = $decoded;
+            }
+        }
+
+        $resourceModel = new ResourceRequirementModel();
+        $resourceData = [
+            'year1' => $resourceModel->getByYear(1),
+            'year2' => $resourceModel->getByYear(2),
+            'year3' => $resourceModel->getByYear(3),
+            'generalSummary' => $resourceModel->getGeneralSummary(),
+            'fundSource' => $resourceModel->getFundSourceSummary(),
+            'statementOfExpenditure' => $resourceModel->getStatementOfExpenditureSummary(),
+            'objectOfExpenditure' => $resourceModel->getObjectOfExpenditureSummary(),
+        ];
+
+        $agencyModel = new AgencyInformationModel();
+        $agencyData = $agencyModel->orderBy('id', 'DESC')->first() ?? [];
+
+        $html = view('frontend/ict_planner/consolidation/pdf_template', [
+            'project' => $project,
+            'formData' => $formData,
+            'resourceData' => $resourceData,
+            'agencyData' => $agencyData,
+            'batchMode' => false,
+        ]);
+
+        $dompdf = new \Dompdf\Dompdf();
+        $dompdf->loadHtml(mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8'));
+        $dompdf->setPaper('A4', 'landscape');
+        $dompdf->render();
+
+        $filename = 'ISSP_' . preg_replace('/[^a-zA-Z0-9]/', '_', $project['title'] ?? 'submission') . '_' . $id . '.pdf';
+
+        $dompdf->stream($filename, ['Attachment' => true]);
+        exit;
     }
 
     private function ensureFormDataColumn(): void

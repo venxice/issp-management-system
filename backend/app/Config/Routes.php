@@ -51,17 +51,17 @@ $routes->group('director-general', ['filter' => 'role:director_general'], static
 
 $routes->group('employee', ['filter' => 'role:employee'], static function (RouteCollection $routes): void {
     $routes->get('dashboard', 'Employee\DashboardController::index');
-    $routes->post('submit-issp', 'Employee\DashboardController::submitISSP');
+    $routes->post('submit-issp/(:num)', 'Employee\DashboardController::submitISSP/$1');
     $routes->post('save-draft', 'Employee\DashboardController::saveDraft');
     $routes->get('load-form-data/(:num)', 'Employee\DashboardController::loadFormData/$1');
     $routes->get('submitted-ict-projects', 'Employee\DashboardController::submittedIctProjects');
     $routes->get('draft-ict-projects', 'Employee\DashboardController::draftIctProjects');
     $routes->get('edit-ict-project/(:num)/(:any)', 'Employee\DashboardController::editIctProject/$1/$2');
-    $routes->post('save-edit-draft/(:num)', 'Employee\DashboardController::saveEditDraft/$1');
-    $routes->post('submit-edit-project/(:num)', 'Employee\DashboardController::submitEditProject/$1');
+    $routes->post('save-draft', 'Employee\DashboardController::saveDraft');
     $routes->post('upload-file', 'Employee\DashboardController::uploadFile');
     $routes->get('view-full-ict-document/(:num)', 'Employee\DashboardController::viewFullIctDocument/$1');
     $routes->post('resubmit-project/(:num)', 'Employee\DashboardController::resubmitProject/$1');
+    $routes->get('download/(:num)', 'Employee\DashboardController::download/$1');
     
     // Proposed ICT Strategy Routes
     $routes->group('proposed-ict-strategy', static function (RouteCollection $routes): void {

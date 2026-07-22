@@ -36,7 +36,7 @@
                     <thead>
                         <tr>
                             <th style="width:36px;"><input type="checkbox" id="checkAll" onchange="toggleAllCheckboxes(this)"></th>
-                            <th>Internal / Cross-Agency Project Title</th>
+                            <th>Project Title</th>
                             <th>Description</th>
                             <th>Budget</th>
                             <th>Status</th>
@@ -47,26 +47,23 @@
                     <tbody>
                         <?php if ($pendingProjects !== []): ?>
                             <?php foreach ($pendingProjects as $project): ?>
-                                <?php $intTitle = $project['int_title'] ?? 'Untitled'; $crossTitle = $project['cross_title'] ?? ''; $intDesc = $project['int_desc'] ?? '---'; $crossDesc = $project['cross_desc'] ?? ''; $intBudget = $project['int_budget'] ?? 0; $crossBudget = $project['cross_budget'] ?? 0; ?>
+                                <?php $intTitle = $project['int_title'] ?? 'Untitled'; $intDesc = $project['int_desc'] ?? '---'; $intBudget = $project['int_budget'] ?? 0; ?>
                                 <tr>
                                         <td><input type="checkbox" name="project_ids[]" value="<?= $project['id'] ?>" class="project-checkbox" data-url="<?= site_url('director-general/download/' . $project['id']) ?>" onchange="onCheckboxChange()"></td>
                                     <td>
-                                        <div><span class="text-muted">Internal:</span> <?= esc($intTitle) ?></div>
-                                        <?php if ($crossTitle): ?><div class="mt-1"><span class="text-muted">Cross-Agency:</span> <?= esc($crossTitle) ?></div><?php endif; ?>
+                                        <div><?= esc($intTitle) ?></div>
                                     </td>
                                     <td>
-                                        <div><span class="text-muted">Internal:</span> <?= esc($intDesc) ?></div>
-                                        <?php if ($crossDesc): ?><div class="mt-1"><span class="text-muted">Cross-Agency:</span> <?= esc($crossDesc) ?></div><?php endif; ?>
+                                        <div><?= esc($intDesc) ?></div>
                                     </td>
                                     <td>
-                                        <div><span class="text-muted">Internal:</span> <?= is_numeric($intBudget) ? '₱' . number_format($intBudget, 2) : '-' ?></div>
-                                        <?php if ($crossBudget && is_numeric($crossBudget)): ?><div class="mt-1"><span class="text-muted">Cross-Agency:</span> <?= '₱' . number_format($crossBudget, 2) ?></div><?php endif; ?>
+                                        <div><?= is_numeric($intBudget) ? '₱' . number_format($intBudget, 2) : '-' ?></div>
                                     </td>
                                     <td>
                                         <?php
                                         $statusLabels = [
                                             'endorsed' => 'Pending',
-                                            'resubmitted' => 'Resubmitted',
+                                            'resubmitted' => 'Pending - Resubmitted',
                                         ];
                                         $status = $project['status'] ?? 'endorsed';
                                         $label = $statusLabels[$status] ?? ucfirst($status);
@@ -85,11 +82,8 @@
                                         <div class="d-flex gap-1 justify-content-center align-items-center">
                                             <button class="btn btn-outline-primary icon-btn" type="button" title="View" data-project='<?= json_encode([
                                                 'title' => $intTitle,
-                                                'cross_title' => $crossTitle,
                                                 'description' => $project['description'] ?? '',
-                                                'cross_description' => $crossDesc,
                                                 'budget' => $project['budget'] ?? '',
-                                                'cross_budget' => $crossBudget,
                                                 'status' => $status,
                                                 'department' => $project['department_name'] ?? '',
                                                 'updated' => $project['updated_at'] ?? $project['created_at'] ?? '',
@@ -186,24 +180,12 @@
             </div>
             <div class="modal-body">
                 <div class="detail-grid">
-                    <div class="key">Internal Title</div>
+                    <div class="key">Project Title</div>
                     <div class="val" id="viewProjectTitle">-</div>
-                    <div class="cross-row" id="viewCrossRow">
-                        <div class="key">Cross-Agency Title</div>
-                        <div class="val" id="viewProjectCrossTitle">-</div>
-                    </div>
-                    <div class="key">Internal Description</div>
+                    <div class="key">Description</div>
                     <div class="val" id="viewProjectDescription">-</div>
-                    <div class="cross-row" id="viewCrossDescRow">
-                        <div class="key">Cross-Agency Description</div>
-                        <div class="val" id="viewProjectCrossDescription">-</div>
-                    </div>
-                    <div class="key">Internal Budget</div>
+                    <div class="key">Budget</div>
                     <div class="val" id="viewProjectBudget">-</div>
-                    <div class="cross-row" id="viewCrossBudgetRow">
-                        <div class="key">Cross-Agency Budget</div>
-                        <div class="val" id="viewProjectCrossBudget">-</div>
-                    </div>
                     <div class="key">Status</div>
                     <div class="val" id="viewProjectStatus">-</div>
                     <div class="key">Department</div>
@@ -329,7 +311,6 @@
 .detail-grid { display: grid; grid-template-columns: 170px 1fr; gap: 12px 18px; }
 .key { font-size: .8rem; color: #6c757d; font-weight: 600; }
 .val { font-size: .9rem; color: #212529; word-break: break-word; }
-.cross-row { display: contents; }
 .remarks-in-modal { margin-top: 18px; }
 .remarks-in-modal__card {
     background: #f0f4f9;
@@ -512,33 +493,9 @@ document.addEventListener('DOMContentLoaded', function() {
             try {
                 var project = JSON.parse(this.getAttribute('data-project'));
                 document.getElementById('viewProjectTitle').textContent = project.title || '-';
-                var crossRow = document.getElementById('viewCrossRow');
-                var crossTitleEl = document.getElementById('viewProjectCrossTitle');
-                if (project.cross_title) {
-                    crossTitleEl.textContent = project.cross_title;
-                    crossRow.style.display = '';
-                } else {
-                    crossRow.style.display = 'none';
-                }
                 document.getElementById('viewProjectDescription').textContent = project.description || '-';
-                var crossDescRow = document.getElementById('viewCrossDescRow');
-                var crossDescEl = document.getElementById('viewProjectCrossDescription');
-                if (project.cross_description) {
-                    crossDescEl.textContent = project.cross_description;
-                    crossDescRow.style.display = '';
-                } else {
-                    crossDescRow.style.display = 'none';
-                }
                 document.getElementById('viewProjectBudget').textContent = project.budget ? '₱' + parseFloat(project.budget).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '-';
-                var crossBudgetRow = document.getElementById('viewCrossBudgetRow');
-                var crossBudgetEl = document.getElementById('viewProjectCrossBudget');
-                if (project.cross_budget && parseFloat(project.cross_budget) > 0) {
-                    crossBudgetEl.textContent = '₱' + parseFloat(project.cross_budget).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-                    crossBudgetRow.style.display = '';
-                } else {
-                    crossBudgetRow.style.display = 'none';
-                }
-                var statusMap = {'endorsed':'Pending','returned':'Returned','approved':'Approved','rejected':'Rejected','resubmitted':'Resubmitted'};
+                var statusMap = {'endorsed':'Pending','returned':'Returned','approved':'Approved','rejected':'Rejected','resubmitted':'Pending - Resubmitted'};
                 document.getElementById('viewProjectStatus').textContent = statusMap[project.status] || project.status || '-';
                 document.getElementById('viewProjectDepartment').textContent = project.department || '-';
                 document.getElementById('viewProjectUpdated').textContent = project.updated || '-';
