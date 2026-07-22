@@ -164,13 +164,20 @@ class ConsolidationController extends BaseController
         $resourceData = $this->loadResourceData();
         $agencyData = $this->loadAgencyData();
 
-        $html = view('frontend/ict_planner/consolidation/pdf_template', [
+        $viewData = [
             'project' => $project,
             'formData' => $formData,
             'resourceData' => $resourceData,
             'agencyData' => $agencyData,
             'batchMode' => false,
-        ]);
+        ];
+
+        $pageNumbers = $this->extractPageNumbers($viewData);
+
+        $html = view('frontend/ict_planner/consolidation/pdf_template', array_merge($viewData, [
+            'scanMode' => false,
+            'pageNumbers' => $pageNumbers,
+        ]));
 
         $dompdf = new \Dompdf\Dompdf();
         $dompdf->loadHtml(mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8'));
@@ -181,6 +188,11 @@ class ConsolidationController extends BaseController
 
         $dompdf->stream($filename, ['Attachment' => true]);
         exit;
+    }
+
+    private function extractPageNumbers(array $viewData): array
+    {
+        return [];
     }
 
     public function batchDownload()
@@ -201,13 +213,20 @@ class ConsolidationController extends BaseController
 
             $formData = $this->extractFormData($project);
 
-            $html = view('frontend/ict_planner/consolidation/pdf_template', [
+            $viewData = [
                 'project' => $project,
                 'formData' => $formData,
                 'resourceData' => $resourceData,
                 'agencyData' => $agencyData,
                 'batchMode' => true,
-            ]);
+            ];
+
+            $pageNumbers = $this->extractPageNumbers($viewData);
+
+            $html = view('frontend/ict_planner/consolidation/pdf_template', array_merge($viewData, [
+                'scanMode' => false,
+                'pageNumbers' => $pageNumbers,
+            ]));
 
             $dompdf = new \Dompdf\Dompdf();
             $dompdf->loadHtml(mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8'));

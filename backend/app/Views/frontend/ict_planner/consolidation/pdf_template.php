@@ -128,6 +128,22 @@ $is = $formData['information-systems-form'] ?? [];
 $proj = $formData['ict-projects-form'] ?? [];
 $pm = $formData['performance-measurement-form'] ?? [];
 $batchMode = $batchMode ?? false;
+$scanMode = $scanMode ?? false;
+$pageNumbers = $pageNumbers ?? [];
+
+if (!function_exists('scanMarker')) {
+    function scanMarker($key) {
+        global $scanMode;
+        return $scanMode ? '<span style="font-size:1px;color:rgba(255,255,255,0);">XXM:' . $key . '</span>' : '';
+    }
+}
+
+if (!function_exists('scanAttr')) {
+    function scanAttr($key) {
+        global $scanMode;
+        return $scanMode ? ' data-scan="' . $key . '"' : '';
+    }
+}
 $rY1 = $resourceData['year1'] ?? []; $rY2 = $resourceData['year2'] ?? []; $rY3 = $resourceData['year3'] ?? [];
 $rGen = $resourceData['generalSummary'] ?? []; $rFund = $resourceData['fundSource'] ?? [];
 $rSOE = $resourceData['statementOfExpenditure'] ?? []; $rOOE = $resourceData['objectOfExpenditure'] ?? [];
@@ -142,6 +158,7 @@ $hasPm = false; $pmProjects = ['internal_projects' => 'INTERNAL ICT PROJECTS'];
 $levels = ['intermediate' => 'INTERMEDIATE OUTCOME', 'immediate' => 'IMMEDIATE OUTCOME', 'output' => 'OUTPUT'];
 $cols = ['indicator' => 'Key Performance Indicators', 'baseline' => 'Baseline Data', 'target' => 'Targets', 'method' => 'Data Collection Methods', 'responsibility' => 'Responsibility'];
 
+if (!function_exists('parsePmFlat')) {
 function parsePmFlat($fields, $prefix) {
     $projects = [];
     foreach ($fields as $fn => $fv) {
@@ -150,6 +167,7 @@ function parsePmFlat($fields, $prefix) {
         }
     }
     return $projects;
+}
 }
 
 $pmParsed = [];
@@ -198,12 +216,13 @@ body { font-family: 'Palatino Linotype', 'Palatino', 'Book Antiqua', serif; font
 .toc-part { font-weight: bold; font-size: 11pt; margin-top: 5mm; margin-bottom: 1mm; }
 .toc-sub { font-size: 11pt; margin-bottom: 1mm; margin-left: 4mm; }
 .toc-item { font-size: 11pt; margin-bottom: 0.8mm; margin-left: 8mm; }
-.toc-row { font-size: 11pt; margin-bottom: 1mm; display: table; width: 100%; }
+.toc-row { font-size: 11pt; margin-bottom: 1mm; display: flex; align-items: baseline; width: 100%; }
 .toc-row-part { font-weight: bold; margin-top: 5mm; }
-.toc-label-toc { display: table-cell; padding-left: 0; }
+.toc-label-toc { flex: 1; padding-right: 2mm; white-space: nowrap; }
 .toc-row-sub .toc-label-toc { padding-left: 4mm; }
 .toc-row-item .toc-label-toc { padding-left: 8mm; }
-.toc-page-num { display: table-cell; text-align: right; width: 20px; }
+.toc-dots { flex: 1; border-bottom: 1px dotted #999; margin: 0 1mm; min-width: 5mm; }
+.toc-page-num { display: inline-block; min-width: 10mm; text-align: right; font-weight: bold; }
 
 .part-heading { font-size: 16pt; font-weight: bold;  margin-top: 6mm; margin-bottom: 4mm; page-break-before: always; }
 .section-heading { font-size: 14pt; font-weight: bold;  margin-top: 5mm; margin-bottom: 3mm; page-break-after: avoid; }
@@ -278,50 +297,51 @@ table.dt tr.group-header td { background: #d9d9d9; font-weight: bold; text-align
 <div class="toc-page">
     <div class="toc-title">Table of Contents</div>
 
-    <div class="toc-row toc-row-sub" style="font-weight:bold;"><span class="toc-label-toc">Definition of Terms</span><span class="toc-page-num">4</span></div>
+    <div class="toc-row toc-row-sub" style="font-weight:bold;"><span class="toc-label-toc">Definition of Terms</span><span class="toc-dots"></span><span class="toc-page-num"><?= $pageNumbers['definition_of_terms'] ?? '' ?></span></div>
 
-    <div class="toc-row toc-row-part"><span class="toc-label-toc">PART I. AGENCY PROFILE &amp; STRATEGIC CONTEXT</span><span class="toc-page-num">5</span></div>
-    <div class="toc-row toc-row-sub"><span class="toc-label-toc">A. Mandate, Vision, Mission, and Organizational Outcome</span><span class="toc-page-num">3</span></div>
-    <div class="toc-row toc-row-item"><span class="toc-label-toc">A.1. Mandate</span><span class="toc-page-num">3</span></div>
-    <div class="toc-row toc-row-item"><span class="toc-label-toc">A.2. Vision Statement</span><span class="toc-page-num">3</span></div>
-    <div class="toc-row toc-row-item"><span class="toc-label-toc">A.3. Mission Statement</span><span class="toc-page-num">3</span></div>
-    <div class="toc-row toc-row-item"><span class="toc-label-toc">A.4. Organizational Outcome</span><span class="toc-page-num">3</span></div>
-    <div class="toc-row toc-row-sub"><span class="toc-label-toc">B. Organizational Structure</span><span class="toc-page-num">4</span></div>
-    <div class="toc-row toc-row-item"><span class="toc-label-toc">B.1. Chief Information Officer (CIO)</span><span class="toc-page-num">4</span></div>
-    <div class="toc-row toc-row-item"><span class="toc-label-toc">B.2. Human Capital</span><span class="toc-page-num">4</span></div>
-    <div class="toc-row toc-row-sub"><span class="toc-label-toc">C. Stakeholder Analysis</span><span class="toc-page-num">5</span></div>
+    <div class="toc-row toc-row-part"><span class="toc-label-toc">PART I. AGENCY PROFILE &amp; STRATEGIC CONTEXT</span><span class="toc-dots"></span><span class="toc-page-num"><?= $pageNumbers['part1'] ?? '' ?></span></div>
+    <div class="toc-row toc-row-sub"><span class="toc-label-toc">A. Mandate, Vision, Mission, and Organizational Outcome</span><span class="toc-dots"></span><span class="toc-page-num"><?= $pageNumbers['part1_a'] ?? '' ?></span></div>
+    <div class="toc-row toc-row-item"><span class="toc-label-toc">A.1. Mandate</span><span class="toc-dots"></span><span class="toc-page-num"><?= $pageNumbers['part1_a1'] ?? '' ?></span></div>
+    <div class="toc-row toc-row-item"><span class="toc-label-toc">A.2. Vision Statement</span><span class="toc-dots"></span><span class="toc-page-num"><?= $pageNumbers['part1_a2'] ?? '' ?></span></div>
+    <div class="toc-row toc-row-item"><span class="toc-label-toc">A.3. Mission Statement</span><span class="toc-dots"></span><span class="toc-page-num"><?= $pageNumbers['part1_a3'] ?? '' ?></span></div>
+    <div class="toc-row toc-row-item"><span class="toc-label-toc">A.4. Organizational Outcome</span><span class="toc-dots"></span><span class="toc-page-num"><?= $pageNumbers['part1_a4'] ?? '' ?></span></div>
+    <div class="toc-row toc-row-sub"><span class="toc-label-toc">B. Organizational Structure</span><span class="toc-dots"></span><span class="toc-page-num"><?= $pageNumbers['part1_b'] ?? '' ?></span></div>
+    <div class="toc-row toc-row-item"><span class="toc-label-toc">B.1. Chief Information Officer (CIO)</span><span class="toc-dots"></span><span class="toc-page-num"><?= $pageNumbers['part1_b1'] ?? '' ?></span></div>
+    <div class="toc-row toc-row-item"><span class="toc-label-toc">B.2. Human Capital</span><span class="toc-dots"></span><span class="toc-page-num"><?= $pageNumbers['part1_b2'] ?? '' ?></span></div>
+    <div class="toc-row toc-row-sub"><span class="toc-label-toc">C. Stakeholder Analysis</span><span class="toc-dots"></span><span class="toc-page-num"><?= $pageNumbers['part1_c'] ?? '' ?></span></div>
 
-    <div class="toc-row toc-row-part"><span class="toc-label-toc">PART II. CURRENT ICT ASSESSMENT</span><span class="toc-page-num">6</span></div>
-    <div class="toc-row toc-row-sub"><span class="toc-label-toc">A. Strategic Concerns for ICT Use</span><span class="toc-page-num">6</span></div>
-    <div class="toc-row toc-row-sub"><span class="toc-label-toc">B. Existing Network Infrastructure</span><span class="toc-page-num">6</span></div>
-    <div class="toc-row toc-row-item"><span class="toc-label-toc">B1. LAN/WAN Set-up Including Connectivity Type and Bandwidth</span><span class="toc-page-num">6</span></div>
-    <div class="toc-row toc-row-item"><span class="toc-label-toc">B2. Cybersecurity Control Checklist</span><span class="toc-page-num">7</span></div>
-    <div class="toc-row toc-row-sub"><span class="toc-label-toc">C. Existing/Operational Information Systems (IS) Inventory</span><span class="toc-page-num">8</span></div>
-    <div class="toc-row toc-row-sub"><span class="toc-label-toc">D. E-Government Programs (EGP) Checklist</span><span class="toc-page-num">9</span></div>
+    <div class="toc-row toc-row-part"><span class="toc-label-toc">PART II. CURRENT ICT ASSESSMENT</span><span class="toc-dots"></span><span class="toc-page-num"><?= $pageNumbers['part2'] ?? '' ?></span></div>
+    <div class="toc-row toc-row-sub"><span class="toc-label-toc">A. Strategic Concerns for ICT Use</span><span class="toc-dots"></span><span class="toc-page-num"><?= $pageNumbers['part2_a'] ?? '' ?></span></div>
+    <div class="toc-row toc-row-sub"><span class="toc-label-toc">B. Existing Network Infrastructure</span><span class="toc-dots"></span><span class="toc-page-num"><?= $pageNumbers['part2_b'] ?? '' ?></span></div>
+    <div class="toc-row toc-row-item"><span class="toc-label-toc">B1. LAN/WAN Set-up Including Connectivity Type and Bandwidth</span><span class="toc-dots"></span><span class="toc-page-num"><?= $pageNumbers['part2_b1'] ?? '' ?></span></div>
+    <div class="toc-row toc-row-item"><span class="toc-label-toc">B2. Cybersecurity Control Checklist</span><span class="toc-dots"></span><span class="toc-page-num"><?= $pageNumbers['part2_b2'] ?? '' ?></span></div>
+    <div class="toc-row toc-row-sub"><span class="toc-label-toc">C. Existing/Operational Information Systems (IS) Inventory</span><span class="toc-dots"></span><span class="toc-page-num"><?= $pageNumbers['part2_c'] ?? '' ?></span></div>
+    <div class="toc-row toc-row-sub"><span class="toc-label-toc">D. E-Government Programs (EGP) Checklist</span><span class="toc-dots"></span><span class="toc-page-num"><?= $pageNumbers['part2_d'] ?? '' ?></span></div>
 
-    <div class="toc-row toc-row-part"><span class="toc-label-toc">PART III. PROPOSED ICT STRATEGY</span><span class="toc-page-num">10</span></div>
-    <div class="toc-row toc-row-sub"><span class="toc-label-toc">A. Proposed Network Infrastructure</span><span class="toc-page-num">10</span></div>
-    <div class="toc-row toc-row-item"><span class="toc-label-toc">A.1. LAN/WAN Set-up Including Connectivity Type and Bandwidth</span><span class="toc-page-num">10</span></div>
-    <div class="toc-row toc-row-item"><span class="toc-label-toc">A.2. Cybersecurity Control Checklist</span><span class="toc-page-num">11</span></div>
-    <div class="toc-row toc-row-sub"><span class="toc-label-toc">B. Enterprise Architecture</span><span class="toc-page-num">12</span></div>
-    <div class="toc-row toc-row-sub"><span class="toc-label-toc">C. Proposed ICT Human Capital</span><span class="toc-page-num">13</span></div>
-    <div class="toc-row toc-row-sub"><span class="toc-label-toc">D. Proposed Information Systems</span><span class="toc-page-num">14</span></div>
-    <div class="toc-row toc-row-sub"><span class="toc-label-toc">E. ICT Projects</span><span class="toc-page-num">16</span></div>
-    <div class="toc-row toc-row-sub"><span class="toc-label-toc">F. Performance Measurement Framework</span><span class="toc-page-num">18</span></div>
+    <div class="toc-row toc-row-part"><span class="toc-label-toc">PART III. PROPOSED ICT STRATEGY</span><span class="toc-dots"></span><span class="toc-page-num"><?= $pageNumbers['part3'] ?? '' ?></span></div>
+    <div class="toc-row toc-row-sub"><span class="toc-label-toc">A. Proposed Network Infrastructure</span><span class="toc-dots"></span><span class="toc-page-num"><?= $pageNumbers['part3_a'] ?? '' ?></span></div>
+    <div class="toc-row toc-row-item"><span class="toc-label-toc">A.1. LAN/WAN Set-up Including Connectivity Type and Bandwidth</span><span class="toc-dots"></span><span class="toc-page-num"><?= $pageNumbers['part3_a1'] ?? '' ?></span></div>
+    <div class="toc-row toc-row-item"><span class="toc-label-toc">A.2. Cybersecurity Control Checklist</span><span class="toc-dots"></span><span class="toc-page-num"><?= $pageNumbers['part3_a2'] ?? '' ?></span></div>
+    <div class="toc-row toc-row-sub"><span class="toc-label-toc">B. Enterprise Architecture</span><span class="toc-dots"></span><span class="toc-page-num"><?= $pageNumbers['part3_b'] ?? '' ?></span></div>
+    <div class="toc-row toc-row-sub"><span class="toc-label-toc">C. Proposed ICT Human Capital</span><span class="toc-dots"></span><span class="toc-page-num"><?= $pageNumbers['part3_c'] ?? '' ?></span></div>
+    <div class="toc-row toc-row-sub"><span class="toc-label-toc">D. Proposed Information Systems</span><span class="toc-dots"></span><span class="toc-page-num"><?= $pageNumbers['part3_d'] ?? '' ?></span></div>
+    <div class="toc-row toc-row-sub"><span class="toc-label-toc">E. ICT Projects</span><span class="toc-dots"></span><span class="toc-page-num"><?= $pageNumbers['part3_e'] ?? '' ?></span></div>
+    <div class="toc-row toc-row-sub"><span class="toc-label-toc">F. Performance Measurement Framework</span><span class="toc-dots"></span><span class="toc-page-num"><?= $pageNumbers['part3_f'] ?? '' ?></span></div>
 
-    <div class="toc-row toc-row-part"><span class="toc-label-toc">PART IV. RESOURCE REQUIREMENTS</span><span class="toc-page-num">23</span></div>
-    <div class="toc-row toc-row-sub"><span class="toc-label-toc">A. Detailed Resource Deployment and Cost Breakdown</span><span class="toc-page-num">23</span></div>
-    <div class="toc-row toc-row-item"><span class="toc-label-toc">A.1. Year #1</span><span class="toc-page-num">23</span></div>
-    <div class="toc-row toc-row-item"><span class="toc-label-toc">A.2. Year #2</span><span class="toc-page-num">27</span></div>
-    <div class="toc-row toc-row-item"><span class="toc-label-toc">A.3. Year #3</span><span class="toc-page-num">31</span></div>
-    <div class="toc-row toc-row-sub"><span class="toc-label-toc">B. Summary of Investments</span><span class="toc-page-num">35</span></div>
-    <div class="toc-row toc-row-item"><span class="toc-label-toc">B.1. General Summary</span><span class="toc-page-num">35</span></div>
-    <div class="toc-row toc-row-item"><span class="toc-label-toc">B.2. Fund Source</span><span class="toc-page-num">35</span></div>
-    <div class="toc-row toc-row-item"><span class="toc-label-toc">B.3. Statement of Expenditure</span><span class="toc-page-num">35</span></div>
-    <div class="toc-row toc-row-item"><span class="toc-label-toc">B.4. Object of Expenditure</span><span class="toc-page-num">36</span></div>
+    <div class="toc-row toc-row-part"><span class="toc-label-toc">PART IV. RESOURCE REQUIREMENTS</span><span class="toc-dots"></span><span class="toc-page-num"><?= $pageNumbers['part4'] ?? '' ?></span></div>
+    <div class="toc-row toc-row-sub"><span class="toc-label-toc">A. Detailed Resource Deployment and Cost Breakdown</span><span class="toc-dots"></span><span class="toc-page-num"><?= $pageNumbers['part4_a'] ?? '' ?></span></div>
+    <div class="toc-row toc-row-item"><span class="toc-label-toc">A.1. Year #1</span><span class="toc-dots"></span><span class="toc-page-num"><?= $pageNumbers['part4_a1'] ?? '' ?></span></div>
+    <div class="toc-row toc-row-item"><span class="toc-label-toc">A.2. Year #2</span><span class="toc-dots"></span><span class="toc-page-num"><?= $pageNumbers['part4_a2'] ?? '' ?></span></div>
+    <div class="toc-row toc-row-item"><span class="toc-label-toc">A.3. Year #3</span><span class="toc-dots"></span><span class="toc-page-num"><?= $pageNumbers['part4_a3'] ?? '' ?></span></div>
+    <div class="toc-row toc-row-sub"><span class="toc-label-toc">B. Summary of Investments</span><span class="toc-dots"></span><span class="toc-page-num"><?= $pageNumbers['part4_b'] ?? '' ?></span></div>
+    <div class="toc-row toc-row-item"><span class="toc-label-toc">B.1. General Summary</span><span class="toc-dots"></span><span class="toc-page-num"><?= $pageNumbers['part4_b1'] ?? '' ?></span></div>
+    <div class="toc-row toc-row-item"><span class="toc-label-toc">B.2. Fund Source</span><span class="toc-dots"></span><span class="toc-page-num"><?= $pageNumbers['part4_b2'] ?? '' ?></span></div>
+    <div class="toc-row toc-row-item"><span class="toc-label-toc">B.3. Statement of Expenditure</span><span class="toc-dots"></span><span class="toc-page-num"><?= $pageNumbers['part4_b3'] ?? '' ?></span></div>
+    <div class="toc-row toc-row-item"><span class="toc-label-toc">B.4. Object of Expenditure</span><span class="toc-dots"></span><span class="toc-page-num"><?= $pageNumbers['part4_b4'] ?? '' ?></span></div>
 </div>
 
 <!-- ==================== DEFINITION OF TERMS ==================== -->
+<?= scanMarker('definition_of_terms') ?>
 <div style="font-size: 20pt; font-weight: bold; margin-bottom: 6mm;">DEFINITION OF TERMS</div>
 <table style="width: 100%; border-collapse: collapse; font-size: 11pt; line-height: 1.5;">
     <thead>
@@ -347,19 +367,27 @@ table.dt tr.group-header td { background: #d9d9d9; font-weight: bold; text-align
 </table>
 
 <!-- ==================== PART I ==================== -->
+<?= scanMarker('part1') ?>
 <div class="part-heading">PART I. AGENCY PROFILE &amp; STRATEGIC CONTEXT</div>
+<?= scanMarker('part1_a') ?>
 <div class="section-heading">A. MANDATE, VISION, MISSION, AND ORGANIZATIONAL OUTCOME</div>
+<?= scanMarker('part1_a1') ?>
 <div class="subsection-heading">A.1. MANDATE</div>
 <div class="body-text"><span class="field-label">Legal Basis:</span> <?= !isEmpty($agencyData['legal_basis'] ?? '') ? nl2br(v($agencyData['legal_basis'])) : '<span class="empty">[To be completed by agency]</span>' ?></div>
 <div class="body-text"><span class="field-label">Function:</span> <?= !isEmpty($agencyData['function'] ?? '') ? nl2br(v($agencyData['function'])) : '<span class="empty">[To be completed by agency]</span>' ?></div>
+<?= scanMarker('part1_a2') ?>
 <div class="subsection-heading">A.2. VISION STATEMENT</div>
 <div class="body-text"><?= !isEmpty($agencyData['vision_statement'] ?? '') ? nl2br(v($agencyData['vision_statement'])) : '<span class="empty">[To be completed by agency]</span>' ?></div>
+<?= scanMarker('part1_a3') ?>
 <div class="subsection-heading">A.3. MISSION STATEMENT</div>
 <div class="body-text"><?= !isEmpty($agencyData['mission_statement'] ?? '') ? nl2br(v($agencyData['mission_statement'])) : '<span class="empty">[To be completed by agency]</span>' ?></div>
+<?= scanMarker('part1_a4') ?>
 <div class="subsection-heading">A.4. ORGANIZATIONAL OUTCOME</div>
 <div class="body-text"><?= !isEmpty($agencyData['organizational_outcome'] ?? '') ? nl2br(v($agencyData['organizational_outcome'])) : '<span class="empty">[To be completed by agency]</span>' ?></div>
 
+<?= scanMarker('part1_b') ?>
 <div class="section-heading">B. ORGANIZATIONAL STRUCTURE</div>
+<?= scanMarker('part1_b1') ?>
 <div class="subsection-heading">B.1. CHIEF INFORMATION OFFICER (CIO)</div>
 <div class="body-text"><span class="field-label">Name of CIO:</span> <?= !isEmpty($agencyData['cio_name'] ?? '') ? v($agencyData['cio_name']) : '<span class="empty">[To be completed]</span>' ?></div>
 <div class="body-text"><span class="field-label">Plantilla Position:</span> <?= !isEmpty($agencyData['cio_plantilla'] ?? '') ? v($agencyData['cio_plantilla']) : '<span class="empty">[To be completed]</span>' ?></div>
@@ -367,6 +395,7 @@ table.dt tr.group-header td { background: #d9d9d9; font-weight: bold; text-align
 <div class="body-text"><span class="field-label">E-mail Address:</span> <?= !isEmpty($agencyData['cio_email'] ?? '') ? v($agencyData['cio_email']) : '<span class="empty">[To be completed]</span>' ?></div>
 <div class="body-text"><span class="field-label">Contact Number/s:</span> <?= !isEmpty($agencyData['cio_contact'] ?? '') ? v($agencyData['cio_contact']) : '<span class="empty">[To be completed]</span>' ?></div>
 
+<?= scanMarker('part1_b2') ?>
 <div class="subsection-heading">B.2. HUMAN CAPITAL</div>
 <?php
 $hcPlantilla = ['it' => (int)($agencyData['plantilla_it'] ?? 0), 'non_it' => (int)($agencyData['plantilla_non_it'] ?? 0), 'male' => (int)($agencyData['plantilla_male'] ?? 0), 'female' => (int)($agencyData['plantilla_female'] ?? 0)];
@@ -385,6 +414,7 @@ $hcGrandFemale = $hcPlantilla['female'] + $hcContractual['female'] + $hcOutsourc
     <tr><td class="gt">Grand Total</td><td class="c gt"><?= $hcGrandIt ?: '-' ?></td><td class="c gt"><?= $hcGrandNonIt ?: '-' ?></td><td class="c gt"><?= $hcGrandMale ?: '-' ?></td><td class="c gt"><?= $hcGrandFemale ?: '-' ?></td></tr>
 </table>
 
+<?= scanMarker('part1_c') ?>
 <div class="section-heading">C. STAKEHOLDER ANALYSIS</div>
 <?php
 $stakeholders = [];
@@ -405,24 +435,35 @@ if (!empty($agencyData['stakeholder_data'])) {
 </table>
 
 <!-- ==================== PART II ==================== -->
+<?= scanMarker('part2') ?>
 <div class="part-heading">PART II. CURRENT ICT ASSESSMENT</div>
+<?= scanMarker('part2_a') ?>
 <div class="section-heading">A. STRATEGIC CONCERNS FOR ICT USE</div>
+<?= scanMarker('part2_b') ?>
 <div class="section-heading">B. EXISTING NETWORK INFRASTRUCTURE</div>
+<?= scanMarker('part2_b1') ?>
 <div class="subsection-heading">B1. LAN/WAN SET-UP INCLUDING CONNECTIVITY TYPE AND BANDWIDTH</div>
+<?= scanMarker('part2_b2') ?>
 <div class="subsection-heading">B2. CYBERSECURITY CONTROL CHECKLIST</div>
+<?= scanMarker('part2_c') ?>
 <div class="section-heading">C. EXISTING/OPERATIONAL INFORMATION SYSTEMS (IS) INVENTORY</div>
+<?= scanMarker('part2_d') ?>
 <div class="section-heading">D. E-GOVERNMENT PROGRAMS (EGP) CHECKLIST</div>
 
 <!-- ==================== PART III ==================== -->
+<?= scanMarker('part3') ?>
 <div class="part-heading">PART III. PROPOSED ICT STRATEGY</div>
 
+<?= scanMarker('part3_a') ?>
 <div class="section-heading">A. PROPOSED NETWORK INFRASTRUCTURE</div>
+<?= scanMarker('part3_a1') ?>
 <div class="subsection-heading">A.1. LAN/WAN SET-UP INCLUDING CONNECTIVITY TYPE AND BANDWIDTH</div>
 
 <?php
 $deptDiagram = v($ni['dept_network_diagram'] ?? '');
 $regionalDiagram = v($ni['regional_network_diagram'] ?? '');
 $hasDiagrams = $deptDiagram !== '' || $regionalDiagram !== '';
+if (!function_exists('renderDiagramPdf')) {
 function renderDiagramPdf($imgSrc, $label) {
     if (preg_match('/^data:image\/(png|jpe?g|gif|webp);/', $imgSrc)) {
         $imgSrc = preg_replace('/^data:(image\/[a-z0-9+\-.]+);.*;base64,/', 'data:$1;base64,', $imgSrc);
@@ -446,6 +487,7 @@ function renderDiagramPdf($imgSrc, $label) {
         echo '<div class="body-text">' . ve($imgSrc) . '</div>';
     }
 }
+}
 ?>
 
 <?php if ($deptDiagram !== ''): ?>
@@ -467,6 +509,7 @@ function renderDiagramPdf($imgSrc, $label) {
 <?php endif; ?>
 
 <div class="section-block">
+<?= scanMarker('part3_a2') ?>
 <div class="subsection-heading">A.2. CYBERSECURITY CONTROL CHECKLIST</div>
 <table class="dt">
     <tr><th style="width:22%;"></th><th style="width:39%;">MANDATORY</th><th style="width:39%;">OPTIONAL</th></tr>
@@ -488,6 +531,7 @@ function renderDiagramPdf($imgSrc, $label) {
 </table>
 </div>
 
+<?= scanMarker('part3_b') ?>
 <div class="section-heading">B. ENTERPRISE ARCHITECTURE</div>
 <?php if ($hasEa): ?>
     <?php $eaD = v($ea['ea_diagram'] ?? ''); if ($eaD !== ''): ?>
@@ -500,6 +544,7 @@ function renderDiagramPdf($imgSrc, $label) {
     <div class="body-text empty">No data provided.</div>
 <?php endif; ?>
 
+<?= scanMarker('part3_c') ?>
 <div class="section-heading">C. PROPOSED ICT HUMAN CAPITAL</div>
 <?php $hcRows = []; $hcGT = 0; for ($i = 1; $i <= 4; $i++) { $pos = v($hc['position_'.$i] ?? ''); $stat = v($hc['status_'.$i] ?? ''); $cnt = v($hc['count_'.$i] ?? ''); if ($pos !== '' || $stat !== '' || $cnt !== '') { $cn = is_numeric($cnt) ? (int)$cnt : 0; $hcGT += $cn; $hcRows[] = ['position' => $pos, 'status' => $stat, 'count' => $cnt]; } } ?>
 <table class="dt">
@@ -509,6 +554,7 @@ function renderDiagramPdf($imgSrc, $label) {
     <tr><td class="gt" colspan="2" style="text-align:left;">Grand Total</td><td class="c gt"><?= $hcGT ?></td></tr>
 </table>
 
+<?= scanMarker('part3_d') ?>
 <div class="section-heading">D. PROPOSED INFORMATION SYSTEMS</div>
 <table class="dt dt-d">
     <?php if ($hasIs): ?>
@@ -547,6 +593,7 @@ function renderDiagramPdf($imgSrc, $label) {
     <?php endif; ?>
 </table>
 
+<?= scanMarker('part3_e') ?>
 <div class="section-heading">E. ICT PROJECTS</div>
 <div class="subsection-heading">INTERNAL ICT PROJECTS</div>
 <table class="dt dt-d">
@@ -582,6 +629,7 @@ function renderDiagramPdf($imgSrc, $label) {
     <?php endif; ?>
 </table>
 
+<?= scanMarker('part3_f') ?>
 <div class="section-heading">F. PERFORMANCE MEASUREMENT FRAMEWORK</div>
 <?php foreach ($pmProjects as $pk => $pl): $kpi = is_array($pmParsed[$pk] ?? null) ? ($pmParsed[$pk]['kpi'] ?? $pmParsed[$pk]) : []; $hKpi = false;
 if (is_array($kpi)) { foreach ($levels as $lk => $lv) { $row = $kpi[$lk] ?? []; if (!is_array($row)) continue; foreach ($cols as $ck => $cl) { if (!isEmpty($row[$ck] ?? '')) { $hKpi = true; break 2; } } } } ?>
@@ -594,10 +642,13 @@ if (is_array($kpi)) { foreach ($levels as $lk => $lv) { $row = $kpi[$lk] ?? []; 
 <?php else: ?><table class="dt"><tr><td class="empty">No KPI data provided for <?= ve($pl) ?>.</td></tr></table><?php endif; endforeach; ?>
 
 <!-- ==================== PART IV ==================== -->
+<?= scanMarker('part4') ?>
 <div class="part-heading">PART IV. RESOURCE REQUIREMENTS</div>
+<?= scanMarker('part4_a') ?>
 <div class="section-heading">DETAILED RESOURCE DEPLOYMENT AND COST BREAKDOWN</div>
 
 <?php $yD = [1 => $rY1, 2 => $rY2, 3 => $rY3]; $yL = [1 => 'YEAR #1', 2 => 'Year #2', 3 => 'Year #3']; foreach ($yD as $yr => $items): ?>
+<?= scanMarker('part4_a' . $yr) ?>
 <div class="subsection-heading"><?= ve($yL[$yr]) ?></div>
 <table class="dt">
     <tr><th style="width:5%;">ITEM</th><th style="width:14%;">ITEM DESCRIPTION</th><th style="width:10%;">OFFICE LOCATION</th><th style="width:10%;">FUND SOURCE</th><th style="width:10%;">UNIT COST</th><th style="width:10%;">PHYSICAL TARGET</th><th style="width:12%;">TOTAL COST</th></tr>
@@ -611,8 +662,10 @@ if (is_array($kpi)) { foreach ($levels as $lk => $lv) { $row = $kpi[$lk] ?? []; 
 </table>
 <?php endforeach; ?>
 
+<?= scanMarker('part4_b') ?>
 <div class="section-heading" style="margin-top:8mm;">SUMMARY OF INVESTMENTS</div>
 
+<?= scanMarker('part4_b1') ?>
 <div class="subsection-heading">GENERAL SUMMARY</div>
 <table class="dt">
     <tr><th style="width:30%;">CATEGORY</th><th>YEAR #1</th><th>YEAR #2</th><th>YEAR #3</th><th>TOTAL</th></tr>
@@ -622,6 +675,7 @@ if (is_array($kpi)) { foreach ($levels as $lk => $lv) { $row = $kpi[$lk] ?? []; 
     <?php else: ?><tr><td colspan="5" class="empty">No summary data available.</td></tr><?php endif; ?>
 </table>
 
+<?= scanMarker('part4_b2') ?>
 <div class="subsection-heading">FUND SOURCE</div>
 <table class="dt">
     <tr><th style="width:30%;">FUND SOURCE</th><th>YEAR #1</th><th>YEAR #2</th><th>YEAR #3</th><th>TOTAL</th></tr>
@@ -630,6 +684,7 @@ if (is_array($kpi)) { foreach ($levels as $lk => $lv) { $row = $kpi[$lk] ?? []; 
     <?php endforeach; else: ?><tr><td colspan="5" class="empty">No fund source data available.</td></tr><?php endif; ?>
 </table>
 
+<?= scanMarker('part4_b3') ?>
 <div class="subsection-heading">STATEMENT OF EXPENDITURE</div>
 <table class="dt">
     <tr><th style="width:30%;">EXPENDITURE CLASS</th><th>YEAR #1</th><th>YEAR #2</th><th>YEAR #3</th><th>TOTAL</th></tr>
@@ -638,6 +693,7 @@ if (is_array($kpi)) { foreach ($levels as $lk => $lv) { $row = $kpi[$lk] ?? []; 
     <?php endforeach; else: ?><tr><td colspan="5" class="empty">No expenditure data available.</td></tr><?php endif; ?>
 </table>
 
+<?= scanMarker('part4_b4') ?>
 <div class="subsection-heading">OBJECT OF EXPENDITURE</div>
 <table class="dt">
     <tr><th style="width:15%;">OBJECT CODE</th><th style="width:25%;">DESCRIPTION</th><th>YEAR #1</th><th>YEAR #2</th><th>YEAR #3</th><th>TOTAL</th></tr>
