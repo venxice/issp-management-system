@@ -591,13 +591,20 @@ class DashboardController extends BaseController
         $agencyModel = new AgencyInformationModel();
         $agencyData = $agencyModel->orderBy('id', 'DESC')->first() ?? [];
 
-        $html = view('frontend/ict_planner/consolidation/pdf_template', [
+        $viewData = [
             'project' => $project,
             'formData' => $formData,
             'resourceData' => $resourceData,
             'agencyData' => $agencyData,
             'batchMode' => false,
-        ]);
+        ];
+
+        $pageNumbers = $this->extractPageNumbers($viewData);
+
+        $html = view('frontend/ict_planner/consolidation/pdf_template', array_merge($viewData, [
+            'scanMode' => false,
+            'pageNumbers' => $pageNumbers,
+        ]));
 
         $dompdf = new \Dompdf\Dompdf();
         $dompdf->loadHtml(mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8'));
@@ -608,6 +615,11 @@ class DashboardController extends BaseController
 
         $dompdf->stream($filename, ['Attachment' => true]);
         exit;
+    }
+
+    private function extractPageNumbers(array $viewData): array
+    {
+        return [];
     }
 
     private function ensureFormDataColumn(): void

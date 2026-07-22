@@ -252,13 +252,20 @@ class DashboardController extends BaseController
         $agencyModel = new \App\Models\AgencyInformationModel();
         $agencyData = $agencyModel->orderBy('id', 'DESC')->first() ?? [];
 
-        $html = view('frontend/ict_planner/consolidation/pdf_template', [
+        $viewData = [
             'project' => $project,
             'formData' => $formData,
             'resourceData' => $resourceData,
             'agencyData' => $agencyData,
             'batchMode' => false,
-        ]);
+        ];
+
+        $pageNumbers = $this->extractPageNumbers($viewData);
+
+        $html = view('frontend/ict_planner/consolidation/pdf_template', array_merge($viewData, [
+            'scanMode' => false,
+            'pageNumbers' => $pageNumbers,
+        ]));
 
         $dompdf = new \Dompdf\Dompdf();
         $dompdf->loadHtml(mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8'));
@@ -270,6 +277,11 @@ class DashboardController extends BaseController
         $filename = 'ISSP_' . preg_replace('/[^a-zA-Z0-9]/', '_', $title) . '_' . $id . '.pdf';
         $dompdf->stream($filename, ['Attachment' => 1]);
         exit;
+    }
+
+    private function extractPageNumbers(array $viewData): array
+    {
+        return [];
     }
     public function batchDownload()
     {
@@ -314,13 +326,20 @@ class DashboardController extends BaseController
                 }
             }
 
-            $html = view('frontend/ict_planner/consolidation/pdf_template', [
+            $viewData = [
                 'project' => $project,
                 'formData' => $formData,
                 'resourceData' => $resourceData,
                 'agencyData' => $agencyData,
                 'batchMode' => true,
-            ]);
+            ];
+
+            $pageNumbers = $this->extractPageNumbers($viewData);
+
+            $html = view('frontend/ict_planner/consolidation/pdf_template', array_merge($viewData, [
+                'scanMode' => false,
+                'pageNumbers' => $pageNumbers,
+            ]));
 
             $dompdf = new \Dompdf\Dompdf();
             $dompdf->loadHtml(mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8'));
