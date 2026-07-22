@@ -705,7 +705,7 @@
         <div class="col-12">
             <div class="footer-actions">
                 <div class="action-buttons">
-                    <button type="button" class="action-btn action-btn-save" onclick="window.saveChanges().then(function() { window.autoSaveDraft(); });">
+                    <button type="button" class="action-btn action-btn-save" onclick="window.saveChanges();">
                         <i class="fa-solid fa-save"></i>
                         <span>Save Changes</span>
                     </button>

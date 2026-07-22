@@ -802,17 +802,17 @@
     <div class="field-group">
 
         <label class="checkbox-item">
-            <input type="radio" name="deployment_1" value="online" onchange="toggleDeploymentType()">
+            <input type="radio" name="deployment_type_1" value="online" onchange="toggleDeploymentType()">
             Online
         </label>
 
         <label class="checkbox-item">
-            <input type="radio" name="deployment_1" value="on_premise" onchange="toggleDeploymentType()">
+            <input type="radio" name="deployment_type_1" value="on_premise" onchange="toggleDeploymentType()">
             On-premise
         </label>
 
         <label class="checkbox-item">
-            <input type="radio" name="deployment_1" value="hybrid" onchange="toggleDeploymentType()">
+            <input type="radio" name="deployment_type_1" value="hybrid" onchange="toggleDeploymentType()">
             Hybrid
         </label>
 
@@ -899,7 +899,7 @@
         <div class="col-12">
             <div class="footer-actions">
                 <div class="action-buttons">
-                    <button type="button" class="action-btn action-btn-save" onclick="window.saveChanges().then(function() { window.autoSaveDraft(); });">
+                    <button type="button" class="action-btn action-btn-save" onclick="window.saveChanges();">
                         <i class="fa-solid fa-save"></i>
                         <span>Save Changes</span>
                     </button>
@@ -1424,7 +1424,7 @@ function toggleClassificationFields() {
         extra.style.display = 'none';
         document.querySelectorAll('[name="system_usage_1"]').forEach(r => r.checked = false);
         document.getElementById('frontline_type_1').style.display = 'none';
-        document.querySelectorAll('[name="deployment_1"]').forEach(r => r.checked = false);
+        document.querySelectorAll('[name="deployment_type_1"]').forEach(r => r.checked = false);
         document.getElementById('online_link_field_1').style.display = 'none';
     }
 }
@@ -1436,13 +1436,13 @@ function toggleFrontlineType() {
         typeSection.style.display = 'block';
     } else {
         typeSection.style.display = 'none';
-        document.querySelectorAll('[name="deployment_1"]').forEach(r => r.checked = false);
+        document.querySelectorAll('[name="deployment_type_1"]').forEach(r => r.checked = false);
         document.getElementById('online_link_field_1').style.display = 'none';
     }
 }
 
 function toggleDeploymentType() {
-    const type = document.querySelector('[name="deployment_1"]:checked')?.value;
+    const type = document.querySelector('[name="deployment_type_1"]:checked')?.value;
     const linkField = document.getElementById('online_link_field_1');
     linkField.style.display = type === 'online' ? 'block' : 'none';
     if (type !== 'online') {
