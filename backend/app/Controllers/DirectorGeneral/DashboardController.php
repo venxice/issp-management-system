@@ -16,22 +16,39 @@ class DashboardController extends BaseController
         $userModel = new UserModel();
         $isspModel = new ISspRecordModel();
 
-        $dgStats = $isspModel->select("
+        $year = $this->request->getGet('year') !== null ? (int) $this->request->getGet('year') : null;
+        $month = $this->request->getGet('month') !== null ? (int) $this->request->getGet('month') : null;
+
+        $dgBuilder = $isspModel->select("
             COALESCE(SUM(CASE WHEN status = 'endorsed' THEN 1 ELSE 0 END), 0) AS endorsed,
             COALESCE(SUM(CASE WHEN status = 'approved' THEN 1 ELSE 0 END), 0) AS approved,
             COALESCE(SUM(CASE WHEN status = 'rejected' THEN 1 ELSE 0 END), 0) AS rejected,
-            COALESCE(SUM(CASE WHEN status = 'returned' THEN 1 ELSE 0 END), 0) AS returned,
             COALESCE(SUM(CASE WHEN status = 'resubmitted' THEN 1 ELSE 0 END), 0) AS resubmitted
-        ")
-            ->get()
-            ->getRowArray();
+        ");
 
-        $pendingApproval = (int) ($dgStats['endorsed'] ?? 0) + (int) ($dgStats['resubmitted'] ?? 0);
+        if ($year !== null) {
+            $dgBuilder->where('YEAR(COALESCE(issp_records.updated_at, issp_records.created_at))', $year);
+        }
+        if ($month !== null) {
+            $dgBuilder->where('MONTH(COALESCE(issp_records.updated_at, issp_records.created_at))', $month);
+        }
+
+        $dgStats = $dgBuilder->get()->getRowArray();
+
+        $pendingApproval = (int) ($dgStats['endorsed'] ?? 0);
         $totalApprovedProjects = (int) ($dgStats['approved'] ?? 0);
 
-        $approvedRecords = $isspModel->select('budget, form_data')
-            ->where('status', 'approved')
-            ->findAll();
+        $approvedBuilder = $isspModel->select('budget, form_data')
+            ->where('status', 'approved');
+
+        if ($year !== null) {
+            $approvedBuilder->where('YEAR(COALESCE(issp_records.updated_at, issp_records.created_at))', $year);
+        }
+        if ($month !== null) {
+            $approvedBuilder->where('MONTH(COALESCE(issp_records.updated_at, issp_records.created_at))', $month);
+        }
+
+        $approvedRecords = $approvedBuilder->findAll();
         $totalApprovedBudget = array_reduce($approvedRecords, function ($carry, $r) {
             $fd = !empty($r['form_data']) ? json_decode($r['form_data'], true) : [];
             $ict = $fd['ict-projects-form'] ?? [];
@@ -39,13 +56,32 @@ class DashboardController extends BaseController
             $cross = (float) ($ict['cross_total_cost'] ?? 0);
             return $carry + $internal + $cross;
         }, 0);
-        $totalDepartments = $isspModel->select('department_id')->distinct()->whereIn('status', ['endorsed', 'approved', 'rejected'])->countAllResults();
 
-        $submissionsByMonth = $isspModel->getSubmissionsByMonth();
-        $recentProjects = $isspModel->select('issp_records.*, departments.name AS department_name, users.name AS created_by_name')
+        $deptBuilder = $isspModel->select('department_id')->distinct()->whereIn('status', ['endorsed', 'approved', 'rejected']);
+        if ($year !== null) {
+            $deptBuilder->where('YEAR(COALESCE(issp_records.updated_at, issp_records.created_at))', $year);
+        }
+        if ($month !== null) {
+            $deptBuilder->where('MONTH(COALESCE(issp_records.updated_at, issp_records.created_at))', $month);
+        }
+        $totalDepartments = $deptBuilder->countAllResults();
+
+        $submissionsByMonth = $isspModel->getSubmissionsByMonth($year, $month);
+        $submissionsByMonthPerDivision = $isspModel->getSubmissionsByMonthPerDivision($year, $month);
+
+        $recentBuilder = $isspModel->select('issp_records.*, departments.name AS department_name, users.name AS created_by_name')
             ->join('departments', 'departments.id = issp_records.department_id', 'left')
             ->join('users', 'users.id = issp_records.created_by', 'left')
-            ->whereIn('issp_records.status', ['endorsed', 'resubmitted', 'returned', 'approved', 'rejected'])
+            ->whereIn('issp_records.status', ['endorsed', 'approved', 'rejected']);
+
+        if ($year !== null) {
+            $recentBuilder->where('YEAR(COALESCE(issp_records.updated_at, issp_records.created_at))', $year);
+        }
+        if ($month !== null) {
+            $recentBuilder->where('MONTH(COALESCE(issp_records.updated_at, issp_records.created_at))', $month);
+        }
+
+        $recentProjects = $recentBuilder
             ->orderBy('COALESCE(issp_records.updated_at, issp_records.created_at)', 'DESC', false)
             ->limit(10)
             ->findAll();
@@ -66,8 +102,9 @@ class DashboardController extends BaseController
         $approvedCount = (int) ($dgStats['approved'] ?? 0);
         $pendingCount = (int) ($dgStats['endorsed'] ?? 0);
         $rejectedCount = (int) ($dgStats['rejected'] ?? 0);
-        $returnedCount = (int) ($dgStats['returned'] ?? 0);
         $resubmittedCount = (int) ($dgStats['resubmitted'] ?? 0);
+
+        $availableYears = $isspModel->getAvailableYears();
 
         return view('frontend/director_general/dashboard/index', [
             'title' => 'Director General Dashboard',
@@ -78,12 +115,15 @@ class DashboardController extends BaseController
             'totalApprovedBudget' => $totalApprovedBudget,
             'totalDepartments' => $totalDepartments,
             'submissionsByMonth' => $submissionsByMonth,
+            'submissionsByMonthPerDivision' => $submissionsByMonthPerDivision,
             'recentProjects' => $recentProjects,
             'approvedCount' => $approvedCount,
             'pendingCount' => $pendingCount,
             'rejectedCount' => $rejectedCount,
-            'returnedCount' => $returnedCount,
             'resubmittedCount' => $resubmittedCount,
+            'selectedYear' => $year,
+            'selectedMonth' => $month,
+            'availableYears' => $availableYears,
         ]);
     }
 

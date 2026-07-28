@@ -102,7 +102,7 @@
                                                 <a href="<?= site_url('ict-planner/download/' . $project['id']) ?>" class="btn btn-outline-primary icon-btn" type="button" title="Download">
                                                     <i class="fa-solid fa-download"></i>
                                                 </a>
-                                                <?php if ($project['status'] === 'pending'): ?>
+                                                <?php if (in_array($project['status'], ['pending', 'resubmitted'])): ?>
                                                     <button class="btn btn-outline-primary icon-btn" type="button" title="Endorse to Director General" onclick="openEndorseModal('<?= $project['id'] ?>')">
                                                         <i class="fa-solid fa-check"></i>
                                                     </button>

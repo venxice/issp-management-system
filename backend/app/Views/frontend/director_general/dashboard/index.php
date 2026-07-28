@@ -4,16 +4,17 @@
 <?php
 $budgetDisplay = '₱' . number_format($totalApprovedBudget, 2);
 
-$pieColors = ['#4f6180', '#7e93b6', '#b8c9e0', '#d0dcec', '#a3b8d4'];
-$pieLabels = ['Approved', 'Pending', 'Rejected', 'Returned', 'Resubmitted'];
-$pieValues = [$approvedCount, $pendingCount, $rejectedCount, $returnedCount, $resubmittedCount];
-$pieTotal = array_sum($pieValues) ?: 1;
+$pieColors = ['#4f6180', '#7e93b6', '#b8c9e0'];
+$pieLabels = ['Approved', 'Pending', 'Rejected'];
+$pieValues = [$approvedCount, $pendingCount, $rejectedCount];
+$pieTotal = array_sum($pieValues);
 $pieSegments = [];
 $pieGradientParts = [];
 $runningDeg = 0;
-foreach ($pieLabels as $i => $label) {
-    $pct = ($pieValues[$i] / $pieTotal) * 100;
-    $deg = ($pieValues[$i] / $pieTotal) * 360;
+if ($pieTotal > 0) {
+    foreach ($pieLabels as $i => $label) {
+        $pct = ($pieValues[$i] / $pieTotal) * 100;
+        $deg = ($pieValues[$i] / $pieTotal) * 360;
     $color = $pieColors[$i % count($pieColors)];
     $startDeg = $runningDeg;
     $endDeg = $runningDeg + $deg;
@@ -27,6 +28,7 @@ foreach ($pieLabels as $i => $label) {
         'startDeg' => $startDeg,
         'endDeg' => $endDeg,
     ];
+    }
 }
 $pieGradient = 'conic-gradient(' . implode(', ', $pieGradientParts) . ')';
 
@@ -142,6 +144,100 @@ $chartSource = $submissionsByMonth ?? [];
 }
 </style>
 
+<style>
+.dash-filter-row {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-bottom: 14px;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.cdd { position: relative; display: inline-flex; align-items: center; gap: 5px; }
+.cdd-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #fff;
+    border: 1px solid #dde4ed;
+    border-radius: 8px;
+    padding: 6px 11px;
+    font-size: .74rem;
+    font-weight: 600;
+    color: var(--ink);
+    cursor: pointer;
+    transition: all .15s ease;
+    box-shadow: 0 1px 3px rgba(15,23,42,.04);
+    user-select: none;
+    white-space: nowrap;
+}
+.cdd-trigger:hover { border-color: #c7d0dc; }
+.cdd-trigger.open { border-color: var(--brand); box-shadow: 0 0 0 2px rgba(79,101,132,.12); }
+.cdd-trigger .cdd-icon { font-size: .7rem; color: var(--muted); }
+.cdd-trigger .cdd-label { font-size: .68rem; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; font-weight: 700; }
+.cdd-trigger .cdd-value { color: var(--ink); }
+.cdd-trigger .cdd-arrow { font-size: .55rem; color: var(--muted); margin-left: 2px; transition: transform .15s ease; }
+.cdd-trigger.open .cdd-arrow { transform: rotate(180deg); }
+.cdd-trigger.has-value { border-color: var(--brand); background: #f6f8fb; }
+.cdd-trigger.has-value .cdd-icon { color: var(--brand); }
+.cdd-panel {
+    display: none;
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    min-width: 130px;
+    background: #fff;
+    border: 1px solid #dde4ed;
+    border-radius: 10px;
+    box-shadow: 0 12px 32px rgba(15,23,42,.12);
+    z-index: 999;
+    padding: 5px;
+    max-height: 220px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+}
+.cdd-panel::-webkit-scrollbar { width: 5px; }
+.cdd-panel::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+.cdd-panel.show { display: block; }
+.cdd-option {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 10px;
+    font-size: .74rem;
+    font-weight: 500;
+    color: var(--ink);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background .1s ease;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+}
+.cdd-option:hover { background: #f1f5f9; }
+.cdd-option.selected { background: #edf2f7; color: var(--brand-dark); font-weight: 700; }
+.cdd-option .check-icon { font-size: .6rem; color: var(--brand); opacity: 0; width: 12px; }
+.cdd-option.selected .check-icon { opacity: 1; }
+.filter-reset-btn {
+    display: none;
+    align-items: center;
+    gap: 4px;
+    background: none;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    padding: 6px 9px;
+    font-size: .7rem;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all .15s ease;
+}
+.filter-reset-btn:hover { color: #b33f3f; background: #fef2f2; border-color: #fecaca; }
+.filter-reset-btn i { font-size: .6rem; }
+.dash-filter-row.has-filters .filter-reset-btn { display: inline-flex; }
+</style>
+
 <div class="row g-3 mb-3 equal-chart-row">
     <div class="col-3 d-flex">
         <div class="stat-card flex-fill">
@@ -169,42 +265,149 @@ $chartSource = $submissionsByMonth ?? [];
     </div>
 </div>
 
+<div class="dash-filter-row <?= ($selectedYear !== null || $selectedMonth !== null) ? 'has-filters' : '' ?>" id="dashFilterBar">
+    <span style="font-size:.68rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-right:2px;"><i class="fa-solid fa-filter" style="font-size:.6rem;margin-right:3px;"></i>Filter</span>
+    <div class="cdd" id="cddYear">
+        <button type="button" class="cdd-trigger <?= $selectedYear !== null ? 'has-value' : '' ?>" id="cddYearBtn" onclick="toggleCdd('cddYear')">
+            <i class="fa-regular fa-calendar cdd-icon"></i>
+            <span class="cdd-label">Year</span>
+            <span class="cdd-value" id="cddYearLabel"><?= $selectedYear !== null ? (int)$selectedYear : 'All' ?></span>
+            <i class="fa-solid fa-chevron-down cdd-arrow"></i>
+        </button>
+        <div class="cdd-panel" id="cddYearPanel">
+            <button type="button" class="cdd-option <?= $selectedYear === null ? 'selected' : '' ?>" data-value="" onclick="selectCdd('cddYear', '', 'All')">
+                <i class="fa-solid fa-check check-icon"></i> All Years
+            </button>
+            <?php
+            $currentYear = (int) date('Y');
+            $yearsToShow = [];
+            foreach ($availableYears as $ay) { $yearsToShow[] = (int) $ay['year']; }
+            if (!empty($yearsToShow) && !in_array($currentYear, $yearsToShow)) { $yearsToShow[] = $currentYear; }
+            rsort($yearsToShow);
+            foreach ($yearsToShow as $y): ?>
+                <button type="button" class="cdd-option <?= ($selectedYear !== null && (int)$selectedYear === $y) ? 'selected' : '' ?>" data-value="<?= $y ?>" onclick="selectCdd('cddYear', '<?= $y ?>', '<?= $y ?>')">
+                    <i class="fa-solid fa-check check-icon"></i> <?= $y ?>
+                </button>
+            <?php endforeach; ?>
+        </div>
+    </div>
+    <div class="cdd" id="cddMonth">
+        <button type="button" class="cdd-trigger <?= $selectedMonth !== null ? 'has-value' : '' ?>" id="cddMonthBtn" onclick="toggleCdd('cddMonth')">
+            <i class="fa-regular fa-clock cdd-icon"></i>
+            <span class="cdd-label">Month</span>
+            <span class="cdd-value" id="cddMonthLabel"><?= $selectedMonth !== null ? ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][(int)$selectedMonth] : 'All' ?></span>
+            <i class="fa-solid fa-chevron-down cdd-arrow"></i>
+        </button>
+        <div class="cdd-panel" id="cddMonthPanel">
+            <button type="button" class="cdd-option <?= $selectedMonth === null ? 'selected' : '' ?>" data-value="" onclick="selectCdd('cddMonth', '', 'All')">
+                <i class="fa-solid fa-check check-icon"></i> All Months
+            </button>
+            <?php
+            $monthLabels = [1=>'January',2=>'February',3=>'March',4=>'April',5=>'May',6=>'June',7=>'July',8=>'August',9=>'September',10=>'October',11=>'November',12=>'December'];
+            foreach ($monthLabels as $num => $fullName): ?>
+                <button type="button" class="cdd-option <?= ($selectedMonth !== null && (int)$selectedMonth === $num) ? 'selected' : '' ?>" data-value="<?= $num ?>" onclick="selectCdd('cddMonth', '<?= $num ?>', '<?= $fullName ?>')">
+                    <i class="fa-solid fa-check check-icon"></i> <?= $fullName ?>
+                </button>
+            <?php endforeach; ?>
+        </div>
+    </div>
+    <button type="button" class="filter-reset-btn" onclick="window.location.search=''">
+        <i class="fa-solid fa-xmark"></i> Clear
+    </button>
+</div>
+<script>
+function toggleCdd(id) {
+    var panel = document.getElementById(id + 'Panel');
+    var btn = document.getElementById(id + 'Btn');
+    var isOpen = panel.classList.contains('show');
+    document.querySelectorAll('.cdd-panel').forEach(function(p) { p.classList.remove('show'); });
+    document.querySelectorAll('.cdd-trigger').forEach(function(b) { b.classList.remove('open'); });
+    if (!isOpen) { panel.classList.add('show'); btn.classList.add('open'); }
+}
+function selectCdd(id, value, label) {
+    var hidden = document.getElementById(id + 'Hidden');
+    var lbl = document.getElementById(id + 'Label');
+    var btn = document.getElementById(id + 'Btn');
+    var panel = document.getElementById(id + 'Panel');
+    hidden.value = value;
+    lbl.textContent = label;
+    btn.classList.toggle('has-value', value !== '');
+    panel.querySelectorAll('.cdd-option').forEach(function(o) { o.classList.toggle('selected', o.dataset.value === value); });
+    panel.classList.remove('show');
+    btn.classList.remove('open');
+    applyDashboardFilter();
+}
+function applyDashboardFilter() {
+    var year = document.getElementById('cddYearHidden').value;
+    var month = document.getElementById('cddMonthHidden').value;
+    var params = new URLSearchParams(window.location.search);
+    if (year) { params.set('year', year); } else { params.delete('year'); }
+    if (month) { params.set('month', month); } else { params.delete('month'); }
+    window.location.search = params.toString();
+}
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.cdd')) {
+        document.querySelectorAll('.cdd-panel').forEach(function(p) { p.classList.remove('show'); });
+        document.querySelectorAll('.cdd-trigger').forEach(function(b) { b.classList.remove('open'); });
+    }
+});
+</script>
+<input type="hidden" id="cddYearHidden" value="<?= $selectedYear ?? '' ?>">
+<input type="hidden" id="cddMonthHidden" value="<?= $selectedMonth ?? '' ?>">
+
 <div class="row g-3 mb-3 equal-chart-row">
     <div class="col-xl-6 d-flex">
         <section class="panel flex-fill d-flex flex-column">
             <div class="panel-header" style="border-bottom: none;">
-                <h2 class="panel-title">ISSP Submissions per Month</h2>
-                <p class="panel-subtitle">Monthly distribution of submitted ICT projects.</p>
+                <h2 class="panel-title">Submissions by Division</h2>
+                <p class="panel-subtitle">ICT project submissions per division across the selected period.</p>
             </div>
             <div class="dashboard-chart flex-fill">
                 <div class="dashboard-chart__frame h-100">
-                    <?php if ($chartSource !== []): ?>
+                    <?php
+                    $divColors = ['#4f6180','#7e93b6','#b8c9e0','#d0dcec','#a0b8d4','#889fc4','#607291','#9aafce'];
+                    $perDivData = $submissionsByMonthPerDivision ?? [];
+                    $divTotals = [];
+                    foreach ($perDivData as $row) {
+                        $div = $row['division'] ?? 'Unknown';
+                        if (!isset($divTotals[$div])) $divTotals[$div] = 0;
+                        $divTotals[$div] += (int) $row['total'];
+                    }
+                    arsort($divTotals);
+                    $divMax = $divTotals ? max($divTotals) : 0;
+                    ?>
+                    <?php if ($divMax > 0): ?>
                         <?php
-                        $maxValue = max(array_column($chartSource, 'total'));
                         $chartHeight = 200;
                         $topPadding = 35;
-                        $bottomPadding = 15;
+                        $bottomPadding = 10;
                         $availableHeight = $chartHeight - $topPadding - $bottomPadding;
                         ?>
-                        <div class="css-bar-chart">
+                        <div class="css-bar-chart" style="gap:14px;">
                             <div class="css-bar-chart__background">
-                                <?php for ($ref = 1; $ref <= $maxValue; $ref++): ?>
-                                    <?php $bottomPosition = (($ref / $maxValue) * ($availableHeight / $chartHeight) * 100) + (($bottomPadding / $chartHeight) * 100); ?>
+                                <?php
+                                $step = 1;
+                                if ($divMax > 10) $step = 2;
+                                if ($divMax > 25) $step = 5;
+                                if ($divMax > 50) $step = 10;
+                                if ($divMax > 100) $step = 20;
+                                for ($ref = $step; $ref <= $divMax; $ref += $step):
+                                ?>
+                                    <?php $bottomPosition = (($ref / $divMax) * ($availableHeight / $chartHeight) * 100) + (($bottomPadding / $chartHeight) * 100); ?>
                                     <div class="css-bar-chart__reference-line" style="bottom: <?= $bottomPosition ?>%;">
                                         <span class="css-bar-chart__reference-label"><?= $ref ?></span>
                                     </div>
                                 <?php endfor; ?>
                             </div>
-                            <?php foreach ($chartSource as $index => $item):
-                                $value = (int) ($item['total'] ?? 0);
-                                $percentage = $maxValue > 0 ? ($value / $maxValue) * 100 : 0;
-                                $color = $index % 2 === 0 ? 'rgba(79, 97, 128, 0.92)' : 'rgba(96, 114, 145, 0.92)';
+                            <?php foreach ($divTotals as $divName => $divTotal):
+                                $percentage = $divMax > 0 ? ($divTotal / $divMax) * 100 : 0;
+                                $color = $divColors[array_search($divName, array_keys($divTotals)) % count($divColors)];
                             ?>
                                 <div class="css-bar-chart__item">
-                                    <div class="css-bar-chart__bar" style="height: <?= esc($percentage) ?>%; background: <?= esc($color) ?>;" data-month="<?= esc($item['month'] ?? '') ?>" data-count="<?= esc($value) ?>">
+                                    <div class="css-bar-chart__bar" style="height: <?= esc($percentage) ?>%; background: <?= esc($color) ?>;">
                                         <div class="css-bar-chart__tooltip">
-                                            <div class="css-bar-chart__tooltip-division"><?= esc($item['month'] ?? '') ?></div>
-                                            <div class="css-bar-chart__tooltip-count"><?= esc($value) ?> submissions</div>
+                                            <div class="css-bar-chart__tooltip-division"><?= esc($divName) ?></div>
+                                            <div class="css-bar-chart__tooltip-count"><?= $divTotal ?> submission<?= $divTotal !== 1 ? 's' : '' ?></div>
                                         </div>
                                     </div>
                                 </div>
@@ -242,7 +445,7 @@ $chartSource = $submissionsByMonth ?? [];
                             <?php endforeach; ?>
                         </div>
                     <?php else: ?>
-                        <div class="w-100 text-center text-muted-strong py-4">No project data available.</div>
+                        <div class="w-100 text-center text-muted-strong py-4">No submission data available.</div>
                     <?php endif; ?>
                 </div>
             </div>
@@ -287,19 +490,15 @@ $chartSource = $submissionsByMonth ?? [];
                                         <?php
                                         $statusLabels = [
                                             'endorsed' => 'Pending',
-                                            'returned' => 'Returned',
                                             'approved' => 'Approved',
                                             'rejected' => 'Rejected',
-                                            'resubmitted' => 'Pending - Resubmitted',
                                         ];
                                         $status = $project['status'] ?? 'endorsed';
                                         $label = $statusLabels[$status] ?? ucfirst($status);
                                         $colorMap = [
                                             'endorsed' => ['bg' => '#e8f0fe', 'color' => '#2a5c8a', 'border' => '#c5d9f0'],
-                                            'returned' => ['bg' => '#ffedd5', 'color' => '#9a3412', 'border' => '#fed7aa'],
                                             'approved' => ['bg' => '#dcfce7', 'color' => '#166534', 'border' => '#bbf7d0'],
                                             'rejected' => ['bg' => '#fee2e2', 'color' => '#991b1b', 'border' => '#fecaca'],
-                                            'resubmitted' => ['bg' => '#e0e7ff', 'color' => '#3730a3', 'border' => '#c7d2fe'],
                                         ];
                                         $colors = $colorMap[$status] ?? $colorMap['endorsed'];
                                         ?>
@@ -328,7 +527,7 @@ $chartSource = $submissionsByMonth ?? [];
                                             <a href="<?= site_url('director-general/download/' . $project['id']) ?>" class="btn btn-outline-primary icon-btn" type="button" title="Download PDF">
                                                 <i class="fa-solid fa-download"></i>
                                             </a>
-                                            <?php if (in_array($project['status'], ['endorsed', 'resubmitted', 'returned'])): ?>
+                                            <?php if (in_array($project['status'], ['endorsed'])): ?>
                                             <button class="action-dropdown-btn" onclick="toggleActionMenu(event, this, '<?= $project['id'] ?>')">
                                                 Review <i class="fa-solid fa-chevron-down" style="font-size:.65rem;margin-left:2px;"></i>
                                             </button>
@@ -653,7 +852,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById('viewProjectTitle').textContent = project.title || '-';
                 document.getElementById('viewProjectDescription').textContent = project.description || '-';
                 document.getElementById('viewProjectBudget').textContent = project.budget ? '₱' + parseFloat(project.budget).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '-';
-                var statusMap = {'endorsed':'Pending','returned':'Returned','approved':'Approved','rejected':'Rejected','resubmitted':'Pending - Resubmitted'};
+                var statusMap = {'endorsed':'Pending','approved':'Approved','rejected':'Rejected'};
                 document.getElementById('viewProjectStatus').textContent = statusMap[project.status] || project.status || '-';
                 document.getElementById('viewProjectDepartment').textContent = project.department || '-';
                 document.getElementById('viewProjectUpdated').textContent = project.updated || '-';
