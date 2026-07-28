@@ -23,11 +23,20 @@ class ISspRecordModel extends Model
         'remarks',
     ];
 
-    public function getRecentRecordsByUser(int $userId, int $limit = 10): array
+    public function getRecentRecordsByUser(int $userId, int $limit = 10, ?int $year = null, ?int $month = null): array
     {
-        return $this->select('issp_records.*, departments.name AS department_name')
+        $builder = $this->select('issp_records.*, departments.name AS department_name')
             ->join('departments', 'departments.id = issp_records.department_id', 'left')
-            ->where('issp_records.created_by', $userId)
+            ->where('issp_records.created_by', $userId);
+
+        if ($year !== null) {
+            $builder->where('YEAR(COALESCE(issp_records.updated_at, issp_records.created_at))', $year);
+        }
+        if ($month !== null) {
+            $builder->where('MONTH(COALESCE(issp_records.updated_at, issp_records.created_at))', $month);
+        }
+
+        return $builder
             ->orderBy('COALESCE(issp_records.updated_at, issp_records.created_at)', 'DESC', false)
             ->limit($limit)
             ->findAll();
@@ -50,24 +59,41 @@ class ISspRecordModel extends Model
             ->where('issp_records.status !=', 'draft');
     }
 
-    public function getRecentSubmittedRecords(int $limit = 10): array
+    public function getRecentSubmittedRecords(int $limit = 10, ?int $year = null, ?int $month = null): array
     {
-        return $this->select('issp_records.*, departments.name AS department_name, users.name AS created_by_name')
+        $builder = $this->select('issp_records.*, departments.name AS department_name, users.name AS created_by_name')
             ->join('departments', 'departments.id = issp_records.department_id', 'left')
             ->join('users', 'users.id = issp_records.created_by', 'left')
-            ->notDraftFilter()
+            ->notDraftFilter();
+
+        if ($year !== null) {
+            $builder->where('YEAR(COALESCE(issp_records.updated_at, issp_records.created_at))', $year);
+        }
+        if ($month !== null) {
+            $builder->where('MONTH(COALESCE(issp_records.updated_at, issp_records.created_at))', $month);
+        }
+
+        return $builder
             ->orderBy('COALESCE(issp_records.updated_at, issp_records.created_at)', 'DESC', false)
             ->limit($limit)
             ->findAll();
     }
 
-    public function getStatusSummary(): array
+    public function getStatusSummary(?int $year = null, ?int $month = null): array
     {
-        $rows = $this->select("status, budget, form_data")
+        $builder = $this->select("status, budget, form_data")
             ->where('issp_records.status IS NOT NULL')
             ->where('issp_records.status !=', '')
-            ->where('issp_records.status !=', 'draft')
-            ->findAll();
+            ->where('issp_records.status !=', 'draft');
+
+        if ($year !== null) {
+            $builder->where('YEAR(COALESCE(issp_records.updated_at, issp_records.created_at))', $year);
+        }
+        if ($month !== null) {
+            $builder->where('MONTH(COALESCE(issp_records.updated_at, issp_records.created_at))', $month);
+        }
+
+        $rows = $builder->findAll();
 
         $stats = [
             'total_budget' => 0,
@@ -97,6 +123,16 @@ class ISspRecordModel extends Model
         return $stats;
     }
 
+    public function getAvailableYears(): array
+    {
+        return $this->select("DISTINCT YEAR(COALESCE(updated_at, created_at)) AS year")
+            ->where('status IS NOT NULL')
+            ->where('status !=', '')
+            ->where('status !=', 'draft')
+            ->orderBy('year', 'DESC')
+            ->findAll();
+    }
+
     public function countSubmitted(): int
     {
         return $this->notDraftFilter()->countAllResults();
@@ -122,20 +158,57 @@ class ISspRecordModel extends Model
         return (float) ($result['budget'] ?? 0);
     }
 
-    public function getSubmissionsByMonth(): array
+    public function getSubmissionsByMonth(?int $year = null, ?int $month = null): array
     {
-        return $this->select("DATE_FORMAT(created_at, '%Y-%m') AS month, COUNT(*) AS total")
-            ->notDraftFilter()
+        $builder = $this->select("DATE_FORMAT(COALESCE(issp_records.updated_at, issp_records.created_at), '%Y-%m') AS month, COUNT(*) AS total")
+            ->notDraftFilter();
+
+        if ($year !== null) {
+            $builder->where('YEAR(COALESCE(issp_records.updated_at, issp_records.created_at))', $year);
+        }
+        if ($month !== null) {
+            $builder->where('MONTH(COALESCE(issp_records.updated_at, issp_records.created_at))', $month);
+        }
+
+        return $builder
             ->groupBy('month')
             ->orderBy('month', 'ASC')
             ->findAll();
     }
 
-    public function getProjectsPerDivision(): array
+    public function getSubmissionsByMonthPerDivision(?int $year = null, ?int $month = null): array
     {
-        return $this->select('departments.name AS name, COUNT(issp_records.id) AS total, COALESCE(SUM(issp_records.budget), 0) AS budget')
+        $builder = $this->select("DATE_FORMAT(COALESCE(issp_records.updated_at, issp_records.created_at), '%m') AS month_num, departments.name AS division, COUNT(issp_records.id) AS total")
             ->join('departments', 'departments.id = issp_records.department_id', 'left')
-            ->notDraftFilter()
+            ->notDraftFilter();
+
+        if ($year !== null) {
+            $builder->where('YEAR(COALESCE(issp_records.updated_at, issp_records.created_at))', $year);
+        }
+        if ($month !== null) {
+            $builder->where('MONTH(COALESCE(issp_records.updated_at, issp_records.created_at))', $month);
+        }
+
+        return $builder
+            ->groupBy('month_num, departments.id, departments.name')
+            ->orderBy('month_num', 'ASC')
+            ->findAll();
+    }
+
+    public function getProjectsPerDivision(?int $year = null, ?int $month = null): array
+    {
+        $builder = $this->select('departments.name AS name, COUNT(issp_records.id) AS total, COALESCE(SUM(issp_records.budget), 0) AS budget')
+            ->join('departments', 'departments.id = issp_records.department_id', 'left')
+            ->notDraftFilter();
+
+        if ($year !== null) {
+            $builder->where('YEAR(COALESCE(issp_records.updated_at, issp_records.created_at))', $year);
+        }
+        if ($month !== null) {
+            $builder->where('MONTH(COALESCE(issp_records.updated_at, issp_records.created_at))', $month);
+        }
+
+        return $builder
             ->groupBy('departments.id, departments.name')
             ->orderBy('total', 'DESC')
             ->findAll();

@@ -17,7 +17,7 @@ class PendingApprovalController extends BaseController
         $isspModel->select('issp_records.*, departments.name AS department_name, users.name AS created_by_name')
             ->join('departments', 'departments.id = issp_records.department_id', 'left')
             ->join('users', 'users.id = issp_records.created_by', 'left')
-            ->whereIn('issp_records.status', ['endorsed', 'resubmitted'])
+            ->whereIn('issp_records.status', ['endorsed'])
             ->orderBy('COALESCE(issp_records.updated_at, issp_records.created_at)', 'DESC', false);
 
         if ($query !== '') {

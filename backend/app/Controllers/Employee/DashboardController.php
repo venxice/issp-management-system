@@ -17,11 +17,22 @@ class DashboardController extends BaseController
         $userModel = new UserModel();
         $isspRecordModel = new ISspRecordModel();
 
-        $recentRecords = $isspRecordModel->getRecentRecordsByUser($currentUserId, 10);
+        $year = $this->request->getGet('year') !== null ? (int) $this->request->getGet('year') : null;
+        $month = $this->request->getGet('month') !== null ? (int) $this->request->getGet('month') : null;
 
-        $allUserRecords = $isspRecordModel->select('status, budget, form_data')
-            ->where('created_by', $currentUserId)
-            ->findAll();
+        $recentRecords = $isspRecordModel->getRecentRecordsByUser($currentUserId, 10, $year, $month);
+
+        $allBuilder = $isspRecordModel->select('status, budget, form_data, created_at, updated_at')
+            ->where('created_by', $currentUserId);
+
+        if ($year !== null) {
+            $allBuilder->where('YEAR(COALESCE(updated_at, created_at))', $year);
+        }
+        if ($month !== null) {
+            $allBuilder->where('MONTH(COALESCE(updated_at, created_at))', $month);
+        }
+
+        $allUserRecords = $allBuilder->findAll();
 
         $isNotDraft = fn($r) => !empty($r['status']) && $r['status'] !== 'draft';
         $submittedProjects = count(array_filter($allUserRecords, $isNotDraft));
@@ -39,6 +50,8 @@ class DashboardController extends BaseController
             0
         );
 
+        $availableYears = $isspRecordModel->getAvailableYears();
+
         return view('frontend/employee/dashboard/index', [
             'title' => 'Employee Dashboard',
             'active' => 'dashboard',
@@ -48,6 +61,9 @@ class DashboardController extends BaseController
             'needRevision' => $needRevision, 
             'totalBudget' => $totalBudget,
             'recentRecords' => $recentRecords,
+            'selectedYear' => $year,
+            'selectedMonth' => $month,
+            'availableYears' => $availableYears,
         ]);
     }
 

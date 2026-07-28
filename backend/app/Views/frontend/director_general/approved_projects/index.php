@@ -31,7 +31,7 @@
                 <a href="<?= site_url('director-general/approved-projects?' . http_build_query(array_filter(['q' => $query, 'date_range' => $date_range]))) ?>" class="btn btn-sm <?= $statusFilter === '' ? 'btn-primary' : 'btn-outline-secondary' ?>">All</a>
                 <a href="<?= site_url('director-general/approved-projects?' . http_build_query(array_filter(['status' => 'approved', 'q' => $query, 'date_range' => $date_range]))) ?>" class="btn btn-sm <?= $statusFilter === 'approved' ? 'btn-primary' : 'btn-outline-secondary' ?>">Approved (<?= $statusCounts['approved'] ?>)</a>
                 <a href="<?= site_url('director-general/approved-projects?' . http_build_query(array_filter(['status' => 'rejected', 'q' => $query, 'date_range' => $date_range]))) ?>" class="btn btn-sm <?= $statusFilter === 'rejected' ? 'btn-primary' : 'btn-outline-secondary' ?>">Rejected (<?= $statusCounts['rejected'] ?>)</a>
-                <a href="<?= site_url('director-general/approved-projects?' . http_build_query(array_filter(['status' => 'returned', 'q' => $query, 'date_range' => $date_range]))) ?>" class="btn btn-sm <?= $statusFilter === 'returned' ? 'btn-primary' : 'btn-outline-secondary' ?>">Returned (<?= $statusCounts['returned'] ?>)</a>
+
             </div>
             <div id="bulkBar" class="bulk-bar" style="display:none;">
                 <div class="bulk-bar-inner">
@@ -74,14 +74,12 @@
                                         $statusLabels = [
                                             'approved' => 'Approved',
                                             'rejected' => 'Rejected',
-                                            'returned' => 'Returned',
                                         ];
                                         $status = $project['status'] ?? 'approved';
                                         $label = $statusLabels[$status] ?? ucfirst($status);
                                         $colorMap = [
                                             'approved' => ['bg' => '#dcfce7', 'color' => '#166534', 'border' => '#bbf7d0'],
                                             'rejected' => ['bg' => '#fee2e2', 'color' => '#991b1b', 'border' => '#fecaca'],
-                                            'returned' => ['bg' => '#ffedd5', 'color' => '#9a3412', 'border' => '#fed7aa'],
                                         ];
                                         $colors = $colorMap[$status] ?? $colorMap['approved'];
                                         ?>
@@ -300,7 +298,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById('viewProjectTitle').textContent = project.title || '-';
                 document.getElementById('viewProjectDescription').textContent = project.description || '-';
                 document.getElementById('viewProjectBudget').textContent = project.budget ? '₱' + parseFloat(project.budget).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '-';
-                var statusMap = {'approved':'Approved','rejected':'Rejected','returned':'Returned'};
+                var statusMap = {'approved':'Approved','rejected':'Rejected'};
                 document.getElementById('viewProjectStatus').textContent = statusMap[project.status] || project.status || '-';
                 document.getElementById('viewProjectDepartment').textContent = project.department || '-';
                 document.getElementById('viewProjectUpdated').textContent = project.updated || '-';

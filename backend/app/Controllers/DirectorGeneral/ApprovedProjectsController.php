@@ -16,14 +16,13 @@ class ApprovedProjectsController extends BaseController
         $counts = [
             'approved'  => (new ISspRecordModel())->where('status', 'approved')->countAllResults(),
             'rejected'  => (new ISspRecordModel())->where('status', 'rejected')->countAllResults(),
-            'returned'  => (new ISspRecordModel())->where('status', 'returned')->countAllResults(),
         ];
 
         $isspModel = new ISspRecordModel();
         $isspModel->select('issp_records.*, departments.name AS department_name, users.name AS created_by_name')
             ->join('departments', 'departments.id = issp_records.department_id', 'left')
             ->join('users', 'users.id = issp_records.created_by', 'left')
-            ->whereIn('issp_records.status', ['approved', 'rejected', 'returned'])
+            ->whereIn('issp_records.status', ['approved', 'rejected'])
             ->orderBy('COALESCE(issp_records.updated_at, issp_records.created_at)', 'DESC', false);
 
         if ($query !== '') {
@@ -37,7 +36,7 @@ class ApprovedProjectsController extends BaseController
             }
         }
 
-        if ($statusFilter !== '' && in_array($statusFilter, ['approved', 'rejected', 'returned'])) {
+        if ($statusFilter !== '' && in_array($statusFilter, ['approved', 'rejected'])) {
             $isspModel->where('issp_records.status', $statusFilter);
         }
 
