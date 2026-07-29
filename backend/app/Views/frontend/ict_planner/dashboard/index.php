@@ -314,12 +314,11 @@ document.addEventListener('click', function(e) {
                     <?php
                     $piePalette = ['#4f6180', '#607291', '#7e93b6', '#9aafce', '#b8c9e0', '#d0dcec'];
                     $statusData = [
-                        ['label' => 'Pending', 'value' => (int) ($pendingCount ?? 0), 'color' => $piePalette[0]],
-                        ['label' => 'Resubmitted', 'value' => (int) ($resubmittedCount ?? 0), 'color' => $piePalette[1]],
-                        ['label' => 'Endorsed', 'value' => (int) ($endorsedCountOnly ?? 0), 'color' => $piePalette[2]],
-                        ['label' => 'Approved', 'value' => (int) ($approvedCount ?? 0), 'color' => $piePalette[3]],
-                        ['label' => 'Rejected', 'value' => (int) ($rejectedCount ?? 0), 'color' => $piePalette[4]],
-                        ['label' => 'Returned', 'value' => (int) ($returnedCount ?? 0), 'color' => $piePalette[5]],
+                        ['label' => 'Pending', 'value' => (int) ($pendingCount ?? 0) + (int) ($resubmittedCount ?? 0), 'color' => $piePalette[0]],
+                        ['label' => 'Endorsed', 'value' => (int) ($endorsedCountOnly ?? 0), 'color' => $piePalette[1]],
+                        ['label' => 'Approved', 'value' => (int) ($approvedCount ?? 0), 'color' => $piePalette[2]],
+                        ['label' => 'Rejected', 'value' => (int) ($rejectedCount ?? 0), 'color' => $piePalette[3]],
+                        ['label' => 'Returned', 'value' => (int) ($returnedCount ?? 0), 'color' => $piePalette[4]],
                     ];
                     $statusMax = max(array_column($statusData, 'value'));
                     ?>

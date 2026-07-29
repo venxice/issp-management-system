@@ -291,7 +291,7 @@ class DashboardController extends BaseController
                 log_message('error', 'Failed to send submission notification: ' . $e->getMessage());
             }
 
-            return redirect()->to('employee/dashboard')->with('success', 'Project submitted successfully for review.');
+            return redirect()->to('employee/dashboard')->with('success', 'Project submitted successfully for review.')->with('clear_form_data', '1');
 
         } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());

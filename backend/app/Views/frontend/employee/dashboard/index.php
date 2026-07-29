@@ -443,4 +443,14 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
+<?php if (session()->getFlashdata('clear_form_data')): ?>
+<script>
+    ['network-infrastructure-form','enterprise-architecture-form','ict-human-capital-form','information-systems-form','ict-projects-form','performance-measurement-form'].forEach(function(k) {
+        localStorage.removeItem(k);
+    });
+    localStorage.removeItem('edit_project_id');
+    localStorage.removeItem('new-project-backup');
+</script>
+<?php endif; ?>
+
 <?= $this->endSection() ?>
