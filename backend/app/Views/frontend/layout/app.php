@@ -302,10 +302,64 @@ $active = $active ?? '';
             flex: 1;
         }
 
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .topbar-settings-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #fff;
+            text-decoration: none;
+            padding: 8px 15px;
+            border-radius: 9px;
+            background: rgba(255, 255, 255, .12);
+            border: 1px solid rgba(255, 255, 255, .32);
+            font-size: .78rem;
+            font-weight: 600;
+            line-height: 1.1;
+            white-space: nowrap;
+            transition: background-color .15s ease, border-color .15s ease, transform .1s ease, box-shadow .15s ease;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, .18);
+        }
+
+        .topbar-settings-btn i {
+            font-size: .85rem;
+        }
+
+        .topbar-settings-btn:hover {
+            background: rgba(255, 255, 255, .2);
+            border-color: rgba(255, 255, 255, .5);
+            color: #fff;
+        }
+
+        .topbar-settings-btn:active {
+            transform: translateY(1px);
+        }
+
+        .topbar-settings-btn.active {
+            background: #fff;
+            border-color: #fff;
+            color: var(--brand-dark);
+            box-shadow: 0 2px 8px rgba(15, 23, 42, .25);
+        }
+
+        .topbar-divider {
+            width: 1px;
+            height: 26px;
+            background: rgba(255, 255, 255, .22);
+            flex-shrink: 0;
+        }
+
         .user-chip {
             display: flex;
             align-items: center;
             gap: 10px;
+            color: #fff;
+            padding: 0 2px;
         }
 
         .page-title {
@@ -1323,10 +1377,17 @@ $active = $active ?? '';
                     <div class="page-title"><?= esc($title) ?></div>
                 </div>
             </div>
-            <div class="user-chip">
-                <div class="meta d-none d-sm-block">
-                    <div class="name"><?= esc(session()->get('name')) ?></div>
-                    <div class="role"><?= esc(session()->get('role_name')) ?></div>
+            <div class="topbar-right">
+                <a href="<?= site_url('profile') ?>" class="topbar-settings-btn <?= ($active ?? '') === 'profile' ? 'active' : '' ?>" title="My Account">
+                    <i class="fa-solid fa-gear"></i>
+                    <span class="d-none d-sm-inline">My Account</span>
+                </a>
+                <div class="topbar-divider d-none d-sm-block"></div>
+                <div class="user-chip">
+                    <div class="meta">
+                        <div class="name"><?= esc(session()->get('name')) ?></div>
+                        <div class="role"><?= esc(session()->get('role_name')) ?></div>
+                    </div>
                 </div>
             </div>
         </header>

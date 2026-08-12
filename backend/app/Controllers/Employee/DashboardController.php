@@ -75,6 +75,17 @@ class DashboardController extends BaseController
 
         $query = trim((string) $this->request->getGet('q'));
         $dateRange = trim((string) $this->request->getGet('date_range'));
+        $statusFilter = trim((string) $this->request->getGet('status'));
+
+        $allowedStatuses = ['pending', 'endorsed', 'approved', 'rejected', 'returned', 'resubmitted'];
+
+        $statusCounts = [];
+        foreach ($allowedStatuses as $st) {
+            $statusCounts[$st] = (new ISspRecordModel())
+                ->where('created_by', $currentUserId)
+                ->where('status', $st)
+                ->countAllResults();
+        }
 
         $isspRecordModel->select('issp_records.*, departments.name AS department_name')
             ->join('departments', 'departments.id = issp_records.department_id', 'left')
@@ -95,6 +106,9 @@ class DashboardController extends BaseController
                     ->where('issp_records.created_at <=', trim($dates[1]) . ' 23:59:59');
             }
         }
+        if ($statusFilter !== '' && in_array($statusFilter, $allowedStatuses)) {
+            $isspRecordModel->where('issp_records.status', $statusFilter);
+        }
 
         $submittedProjects = $isspRecordModel->findAll();
 
@@ -105,6 +119,8 @@ class DashboardController extends BaseController
             'submittedProjects' => $submittedProjects,
             'query' => $query,
             'date_range' => $dateRange,
+            'statusFilter' => $statusFilter,
+            'statusCounts' => $statusCounts,
         ]);
     }
 
@@ -622,10 +638,15 @@ class DashboardController extends BaseController
             'pageNumbers' => $pageNumbers,
         ]));
 
-        $dompdf = new \Dompdf\Dompdf();
-        $dompdf->loadHtml(mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8'));
-        $dompdf->setPaper('A4', 'landscape');
-        $dompdf->render();
+        helper('pdf');
+
+        $dompdf = run_with_retry(function () use ($html) {
+            $dp = new \Dompdf\Dompdf();
+            $dp->loadHtml(mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8'));
+            $dp->setPaper('A4', 'landscape');
+            $dp->render();
+            return $dp;
+        });
 
         $filename = 'ISSP_' . preg_replace('/[^a-zA-Z0-9]/', '_', $project['title'] ?? 'submission') . '_' . $id . '.pdf';
 

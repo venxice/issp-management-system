@@ -15,6 +15,7 @@
                         <i class="fa-regular fa-square me-1"></i> Select All
                     </button>
                     <form class="d-flex flex-wrap align-items-center gap-2 toolbar-form" method="get" action="<?= site_url('employee/submitted-ict-projects') ?>" id="searchForm">
+                    <input type="hidden" name="status" value="<?= esc($statusFilter ?? '') ?>">
                     <div class="input-group input-group-sm" style="width:200px;">
                         <input class="form-control" name="q" value="<?= esc($query ?? '') ?>" placeholder="Search Projects">
                         <button class="btn btn-outline-secondary" type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
@@ -27,6 +28,15 @@
                     </div>
                 </form>
                 </div>
+            </div>
+            <div class="status-tabs d-flex align-items-center gap-1 px-3 pt-3 pb-3" style="background:#f8f9fa;border-bottom:1px solid #e9ecef;">
+                <a href="<?= site_url('employee/submitted-ict-projects?' . http_build_query(array_filter(['q' => $query, 'date_range' => $date_range]))) ?>" class="btn btn-sm <?= $statusFilter === '' ? 'btn-primary' : 'btn-outline-secondary' ?>">All</a>
+                <a href="<?= site_url('employee/submitted-ict-projects?' . http_build_query(array_filter(['status' => 'pending', 'q' => $query, 'date_range' => $date_range]))) ?>" class="btn btn-sm <?= $statusFilter === 'pending' ? 'btn-primary' : 'btn-outline-secondary' ?>">Pending (<?= $statusCounts['pending'] ?? 0 ?>)</a>
+                <a href="<?= site_url('employee/submitted-ict-projects?' . http_build_query(array_filter(['status' => 'endorsed', 'q' => $query, 'date_range' => $date_range]))) ?>" class="btn btn-sm <?= $statusFilter === 'endorsed' ? 'btn-primary' : 'btn-outline-secondary' ?>">Endorsed (<?= $statusCounts['endorsed'] ?? 0 ?>)</a>
+                <a href="<?= site_url('employee/submitted-ict-projects?' . http_build_query(array_filter(['status' => 'approved', 'q' => $query, 'date_range' => $date_range]))) ?>" class="btn btn-sm <?= $statusFilter === 'approved' ? 'btn-primary' : 'btn-outline-secondary' ?>">Approved (<?= $statusCounts['approved'] ?? 0 ?>)</a>
+                <a href="<?= site_url('employee/submitted-ict-projects?' . http_build_query(array_filter(['status' => 'rejected', 'q' => $query, 'date_range' => $date_range]))) ?>" class="btn btn-sm <?= $statusFilter === 'rejected' ? 'btn-primary' : 'btn-outline-secondary' ?>">Rejected (<?= $statusCounts['rejected'] ?? 0 ?>)</a>
+                <a href="<?= site_url('employee/submitted-ict-projects?' . http_build_query(array_filter(['status' => 'returned', 'q' => $query, 'date_range' => $date_range]))) ?>" class="btn btn-sm <?= $statusFilter === 'returned' ? 'btn-primary' : 'btn-outline-secondary' ?>">Returned (<?= $statusCounts['returned'] ?? 0 ?>)</a>
+                <a href="<?= site_url('employee/submitted-ict-projects?' . http_build_query(array_filter(['status' => 'resubmitted', 'q' => $query, 'date_range' => $date_range]))) ?>" class="btn btn-sm <?= $statusFilter === 'resubmitted' ? 'btn-primary' : 'btn-outline-secondary' ?>">Pending - Resubmitted (<?= $statusCounts['resubmitted'] ?? 0 ?>)</a>
             </div>
             <div id="bulkBar" class="bulk-bar" style="display:none;">
                 <div class="bulk-bar-inner">

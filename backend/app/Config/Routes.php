@@ -15,6 +15,13 @@ $routes->group('', ['filter' => 'auth'], static function (RouteCollection $route
     $routes->get('db-test', 'DbTest::index', ['filter' => 'role:admin']);
 });
 
+// Own profile — available to any signed-in user. Data is always session-bound,
+// so a user can only ever read/update their own account.
+$routes->group('profile', ['filter' => 'auth'], static function (RouteCollection $routes): void {
+    $routes->get('', 'ProfileController::index');
+    $routes->post('update-password', 'ProfileController::updatePassword');
+});
+
 $routes->group('admin', ['filter' => 'role:admin'], static function (RouteCollection $routes): void {
     $routes->get('dashboard', 'Admin\DashboardController::index');
     $routes->get('users', 'Admin\UsersController::index');

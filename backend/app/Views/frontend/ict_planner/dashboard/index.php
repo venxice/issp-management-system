@@ -9,31 +9,33 @@ $chartSource = $submissionsByMonth ?? [];
 $divisionData = $divisionData ?? [];
 $recentProjects = $recentProjects ?? [];
 
-$divisionTotal = array_sum(array_column($divisionData, 'total')) ?: 1;
-$pieSegments = [];
-$pieGradientParts = [];
+$statusPieData = [
+    ['label' => 'Pending', 'value' => (int) ($pendingCount ?? 0) + (int) ($resubmittedCount ?? 0), 'color' => $pieColors[0]],
+    ['label' => 'Endorsed', 'value' => (int) ($endorsedCountOnly ?? 0), 'color' => $pieColors[1]],
+    ['label' => 'Approved', 'value' => (int) ($approvedCount ?? 0), 'color' => $pieColors[2]],
+    ['label' => 'Rejected', 'value' => (int) ($rejectedCount ?? 0), 'color' => $pieColors[3]],
+    ['label' => 'Returned', 'value' => (int) ($returnedCount ?? 0), 'color' => $pieColors[4]],
+];
+$statusPieTotal = array_sum(array_column($statusPieData, 'value'));
+$statusPieSegments = [];
 $runningDeg = 0;
-foreach ($divisionData as $i => $div) {
-    $pct = ($div['total'] / $divisionTotal) * 100;
-    $deg = ($div['total'] / $divisionTotal) * 360;
-    $color = $pieColors[$i % count($pieColors)];
+foreach ($statusPieData as $item) {
+    $val = (int) $item['value'];
+    $pct = $statusPieTotal > 0 ? ($val / $statusPieTotal) * 100 : 0;
+    $deg = $statusPieTotal > 0 ? ($val / $statusPieTotal) * 360 : 0;
     $startDeg = $runningDeg;
     $endDeg = $runningDeg + $deg;
-    $pieGradientParts[] = "{$color} {$startDeg}deg {$endDeg}deg";
     $runningDeg = $endDeg;
-    $pieSegments[] = [
-        'name' => $div['name'] ?? 'Unknown',
-        'total' => $div['total'],
-        'budget' => $div['budget'],
+    $statusPieSegments[] = [
+        'name' => $item['label'],
+        'total' => $val,
         'pct' => round($pct, 1),
-        'color' => $color,
+        'color' => $item['color'],
         'startDeg' => $startDeg,
         'endDeg' => $endDeg,
     ];
 }
-$pieGradient = 'conic-gradient(' . implode(', ', $pieGradientParts) . ')';
-
-$pieCanvasData = json_encode(array_map(function ($seg) {
+$statusPieCanvasData = json_encode(array_map(function ($seg) {
     return [
         'name'    => $seg['name'],
         'total'   => $seg['total'],
@@ -42,7 +44,17 @@ $pieCanvasData = json_encode(array_map(function ($seg) {
         'start'   => $seg['startDeg'],
         'end'     => $seg['endDeg'],
     ];
-}, $pieSegments));
+}, $statusPieSegments));
+
+$divisionBarItems = [];
+foreach ($divisionData as $i => $div) {
+    $divisionBarItems[] = [
+        'label' => $div['name'] ?? 'Unknown',
+        'value' => (int) $div['total'],
+        'color' => $pieColors[$i % count($pieColors)],
+    ];
+}
+$divisionBarMax = $divisionBarItems !== [] ? max(array_column($divisionBarItems, 'value')) : 0;
 ?>
 <style>
 .pie-wrap {
@@ -311,52 +323,18 @@ document.addEventListener('click', function(e) {
             </div>
             <div class="dashboard-chart flex-fill">
                 <div class="dashboard-chart__frame h-100">
-                    <?php
-                    $piePalette = ['#4f6180', '#607291', '#7e93b6', '#9aafce', '#b8c9e0', '#d0dcec'];
-                    $statusData = [
-                        ['label' => 'Pending', 'value' => (int) ($pendingCount ?? 0) + (int) ($resubmittedCount ?? 0), 'color' => $piePalette[0]],
-                        ['label' => 'Endorsed', 'value' => (int) ($endorsedCountOnly ?? 0), 'color' => $piePalette[1]],
-                        ['label' => 'Approved', 'value' => (int) ($approvedCount ?? 0), 'color' => $piePalette[2]],
-                        ['label' => 'Rejected', 'value' => (int) ($rejectedCount ?? 0), 'color' => $piePalette[3]],
-                        ['label' => 'Returned', 'value' => (int) ($returnedCount ?? 0), 'color' => $piePalette[4]],
-                    ];
-                    $statusMax = max(array_column($statusData, 'value'));
-                    ?>
-                    <?php if ($statusMax > 0): ?>
-                        <?php
-                        $chartHeight = 200;
-                        $topPadding = 20;
-                        $bottomPadding = 30;
-                        $availableHeight = $chartHeight - $topPadding - $bottomPadding;
-                        ?>
-                        <div class="css-bar-chart" style="gap:14px;">
-                            <div class="css-bar-chart__background">
-                                <?php for ($ref = 1; $ref <= $statusMax; $ref++): ?>
-                                    <?php $bottomPosition = (($ref / $statusMax) * ($availableHeight / $chartHeight) * 100) + (($bottomPadding / $chartHeight) * 100); ?>
-                                    <div class="css-bar-chart__reference-line" style="bottom: <?= $bottomPosition ?>%;">
-                                        <span class="css-bar-chart__reference-label"><?= $ref ?></span>
-                                    </div>
-                                <?php endfor; ?>
+                    <?php if ($statusPieTotal > 0): ?>
+                        <div class="d-flex justify-content-center" style="min-height: 180px; padding-top: 20px;">
+                            <div class="pie-wrap">
+                                <canvas id="pieCanvas" width="180" height="180"></canvas>
+                                <div id="pieTooltip" class="pie-tooltip"></div>
                             </div>
-                            <?php foreach ($statusData as $item):
-                                $value = $item['value'];
-                                $percentage = $statusMax > 0 ? ($value / $statusMax) * 100 : 0;
-                            ?>
-                                <div class="css-bar-chart__item">
-                                    <div class="css-bar-chart__bar" style="height: <?= esc($percentage) ?>%; background: <?= esc($item['color']) ?>;">
-                                        <div class="css-bar-chart__tooltip">
-                                            <div class="css-bar-chart__tooltip-division"><?= esc($item['label']) ?></div>
-                                            <div class="css-bar-chart__tooltip-count"><?= $value ?> project<?= $value !== 1 ? 's' : '' ?></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            <?php endforeach; ?>
                         </div>
-                        <div style="display:flex; justify-content:center; gap:14px; flex-wrap:wrap; padding-bottom:4px;">
-                            <?php foreach ($statusData as $item): ?>
-                                <div style="display:flex; align-items:center; gap:4px;">
-                                    <span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:<?= $item['color'] ?>;"></span>
-                                    <span style="font-size:.68rem;color:#475569;"><?= esc($item['label']) ?></span>
+                        <div class="d-flex justify-content-center gap-4 mt-3">
+                            <?php foreach ($statusPieSegments as $seg): ?>
+                                <div class="d-flex align-items-center gap-1">
+                                    <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:<?= $seg['color'] ?>;"></span>
+                                    <span style="font-size:.78rem;color:#475569;"><?= $seg['name'] ?> (<?= $seg['total'] ?>)</span>
                                 </div>
                             <?php endforeach; ?>
                         </div>
@@ -376,18 +354,45 @@ document.addEventListener('click', function(e) {
             </div>
             <div class="dashboard-chart flex-fill">
                 <div class="dashboard-chart__frame h-100">
-                    <?php if ($pieSegments !== []): ?>
-                        <div class="d-flex justify-content-center" style="min-height: 180px; padding-top: 20px;">
-                            <div class="pie-wrap">
-                                <canvas id="pieCanvas" width="180" height="180"></canvas>
-                                <div id="pieTooltip" class="pie-tooltip"></div>
+                    <?php if ($divisionBarMax > 0): ?>
+                        <?php
+                        $chartHeight = 200;
+                        $topPadding = 20;
+                        $bottomPadding = 30;
+                        $availableHeight = $chartHeight - $topPadding - $bottomPadding;
+                        $divisionBarStep = 1;
+                        while ($divisionBarMax / $divisionBarStep > 10) {
+                            $divisionBarStep *= 2;
+                        }
+                        ?>
+                        <div class="css-bar-chart" style="gap:14px;">
+                            <div class="css-bar-chart__background">
+                                <?php for ($ref = $divisionBarStep; $ref <= $divisionBarMax; $ref += $divisionBarStep): ?>
+                                    <?php $bottomPosition = (($ref / $divisionBarMax) * ($availableHeight / $chartHeight) * 100) + (($bottomPadding / $chartHeight) * 100); ?>
+                                    <div class="css-bar-chart__reference-line" style="bottom: <?= $bottomPosition ?>%;">
+                                        <span class="css-bar-chart__reference-label"><?= $ref ?></span>
+                                    </div>
+                                <?php endfor; ?>
                             </div>
+                            <?php foreach ($divisionBarItems as $item):
+                                $value = $item['value'];
+                                $percentage = $divisionBarMax > 0 ? ($value / $divisionBarMax) * 100 : 0;
+                            ?>
+                                <div class="css-bar-chart__item">
+                                    <div class="css-bar-chart__bar" style="height: <?= esc($percentage) ?>%; background: <?= esc($item['color']) ?>;">
+                                        <div class="css-bar-chart__tooltip">
+                                            <div class="css-bar-chart__tooltip-division"><?= esc($item['label']) ?></div>
+                                            <div class="css-bar-chart__tooltip-count"><?= $value ?> project<?= $value !== 1 ? 's' : '' ?></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
                         </div>
-                        <div class="d-flex justify-content-center gap-4 mt-3">
-                            <?php foreach ($pieSegments as $seg): ?>
-                                <div class="d-flex align-items-center gap-1">
-                                    <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:<?= $seg['color'] ?>;"></span>
-                                    <span style="font-size:.78rem;color:#475569;"><?= $seg['name'] ?> (<?= $seg['total'] ?>)</span>
+                        <div style="display:flex; justify-content:center; gap:14px; flex-wrap:wrap; padding-bottom:4px;">
+                            <?php foreach ($divisionBarItems as $item): ?>
+                                <div style="display:flex; align-items:center; gap:4px;">
+                                    <span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:<?= $item['color'] ?>;"></span>
+                                    <span style="font-size:.68rem;color:#475569;"><?= esc($item['label']) ?></span>
                                 </div>
                             <?php endforeach; ?>
                         </div>
@@ -561,7 +566,7 @@ function openEndorseModal(projectId) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    <?php if ($pieSegments !== []): ?>
+    <?php if ($statusPieTotal > 0): ?>
     const canvas = document.getElementById('pieCanvas');
     const tooltip = document.getElementById('pieTooltip');
     if (canvas && tooltip) {
@@ -569,7 +574,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const w = canvas.width, h = canvas.height;
         const cx = w / 2, cy = h / 2, r = 80;
 
-        const segments = <?= $pieCanvasData ?>;
+        const segments = <?= $statusPieCanvasData ?>;
 
         function drawPie() {
             ctx.clearRect(0, 0, w, h);
