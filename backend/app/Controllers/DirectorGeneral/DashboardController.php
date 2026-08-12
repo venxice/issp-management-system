@@ -307,10 +307,15 @@ class DashboardController extends BaseController
             'pageNumbers' => $pageNumbers,
         ]));
 
-        $dompdf = new \Dompdf\Dompdf();
-        $dompdf->loadHtml(mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8'));
-        $dompdf->setPaper('A4', 'landscape');
-        $dompdf->render();
+        helper('pdf');
+
+        $dompdf = run_with_retry(function () use ($html) {
+            $dp = new \Dompdf\Dompdf();
+            $dp->loadHtml(mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8'));
+            $dp->setPaper('A4', 'landscape');
+            $dp->render();
+            return $dp;
+        });
         $fd = !empty($project['form_data']) ? json_decode($project['form_data'], true) : [];
         $ict = $fd['ict-projects-form'] ?? [];
         $title = $ict['internal_project_title'] ?? $project['title'] ?? 'submission';
@@ -381,10 +386,15 @@ class DashboardController extends BaseController
                 'pageNumbers' => $pageNumbers,
             ]));
 
-            $dompdf = new \Dompdf\Dompdf();
-            $dompdf->loadHtml(mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8'));
-            $dompdf->setPaper('A4', 'landscape');
-            $dompdf->render();
+            helper('pdf');
+
+            $dompdf = run_with_retry(function () use ($html) {
+                $dp = new \Dompdf\Dompdf();
+                $dp->loadHtml(mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8'));
+                $dp->setPaper('A4', 'landscape');
+                $dp->render();
+                return $dp;
+            });
 
             $safeTitle = preg_replace('/[^a-zA-Z0-9]/', '_', $project['title'] ?? 'submission');
             $filename = 'ISSP_' . $safeTitle . '_' . $id . '.pdf';
