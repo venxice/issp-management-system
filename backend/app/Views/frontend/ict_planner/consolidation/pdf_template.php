@@ -226,8 +226,77 @@ $hc = $formData['ict-human-capital-form'] ?? [];
 $is = $formData['information-systems-form'] ?? [];
 $proj = $formData['ict-projects-form'] ?? [];
 $pm = $formData['performance-measurement-form'] ?? [];
+$rY1 = $formData['year1-requirements-form'] ?? [];
+$rY2 = $formData['year2-requirements-form'] ?? [];
+$rY3 = $formData['year3-requirements-form'] ?? [];
+$summaryData = $formData['summary-of-investments-form'] ?? [];
 $batchMode = $batchMode ?? false;
+<<<<<<< Updated upstream
 if (!$batchMode):
+=======
+$scanMode = $scanMode ?? false;
+$pageNumbers = $pageNumbers ?? [];
+
+if (!function_exists('scanMarker')) {
+    function scanMarker($key) {
+        global $scanMode;
+        return $scanMode ? '<span style="font-size:1px;color:rgba(255,255,255,0);">XXM:' . $key . '</span>' : '';
+    }
+}
+
+if (!function_exists('scanAttr')) {
+    function scanAttr($key) {
+        global $scanMode;
+        return $scanMode ? ' data-scan="' . $key . '"' : '';
+    }
+}
+$rY1 = $resourceData['year1'] ?? [];
+$rY2 = $resourceData['year2'] ?? [];
+$rY3 = $resourceData['year3'] ?? [];
+
+// Summary of Investments
+$rGen  = $resourceData['generalSummary'] ?? [];
+$rFund = $resourceData['fundSource'] ?? [];
+$rSOE  = $resourceData['statementOfExpenditure'] ?? [];
+$rOOE  = $resourceData['objectOfExpenditure'] ?? [];
+
+$hasNi = false; foreach ($ni as $k => $vv) { if (!in_array($k, $cyberFieldList) && !isEmpty($vv)) { $hasNi = true; break; } }
+$hasEa = false; foreach ($ea as $vv) { if (!isEmpty($vv)) { $hasEa = true; break; } }
+$hasHc = false; for ($i = 1; $i <= 4; $i++) { if (!isEmpty($hc['position_'.$i] ?? '') || !isEmpty($hc['status_'.$i] ?? '') || !isEmpty($hc['count_'.$i] ?? '')) { $hasHc = true; break; } }
+$hasIs = false; foreach ($is as $vv) { if (!isEmpty($vv)) { $hasIs = true; break; } }
+$intFlds = ['internal_project_title','internal_description','internal_objectives','internal_total_cost','internal_funding_source','internal_start_date','internal_end_date','internal_implementing_unit','internal_year1_deliverables','internal_year2_deliverables','internal_year3_deliverables'];
+$hasInt = false; foreach ($intFlds as $f) { if (!isEmpty($proj[$f] ?? '')) { $hasInt = true; break; } }
+$hasPm = false; $pmProjects = ['internal_projects' => 'INTERNAL ICT PROJECTS'];
+$levels = ['intermediate' => 'INTERMEDIATE OUTCOME', 'immediate' => 'IMMEDIATE OUTCOME', 'output' => 'OUTPUT'];
+$cols = ['indicator' => 'Key Performance Indicators', 'baseline' => 'Baseline Data', 'target' => 'Targets', 'method' => 'Data Collection Methods', 'responsibility' => 'Responsibility'];
+
+if (!function_exists('parsePmFlat')) {
+function parsePmFlat($fields, $prefix) {
+    $projects = [];
+    foreach ($fields as $fn => $fv) {
+        if (preg_match('/^' . preg_quote($prefix) . '\[(\d+)\]\[kpi\]\[(\w+)\]\[(\w+)\]$/', $fn, $m)) {
+            $projects[(int)$m[1]][$m[2]][$m[3]] = $fv;
+        }
+    }
+    return $projects;
+}
+}
+
+$pmParsed = [];
+foreach ($pmProjects as $pk => $pl) {
+    $kpData = $pm[$pk] ?? null;
+    if (is_array($kpData)) {
+        $pmParsed[$pk] = $kpData;
+    } else {
+        $parsed = parsePmFlat($pm, $pk);
+        $pmParsed[$pk] = empty($parsed) ? null : ['kpi' => reset($parsed)];
+    }
+}
+
+foreach ($pmProjects as $pk => $pl): $kpi = is_array($pmParsed[$pk] ?? null) ? ($pmParsed[$pk]['kpi'] ?? $pmParsed[$pk]) : [];
+if (is_array($kpi)) { foreach ($levels as $lk => $lv) { $row = $kpi[$lk] ?? []; if (!is_array($row)) continue; foreach ($cols as $ck => $cl) { if (!isEmpty($row[$ck] ?? '')) { $hasPm = true; break 3; } } } } endforeach;
+$hasRes = !empty($rY1) || !empty($rY2) || !empty($rY3);
+>>>>>>> Stashed changes
 ?>
 <!DOCTYPE html>
 <html>
@@ -660,6 +729,7 @@ foreach ($crossFields as $f) { if (v($proj[$f] ?? '') !== '') { $hasCross = true
 <table><tr><td class="empty-field" style="text-align:center;">No cross-agency ICT project data provided.</td></tr></table>
 <?php endif; ?>
 
+<<<<<<< Updated upstream
 <!-- F. PERFORMANCE MEASUREMENT FRAMEWORK -->
 <div class="sec">F. PERFORMANCE MEASUREMENT FRAMEWORK</div>
 
@@ -713,6 +783,113 @@ foreach ($pmProjects as $pk => $pl):
         <?php endforeach; ?>
     </tr>
     <?php endforeach; ?>
+=======
+<?= scanMarker('part3_d') ?>
+<div class="section-heading">D. PROPOSED INFORMATION SYSTEMS</div>
+<table class="dt dt-d">
+    <?php if ($hasIs): ?>
+    <tr><td class="b" style="background:#e0e0e0;">Information System Name</td><td><?= v($is['is_name_1'] ?? '') ?></td></tr>
+    <tr><td class="b" style="background:#e0e0e0;">Classification</td><td><?= v($is['classification_1'] ?? '') ?></td></tr>
+    <tr><td class="b" style="background:#e0e0e0;">Service Type</td><td>
+        [<?= (isset($is['system_usage_1']) && v($is['system_usage_1']) === 'frontline') ? '/' : ' ' ?>] Frontline Service (directly used for public/client service delivery)<br>
+        [<?= (isset($is['system_usage_1']) && v($is['system_usage_1']) === 'non_frontline') ? '/' : ' ' ?>] Non-Frontline Service (supports core mandate but not directly used by clients/public)<br><br>
+        Identify if:<br>
+        [<?= (isset($is['deployment_type_1']) && v($is['deployment_type_1']) === 'online') ? '/' : ' ' ?>] Online<br>
+        [<?= (isset($is['deployment_type_1']) && v($is['deployment_type_1']) === 'on_premise') ? '/' : ' ' ?>] On-premise<br>
+        [<?= (isset($is['deployment_type_1']) && v($is['deployment_type_1']) === 'hybrid') ? '/' : ' ' ?>] Hybrid
+    </td></tr>
+    <tr><td class="b" style="background:#e0e0e0;">Description &amp; Purpose</td><td><?= v($is['description_1'] ?? '') ?></td></tr>
+    <tr><td class="b" style="background:#e0e0e0;">Status</td><td><?= v($is['status_1'] ?? '') ?></td></tr>
+    <tr><td class="b" style="background:#e0e0e0;">Development Strategy</td><td><?= v($is['dev_strategy_1'] ?? '') ?></td></tr>
+    <tr><td class="b" style="background:#e0e0e0;">Development Platform</td><td><?= v($is['platform_1'] ?? '') ?></td></tr>
+    <tr><td class="b" style="background:#e0e0e0;">Database Name</td><td><?= v($is['database_1'] ?? '') ?></td></tr>
+    <tr><td class="b" style="background:#e0e0e0;">Data Storage</td><td><?= v($is['storage_1'] ?? '') ?></td></tr>
+    <tr><td class="b" style="background:#e0e0e0;">Internal Users</td><td><?= v($is['internal_users_1'] ?? '') ?></td></tr>
+    <tr><td class="b" style="background:#e0e0e0;">External Users</td><td><?= v($is['external_users_1'] ?? '') ?></td></tr>
+    <tr><td class="b" style="background:#e0e0e0;">Owner</td><td><?= v($is['owner_1'] ?? '') ?></td></tr>
+    <tr><td class="b" style="background:#e0e0e0;font-weight:bold;">INTEROPERABILITY</td><td>
+        [<?= !empty($is['interop1_main']) ? '/' : ' ' ?>] Integration with another system (If the system will exchange data or will be technically integrated with another system)<br>
+        If yes, specify the system name &nbsp; Internal System: <?= v($is['interop1_internal_system'] ?? '') ?> &nbsp; External System: <?= v($is['interop1_external_system'] ?? '') ?><br><br>
+        [<?= (isset($is['interop1_sub']) && v($is['interop1_sub']) === 'generate') ? '/' : ' ' ?>] Generate data that will be utilized by other system<br>
+        [<?= (isset($is['interop1_sub']) && v($is['interop1_sub']) === 'process') ? '/' : ' ' ?>] Process data generated from other system<br>
+        [<?= (isset($is['interop1_sub']) && v($is['interop1_sub']) === 'shared') ? '/' : ' ' ?>] Deployment on a shared platform
+    </td></tr>
+    <tr><td class="b" style="background:#e0e0e0;font-weight:bold;">PRIVACY IMPACT ASSESSMENT</td><td>
+        Will the system process personal information? (Will the system collect, store, or process names, addresses, photos, or any info that can identify an individual?)<br>
+        [<?= (isset($is['pia_1']) && v($is['pia_1']) === 'yes') ? '/' : ' ' ?>] Yes &nbsp; [<?= (isset($is['pia_1']) && v($is['pia_1']) === 'no') ? '/' : ' ' ?>] No
+    </td></tr>
+    <?php else: ?>
+    <tr><td colspan="2" class="empty">No data provided.</td></tr>
+    <?php endif; ?>
+</table>
+
+<?= scanMarker('part3_e') ?>
+<div class="section-heading">E. ICT PROJECTS</div>
+<div class="subsection-heading">INTERNAL ICT PROJECTS</div>
+<table class="dt dt-d">
+    <?php if ($hasInt): ?>
+    <tr><td class="b" style="background:#e0e0e0;">Project Title</td><td><?= v($proj['internal_project_title'] ?? '') ?></td></tr>
+    <tr><td class="b" style="background:#e0e0e0;">Description</td><td><?= v($proj['internal_description'] ?? '') ?></td></tr>
+    <tr><td class="b" style="background:#e0e0e0;">Objectives</td><td><?= v($proj['internal_objectives'] ?? '') ?></td></tr>
+    <tr><td class="b" style="background:#e0e0e0;">Strategic Alignment</td><td>
+        [<?= !empty($proj['internal_strategic_pip']) ? '/' : ' ' ?>] Public Investment Program<br>
+        [<?= !empty($proj['internal_strategic_ncp']) ? '/' : ' ' ?>] National Cybersecurity Plan<br>
+        [<?= !empty($proj['internal_strategic_egov']) ? '/' : ' ' ?>] E-Government Master Plan<br>
+        [<?= !empty($proj['internal_strategic_pcb']) ? '/' : ' ' ?>] Program Convergence Budgeting<br>
+        [<?= !empty($proj['internal_strategic_others']) ? '/' : ' ' ?>] Others (Specify): <?= v($proj['internal_strategic_others_text'] ?? '') ?>
+    </td></tr>
+    <tr><td class="b" style="background:#e0e0e0;">Harmonization Framework</td><td>
+        [<?= !empty($proj['internal_harmonization_1']) ? '/' : ' ' ?>] National Prioritization<br>
+        [<?= !empty($proj['internal_harmonization_2']) ? '/' : ' ' ?>] Resource Optimization<br>
+        [<?= !empty($proj['internal_harmonization_3']) ? '/' : ' ' ?>] Interoperability Framework<br>
+        [<?= !empty($proj['internal_harmonization_4']) ? '/' : ' ' ?>] Cross-Agency Collaboration<br>
+        [<?= !empty($proj['internal_harmonization_5']) ? '/' : ' ' ?>] Scalability and Sustainability
+    </td></tr>
+    <tr><td class="b" style="background:#e0e0e0;">Duration</td><td>
+        Start: <?= v($proj['internal_start_date'] ?? '') ?> &nbsp; End: <?= v($proj['internal_end_date'] ?? '') ?>
+    </td></tr>
+    <tr><td class="b" style="background:#e0e0e0;">Year 1 Deliverables/Milestone</td><td><?= v($proj['internal_year1_deliverables'] ?? '') ?></td></tr>
+    <tr><td class="b" style="background:#e0e0e0;">Year 2 Deliverables/Milestone</td><td><?= v($proj['internal_year2_deliverables'] ?? '') ?></td></tr>
+    <tr><td class="b" style="background:#e0e0e0;">Year 3 Deliverables/Milestone</td><td><?= v($proj['internal_year3_deliverables'] ?? '') ?></td></tr>
+    <tr><td class="b" style="background:#e0e0e0;">Implementing Unit</td><td><?= v($proj['internal_implementing_unit'] ?? '') ?></td></tr>
+    <tr><td class="b" style="background:#e0e0e0;">Total Project Cost</td><td><?= v($proj['internal_total_cost'] ?? '') ?></td></tr>
+    <tr><td class="b" style="background:#e0e0e0;">Funding Source</td><td><?= v($proj['internal_funding_source'] ?? '') ?></td></tr>
+    <?php else: ?>
+    <tr><td colspan="2" class="empty">No internal ICT project data provided.</td></tr>
+    <?php endif; ?>
+</table>
+
+<?= scanMarker('part3_f') ?>
+<div class="section-heading">F. PERFORMANCE MEASUREMENT FRAMEWORK</div>
+<?php foreach ($pmProjects as $pk => $pl): $kpi = is_array($pmParsed[$pk] ?? null) ? ($pmParsed[$pk]['kpi'] ?? $pmParsed[$pk]) : []; $hKpi = false;
+if (is_array($kpi)) { foreach ($levels as $lk => $lv) { $row = $kpi[$lk] ?? []; if (!is_array($row)) continue; foreach ($cols as $ck => $cl) { if (!isEmpty($row[$ck] ?? '')) { $hKpi = true; break 2; } } } } ?>
+<div class="subsection-heading"><?= ve($pl) ?></div>
+<?php if ($hKpi): ?>
+<table class="dt kpi" style="width:100%;"><tr><th>HIERARCHY OF TARGETED RESULTS</th><th>KEY PERFORMANCE INDICATORS</th><th>BASELINE DATA</th><th>TARGETS</th><th>DATA COLLECTION METHODS</th><th>RESPONSIBILITY</th></tr>
+<?php foreach ($levels as $lk => $lv): $row = $kpi[$lk] ?? []; if (!is_array($row)) continue; $rH = false; foreach ($cols as $ck => $cl) { if (!isEmpty($row[$ck] ?? '')) { $rH = true; break; } } if (!$rH) continue; ?>
+<tr><td class="b"><?= ve($lv) ?></td><?php foreach ($cols as $ck => $cl): $cv = v($row[$ck] ?? ''); ?><td><?= $cv !== '' ? $cv : '<span class="empty">-</span>' ?></td><?php endforeach; ?></tr>
+<?php endforeach; ?></table>
+<?php else: ?><table class="dt"><tr><td class="empty">No KPI data provided for <?= ve($pl) ?>.</td></tr></table><?php endif; endforeach; ?>
+
+<!-- ==================== PART IV ==================== -->
+<?= scanMarker('part4') ?>
+<div class="part-heading">PART IV. RESOURCE REQUIREMENTS</div>
+<?= scanMarker('part4_a') ?>
+<div class="section-heading">DETAILED RESOURCE DEPLOYMENT AND COST BREAKDOWN</div>
+
+<?php $yD = [1 => $rY1, 2 => $rY2, 3 => $rY3]; $yL = [1 => 'YEAR #1', 2 => 'Year #2', 3 => 'Year #3']; foreach ($yD as $yr => $items): ?>
+<?= scanMarker('part4_a' . $yr) ?>
+<div class="subsection-heading"><?= ve($yL[$yr]) ?></div>
+<table class="dt">
+    <tr><th style="width:5%;">ITEM</th><th style="width:14%;">ITEM DESCRIPTION</th><th style="width:10%;">OFFICE LOCATION</th><th style="width:10%;">FUND SOURCE</th><th style="width:10%;">UNIT COST</th><th style="width:10%;">PHYSICAL TARGET</th><th style="width:12%;">TOTAL COST</th></tr>
+    <?php if (!empty($items)): $cats = []; foreach ($items as $it) { $c = $it['strategic_category'] ?? 'Uncategorized'; $cats[$c][] = $it; } $yrT = 0; foreach ($cats as $cN => $cI): $cT = 0; ?>
+    <tr><td colspan="7" class="group-header"><?= ve($cN) ?></td></tr>
+    <?php foreach ($cI as $it): $tc = (float)($it['total_cost'] ?? 0); $yrT += $tc; $cT += $tc; ?>
+    <tr><td></td><td><?= ve($it['item'] ?? '') ?></td><td><?= ve($it['office'] ?? '') ?></td><td><?= ve($it['fund_source'] ?? '') ?></td><td class="r"><?= number_format((float)($it['unit_cost'] ?? 0), 2) ?></td><td class="c"><?= ve($it['physical_target'] ?? '') ?></td><td class="r"><?= number_format($tc, 2) ?></td></tr>
+    <?php endforeach; endforeach; ?>
+    <tr><td colspan="6" class="gt" style="text-align:right;">GRAND TOTAL</td><td class="r gt"><?= number_format($yrT, 2) ?></td></tr>
+    <?php else: ?><tr><td colspan="7" class="empty">No resource requirements data for this year.</td></tr><?php endif; ?>
+>>>>>>> Stashed changes
 </table>
 <?php else: ?>
 <table><tr><td class="empty-field" style="text-align:center;">No KPI data provided for <?= htmlspecialchars($pl) ?>.</td></tr></table>

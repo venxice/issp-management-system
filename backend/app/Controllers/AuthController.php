@@ -11,6 +11,7 @@ class AuthController extends BaseController
 {
     public function loginForm()
     {
+
         if (session()->get('is_logged_in')) {
             return redirect()->to(site_url($this->dashboardPathForRole((string) session()->get('role_slug'))));
         }
@@ -76,6 +77,12 @@ class AuthController extends BaseController
 
     public function googleRedirect()
     {
+
+ //dd(
+        //env('SSO_GOOGLE_CLIENT_ID'),
+        //env('SSO_GOOGLE_CLIENT_SECRET')
+    //);
+
         if (! $this->googleSsoConfigured()) {
             return redirect()->to(site_url('login'))->with('error', 'Google SSO is not configured yet');
         }
@@ -150,15 +157,16 @@ class AuthController extends BaseController
         return redirect()->to(site_url($this->dashboardPathForRole((string) ($user['role_slug'] ?? 'employee'))))->with('success', 'Successfully signed in');
     }
 
-    private function googleSsoConfigured(): bool
-    {
-        return (bool) env('SSO_GOOGLE_CLIENT_ID') && (bool) env('SSO_GOOGLE_CLIENT_SECRET');
-    }
+private function googleSsoConfigured(): bool
+{
+    return env('SSO_GOOGLE_CLIENT_ID')
+        && env('SSO_GOOGLE_CLIENT_SECRET');
+}
 
-    private function googleRedirectUri(): string
-    {
-        return env('SSO_GOOGLE_REDIRECT_URI') ?: site_url('auth/google/callback');
-    }
+private function googleRedirectUri(): string
+{
+    return env('SSO_GOOGLE_REDIRECT_URI') ?: site_url('auth/google/callback');
+}
 
     private function fetchGoogleProfile(string $code): array
     {
@@ -217,13 +225,16 @@ class AuthController extends BaseController
         return filter_var($profile['email_verified'] ?? false, FILTER_VALIDATE_BOOL);
     }
 
-    private function findGoogleUser(array $profile): ?array
-    {
-        $userModel = new UserModel();
-        $email = strtolower(trim((string) $profile['email']));
+  private function findGoogleUser(array $profile): ?array
+{
+    $userModel = new UserModel();
 
-        return $userModel->findByEmailWithRole($email);
-    }
+    $email = strtolower(trim((string) $profile['email']));
+
+    $user = $userModel->findByEmailWithRole($email);
+
+    return $user;
+}
 
     private function googleRoleAllowed(string $roleSlug): bool
     {
@@ -258,7 +269,12 @@ class AuthController extends BaseController
         session()->set([
             'is_logged_in'  => true,
             'user_id'       => (int) $user['id'],
-            'name'          => $user['name'],
+            'name' => trim(
+    ($user['first_name'] ?? '') .
+    (!empty($user['middle_initial']) ? ' ' . $user['middle_initial'] . '.' : '') .
+    ' ' .
+    ($user['last_name'] ?? '')
+),
             'email'         => $user['email'],
             'role_id'       => (int) $user['role_id'],
             'role_name'     => $user['role_name'] ?? 'User',
@@ -268,6 +284,7 @@ class AuthController extends BaseController
             'login_provider'=> $provider,
             'login_at'      => date('Y-m-d H:i:s'),
         ]);
+
 
         (new UserModel())->update($user['id'], [
             'last_login_at' => date('Y-m-d H:i:s'),

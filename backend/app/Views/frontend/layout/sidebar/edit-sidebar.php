@@ -169,32 +169,26 @@ $isIsspPage = strpos($currentPage, 'edit-ict-project') !== false;
 
 <div class="sidebar-section-title">Resource Requirements</div>
 
-<a class="nav-link <?= $active === 'year1-requirements' ? 'active' : '' ?>" href="<?= site_url('employee/edit-ict-project/'.$editId.'/year1-requirements') ?>">
+<a id="year1RequirementsLink"
+   class="nav-link <?= $active === 'year1-requirements' ? 'active' : '' ?>"
+   href="<?= site_url('employee/edit-ict-project/'.$editId.'/year1-requirements') ?>">
     <span class="status-indicator not-started"></span> Year 1 Requirements
 </a>
 
-<a class="nav-link <?= $active === 'year2-requirements' ? 'active' : '' ?>" href="<?= site_url('employee/edit-ict-project/'.$editId.'/year2-requirements') ?>">
+<a id="year2RequirementsLink"
+   class="nav-link <?= $active === 'year2-requirements' ? 'active' : '' ?>"
+   href="<?= site_url('employee/edit-ict-project/'.$editId.'/year2-requirements') ?>">
     <span class="status-indicator not-started"></span> Year 2 Requirements
 </a>
 
-<a class="nav-link <?= $active === 'year3-requirements' ? 'active' : '' ?>" href="<?= site_url('employee/edit-ict-project/'.$editId.'/year3-requirements') ?>">
+<a id="year3RequirementsLink"
+   class="nav-link <?= $active === 'year3-requirements' ? 'active' : '' ?>"
+   href="<?= site_url('employee/edit-ict-project/'.$editId.'/year3-requirements') ?>">
     <span class="status-indicator not-started"></span> Year 3 Requirements
 </a>
 
-<a class="nav-link <?= $active === 'general-summary' ? 'active' : '' ?>" href="<?= site_url('employee/edit-ict-project/'.$editId.'/general-summary') ?>">
-    <span class="status-indicator not-started"></span> General Summary
-</a>
-
-<a class="nav-link <?= $active === 'fund-source' ? 'active' : '' ?>" href="<?= site_url('employee/edit-ict-project/'.$editId.'/fund-source') ?>">
-    <span class="status-indicator not-started"></span> Fund Source
-</a>
-
-<a class="nav-link <?= $active === 'statement-expenditure' ? 'active' : '' ?>" href="<?= site_url('employee/edit-ict-project/'.$editId.'/statement-expenditure') ?>">
-    <span class="status-indicator not-started"></span> Statement of Expenditure
-</a>
-
-<a class="nav-link <?= $active === 'object-expenditure' ? 'active' : '' ?>" href="<?= site_url('employee/edit-ict-project/'.$editId.'/object-expenditure') ?>">
-    <span class="status-indicator not-started"></span> Object of Expenditure
+<a class="nav-link <?= $active === 'summary-of-investments' ? 'active' : '' ?>" href="<?= site_url('employee/edit-ict-project/'.$editId.'/summary-of-investments') ?>">
+    <span class="status-indicator not-started"></span> Summary of Investments
 </a>
  
 <div class="sidebar-footer-submit mt-3">
@@ -204,6 +198,11 @@ $isIsspPage = strpos($currentPage, 'edit-ict-project') !== false;
 </div>
 
 <script>
+const isEditMode = <?= !empty($editId) && $editId > 0 ? 'true' : 'false' ?>;
+
+console.log('EDIT MODE:', isEditMode);
+console.log('EDIT ID:', <?= json_encode($editId) ?>);
+
 function collectFormData() {
     var keys = [
         'network-infrastructure-form',
@@ -211,19 +210,35 @@ function collectFormData() {
         'ict-human-capital-form',
         'information-systems-form',
         'ict-projects-form',
-        'performance-measurement-form'
+        'performance-measurement-form',
+       'year1-office-productivity-form',
+       'year1-internal-ict-projects-form',
+       'year1-cross-agency-form',
+       'year1-continuing-costs-form',
+       'year2-office-productivity-form',
+       'year2-internal-ict-projects-form',
+       'year2-cross-agency-form',
+       'year2-continuing-costs-form',
+       'year3-office-productivity-form',
+       'year3-internal-ict-projects-form',
+       'year3-cross-agency-form',
+       'year3-continuing-costs-form'
+       
     ];
     var data = {};
     keys.forEach(function(key) {
-        try {
-            var saved = localStorage.getItem(key);
-            if (saved) {
-                data[key] = JSON.parse(saved);
-            }
-        } catch(e) {
-            console.warn('Failed to parse localStorage key:', key, e);
+    console.log("Checking:", key);
+    console.log("Storage:", localStorage.getItem(key));
+
+    try {
+        const saved = localStorage.getItem(key);
+        if (saved) {
+            data[key] = JSON.parse(saved);
         }
-    });
+    } catch(e) {
+        console.error(e);
+    }
+});
     return data;
 }
 
@@ -241,6 +256,8 @@ function saveEditDraft() {
 
     var csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
     var editId = <?= json_encode($editId) ?>;
+    
+     console.log(JSON.stringify(formData, null, 2));
 
     fetch('<?= site_url('employee/save-draft') ?>', {
         method: 'POST',
@@ -280,11 +297,32 @@ function areAllFormsComplete() {
         'network-infrastructure-form': { label: 'Network Infrastructure', skip: ['dept_network_diagram','regional_network_diagram'] },
         'enterprise-architecture-form': { label: 'Enterprise Architecture', skip: ['ea_diagram'] },
         'ict-human-capital-form': { label: 'ICT Human Capital', skip: [] },
+<<<<<<< Updated upstream
         'information-systems-form': { label: 'Information Systems', skip: [] },
         'ict-projects-form': { label: 'ICT Projects', skip: [] },
         'performance-measurement-form': { label: 'Performance Measurement', skip: [] }
     };
+=======
+        'information-systems-form': { label: 'Information Systems', skip: ['interop1_internal_system','interop1_external_system','online_link_1','system_usage_1','interop1_sub','owner_1','dev_strategy_1','platform_1','database_1','storage_1'] },
+        'ict-projects-form': { label: 'ICT Projects', skip: ['internal_strategic_others_text','cross_strategic_others_text'] },
+        'performance-measurement-form': { label: 'Performance Measurement', skip: ['cross_projects[1][kpi][intermediate][indicator]','cross_projects[1][kpi][intermediate][baseline]','cross_projects[1][kpi][intermediate][target]','cross_projects[1][kpi][intermediate][method]','cross_projects[1][kpi][intermediate][responsibility]','cross_projects[1][kpi][immediate][indicator]','cross_projects[1][kpi][immediate][baseline]','cross_projects[1][kpi][immediate][target]','cross_projects[1][kpi][immediate][method]','cross_projects[1][kpi][immediate][responsibility]','cross_projects[1][kpi][output][indicator]','cross_projects[1][kpi][output][baseline]','cross_projects[1][kpi][output][target]','cross_projects[1][kpi][output][method]','cross_projects[1][kpi][output][responsibility]'] },
+       'year1-office-productivity-form': { label: 'Year 1 - Office Productivity', skip: [] },
+        'year1-internal-ict-projects-form': { label: 'Year 1 - Internal ICT Projects', skip: [] },
+        'year1-cross-agency-form': { label: 'Year 1 - Cross Agency ICT Projects', skip: [] },
+        'year1-continuing-costs-form': { label: 'Year 1 - Continuing Costs', skip: [] },
+        'year2-office-productivity-form': { label: 'Year 2 - Office Productivity', skip: [] },
+        'year2-internal-ict-projects-form': { label: 'Year 2 - Internal ICT Projects', skip: [] },
+        'year2-cross-agency-form': { label: 'Year 2 - Cross Agency ICT Projects', skip: [] },
+        'year2-continuing-costs-form': { label: 'Year 2 - Continuing Costs', skip: [] },
+        'year3-office-productivity-form': { label: 'Year 3 - Office Productivity', skip: [] },
+        'year3-internal-ict-projects-form': { label: 'Year 3 - Internal ICT Projects', skip: [] },
+        'year3-cross-agency-form': { label: 'Year 3 - Cross Agency ICT Projects', skip: [] },
+        'year3-continuing-costs-form': { label: 'Year 3 - Continuing Costs', skip: [] },
+        'summary-of-investments-form': { label: 'Summary of Investments', skip: [] }
+>>>>>>> Stashed changes
 
+    };
+        
     try {
         var ictProjects = JSON.parse(localStorage.getItem('ict-projects-form'));
         if (!ictProjects || !ictProjects.internal_project_title || ictProjects.internal_project_title.trim() === '') {
@@ -368,60 +406,202 @@ function submitEditProject() {
 }
 
 function updateStatusIndicators() {
+
     document.querySelectorAll('.app-sidebar .nav-link[data-form-key]').forEach(function(link) {
+
         var storageKey = link.getAttribute('data-form-key');
         var indicator = link.querySelector('.status-indicator');
+
         if (!indicator || !storageKey) return;
 
         try {
+
             var data = localStorage.getItem(storageKey);
+
             if (data) {
+
                 var parsed = JSON.parse(data);
-                var skip = ['dept_network_diagram','regional_network_diagram','ea_diagram'];
-                if (storageKey === 'network-infrastructure-form') skip = ['dept_network_diagram','regional_network_diagram'];
-                else if (storageKey === 'enterprise-architecture-form') skip = ['ea_diagram'];
-                else skip = [];
+
+                var skip = [
+                    'dept_network_diagram',
+                    'regional_network_diagram',
+                    'ea_diagram'
+                ];
+
+                if (storageKey === 'network-infrastructure-form') {
+                    skip = [
+                        'dept_network_diagram',
+                        'regional_network_diagram'
+                    ];
+                }
+                else if (storageKey === 'enterprise-architecture-form') {
+                    skip = ['ea_diagram'];
+                }
+                else {
+                    skip = [];
+                }
+
                 var totalReal = 0;
                 var emptyReal = 0;
+
                 Object.entries(parsed).forEach(function(entry) {
-                    var key = entry[0], v = entry[1];
+
+                    var key = entry[0];
+                    var v = entry[1];
+
                     if (key.startsWith('csrf_') || key === '_token') return;
                     if (skip.indexOf(key) >= 0) return;
                     if (typeof v !== 'string') return;
+
                     totalReal++;
-                    if (v.trim() === '') emptyReal++;
+
+                    if (v.trim() === '') {
+                        emptyReal++;
+                    }
+
                 });
+
                 var filledCount = totalReal - emptyReal;
+
                 if (totalReal > 0 && filledCount / totalReal >= 0.8) {
+
                     indicator.className = 'status-indicator complete';
-                } else if (filledCount > 0) {
-                    indicator.className = 'status-indicator in-progress';
-                } else {
-                    indicator.className = 'status-indicator not-started';
+
                 }
-            } else {
-                indicator.className = 'status-indicator not-started';
+                else if (filledCount > 0) {
+
+                    indicator.className = 'status-indicator in-progress';
+
+                }
+                else {
+
+                    indicator.className = 'status-indicator not-started';
+
+                }
+
             }
-        } catch (e) {
-            indicator.className = 'status-indicator not-started';
+            else {
+
+                indicator.className = 'status-indicator not-started';
+
+            }
+
         }
+        catch (e) {
+
+            indicator.className = 'status-indicator not-started';
+
+        }
+
     });
+
+
+    // ==========================================
+    // RESOURCE REQUIREMENTS STATUS
+    // ==========================================
+
+    updateResourceRequirementStatusSidebar(
+        1,
+        'year1RequirementsLink'
+    );
+
+    updateResourceRequirementStatusSidebar(
+        2,
+        'year2RequirementsLink'
+    );
+
+    updateResourceRequirementStatusSidebar(
+        3,
+        'year3RequirementsLink'
+    );
+
+}
+
+function updateResourceRequirementStatusSidebar(year, linkId) {
+
+    var link = document.getElementById(linkId);
+
+    if (!link) return;
+
+    var indicator = link.querySelector('.status-indicator');
+
+    if (!indicator) return;
+
+    var keys = [
+        'year' + year + '-office-productivity-form',
+        'year' + year + '-internal-ict-projects-form',
+        'year' + year + '-cross-agency-form',
+        'year' + year + '-continuing-costs-form'
+    ];
+
+    var hasData = false;
+
+    keys.forEach(function(key) {
+
+        var value = localStorage.getItem(key);
+
+        if (!value) return;
+
+        try {
+
+            var rows = JSON.parse(value);
+
+            if (Array.isArray(rows) && rows.length > 0) {
+                hasData = true;
+            }
+
+        }
+        catch (e) {}
+
+    });
+
+
+    var saved = localStorage.getItem(
+        'year' + year + '-requirements-saved'
+    );
+
+
+    if (saved === 'true' && hasData) {
+
+        indicator.className = 'status-indicator complete';
+
+    }
+    else if (hasData) {
+
+        indicator.className = 'status-indicator in-progress';
+
+    }
+    else {
+
+        indicator.className = 'status-indicator not-started';
+
+    }
+
 }
 
 document.addEventListener('DOMContentLoaded', function() {
     updateStatusIndicators();
+document.querySelectorAll('a.nav-link[href]').forEach(function(link) {
 
-    document.querySelectorAll('a.nav-link[href]').forEach(function(link) {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
-            if (typeof window.saveChanges === 'function') {
-                window.saveChanges(false);
-            }
-            setTimeout(function() {
-                window.location.href = link.href;
-            }, 100);
-        });
+    link.addEventListener('click', function(e) {
+
+        e.preventDefault();
+
+        var href = link.href;
+
+        // Save current form data only if needed,
+        // but DO NOT mark the section as completed.
+        if (typeof window.saveChanges === 'function') {
+            window.saveChanges(false);
+        }
+
+        setTimeout(function() {
+            window.location.href = href;
+        }, 100);
+
     });
+
+});
 
     var backLink = document.getElementById('backToDraftsLink');
     if (backLink) {
@@ -434,7 +614,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Then save to DB so data persists even if localStorage is cleared later
             var csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
             var editId = <?= json_encode($editId) ?>;
-            fetch('<?= site_url('employee/save-draft') ?>', {
+           fetch('<?= site_url('employee/save-draft') ?>', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -450,7 +630,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .catch(function() {})
             .finally(function() {
                 // Clear all form keys first to prevent stale draft data
-                var formKeys = ['network-infrastructure-form','enterprise-architecture-form','ict-human-capital-form','information-systems-form','ict-projects-form','performance-measurement-form'];
+                var formKeys = ['network-infrastructure-form','enterprise-architecture-form','ict-human-capital-form','information-systems-form','ict-projects-form','performance-measurement-form', 'year1-office-productivity-form','year1-internal-ict-projects-form','year1-cross-agency-form','year1-continuing-costs-form'];
                 formKeys.forEach(function(k) {
                     localStorage.removeItem(k);
                 });
