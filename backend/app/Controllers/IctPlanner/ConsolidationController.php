@@ -2,6 +2,7 @@
 
 namespace App\Controllers\IctPlanner;
 
+use Dompdf\Dompdf;
 use App\Controllers\BaseController;
 use App\Models\ISspRecordModel;
 use App\Models\ResourceRequirementModel;
@@ -174,21 +175,30 @@ class ConsolidationController extends BaseController
 
         $pageNumbers = $this->extractPageNumbers($viewData);
 
+<<<<<<< Updated upstream
+        $dompdf = new \Dompdf\Dompdf();
+        $dompdf->loadHtml(mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8'));
+        $dompdf->setPaper('A4', 'landscape');
+        $dompdf->render();
+=======
+        $pageNumbers = $this->extractPageNumbers($viewData);
+
         $html = view('frontend/ict_planner/consolidation/pdf_template', array_merge($viewData, [
             'scanMode' => false,
             'pageNumbers' => $pageNumbers,
         ]));
 
-        helper('pdf');
+$dompdf = new \Dompdf\Dompdf();
 
-        $dompdf = run_with_retry(function () use ($html) {
-            $dp = new \Dompdf\Dompdf();
-            $dp->loadHtml(mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8'));
-            $dp->setPaper('A4', 'landscape');
-            $dp->render();
-            return $dp;
-        });
+      $dompdf = new \Dompdf\Dompdf();
+>>>>>>> Stashed changes
 
+    $dompdf->loadHtml(
+        mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8')
+    );
+
+    $dompdf->setPaper('A4', 'landscape');
+    $dompdf->render();
         $filename = 'ISSP_' . preg_replace('/[^a-zA-Z0-9]/', '_', $project['title'] ?? 'submission') . '_' . $id . '.pdf';
 
         $dompdf->stream($filename, ['Attachment' => true]);
@@ -228,27 +238,33 @@ class ConsolidationController extends BaseController
 
             $pageNumbers = $this->extractPageNumbers($viewData);
 
+<<<<<<< Updated upstream
+            $allHtml .= $html;
+            $count++;
+=======
+            $pageNumbers = $this->extractPageNumbers($viewData);
+
             $html = view('frontend/ict_planner/consolidation/pdf_template', array_merge($viewData, [
                 'scanMode' => false,
                 'pageNumbers' => $pageNumbers,
             ]));
 
-            helper('pdf');
+            $dompdf = new \Dompdf\Dompdf();
 
-            $dompdf = run_with_retry(function () use ($html) {
-                $dp = new \Dompdf\Dompdf();
-                $dp->loadHtml(mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8'));
-                $dp->setPaper('A4', 'landscape');
-                $dp->render();
-                return $dp;
-            });
+            $dompdf->loadHtml(
+                mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8')
+            );
+
+            $dompdf->setPaper('A4', 'landscape');
+            $dompdf->render();
 
             $safeTitle = preg_replace('/[^a-zA-Z0-9]/', '_', $project['title'] ?? 'submission');
             $filename = 'ISSP_' . $safeTitle . '_' . $id . '.pdf';
             $files[$filename] = $dompdf->output();
+>>>>>>> Stashed changes
         }
 
-        if (empty($files)) {
+        if ($count === 0) {
             return redirect()->to('ict-planner/consolidation')->with('error', 'No valid projects found.');
         }
 

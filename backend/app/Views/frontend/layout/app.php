@@ -1394,12 +1394,13 @@ $active = $active ?? '';
         <div class="content-wrap">
             <?= $this->include('frontend/layout/alerts') ?>
             <?= $this->renderSection('content') ?>
-        </div>
-    </main>
+</div>
+</main>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Sidebar Toggle Functionality
@@ -1568,59 +1569,121 @@ window.addEventListener('pageshow', function(e) {
 <script>
 // Auto-save current section to DB (called by Save Changes button)
 window.autoSaveDraft = function() {
+
     var editId = localStorage.getItem('edit_project_id');
-    var csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-    if (!csrfToken) return;
 
-    var keys = ['network-infrastructure-form','enterprise-architecture-form','ict-human-capital-form','information-systems-form','ict-projects-form','performance-measurement-form'];
-    var data = {};
-    keys.forEach(function(key) {
-        try {
-            var saved = localStorage.getItem(key);
-            if (saved) data[key] = JSON.parse(saved);
-            else data[key] = {};
-        } catch(e) {
-            data[key] = {};
-        }
-    });
+    var csrfToken =
+        document
+            .querySelector('meta[name="csrf-token"]')
+            ?.getAttribute('content');
 
-    var projectTitle = data['ict-projects-form'] && data['ict-projects-form'].internal_project_title;
-    if (!projectTitle || !projectTitle.trim()) {
-        if (typeof showAlertModal === 'function') {
-            showAlertModal('Validation Error', 'Project title is required. Please go to the ICT Projects section and enter a title before saving.');
-        }
+    if (!csrfToken) {
         return;
     }
 
-    fetch('<?= site_url('employee/save-draft') ?>', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest',
-            'X-CSRF-TOKEN': csrfToken
-        },
-        body: JSON.stringify({
-            csrf_test_name: csrfToken,
-            form_data: data,
-            id: editId || null
-        })
-    })
-    .then(function(r) {
-        if (!r.ok) throw new Error('Server returned ' + r.status);
-        return r.json();
-    })
-    .then(function(result) {
-        if (result.success && result.id && !editId) {
-            localStorage.setItem('edit_project_id', result.id);
+    var keys = [
+        'network-infrastructure-form',
+        'enterprise-architecture-form',
+        'ict-human-capital-form',
+        'information-systems-form',
+        'ict-projects-form',
+        'performance-measurement-form',
+
+        'year1-office-productivity-form',
+        'year1-internal-ict-projects-form',
+        'year1-cross-agency-form',
+        'year1-continuing-costs-form',
+
+        'year2-office-productivity-form',
+        'year2-internal-ict-projects-form',
+        'year2-cross-agency-form',
+        'year2-continuing-costs-form',
+
+        'year3-office-productivity-form',
+        'year3-internal-ict-projects-form',
+        'year3-cross-agency-form',
+        'year3-continuing-costs-form'
+    ];
+
+    var data = {};
+
+    keys.forEach(function(key) {
+
+        try {
+
+            var saved = localStorage.getItem(key);
+
+            if (saved) {
+                data[key] = JSON.parse(saved);
+            } else {
+                data[key] = {};
+            }
+
+        } catch (e) {
+
+            data[key] = {};
+
         }
-    })
-    .catch(function(err) {
-        console.error('Auto-save to DB failed:', err);
+
     });
-};
+
+    var currentPage = window.location.pathname;
+
+        if (currentPage.includes('ict-projects')) {
+
+        var projectTitle =
+            data['ict-projects-form'] &&
+            data['ict-projects-form'].internal_project_title;
+
+        if (!projectTitle || !projectTitle.trim()) {
+
+            if (typeof showAlertModal === 'function') {
+                showAlertModal(
+                    'Validation Error',
+                    'Project title is required. Please go to the ICT Projects section and enter a title before saving.'
+                );
+            }
+
+            return;
+        }
+
+        fetch('<?= site_url('employee/save-draft') ?>', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': csrfToken
+            },
+            body: JSON.stringify({
+                csrf_test_name: csrfToken,
+                form_data: data,
+                id: editId || null
+            })
+        })
+        .then(function(r) {
+            if (!r.ok) throw new Error('Server returned ' + r.status);
+            return r.json();
+        })
+        .then(function(result) {
+            console.log(result);
+
+            if (result.success && result.id && !editId) {
+                localStorage.setItem('edit_project_id', result.id);
+            }
+        })
+        .catch(function(err) {
+            console.error(err);
+            console.error('Auto-save to DB failed:', err);
+        });
+
+    } // ← CLOSE IF
+
+}; // ← CLOSE autoSaveDraft
 
 // File upload helper — uploads file to server, stores path on the input
 window.uploadFileInput = function(input) {
+
+
     var file = input.files[0];
     if (!file) return;
 
@@ -1638,13 +1701,18 @@ window.uploadFileInput = function(input) {
         statusEl.className = 'upload-status text-info';
     }
 
-    fetch('<?= site_url('employee/upload-file') ?>', {
-        method: 'POST',
-        body: formData,
-        headers: { 'X-Requested-With': 'XMLHttpRequest' }
-    })
+    const uploadUrl = input.dataset.uploadUrl;
+
+fetch(uploadUrl, {
+    method: 'POST',
+    body: formData,
+    headers: {
+        'X-Requested-With': 'XMLHttpRequest'
+    }
+})
     .then(function(r) { return r.json(); })
     .then(function(result) {
+        console.log(result);
         if (result.success) {
             input.setAttribute('data-uploaded-path', result.path);
             input.setAttribute('data-uploaded-name', result.name);
@@ -1705,6 +1773,10 @@ window.showServerFileLink = function(input, filePath) {
         }
     }
 })();
+
+window.navigateToPage = function(url) {
+    window.location.href = url;
+};
 </script>
 </body>
 </html>

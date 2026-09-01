@@ -539,24 +539,9 @@ window.saveFormData = function() {
 
 window.loadSavedData = function() {
     const tbody = document.getElementById('stakeholderTableBody');
+
     if (tbody.children.length === 0) {
         addStakeholderRow();
-        return;
-    }
-    // Check localStorage for rows that DB doesn't have yet
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-        try {
-            const data = JSON.parse(saved);
-            if (data.rows && data.rows.length > 0 && tbody.children.length === 0) {
-                tbody.innerHTML = '';
-                data.rows.forEach(function(row) {
-                    addStakeholderRow(row);
-                });
-            }
-        } catch (e) {
-            console.error('Error loading saved data:', e);
-        }
     }
 };
 
@@ -579,7 +564,6 @@ window.clearForm = function() {
 };
 
 window.saveChanges = function() {
-    saveFormData();
     document.querySelector('#mainForm').submit();
 };
 

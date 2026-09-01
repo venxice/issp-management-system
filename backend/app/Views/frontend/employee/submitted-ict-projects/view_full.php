@@ -194,6 +194,10 @@ $sectionLabels = [
     'information-systems-form'          => 'D. Information Systems',
     'ict-projects-form'                 => 'E. ICT Projects',
     'performance-measurement-form'      => 'F. Performance Measurement & KPIs',
+    'year1-requirements-form'           => 'Year 1 Resource Requirements',
+    'year2-requirements-form'           => 'Year 2 Resource Requirements',
+    'year3-requirements-form'           => 'Year 3 Resource Requirements',
+    'summary-of-investments-form'       => 'Summary of Investments',
 ];
 
 $sectionIcons = [
@@ -203,6 +207,10 @@ $sectionIcons = [
     'information-systems-form'          => 'fa-laptop-code',
     'ict-projects-form'                 => 'fa-project-diagram',
     'performance-measurement-form'      => 'fa-chart-line',
+    'year1-requirements-form'           => 'fa-list-check',
+    'year2-requirements-form'           => 'fa-list-check',
+    'year3-requirements-form'           => 'fa-list-check',
+    'summary-of-investments-form'       => 'fa-chart-pie',
 ];
 
 $fieldLabels = [

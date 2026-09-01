@@ -10,6 +10,7 @@ $routes->get('auth/google', 'AuthController::googleRedirect');
 $routes->get('auth/google/callback', 'AuthController::googleCallback');
 $routes->post('logout', 'AuthController::logout', ['filter' => 'auth']);
 
+
 $routes->group('', ['filter' => 'auth'], static function (RouteCollection $routes): void {
     $routes->get('dashboard', 'DashboardController::index');
     $routes->get('db-test', 'DbTest::index', ['filter' => 'role:admin']);
@@ -141,8 +142,10 @@ $routes->group('employee', ['filter' => 'role:employee'], static function (Route
       });
 
 $routes->group('director-general', ['filter' => 'role:director_general'], static function (RouteCollection $routes): void {
-    $routes->get('pending-approval', 'DirectorGeneral\PendingApprovalController::index');
-    $routes->get('approved-projects', 'DirectorGeneral\ApprovedProjectsController::index');
-    $routes->post('download-batch', 'DirectorGeneral\DashboardController::batchDownload');
+    $routes->get('dashboard', 'DashboardController::index');
+});
+
+$routes->group('employee', ['filter' => 'role:employee'], static function (RouteCollection $routes): void {
+    $routes->get('dashboard', 'DashboardController::index');
 });
 

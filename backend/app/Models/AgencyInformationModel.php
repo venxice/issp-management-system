@@ -40,6 +40,10 @@ class AgencyInformationModel extends Model
         'outsourced_male',
         'outsourced_female',
         'stakeholder_data',
+        'strategic_concerns_data',
+        'network_infrastructure_data',
+        'information_systems_inventory_data',
+        'e_government_programs_data',
     ];
 
     public function __construct()
