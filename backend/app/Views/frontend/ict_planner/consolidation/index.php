@@ -411,20 +411,43 @@ function clearSelection() {
 
 function downloadSelected() {
     var cbs = document.querySelectorAll('.project-checkbox:checked');
+
     if (cbs.length === 0) {
-        showAlertModal('No Selection', 'Please select at least one project to download.');
+        if (typeof showAlertModal === 'function') {
+            showAlertModal(
+                'No Selection',
+                'Please select at least one project to download.'
+            );
+        } else {
+            alert('Please select at least one project to download.');
+        }
         return;
     }
-    cbs.forEach(function(cb, i) {
+
+    cbs.forEach(function(cb, index) {
+
         var url = cb.getAttribute('data-url');
-        if (url) {
-            setTimeout(function() {
-                var f = document.createElement('iframe');
-                f.style.display = 'none';
-                f.src = url;
-                document.body.appendChild(f);
-            }, i * 500);
+
+        if (!url) {
+            return;
         }
+
+        setTimeout(function() {
+
+            var link = document.createElement('a');
+
+            link.href = url;
+            link.target = '_blank';
+            link.rel = 'noopener';
+
+            document.body.appendChild(link);
+
+            link.click();
+
+            document.body.removeChild(link);
+
+        }, index * 1000);
+
     });
 }
 
