@@ -100,7 +100,6 @@ $routes->group('employee', ['filter' => 'role:employee'], static function (Route
 });
 
 
-<<<<<<< Updated upstream
       $routes->group('ict-planner', ['filter' => 'role:ict_planner'], static function (RouteCollection $routes): void {
 
     $routes->get('dashboard', 'IctPlanner\DashboardController::index');
@@ -127,9 +126,6 @@ $routes->group('employee', ['filter' => 'role:employee'], static function (Route
   });  
 
 // Resource Requirements Routes
-=======
-      // Resource Requirements Routes
->>>>>>> Stashed changes
 $routes->group('employee', ['filter' => 'role:employee'], static function (RouteCollection $routes): void {
 
     $routes->group('resource-requirements', static function (RouteCollection $routes): void {
@@ -146,62 +142,10 @@ $routes->group('employee', ['filter' => 'role:employee'], static function (Route
       });
 
 $routes->group('director-general', ['filter' => 'role:director_general'], static function (RouteCollection $routes): void {
-<<<<<<< Updated upstream
     $routes->get('dashboard', 'DashboardController::index');
 });
 
 $routes->group('employee', ['filter' => 'role:employee'], static function (RouteCollection $routes): void {
     $routes->get('dashboard', 'DashboardController::index');
-=======
-    $routes->get('pending-approval', 'DirectorGeneral\PendingApprovalController::index');
-    $routes->get('approved-projects', 'DirectorGeneral\ApprovedProjectsController::index');
-    $routes->post('approve/(:num)', 'DirectorGeneral\DashboardController::approve/$1');
-    $routes->post('reject/(:num)', 'DirectorGeneral\DashboardController::reject/$1');
-    $routes->post('return/(:num)', 'DirectorGeneral\DashboardController::return/$1');
-    $routes->get('view-full/(:num)', 'DirectorGeneral\DashboardController::viewFull/$1');
-    $routes->get('download/(:num)', 'DirectorGeneral\DashboardController::download/$1');
-});
-
-$routes->group('ict-planner', ['filter' => 'role:ict_planner'], static function (RouteCollection $routes): void {
-
-    $routes->get('dashboard', 'IctPlanner\DashboardController::index');
-    $routes->get('consolidation', 'IctPlanner\ConsolidationController::index');
-
-    $routes->post('endorse/(:num)', 'IctPlanner\DashboardController::endorse/$1');
-
-    $routes->get('view-full/(:num)', 'IctPlanner\ConsolidationController::viewFull/$1');
-    $routes->get('download/(:num)', 'IctPlanner\ConsolidationController::download/$1');
-    $routes->post('download-batch', 'IctPlanner\ConsolidationController::batchDownload');
-
-    // upload
-    $routes->post('upload-file', 'IctPlanner\AgencyInformationController::uploadFile');
-
-    // Agency Information
-    $routes->group('agency-information', static function (RouteCollection $routes): void {
-
-        $routes->get('mandate-vision-mission', 'IctPlanner\AgencyInformationController::mandateVisionMission');
-        $routes->post('mandate-vision-mission/save', 'IctPlanner\AgencyInformationController::saveMandateVisionMission');
-
-        $routes->get('organizational-structure', 'IctPlanner\AgencyInformationController::organizationalStructure');
-        $routes->post('organizational-structure/save', 'IctPlanner\AgencyInformationController::saveOrganizationalStructure');
-
-        $routes->get('stakeholder-analysis', 'IctPlanner\AgencyInformationController::stakeholderAnalysis');
-        $routes->post('stakeholder-analysis/save', 'IctPlanner\AgencyInformationController::savestakeholderAnalysis');
-
-        $routes->get('strategic-concerns', 'IctPlanner\AgencyInformationController::strategicConcerns');
-        $routes->post('strategic-concerns/save', 'IctPlanner\AgencyInformationController::savestrategicConcerns');
-
-        $routes->get('network-infrastructure', 'IctPlanner\AgencyInformationController::networkInfrastructure');
-        $routes->post('network-infrastructure/save', 'IctPlanner\AgencyInformationController::savenetworkInfrastructure');
-
-        $routes->get('information-systems-inventory', 'IctPlanner\AgencyInformationController::informationSystemsInventory');
-        $routes->post('information-systems-inventory/save', 'IctPlanner\AgencyInformationController::saveinformationSystemsInventory');
-
-        $routes->get('e-government-programs', 'IctPlanner\AgencyInformationController::eGovernmentPrograms');
-        $routes->post('e-government-programs/save', 'IctPlanner\AgencyInformationController::saveeGovernmentPrograms');
-
-    });
-    $routes->post('download-batch', 'DirectorGeneral\DashboardController::batchDownload');
->>>>>>> Stashed changes
 });
 
