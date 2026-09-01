@@ -533,6 +533,17 @@
     accent-color: var(--brand);
 }
 
+.control-checkbox.mandatory:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+    accent-color: var(--brand);
+}
+
+.control-item:has(.control-checkbox.mandatory) {
+    background: #eef2f7;
+    border-left: 3px solid var(--brand);
+}
+
 .control-label {
     font-size: .85rem;
     font-weight: 500;
@@ -681,9 +692,9 @@
                         </div>
                     </div>
                     
-                    <!-- A.1.ii Central Office to Branches -->
+                    <!-- A.2 Central Office to Branches -->
                     <div class="form-section-label">
-                        A.1.ii Central Office to Branches/Regional Offices
+                        A.2 Central Office to Branches/Regional Offices
                     </div>
                     
                     <div class="row g-3">
@@ -764,7 +775,7 @@
                         
                             <div class="control-item">
                                 <div class="control-info">
-                                    <input type="checkbox" class="control-checkbox" name="perimeter_protection" value="1">
+                                    <input type="checkbox" class="control-checkbox mandatory" name="perimeter_protection" value="1" checked disabled>
                                     <span class="control-label">Perimeter Protection</span>
                                 </div>
                                 <span class="control-badge badge-mandatory">Mandatory</span>
@@ -772,7 +783,7 @@
                             
                             <div class="control-item">
                                 <div class="control-info">
-                                    <input type="checkbox" class="control-checkbox" name="access_control" value="1">
+                                    <input type="checkbox" class="control-checkbox mandatory" name="access_control" value="1" checked disabled>
                                     <span class="control-label">Access Control</span>
                                 </div>
                                 <span class="control-badge badge-mandatory">Mandatory</span>
@@ -780,7 +791,7 @@
                             
                             <div class="control-item">
                                 <div class="control-info">
-                                    <input type="checkbox" class="control-checkbox" name="surveillance_system" value="1">
+                                    <input type="checkbox" class="control-checkbox mandatory" name="surveillance_system" value="1" checked disabled>
                                     <span class="control-label">Surveillance System</span>
                                 </div>
                                 <span class="control-badge badge-mandatory">Mandatory</span>
@@ -806,7 +817,7 @@
                         
                             <div class="control-item">
                                 <div class="control-info">
-                                    <input type="checkbox" class="control-checkbox" name="next_gen_firewall" value="1">
+                                    <input type="checkbox" class="control-checkbox mandatory" name="next_gen_firewall" value="1" checked disabled>
                                     <span class="control-label">Next Generation Firewalls</span>
                                 </div>
                                 <span class="control-badge badge-mandatory">Mandatory</span>
@@ -814,7 +825,7 @@
                             
                             <div class="control-item">
                                 <div class="control-info">
-                                    <input type="checkbox" class="control-checkbox" name="ids_ips" value="1">
+                                    <input type="checkbox" class="control-checkbox mandatory" name="ids_ips" value="1" checked disabled>
                                     <span class="control-label">Intrusion Detection/Prevention Systems (IDS/IPS)</span>
                                 </div>
                                 <span class="control-badge badge-mandatory">Mandatory</span>
@@ -822,7 +833,7 @@
                             
                             <div class="control-item">
                                 <div class="control-info">
-                                    <input type="checkbox" class="control-checkbox" name="waf" value="1">
+                                    <input type="checkbox" class="control-checkbox mandatory" name="waf" value="1" checked disabled>
                                     <span class="control-label">Web Application Firewalls (WAFs)</span>
                                 </div>
                                 <span class="control-badge badge-mandatory">Mandatory</span>
@@ -848,7 +859,7 @@
                         
                             <div class="control-item">
                                 <div class="control-info">
-                                    <input type="checkbox" class="control-checkbox" name="data_encryption" value="1">
+                                    <input type="checkbox" class="control-checkbox mandatory" name="data_encryption" value="1" checked disabled>
                                     <span class="control-label">Data Encryption</span>
                                 </div>
                                 <span class="control-badge badge-mandatory">Mandatory</span>
@@ -874,7 +885,7 @@
                         
                             <div class="control-item">
                                 <div class="control-info">
-                                    <input type="checkbox" class="control-checkbox" name="antivirus_antimalware" value="1">
+                                    <input type="checkbox" class="control-checkbox mandatory" name="antivirus_antimalware" value="1" checked disabled>
                                     <span class="control-label">Anti-virus and Anti-malware Software</span>
                                 </div>
                                 <span class="control-badge badge-mandatory">Mandatory</span>
@@ -882,7 +893,7 @@
                             
                             <div class="control-item">
                                 <div class="control-info">
-                                    <input type="checkbox" class="control-checkbox" name="application_control" value="1">
+                                    <input type="checkbox" class="control-checkbox mandatory" name="application_control" value="1" checked disabled>
                                     <span class="control-label">Application Control</span>
                                 </div>
                                 <span class="control-badge badge-mandatory">Mandatory</span>
@@ -890,7 +901,7 @@
                             
                             <div class="control-item">
                                 <div class="control-info">
-                                    <input type="checkbox" class="control-checkbox" name="byod_security" value="1">
+                                    <input type="checkbox" class="control-checkbox mandatory" name="byod_security" value="1" checked disabled>
                                     <span class="control-label">BYOD Security</span>
                                 </div>
                                 <span class="control-badge badge-mandatory">Mandatory</span>
@@ -916,7 +927,7 @@
                         
                             <div class="control-item">
                                 <div class="control-info">
-                                    <input type="checkbox" class="control-checkbox" name="data_classification" value="1">
+                                    <input type="checkbox" class="control-checkbox mandatory" name="data_classification" value="1" checked disabled>
                                     <span class="control-label">Data Classification</span>
                                 </div>
                                 <span class="control-badge badge-mandatory">Mandatory</span>
@@ -924,7 +935,7 @@
                             
                             <div class="control-item">
                                 <div class="control-info">
-                                    <input type="checkbox" class="control-checkbox" name="dlp" value="1">
+                                    <input type="checkbox" class="control-checkbox mandatory" name="dlp" value="1" checked disabled>
                                     <span class="control-label">Data Loss Prevention (DLP)</span>
                                 </div>
                                 <span class="control-badge badge-mandatory">Mandatory</span>
@@ -932,7 +943,7 @@
                             
                             <div class="control-item">
                                 <div class="control-info">
-                                    <input type="checkbox" class="control-checkbox" name="data_backups" value="1">
+                                    <input type="checkbox" class="control-checkbox mandatory" name="data_backups" value="1" checked disabled>
                                     <span class="control-label">Data Backups and Recovery</span>
                                 </div>
                                 <span class="control-badge badge-mandatory">Mandatory</span>
@@ -950,7 +961,7 @@
                         
                             <div class="control-item">
                                 <div class="control-info">
-                                    <input type="checkbox" class="control-checkbox" name="security_scanning" value="1">
+                                    <input type="checkbox" class="control-checkbox mandatory" name="security_scanning" value="1" checked disabled>
                                     <span class="control-label">Regular Security Scanning and Testing</span>
                                 </div>
                                 <span class="control-badge badge-mandatory">Mandatory</span>
@@ -1065,7 +1076,7 @@
         <div class="col-12">
             <div class="footer-actions">
                 <div class="action-buttons">
-                    <button type="button" class="action-btn action-btn-save" onclick="window.saveChanges(); window.autoSaveDraft();">
+                    <button type="button" class="action-btn action-btn-save" onclick="window.saveChanges();">
                         <i class="fa-solid fa-save"></i>
                         <span>Save Changes</span>
                     </button>
@@ -1095,7 +1106,7 @@ function updateCategoryStats() {
         const statItem = section.querySelector('.stat-item');
         
         if (checkboxes.length > 0 && statItem) {
-            const checkedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
+            const checkedCount = Array.from(checkboxes).filter(cb => cb.checked || cb.classList.contains('mandatory')).length;
             const totalCount = checkboxes.length;
             statItem.textContent = `${checkedCount}/${totalCount}`;
         }
@@ -1199,63 +1210,73 @@ window.clearForm = function() {
 
 // Save changes to localStorage (supports file persistence)
 window.saveChanges = function(showAlert = true) {
-    console.log('saveChanges called with showAlert:', showAlert);
-    try {
-        const form = document.querySelector('#mainForm');
-        if (form) {
-            const formData = new FormData(form);
-            const formDataObj = {};
-            const fileReads = [];
-            
-            formData.forEach((value, key) => {
-                if (value instanceof File && value.name) {
-                    var fileInput = form.querySelector('[name="' + key + '"]');
-                    var uploadedPath = fileInput ? fileInput.getAttribute('data-uploaded-path') : null;
-                    if (uploadedPath) {
-                        formDataObj[key] = uploadedPath;
+    return new Promise(function(resolve) {
+        console.log('saveChanges called with showAlert:', showAlert);
+        try {
+            const form = document.querySelector('#mainForm');
+            if (form) {
+                const formData = new FormData(form);
+                const formDataObj = {};
+                const fileReads = [];
+                
+                formData.forEach((value, key) => {
+                    if (value instanceof File && value.name) {
+                        var fileInput = form.querySelector('[name="' + key + '"]');
+                        var uploadedPath = fileInput ? fileInput.getAttribute('data-uploaded-path') : null;
+                        if (uploadedPath) {
+                            formDataObj[key] = uploadedPath;
+                        } else {
+                            fileReads.push(
+                            new Promise(resolve => {
+                                const reader = new FileReader();
+                                reader.onload = () => {
+                                    const dataUrl = reader.result;
+                                    const b64Idx = dataUrl.indexOf(';base64,');
+                                    if (b64Idx !== -1) {
+                                        const beforeBase64 = dataUrl.substring(0, b64Idx);
+                                        const afterBase64 = dataUrl.substring(b64Idx);
+                                        formDataObj[key] = beforeBase64 + ';name=' + encodeURIComponent(value.name) + afterBase64;
+                                    } else {
+                                        const parts = dataUrl.split(',');
+                                        formDataObj[key] = parts[0] + ';name=' + encodeURIComponent(value.name) + ',' + parts.slice(1).join(',');
+                                    }
+                                    resolve();
+                                };
+                                reader.readAsDataURL(value);
+                            })
+                        );
+                        }
+                    } else if (value instanceof File) {
+                        // Empty file input — skip (would serialize to {})
                     } else {
-                        fileReads.push(
-                        new Promise(resolve => {
-                            const reader = new FileReader();
-                            reader.onload = () => {
-                                const dataUrl = reader.result;
-                                const b64Idx = dataUrl.indexOf(';base64,');
-                                if (b64Idx !== -1) {
-                                    const beforeBase64 = dataUrl.substring(0, b64Idx);
-                                    const afterBase64 = dataUrl.substring(b64Idx);
-                                    formDataObj[key] = beforeBase64 + ';name=' + encodeURIComponent(value.name) + afterBase64;
-                                } else {
-                                    const parts = dataUrl.split(',');
-                                    formDataObj[key] = parts[0] + ';name=' + encodeURIComponent(value.name) + ',' + parts.slice(1).join(',');
-                                }
-                                resolve();
-                            };
-                            reader.readAsDataURL(value);
-                        })
-                    );
+                        formDataObj[key] = value;
                     }
-                } else if (value instanceof File) {
-                    // Empty file input — skip (would serialize to {})
-                } else {
-                    formDataObj[key] = value;
-                }
-            });
-            
-            if (fileReads.length > 0) {
-                Promise.all(fileReads).then(() => {
-                    finalizeSave(formDataObj, showAlert);
                 });
+                
+                document.querySelectorAll('.control-checkbox.mandatory').forEach(cb => {
+                    formDataObj[cb.name] = '1';
+                });
+                
+                if (fileReads.length > 0) {
+                    Promise.all(fileReads).then(() => {
+                        finalizeSave(formDataObj, showAlert);
+                        resolve();
+                    });
+                } else {
+                    finalizeSave(formDataObj, showAlert);
+                    resolve();
+                }
             } else {
-                finalizeSave(formDataObj, showAlert);
+                console.error('Form #mainForm not found');
+                if (showAlert) showAlertModal('Error', 'Error: Form not found');
+                resolve();
             }
-        } else {
-            console.error('Form #mainForm not found');
-            if (showAlert) showAlertModal('Error', 'Error: Form not found');
+        } catch (error) {
+            console.error('Error in saveChanges:', error);
+            if (showAlert) showAlertModal('Error', 'Error saving changes: ' + error.message);
+            resolve();
         }
-    } catch (error) {
-        console.error('Error in saveChanges:', error);
-        if (showAlert) showAlertModal('Error', 'Error saving changes: ' + error.message);
-    }
+    });
 };
 
 function finalizeSave(formDataObj, showAlert) {
@@ -1266,6 +1287,16 @@ function finalizeSave(formDataObj, showAlert) {
         if (typeof val === 'string' && (val.startsWith('data:') || val.startsWith('uploads/'))) {
             if (!(key in formDataObj) || formDataObj[key] === '') {
                 formDataObj[key] = val;
+            }
+        }
+    });
+    
+    // Remove empty values from hidden elements (e.g. Others textbox when "Others" not checked)
+    Object.keys(formDataObj).forEach(key => {
+        if (formDataObj[key] === '') {
+            const el = document.querySelector(`[name="${key}"]`);
+            if (el && el.offsetParent === null) {
+                delete formDataObj[key];
             }
         }
     });
@@ -1315,14 +1346,18 @@ window.loadSavedData = function() {
                             showServerFileLink(input, val);
                             restoredCount++;
                         } else if (input.type === 'checkbox') {
-                            input.checked = val === '1';
+                            input.checked = val === '1' || val === 'on';
                             restoredCount++;
                         } else if (input.type === 'radio') {
                             const radio = form.querySelector(`[name="${key}"][value="${val}"]`);
                             if (radio) radio.checked = true;
                             restoredCount++;
                         } else if (input.type === 'file') {
-                            // File inputs cannot be set programmatically; skip
+                            if (typeof val === 'string' && val) {
+                                var filePath = val.startsWith('uploads/') ? val : 'uploads/' + val;
+                                input.setAttribute('data-uploaded-path', filePath);
+                                showServerFileLink(input, filePath);
+                            }
                             restoredCount++;
                         } else {
                             input.value = val;
@@ -1456,29 +1491,42 @@ window.navigateToPage = function(url) {
         const fileReads = [];
         formData.forEach((value, key) => {
             if (value instanceof File && value.name) {
-                fileReads.push(
-                    new Promise(resolve => {
-                        const reader = new FileReader();
-                        reader.onload = () => {
-                            const dataUrl = reader.result;
-                            const b64Idx = dataUrl.indexOf(';base64,');
-                            if (b64Idx !== -1) {
-                                const beforeBase64 = dataUrl.substring(0, b64Idx);
-                                const afterBase64 = dataUrl.substring(b64Idx);
-                                formDataObj[key] = beforeBase64 + ';name=' + encodeURIComponent(value.name) + afterBase64;
-                            } else {
-                                const parts = dataUrl.split(',');
-                                formDataObj[key] = parts[0] + ';name=' + encodeURIComponent(value.name) + ',' + parts.slice(1).join(',');
-                            }
-                            resolve();
-                        };
-                        reader.readAsDataURL(value);
-                    })
-                );
+                var fileInput = form.querySelector('[name="' + key + '"]');
+                var uploadedPath = fileInput ? fileInput.getAttribute('data-uploaded-path') : null;
+                if (uploadedPath) {
+                    formDataObj[key] = uploadedPath;
+                } else {
+                    fileReads.push(
+                        new Promise(resolve => {
+                            const reader = new FileReader();
+                            reader.onload = () => {
+                                const dataUrl = reader.result;
+                                const b64Idx = dataUrl.indexOf(';base64,');
+                                if (b64Idx !== -1) {
+                                    const beforeBase64 = dataUrl.substring(0, b64Idx);
+                                    const afterBase64 = dataUrl.substring(b64Idx);
+                                    formDataObj[key] = beforeBase64 + ';name=' + encodeURIComponent(value.name) + afterBase64;
+                                } else {
+                                    const parts = dataUrl.split(',');
+                                    formDataObj[key] = parts[0] + ';name=' + encodeURIComponent(value.name) + ',' + parts.slice(1).join(',');
+                                }
+                                resolve();
+                            };
+                            reader.readAsDataURL(value);
+                        })
+                    );
+                }
+            } else if (value instanceof File) {
+                // Empty file input — skip
             } else {
                 formDataObj[key] = value;
             }
         });
+
+        document.querySelectorAll('.control-checkbox.mandatory').forEach(cb => {
+            formDataObj[cb.name] = '1';
+        });
+
         const doNav = () => {
             // Merge with previous localStorage data to preserve file previews
             const prevData = JSON.parse(localStorage.getItem('network-infrastructure-form') || '{}');
@@ -1490,8 +1538,21 @@ window.navigateToPage = function(url) {
                     }
                 }
             });
+            // Remove empty values from hidden elements
+            Object.keys(formDataObj).forEach(key => {
+                if (formDataObj[key] === '') {
+                    const el = document.querySelector(`[name="${key}"]`);
+                    if (el && el.offsetParent === null) {
+                        delete formDataObj[key];
+                    }
+                }
+            });
             const jsonStr = JSON.stringify(formDataObj);
-            localStorage.setItem('network-infrastructure-form', jsonStr);
+            try {
+                localStorage.setItem('network-infrastructure-form', jsonStr);
+            } catch (e) {
+                console.error('localStorage save failed:', e);
+            }
             if (typeof updateStatusIndicators === 'function') updateStatusIndicators();
             window.location.href = url;
         };

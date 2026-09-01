@@ -5,33 +5,73 @@ namespace App\Controllers\IctPlanner;
 use Dompdf\Dompdf;
 use App\Controllers\BaseController;
 use App\Models\ISspRecordModel;
+use App\Models\ResourceRequirementModel;
+use App\Models\AgencyInformationModel;
 
 class ConsolidationController extends BaseController
 {
     public function index()
     {
+        $query = trim((string) $this->request->getGet('q'));
+        $dateRange = trim((string) $this->request->getGet('date_range'));
+        $statusFilter = trim((string) $this->request->getGet('status'));
+        $page = (int) ($this->request->getGet('page') ?? 1);
+        $perPage = 25;
+
+        $statusCounts = [
+            'pending'     => (new ISspRecordModel())->where('status', 'pending')->countAllResults(),
+            'endorsed'    => (new ISspRecordModel())->where('status', 'endorsed')->countAllResults(),
+            'approved'    => (new ISspRecordModel())->where('status', 'approved')->countAllResults(),
+            'rejected'    => (new ISspRecordModel())->where('status', 'rejected')->countAllResults(),
+            'returned'    => (new ISspRecordModel())->where('status', 'returned')->countAllResults(),
+            'resubmitted' => (new ISspRecordModel())->where('status', 'resubmitted')->countAllResults(),
+        ];
+
         $isspModel = new ISspRecordModel();
 
-        $projects = $isspModel
+        if ($query !== '') {
+            $isspModel->groupStart()
+                ->like('issp_records.title', $query)
+                ->orLike('users.name', $query)
+                ->orLike('departments.name', $query)
+                ->groupEnd();
+        }
+
+        if ($dateRange !== '') {
+            $dates = explode(' to ', $dateRange);
+            if (count($dates) === 2) {
+                $isspModel->where('issp_records.created_at >=', trim($dates[0]) . ' 00:00:00')
+                    ->where('issp_records.created_at <=', trim($dates[1]) . ' 23:59:59');
+            }
+        }
+
+        $builder = $isspModel
             ->select('issp_records.*, departments.name AS department_name, users.name AS created_by_name')
             ->join('departments', 'departments.id = issp_records.department_id', 'left')
             ->join('users', 'users.id = issp_records.created_by', 'left')
-            ->where('issp_records.status !=', 'draft')
-            ->orderBy('issp_records.created_at', 'DESC')
-            ->findAll();
+            ->notDraftFilter()
+            ->orderBy('COALESCE(issp_records.updated_at, issp_records.created_at)', 'DESC', false);
 
-        $stats = [
-            'total' => count($projects),
-            'pending' => count(array_filter($projects, fn($p) => $p['status'] === 'pending')),
-            'endorsed' => count(array_filter($projects, fn($p) => $p['status'] === 'endorsed')),
-            'approved' => count(array_filter($projects, fn($p) => $p['status'] === 'approved')),
-        ];
+        if ($statusFilter !== '' && in_array($statusFilter, ['pending', 'endorsed', 'approved', 'rejected', 'returned', 'resubmitted'])) {
+            $builder->where('issp_records.status', $statusFilter);
+        }
+
+        $total = $builder->countAllResults(false);
+        $projects = $builder->paginate($perPage, 'default', $page);
+        $pager = $isspModel->pager;
 
         return view('frontend/ict_planner/consolidation/index', [
             'title' => 'Consolidation',
             'active' => 'consolidation',
             'projects' => $projects,
-            'stats' => $stats,
+            'query' => $query,
+            'date_range' => $dateRange,
+            'statusFilter' => $statusFilter,
+            'pager' => $pager,
+            'total' => $total,
+            'perPage' => $perPage,
+            'currentPage' => $page,
+            'statusCounts' => $statusCounts,
         ]);
     }
 
@@ -92,6 +132,27 @@ class ConsolidationController extends BaseController
         return $formData;
     }
 
+    private function loadResourceData(): array
+    {
+        $resourceModel = new ResourceRequirementModel();
+        return [
+            'year1' => $resourceModel->getByYear(1),
+            'year2' => $resourceModel->getByYear(2),
+            'year3' => $resourceModel->getByYear(3),
+            'generalSummary' => $resourceModel->getGeneralSummary(),
+            'fundSource' => $resourceModel->getFundSourceSummary(),
+            'statementOfExpenditure' => $resourceModel->getStatementOfExpenditureSummary(),
+            'objectOfExpenditure' => $resourceModel->getObjectOfExpenditureSummary(),
+        ];
+    }
+
+    private function loadAgencyData(): array
+    {
+        $model = new AgencyInformationModel();
+        $record = $model->orderBy('id', 'DESC')->first();
+        return $record ?? [];
+    }
+
     public function download(int $id)
     {
         $project = $this->loadProject($id);
@@ -101,12 +162,18 @@ class ConsolidationController extends BaseController
         }
 
         $formData = $this->extractFormData($project);
+        $resourceData = $this->loadResourceData();
+        $agencyData = $this->loadAgencyData();
 
-        $html = view('frontend/ict_planner/consolidation/pdf_template', [
+        $viewData = [
             'project' => $project,
             'formData' => $formData,
+            'resourceData' => $resourceData,
+            'agencyData' => $agencyData,
             'batchMode' => false,
-        ]);
+        ];
+
+        $pageNumbers = $this->extractPageNumbers($viewData);
 
 <<<<<<< Updated upstream
         $dompdf = new \Dompdf\Dompdf();
@@ -138,6 +205,11 @@ $dompdf = new \Dompdf\Dompdf();
         exit;
     }
 
+    private function extractPageNumbers(array $viewData): array
+    {
+        return [];
+    }
+
     public function batchDownload()
     {
         $projectIds = $this->request->getPost('project_ids');
@@ -146,8 +218,9 @@ $dompdf = new \Dompdf\Dompdf();
         }
 
         $projectIds = array_map('intval', $projectIds);
-        $allHtml = '';
-        $count = 0;
+        $files = [];
+        $resourceData = $this->loadResourceData();
+        $agencyData = $this->loadAgencyData();
 
         foreach ($projectIds as $id) {
             $project = $this->loadProject($id);
@@ -155,11 +228,15 @@ $dompdf = new \Dompdf\Dompdf();
 
             $formData = $this->extractFormData($project);
 
-            $html = view('frontend/ict_planner/consolidation/pdf_template', [
+            $viewData = [
                 'project' => $project,
                 'formData' => $formData,
+                'resourceData' => $resourceData,
+                'agencyData' => $agencyData,
                 'batchMode' => true,
-            ]);
+            ];
+
+            $pageNumbers = $this->extractPageNumbers($viewData);
 
 <<<<<<< Updated upstream
             $allHtml .= $html;
@@ -191,29 +268,88 @@ $dompdf = new \Dompdf\Dompdf();
             return redirect()->to('ict-planner/consolidation')->with('error', 'No valid projects found.');
         }
 
-        $headHtml = view('frontend/ict_planner/consolidation/pdf_template', [
-            'project' => $project ?? [],
-            'formData' => [],
-            'batchMode' => true,
-        ]);
+        if (count($files) === 1) {
+            $name = array_key_first($files);
+            header('Content-Type: application/pdf');
+            header('Content-Disposition: attachment; filename="' . $name . '"');
+            header('Content-Length: ' . strlen($files[$name]));
+            echo $files[$name];
+            exit;
+        }
 
-        preg_match('/<style>(.*?)<\/style>/s', $headHtml, $styleMatch);
-        $styles = $styleMatch[1] ?? '';
-
-        $finalHtml = '<!DOCTYPE html><html><head><meta charset="utf-8"><style>' . $styles . '</style></head><body>';
-
-        $finalHtml .= $allHtml;
-
-        $finalHtml .= '</body></html>';
-
-        $dompdf = new \Dompdf\Dompdf();
-        $dompdf->loadHtml(mb_convert_encoding($finalHtml, 'HTML-ENTITIES', 'UTF-8'));
-        $dompdf->setPaper('A4', 'landscape');
-        $dompdf->render();
-
-        $filename = 'ISSP_Batch_Download_' . date('Ymd_His') . '.pdf';
-
-        $dompdf->stream($filename, ['Attachment' => true]);
+        $zipData = $this->buildZip($files);
+        $zipName = 'ISSP_Batch_' . date('Ymd_His') . '.zip';
+        header('Content-Type: application/zip');
+        header('Content-Disposition: attachment; filename="' . $zipName . '"');
+        header('Content-Length: ' . strlen($zipData));
+        echo $zipData;
         exit;
+    }
+
+    private function buildZip(array $files): string
+    {
+        $centralDir = '';
+        $localFiles = '';
+        $offset = 0;
+
+        foreach ($files as $name => $data) {
+            $nameLen = strlen($name);
+            $dataLen = strlen($data);
+            $crc = crc32($data);
+
+            $localHeader = pack('VvvvvvVVVv',
+                0x04034b50,
+                20,
+                0,
+                0,
+                0,
+                0,
+                $crc,
+                $dataLen,
+                $dataLen,
+                $nameLen
+            ) . $name;
+
+            $localFiles .= $localHeader . $data;
+
+            $centralDir .= pack('VvvvvvvVVVVvvvvvVV',
+                0x02014b50,
+                20,
+                20,
+                0,
+                0,
+                0,
+                0,
+                $crc,
+                $dataLen,
+                $dataLen,
+                $nameLen,
+                0,
+                0,
+                0,
+                0,
+                0,
+                $offset
+            ) . $name;
+
+            $offset += strlen($localHeader) + $dataLen;
+        }
+
+        $centralDirOffset = $offset;
+        $centralDirSize = strlen($centralDir);
+        $count = count($files);
+
+        $eocd = pack('VvvvvVV',
+            0x06054b50,
+            0,
+            0,
+            $count,
+            $count,
+            $centralDirSize,
+            $centralDirOffset,
+            0
+        );
+
+        return $localFiles . $centralDir . $eocd;
     }
 }

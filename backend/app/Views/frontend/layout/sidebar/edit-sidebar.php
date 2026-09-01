@@ -259,19 +259,23 @@ function saveEditDraft() {
     
      console.log(JSON.stringify(formData, null, 2));
 
-    fetch('<?= site_url('employee/save-draft') ?>', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest'
-        },
-        body: JSON.stringify({
-            csrf_test_name: csrfToken,
-            form_data: collectFormData(),
-            id: editId
+        fetch('<?= site_url('employee/save-draft') ?>', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': csrfToken
+            },
+            body: JSON.stringify({
+                csrf_test_name: csrfToken,
+                form_data: collectFormData(),
+                id: editId
+            })
         })
-    })
-    .then(function(r) { return r.json(); })
+        .then(function(r) {
+            if (!r.ok) throw new Error('Server returned ' + r.status);
+            return r.json();
+        })
     .then(function(data) {
         if (data.success) {
             showAlertModal('Success', 'Draft saved successfully!');
@@ -339,6 +343,24 @@ function areAllFormsComplete() {
             if (!data) {
                 return { valid: false, message: section.label + ' section is empty. Please fill in required fields.' };
             }
+            if (key === 'ict-human-capital-form') {
+                var hasAnyRow = false;
+                for (var r = 1; r <= 20; r++) {
+                    var pos = data['position_' + r];
+                    if (typeof pos === 'string' && pos.trim() !== '') {
+                        hasAnyRow = true;
+                        var stat = data['status_' + r];
+                        var cnt = data['count_' + r];
+                        if ((typeof stat !== 'string' || stat.trim() === '') || (typeof cnt !== 'string' || cnt.trim() === '')) {
+                            return { valid: false, message: section.label + ' — Row ' + r + ' has incomplete fields. Please fill in all fields for each row.' };
+                        }
+                    }
+                }
+                if (!hasAnyRow) {
+                    return { valid: false, message: section.label + ' section has empty fields. Please fill in at least one position.' };
+                }
+                continue;
+            }
             for (var field in data) {
                 if (field.startsWith('csrf_') || field === '_token') continue;
                 if (section.skip.indexOf(field) >= 0) continue;
@@ -362,11 +384,6 @@ function submitEditProject() {
     }
 
     showConfirmModal('Are you sure you want to submit this project for review?', function() {
-        // Save current form data to localStorage first so collectFormData() has it
-        if (typeof window.saveChanges === 'function') {
-            window.saveChanges(false);
-        }
-
         var btn = document.getElementById('submitIsspBtn');
         btn.disabled = true;
         btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i>Submitting...';
@@ -374,11 +391,12 @@ function submitEditProject() {
         var csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
         var editId = <?= json_encode($editId) ?>;
 
-        fetch('<?= site_url('employee/submit-issp') ?>', {
+        fetch('<?= site_url('employee/save-draft') ?>', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': csrfToken
             },
             body: JSON.stringify({
                 csrf_test_name: csrfToken,
@@ -386,19 +404,30 @@ function submitEditProject() {
                 id: editId
             })
         })
-        .then(function(r) { return r.json(); })
+        .then(function(r) {
+            if (!r.ok) throw new Error('Server returned ' + r.status);
+            return r.json();
+        })
         .then(function(data) {
             if (data.success) {
-                showAlertModal('Success', 'Project submitted successfully!');
-                window.location.href = '<?= site_url('employee/submitted-ict-projects') ?>';
+                var form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '<?= site_url('employee/submit-issp') ?>/' + editId;
+                var input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'csrf_test_name';
+                input.value = csrfToken;
+                form.appendChild(input);
+                document.body.appendChild(form);
+                form.submit();
             } else {
-                showAlertModal('Error', 'Error submitting: ' + (data.message || 'Please try again.'));
+                showAlertModal('Error', 'Failed to save. ' + (data.message || 'Please try again.'));
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fa-solid fa-paper-plane me-2"></i>Submit';
             }
         })
         .catch(function() {
-            showAlertModal('Error', 'Error submitting. Please try again.');
+            showAlertModal('Error', 'Error saving. Please try again.');
             btn.disabled = false;
             btn.innerHTML = '<i class="fa-solid fa-paper-plane me-2"></i>Submit';
         });
@@ -618,7 +647,8 @@ document.querySelectorAll('a.nav-link[href]').forEach(function(link) {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': csrfToken
                 },
                 body: JSON.stringify({
                     csrf_test_name: csrfToken,
@@ -626,7 +656,7 @@ document.querySelectorAll('a.nav-link[href]').forEach(function(link) {
                     id: editId
                 })
             })
-            .then(function(r) { return r.json(); })
+            .then(function(r) { return r.ok ? r.json() : Promise.reject(); })
             .catch(function() {})
             .finally(function() {
                 // Clear all form keys first to prevent stale draft data

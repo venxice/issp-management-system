@@ -471,12 +471,7 @@
 <form id="mainForm" action="<?= site_url('employee/proposed-ict-strategy/performance-measurement/save') ?>" method="post">
     <?= csrf_field() ?>
 
-<div class="project-tabs">
-    <button type="button" class="project-tab active" data-tab="internal-kpi">F.1 Internal ICT Projects</button>
-    <button type="button" class="project-tab" data-tab="cross-agency-kpi">F.2 Cross-Agency ICT Projects</button>
-</div>
-
-<div id="internal-kpi" class="tab-content active">
+<div id="internal-kpi">
     <div class="section-card">
         <div class="section-header">
             <div>
@@ -536,74 +531,12 @@
     </div>
 </div>
 
-<div id="cross-agency-kpi" class="tab-content">
-    <div class="section-card">
-        <div class="section-header">
-            <div>
-                <div class="d-flex align-items-center">
-                    <h5 class="section-title mb-0"> Performance Measurement Framework</h5>
-                    <i class="fa-solid fa-circle-question help-icon" data-tooltip="Define KPIs for cross-agency ICT projects to measure progress and outcomes."></i>
-                </div>
-                <p class="section-subtitle">Establish Key Performance Indicators (KPIs) for each cross-agency ICT project.</p>
-            </div>
-            <i class="fa-solid fa-circle-question help-icon" data-tooltip="Define KPIs for cross-agency ICT projects to measure progress and outcomes."></i>
-        </div>
-        <div class="section-body">
-            <div class="form-section-label">
-                <span>F. Key Performance Indicators
-                  <i class="fa-solid fa-circle-question help-icon"
-              data-tooltip="Define Key Performance Indicators for each cross-agency ICT project to measure progress and outcomes."></i>
-            </div>
-            <div class="table-responsive">
-                <table class="kpi-table">
-                    <thead>
-                        <tr>
-                            <th>Hierarchy of Targeted Results</th>
-                            <th>Key Performance Indicators</th>
-                            <th>Baseline Data</th>
-                            <th>Targets</th>
-                            <th>Data Collection Methods</th>
-                            <th>Responsibility</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><b>INTERMEDIATE OUTCOME</b></td>
-                            <td><textarea class="form-control" rows="3" name="cross_projects[1][kpi][intermediate][indicator]" placeholder="Percentage (%), No. of Units, or Ratios"></textarea></td>
-                            <td><textarea class="form-control" rows="3" name="cross_projects[1][kpi][intermediate][baseline]" placeholder="Current Percentage (%), No. of Units, or Ratios"></textarea></td>
-                            <td><textarea class="form-control" rows="3" name="cross_projects[1][kpi][intermediate][target]" placeholder="Additional Percentage (%), No. of Units, or Ratios"></textarea></td>
-                            <td><textarea class="form-control" rows="3" name="cross_projects[1][kpi][intermediate][method]" placeholder="Reports, Modules, etc."></textarea></td>
-                            <td><textarea class="form-control" rows="3" name="cross_projects[1][kpi][intermediate][responsibility]" placeholder="Department or Agency, Bureau, Service, or Office"></textarea></td>
-                        </tr>
-                        <tr>
-                            <td><b>IMMEDIATE OUTCOME</b></td>
-                            <td><textarea class="form-control" rows="3" name="cross_projects[1][kpi][immediate][indicator]" placeholder="Percentage (%), No. of Units, or Ratios"></textarea></td>
-                            <td><textarea class="form-control" rows="3" name="cross_projects[1][kpi][immediate][baseline]" placeholder="Current Percentage (%), No. of Units, or Ratios"></textarea></td>
-                            <td><textarea class="form-control" rows="3" name="cross_projects[1][kpi][immediate][target]" placeholder="Additional Percentage (%), No. of Units, or Ratios"></textarea></td>
-                            <td><textarea class="form-control" rows="3" name="cross_projects[1][kpi][immediate][method]" placeholder="Reports, Modules, etc."></textarea></td>
-                            <td><textarea class="form-control" rows="3" name="cross_projects[1][kpi][immediate][responsibility]" placeholder="Department or Agency, Bureau, Service, or Office"></textarea></td>
-                        </tr>
-                        <tr>
-                            <td><b>OUTPUT</b></td>
-                            <td><textarea class="form-control" rows="3" name="cross_projects[1][kpi][output][indicator]" placeholder="Percentage (%), No. of Units, or Ratios"></textarea></td>
-                            <td><textarea class="form-control" rows="3" name="cross_projects[1][kpi][output][baseline]" placeholder="Current Percentage (%), No. of Units, or Ratios"></textarea></td>
-                            <td><textarea class="form-control" rows="3" name="cross_projects[1][kpi][output][target]" placeholder="Additional Percentage (%), No. of Units, or Ratios"></textarea></td>
-                            <td><textarea class="form-control" rows="3" name="cross_projects[1][kpi][output][method]" placeholder="Reports, Modules, etc."></textarea></td>
-                            <td><textarea class="form-control" rows="3" name="cross_projects[1][kpi][output][responsibility]" placeholder="Department or Agency, Bureau, Service, or Office"></textarea></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</div>
-
     <!-- Footer Actions -->
     <div class="row mb-4">
         <div class="col-12">
             <div class="footer-actions">
                 <div class="action-buttons">
-                    <button type="button" class="action-btn action-btn-save" onclick="window.saveChanges(); window.autoSaveDraft();">
+                    <button type="button" class="action-btn action-btn-save" onclick="window.saveChanges();">
                         <i class="fa-solid fa-save"></i>
                         <span>Save Changes</span>
                     </button>
@@ -816,7 +749,7 @@ window.loadSavedData = function() {
                             showServerFileLink(input, val);
                             restoredCount++;
                         } else if (input.type === 'checkbox') {
-                            input.checked = val === '1';
+                            input.checked = val === '1' || val === 'on';
                             restoredCount++;
                         } else if (input.type === 'radio') {
                             const radio = form.querySelector(`[name="${key}"][value="${val}"]`);
@@ -841,17 +774,6 @@ window.loadSavedData = function() {
 
     }
 };
-
-document.querySelectorAll('.project-tab').forEach(tab => {
-    tab.addEventListener('click', function() {
-        document.querySelectorAll('.project-tab').forEach(t => t.classList.remove('active'));
-        this.classList.add('active');
-        document.querySelectorAll('.tab-content').forEach(content => {
-            content.classList.remove('active');
-        });
-        document.getElementById(this.getAttribute('data-tab')).classList.add('active');
-    });
-});
 
 document.addEventListener('DOMContentLoaded', function() {
     initializeTooltips();
@@ -899,57 +821,63 @@ window.clearForm = function() {
 
 // Save changes to localStorage (supports file persistence)
 window.saveChanges = function(showAlert = true) {
-    console.log('saveChanges called with showAlert:', showAlert);
-    try {
-        const form = document.querySelector('#mainForm');
-        if (form) {
-            const formData = new FormData(form);
-            const formDataObj = {};
-            const fileReads = [];
-            
-            formData.forEach((value, key) => {
-                if (value instanceof File && value.name) {
-                    fileReads.push(
-                        new Promise(resolve => {
-                            const reader = new FileReader();
-                            reader.onload = () => {
-                                const dataUrl = reader.result;
-                                const b64Idx = dataUrl.indexOf(';base64,');
-                                if (b64Idx !== -1) {
-                                    const beforeBase64 = dataUrl.substring(0, b64Idx);
-                                    const afterBase64 = dataUrl.substring(b64Idx);
-                                    formDataObj[key] = beforeBase64 + ';name=' + encodeURIComponent(value.name) + afterBase64;
-                                } else {
-                                    const parts = dataUrl.split(',');
-                                    formDataObj[key] = parts[0] + ';name=' + encodeURIComponent(value.name) + ',' + parts.slice(1).join(',');
-                                }
-                                resolve();
-                            };
-                            reader.readAsDataURL(value);
-                        })
-                    );
-                } else if (value instanceof File) {
-                    // Empty file input — skip (would serialize to {})
-                } else {
-                    formDataObj[key] = value;
-                }
-            });
-            
-            if (fileReads.length > 0) {
-                Promise.all(fileReads).then(() => {
-                    finalizeSave(formDataObj, showAlert);
+    return new Promise(function(resolve) {
+        console.log('saveChanges called with showAlert:', showAlert);
+        try {
+            const form = document.querySelector('#mainForm');
+            if (form) {
+                const formData = new FormData(form);
+                const formDataObj = {};
+                const fileReads = [];
+                
+                formData.forEach((value, key) => {
+                    if (value instanceof File && value.name) {
+                        fileReads.push(
+                            new Promise(resolve => {
+                                const reader = new FileReader();
+                                reader.onload = () => {
+                                    const dataUrl = reader.result;
+                                    const b64Idx = dataUrl.indexOf(';base64,');
+                                    if (b64Idx !== -1) {
+                                        const beforeBase64 = dataUrl.substring(0, b64Idx);
+                                        const afterBase64 = dataUrl.substring(b64Idx);
+                                        formDataObj[key] = beforeBase64 + ';name=' + encodeURIComponent(value.name) + afterBase64;
+                                    } else {
+                                        const parts = dataUrl.split(',');
+                                        formDataObj[key] = parts[0] + ';name=' + encodeURIComponent(value.name) + ',' + parts.slice(1).join(',');
+                                    }
+                                    resolve();
+                                };
+                                reader.readAsDataURL(value);
+                            })
+                        );
+                    } else if (value instanceof File) {
+                        // Empty file input — skip (would serialize to {})
+                    } else {
+                        formDataObj[key] = value;
+                    }
                 });
+                
+                if (fileReads.length > 0) {
+                    Promise.all(fileReads).then(() => {
+                        finalizeSave(formDataObj, showAlert);
+                        resolve();
+                    });
+                } else {
+                    finalizeSave(formDataObj, showAlert);
+                    resolve();
+                }
             } else {
-                finalizeSave(formDataObj, showAlert);
+                console.error('Form #mainForm not found');
+                if (showAlert) showAlertModal('Error', 'Error: Form not found');
+                resolve();
             }
-        } else {
-            console.error('Form #mainForm not found');
-            if (showAlert) showAlertModal('Error', 'Error: Form not found');
+        } catch (error) {
+            console.error('Error in saveChanges:', error);
+            if (showAlert) showAlertModal('Error', 'Error saving changes: ' + error.message);
+            resolve();
         }
-    } catch (error) {
-        console.error('Error in saveChanges:', error);
-        if (showAlert) showAlertModal('Error', 'Error saving changes: ' + error.message);
-    }
+    });
 };
 
 function finalizeSave(formDataObj, showAlert) {
@@ -960,6 +888,16 @@ function finalizeSave(formDataObj, showAlert) {
         if (typeof val === 'string' && (val.startsWith('data:') || val.startsWith('uploads/'))) {
             if (!(key in formDataObj) || formDataObj[key] === '') {
                 formDataObj[key] = val;
+            }
+        }
+    });
+    
+    // Remove empty values from hidden elements (e.g. Others textbox when "Others" not checked)
+    Object.keys(formDataObj).forEach(key => {
+        if (formDataObj[key] === '') {
+            const el = document.querySelector(`[name="${key}"]`);
+            if (el && el.offsetParent === null) {
+                delete formDataObj[key];
             }
         }
     });
@@ -1098,25 +1036,33 @@ window.navigateToPage = function(url) {
         const fileReads = [];
         formData.forEach((value, key) => {
             if (value instanceof File && value.name) {
-                fileReads.push(
-                    new Promise(resolve => {
-                        const reader = new FileReader();
-                        reader.onload = () => {
-                            const dataUrl = reader.result;
-                            const b64Idx = dataUrl.indexOf(';base64,');
-                            if (b64Idx !== -1) {
-                                const beforeBase64 = dataUrl.substring(0, b64Idx);
-                                const afterBase64 = dataUrl.substring(b64Idx);
-                                formDataObj[key] = beforeBase64 + ';name=' + encodeURIComponent(value.name) + afterBase64;
-                            } else {
-                                const parts = dataUrl.split(',');
-                                formDataObj[key] = parts[0] + ';name=' + encodeURIComponent(value.name) + ',' + parts.slice(1).join(',');
-                            }
-                            resolve();
-                        };
-                        reader.readAsDataURL(value);
-                    })
-                );
+                var fileInput = form.querySelector('[name="' + key + '"]');
+                var uploadedPath = fileInput ? fileInput.getAttribute('data-uploaded-path') : null;
+                if (uploadedPath) {
+                    formDataObj[key] = uploadedPath;
+                } else {
+                    fileReads.push(
+                        new Promise(resolve => {
+                            const reader = new FileReader();
+                            reader.onload = () => {
+                                const dataUrl = reader.result;
+                                const b64Idx = dataUrl.indexOf(';base64,');
+                                if (b64Idx !== -1) {
+                                    const beforeBase64 = dataUrl.substring(0, b64Idx);
+                                    const afterBase64 = dataUrl.substring(b64Idx);
+                                    formDataObj[key] = beforeBase64 + ';name=' + encodeURIComponent(value.name) + afterBase64;
+                                } else {
+                                    const parts = dataUrl.split(',');
+                                    formDataObj[key] = parts[0] + ';name=' + encodeURIComponent(value.name) + ',' + parts.slice(1).join(',');
+                                }
+                                resolve();
+                            };
+                            reader.readAsDataURL(value);
+                        })
+                    );
+                }
+            } else if (value instanceof File) {
+                // Empty file input — skip
             } else {
                 formDataObj[key] = value;
             }
@@ -1132,8 +1078,21 @@ window.navigateToPage = function(url) {
                     }
                 }
             });
+            // Remove empty values from hidden elements
+            Object.keys(formDataObj).forEach(key => {
+                if (formDataObj[key] === '') {
+                    const el = document.querySelector(`[name="${key}"]`);
+                    if (el && el.offsetParent === null) {
+                        delete formDataObj[key];
+                    }
+                }
+            });
             const jsonStr = JSON.stringify(formDataObj);
-            localStorage.setItem('performance-measurement-form', jsonStr);
+            try {
+                localStorage.setItem('performance-measurement-form', jsonStr);
+            } catch (e) {
+                console.error('localStorage save failed:', e);
+            }
             if (typeof updateStatusIndicators === 'function') updateStatusIndicators();
             window.location.href = url;
         };

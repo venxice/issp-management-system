@@ -233,7 +233,7 @@ $isIsspPage = strpos($currentPage, 'proposed-ict-strategy') !== false ||
 <script>
 function updateStatusIndicators() {
     var skipFields = {
-        'network-infrastructure-form': ['dept_network_diagram','regional_network_diagram'],
+        'network-infrastructure-form': ['dept_network_diagram','regional_network_diagram','perimeter_protection','access_control','surveillance_system','next_gen_firewall','ids_ips','waf','data_encryption','antivirus_antimalware','application_control','byod_security','data_classification','dlp','data_backups','security_scanning'],
         'enterprise-architecture-form': ['ea_diagram'],
         'ict-human-capital-form': [],
         'information-systems-form': [],
@@ -383,6 +383,14 @@ function collectFormData() {
 
 function saveDraft() {
     const saveDraftBtn = document.getElementById('saveDraftBtn');
+    
+    var formData = collectFormData();
+    var projectTitle = formData['ict-projects-form'] && formData['ict-projects-form'].internal_project_title;
+    if (!projectTitle || !projectTitle.trim()) {
+        showAlertModal('Validation Error', 'Project title is required. Please go to the ICT Projects section and enter a title before saving.');
+        return;
+    }
+
     saveDraftBtn.disabled = true;
     saveDraftBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i>Saving...';
 
@@ -394,15 +402,19 @@ function saveDraft() {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest'
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': csrfToken
         },
         body: JSON.stringify({
             csrf_test_name: csrfToken,
-            form_data: collectFormData(),
+            form_data: formData,
             id: editId || null
         })
     })
-    .then(response => response.json())
+    .then(function(r) {
+        if (!r.ok) throw new Error('Server returned ' + r.status);
+        return r.json();
+    })
     .then(data => {
         if (data.success) {
             localStorage.clear();
@@ -424,12 +436,12 @@ function saveDraft() {
 
 function areAllFormsComplete() {
     var sections = {
-        'network-infrastructure-form': { label: 'Network Infrastructure', skip: ['dept_network_diagram','regional_network_diagram'] },
-        'enterprise-architecture-form': { label: 'Enterprise Architecture', skip: ['ea_diagram'] },
+        'network-infrastructure-form': { label: 'Network Infrastructure', skip: [] },
+        'enterprise-architecture-form': { label: 'Enterprise Architecture', skip: [] },
         'ict-human-capital-form': { label: 'ICT Human Capital', skip: [] },
-        'information-systems-form': { label: 'Information Systems', skip: [] },
-        'ict-projects-form': { label: 'ICT Projects', skip: [] },
-        'performance-measurement-form': { label: 'Performance Measurement', skip: [] }
+        'information-systems-form': { label: 'Information Systems', skip: ['interop1_internal_system','interop1_external_system','online_link_1','system_usage_1','interop1_sub','owner_1','dev_strategy_1','platform_1','database_1','storage_1'] },
+        'ict-projects-form': { label: 'ICT Projects', skip: ['internal_strategic_others_text','cross_strategic_others_text'] },
+        'performance-measurement-form': { label: 'Performance Measurement', skip: ['cross_projects[1][kpi][intermediate][indicator]','cross_projects[1][kpi][intermediate][baseline]','cross_projects[1][kpi][intermediate][target]','cross_projects[1][kpi][intermediate][method]','cross_projects[1][kpi][intermediate][responsibility]','cross_projects[1][kpi][immediate][indicator]','cross_projects[1][kpi][immediate][baseline]','cross_projects[1][kpi][immediate][target]','cross_projects[1][kpi][immediate][method]','cross_projects[1][kpi][immediate][responsibility]','cross_projects[1][kpi][output][indicator]','cross_projects[1][kpi][output][baseline]','cross_projects[1][kpi][output][target]','cross_projects[1][kpi][output][method]','cross_projects[1][kpi][output][responsibility]'] }
     };
 
     // Special check: ict-projects must have a title
@@ -442,12 +454,49 @@ function areAllFormsComplete() {
         return { valid: false, message: 'ICT Projects section is empty. Please fill in required fields.' };
     }
 
+    // Required file uploads
+    var requiredFiles = {
+        'network-infrastructure-form': ['dept_network_diagram', 'regional_network_diagram'],
+        'enterprise-architecture-form': ['ea_diagram']
+    };
+    for (var sectionKey in requiredFiles) {
+        try {
+            var sectionData = JSON.parse(localStorage.getItem(sectionKey)) || {};
+            var fileFields = requiredFiles[sectionKey];
+            for (var i = 0; i < fileFields.length; i++) {
+                var f = fileFields[i];
+                var val = sectionData[f];
+                if (!val || typeof val !== 'string' || val.trim() === '') {
+                    return { valid: false, message: sections[sectionKey].label + ' requires a file upload. Please upload the required diagram(s).' };
+                }
+            }
+        } catch(e) {}
+    }
+
     for (var key in sections) {
         var section = sections[key];
         try {
             var data = JSON.parse(localStorage.getItem(key));
             if (!data) {
                 return { valid: false, message: section.label + ' section is empty. Please fill in required fields.' };
+            }
+            if (key === 'ict-human-capital-form') {
+                var hasAnyRow = false;
+                for (var r = 1; r <= 20; r++) {
+                    var pos = data['position_' + r];
+                    if (typeof pos === 'string' && pos.trim() !== '') {
+                        hasAnyRow = true;
+                        var stat = data['status_' + r];
+                        var cnt = data['count_' + r];
+                        if ((typeof stat !== 'string' || stat.trim() === '') || (typeof cnt !== 'string' || cnt.trim() === '')) {
+                            return { valid: false, message: section.label + ' — Row ' + r + ' has incomplete fields. Please fill in all fields for each row.' };
+                        }
+                    }
+                }
+                if (!hasAnyRow) {
+                    return { valid: false, message: section.label + ' section has empty fields. Please fill in at least one position.' };
+                }
+                continue;
             }
             for (var field in data) {
                 if (field.startsWith('csrf_') || field === '_token') continue;
@@ -473,7 +522,6 @@ function submitISSP() {
         return;
     }
 
-    // Show confirmation modal
     showConfirmModal('Are you sure you want to submit your ISSP for review? This action cannot be undone.', function() {
         const submitBtn = document.getElementById('submitIsspBtn');
         submitBtn.disabled = true;
@@ -483,11 +531,13 @@ function submitISSP() {
                          document.querySelector('input[name="csrf_test_name"]')?.value;
 
         var editId = localStorage.getItem('edit_project_id');
-        fetch('<?= site_url('employee/submit-issp') ?>', {
+
+        fetch('<?= site_url('employee/save-draft') ?>', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': csrfToken
             },
             body: JSON.stringify({
                 csrf_test_name: csrfToken,
@@ -495,21 +545,32 @@ function submitISSP() {
                 id: editId || null
             })
         })
-        .then(response => response.json())
+        .then(function(r) {
+            if (!r.ok) throw new Error('Server returned ' + r.status);
+            return r.json();
+        })
         .then(data => {
             if (data.success) {
-                localStorage.clear();
-                showAlertModal('Success', 'ISSP submitted successfully!');
-                window.location.href = '<?= site_url('employee/submitted-ict-projects') ?>';
+                var savedId = data.id || editId;
+                var form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '<?= site_url('employee/submit-issp') ?>/' + savedId;
+                var input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'csrf_test_name';
+                input.value = csrfToken;
+                form.appendChild(input);
+                document.body.appendChild(form);
+                form.submit();
             } else {
-                showAlertModal('Error', 'Error submitting ISSP: ' + (data.message || 'Please try again.'));
+                showAlertModal('Error', 'Failed to save. ' + (data.message || 'Please try again.'));
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane me-2"></i>Submit Project';
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            showAlertModal('Error', 'Error submitting ISSP. Please try again.');
+            showAlertModal('Error', 'Error saving. Please try again.');
             submitBtn.disabled = false;
             submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane me-2"></i>Submit Project';
         });

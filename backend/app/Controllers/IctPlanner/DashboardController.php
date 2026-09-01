@@ -15,21 +15,19 @@ class DashboardController extends BaseController
         $userModel = new UserModel();
         $isspModel = new ISspRecordModel();
 
-        (new AuditLogModel())->insert([
-            'user_id' => $currentUserId,
-            'action' => 'dashboard.viewed',
-            'description' => 'Viewed ICT Planner dashboard',
-            'created_at' => date('Y-m-d H:i:s'),
-        ]);
+        $year = $this->request->getGet('year') !== null ? (int) $this->request->getGet('year') : null;
+        $month = $this->request->getGet('month') !== null ? (int) $this->request->getGet('month') : null;
 
-        $submittedProjects = $isspModel->countSubmitted();
-        $totalConsolidates = $isspModel->countAllResults();
-        $pendingConsolidation = $isspModel->countPending();
-        $endorsedCount = $isspModel->countEndorsed();
-        $totalProposedBudget = $isspModel->sumSubmittedBudget();
-        $submissionsByMonth = $isspModel->getSubmissionsByMonth();
-        $divisionData = $isspModel->getProjectsPerDivision();
-        $recentProjects = $isspModel->getRecentSubmittedRecords(10);
+        $stats = $isspModel->getStatusSummary($year, $month);
+        $submittedProjects = (int) $stats['total'];
+        $totalConsolidates = $submittedProjects;
+        $pendingConsolidation = (int) $stats['pending'] + (int) $stats['resubmitted'];
+        $endorsedCount = (int) $stats['endorsed'] + (int) $stats['approved'] + (int) $stats['rejected'] + (int) $stats['returned'];
+        $totalProposedBudget = (float) $stats['total_budget'];
+        $submissionsByMonth = $isspModel->getSubmissionsByMonth($year, $month);
+        $divisionData = $isspModel->getProjectsPerDivision($year, $month);
+        $recentProjects = $isspModel->getRecentSubmittedRecords(50, $year, $month);
+        $availableYears = $isspModel->getAvailableYears();
 
         return view('frontend/ict_planner/dashboard/index', [
             'title' => 'ICT Planner Dashboard',
@@ -43,8 +41,18 @@ class DashboardController extends BaseController
             'submissionsByMonth' => $submissionsByMonth,
             'divisionData' => $divisionData,
             'recentProjects' => $recentProjects,
+            'pendingCount' => (int) $stats['pending'],
+            'endorsedCountOnly' => (int) $stats['endorsed'],
+            'approvedCount' => (int) $stats['approved'],
+            'rejectedCount' => (int) $stats['rejected'],
+            'returnedCount' => (int) $stats['returned'],
+            'resubmittedCount' => (int) $stats['resubmitted'],
+            'selectedYear' => $year,
+            'selectedMonth' => $month,
+            'availableYears' => $availableYears,
         ]);
     }
+
 
     public function endorse(int $id)
     {
@@ -55,8 +63,8 @@ class DashboardController extends BaseController
             return redirect()->back()->with('error', 'Project not found.');
         }
 
-        if ($record['status'] !== 'pending') {
-            return redirect()->back()->with('error', 'Only pending projects can be endorsed.');
+        if (!in_array($record['status'], ['pending', 'resubmitted'])) {
+            return redirect()->back()->with('error', 'Only pending and pending resubmitted projects can be endorsed.');
         }
 
         $isspModel->update($id, [
@@ -70,6 +78,21 @@ class DashboardController extends BaseController
             'description' => 'Endorsed project #' . $id . ' (' . ($record['title'] ?? 'Untitled') . ') to Director General.',
             'created_at' => date('Y-m-d H:i:s'),
         ]);
+
+        helper('notification');
+
+        $currentUser = (new UserModel())->findWithRole((int) session()->get('user_id'));
+
+        $directorGenerals = (new UserModel())->getUsersByRole('director_general');
+
+        foreach ($directorGenerals as $dg) {
+            sendEndorsementNotification($record, $currentUser, $dg);
+        }
+
+        $employee = (new UserModel())->findWithRole((int) $record['created_by']);
+        if ($employee && !empty($employee['email'])) {
+            sendEndorsementToEmployeeNotification($record, $currentUser, $employee);
+        }
 
         return redirect()->back()->with('success', 'Project endorsed to Director General for approval.');
     }

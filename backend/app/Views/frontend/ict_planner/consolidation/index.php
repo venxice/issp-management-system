@@ -5,16 +5,33 @@
 <div class="row g-0">
     <div class="col-12">
         <section class="panel mb-0">
-            <div class="panel-header d-flex align-items-center gap-3">
+            <div class="panel-header d-flex align-items-center justify-content-between" style="border-bottom:none;padding-bottom:6px;">
                 <div>
                     <h2 class="panel-title">All Submissions</h2>
                     <p class="panel-subtitle">Consolidated list of all ISSP project submissions.</p>
                 </div>
-                <div class="ms-auto">
-                    <button class="btn btn-sm btn-outline-primary" type="button" id="selectAllBtn" onclick="toggleSelectAll()">
+                <form class="d-flex align-items-center toolbar-form flex-shrink-0" method="get" action="<?= site_url('ict-planner/consolidation') ?>">
+                    <input type="hidden" name="status" value="<?= esc($statusFilter) ?>">
+                    <input class="form-control form-control-sm" name="q" value="<?= esc($query ?? '') ?>" placeholder="Search" style="width:140px; flex-shrink:0;">
+                    <button class="btn btn-sm btn-outline-primary flex-shrink-0" type="button" id="selectAllBtn" onclick="toggleSelectAll()">
                         <i class="fa-regular fa-square me-1"></i> Select All
                     </button>
-                </div>
+                    <div class="position-relative date-range-picker-wrapper">
+                        <input class="form-control form-control-sm" name="date_range" type="text" value="<?= esc($date_range ?? '') ?>" placeholder="" id="dateRangePicker" readonly>
+                        <button type="button" class="date-picker-icon-btn" id="datePickerToggleBtn">
+                            <i class="fa-solid fa-calendar-days"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div class="status-tabs d-flex align-items-center gap-1 px-3 pt-3 pb-3" style="background:#f8f9fa;border-bottom:1px solid #e9ecef;">
+                <a href="<?= site_url('ict-planner/consolidation?' . http_build_query(array_filter(['q' => $query, 'date_range' => $date_range]))) ?>" class="btn btn-sm <?= $statusFilter === '' ? 'btn-primary' : 'btn-outline-secondary' ?>">All</a>
+                <a href="<?= site_url('ict-planner/consolidation?' . http_build_query(array_filter(['status' => 'pending', 'q' => $query, 'date_range' => $date_range]))) ?>" class="btn btn-sm <?= $statusFilter === 'pending' ? 'btn-primary' : 'btn-outline-secondary' ?>">Pending (<?= $statusCounts['pending'] ?>)</a>
+                <a href="<?= site_url('ict-planner/consolidation?' . http_build_query(array_filter(['status' => 'endorsed', 'q' => $query, 'date_range' => $date_range]))) ?>" class="btn btn-sm <?= $statusFilter === 'endorsed' ? 'btn-primary' : 'btn-outline-secondary' ?>">Endorsed (<?= $statusCounts['endorsed'] ?>)</a>
+                <a href="<?= site_url('ict-planner/consolidation?' . http_build_query(array_filter(['status' => 'approved', 'q' => $query, 'date_range' => $date_range]))) ?>" class="btn btn-sm <?= $statusFilter === 'approved' ? 'btn-primary' : 'btn-outline-secondary' ?>">Approved (<?= $statusCounts['approved'] ?>)</a>
+                <a href="<?= site_url('ict-planner/consolidation?' . http_build_query(array_filter(['status' => 'rejected', 'q' => $query, 'date_range' => $date_range]))) ?>" class="btn btn-sm <?= $statusFilter === 'rejected' ? 'btn-primary' : 'btn-outline-secondary' ?>">Rejected (<?= $statusCounts['rejected'] ?>)</a>
+                <a href="<?= site_url('ict-planner/consolidation?' . http_build_query(array_filter(['status' => 'returned', 'q' => $query, 'date_range' => $date_range]))) ?>" class="btn btn-sm <?= $statusFilter === 'returned' ? 'btn-primary' : 'btn-outline-secondary' ?>">Returned (<?= $statusCounts['returned'] ?>)</a>
+                <a href="<?= site_url('ict-planner/consolidation?' . http_build_query(array_filter(['status' => 'resubmitted', 'q' => $query, 'date_range' => $date_range]))) ?>" class="btn btn-sm <?= $statusFilter === 'resubmitted' ? 'btn-primary' : 'btn-outline-secondary' ?>">Pending - Resubmitted (<?= $statusCounts['resubmitted'] ?>)</a>
             </div>
             <div id="bulkBar" class="bulk-bar" style="display:none;">
                 <div class="bulk-bar-inner">
@@ -24,52 +41,58 @@
                     </button>
                 </div>
             </div>
-            <form id="batchDownloadForm" method="post" action="<?= site_url('ict-planner/download-batch') ?>">
-                <?= csrf_field() ?>
-                <div class="table-responsive mb-0">
+            <div class="table-responsive mb-0">
                     <table class="table table-ict-projects align-middle mb-0">
                         <thead>
                             <tr>
                                 <th style="width:36px;"><input type="checkbox" id="checkAll" onchange="toggleAllCheckboxes(this)"></th>
-                                <th>ICT Project Title</th>
-                                <th>User</th>
-                                <th>Department</th>
+                                <th>Project Title</th>
+                                <th>Description</th>
                                 <th>Budget</th>
-                                <th>Submitted Date</th>
                                 <th>Status</th>
+                                <th>Last Updated</th>
                                 <th class="text-center">Action</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php if ($projects !== []): ?>
                                 <?php foreach ($projects as $project): ?>
+                                    <?php $fd = !empty($project['form_data']) ? json_decode($project['form_data'], true) : []; $ict = $fd['ict-projects-form'] ?? []; $intTitle = $ict['internal_project_title'] ?? $project['title'] ?? 'Untitled'; $intDesc = $ict['internal_description'] ?? $project['description'] ?? '---'; $intBudget = $ict['internal_total_cost'] ?? $project['budget'] ?? 0; ?>
                                     <tr>
-                                        <td><input type="checkbox" name="project_ids[]" value="<?= $project['id'] ?>" class="project-checkbox" onchange="onCheckboxChange()"></td>
-                                        <td class="fw-semibold"><?= esc($project['title'] ?? 'Untitled') ?></td>
-                                        <td><?= esc($project['created_by_name'] ?? 'Unknown') ?></td>
-                                        <td><?= esc($project['department_name'] ?? 'N/A') ?></td>
-                                        <td>₱<?= number_format((float) ($project['budget'] ?? 0), 2) ?></td>
-                                        <td class="text-muted"><?= esc($project['submitted_at'] ?? $project['created_at'] ?? '-') ?></td>
+                                        <td><input type="checkbox" name="project_ids[]" value="<?= $project['id'] ?>" class="project-checkbox" data-url="<?= site_url('ict-planner/download/' . $project['id']) ?>" onchange="onCheckboxChange()"></td>
                                         <td>
-                                            <span class="badge badge-soft" style="font-size:.7rem;padding:4px 10px;
-                                                <?php if ($project['status'] === 'pending'): ?>background:#fef7e0;color:#8a6d1e;border-color:#f5e6b8;
-                                                <?php elseif ($project['status'] === 'endorsed'): ?>background:#e8f0fe;color:#2a5c8a;border-color:#c5d9f0;
-                                                <?php elseif ($project['status'] === 'approved'): ?>background:#e6f4ea;color:#1e6f3f;border-color:#c3e6cb;
-                                                <?php elseif ($project['status'] === 'rejected'): ?>background:#fce8e8;color:#a13d3d;border-color:#f0c8c8;
-                                                <?php endif; ?>">
-                                                <?= esc(ucfirst($project['status'])) ?>
+                                            <div><?= esc($intTitle) ?></div>
+                                        </td>
+                                        <td>
+                                            <div><?= esc($intDesc) ?></div>
+                                        </td>
+                                        <td>
+                                            <div><?= is_numeric($intBudget) ? '₱' . number_format($intBudget, 2) : '-' ?></div>
+                                        </td>
+                                        <td>
+                                <span class="badge badge-soft" style="font-size:.7rem;padding:4px 10px;
+                                    <?php if ($project['status'] === 'pending'): ?>background:#fef3c7;color:#92400e;border-color:#fde68a;
+                                    <?php elseif ($project['status'] === 'endorsed'): ?>background:#e8f0fe;color:#2a5c8a;border-color:#c5d9f0;
+                                    <?php elseif ($project['status'] === 'approved'): ?>background:#dcfce7;color:#166534;border-color:#bbf7d0;
+                                    <?php elseif ($project['status'] === 'rejected'): ?>background:#fee2e2;color:#991b1b;border-color:#fecaca;
+                                    <?php elseif ($project['status'] === 'returned'): ?>background:#ffedd5;color:#9a3412;border-color:#fed7aa;
+                                    <?php elseif ($project['status'] === 'resubmitted'): ?>background:#e0e7ff;color:#4338ca;border-color:#c7d2fe;
+                                    <?php endif; ?>">
+                                    <?= esc($project['status'] === 'resubmitted' ? 'Pending - Resubmitted' : ucfirst($project['status'])) ?>
                                             </span>
                                         </td>
+                                        <td class="text-muted"><?= esc($project['updated_at'] ?? $project['created_at'] ?? '-') ?></td>
                                         <td class="text-center">
                                             <div class="d-flex gap-1 justify-content-center">
                                                 <button class="btn btn-outline-primary icon-btn" type="button" title="View" data-project='<?= json_encode([
-                                                    'title' => $project['title'] ?? '',
+                                                    'title' => $intTitle,
                                                     'description' => $project['description'] ?? '',
                                                     'budget' => $project['budget'] ?? '',
                                                     'status' => $project['status'] ?? '',
                                                     'department' => $project['department_name'] ?? '',
                                                     'updated' => $project['updated_at'] ?? $project['created_at'] ?? '',
-                                                    'created' => $project['created_at'] ?? ''
+                                                    'created' => $project['created_at'] ?? '',
+                                                    'remarks' => $project['remarks'] ?? ''
                                                 ]) ?>'>
                                                     <i class="fa-regular fa-eye"></i>
                                                 </button>
@@ -79,13 +102,14 @@
                                                 <a href="<?= site_url('ict-planner/download/' . $project['id']) ?>" class="btn btn-outline-primary icon-btn" type="button" title="Download">
                                                     <i class="fa-solid fa-download"></i>
                                                 </a>
-                                                <?php if ($project['status'] === 'pending'): ?>
-                                                    <form method="post" action="<?= site_url('ict-planner/endorse/' . $project['id']) ?>" class="d-inline" onsubmit="return confirm('Endorse this project to Director General for approval?')">
-                                                        <?= csrf_field() ?>
-                                                        <button class="btn btn-outline-primary icon-btn" type="submit" title="Endorse to Director General">
-                                                            <i class="fa-solid fa-check"></i>
-                                                        </button>
-                                                    </form>
+                                                <?php if (in_array($project['status'], ['pending', 'resubmitted'])): ?>
+                                                    <button class="btn btn-outline-primary icon-btn" type="button" title="Endorse to Director General" onclick="openEndorseModal('<?= $project['id'] ?>')">
+                                                        <i class="fa-solid fa-check"></i>
+                                                    </button>
+                                                <?php else: ?>
+                                                    <button class="btn btn-outline-secondary icon-btn" type="button" title="Endorse to Director General" disabled style="opacity:0.35;cursor:not-allowed;pointer-events:none;">
+                                                        <i class="fa-solid fa-check"></i>
+                                                    </button>
                                                 <?php endif; ?>
                                             </div>
                                         </td>
@@ -99,7 +123,54 @@
                         </tbody>
                     </table>
                 </div>
-            </form>
+
+            <?php if ($pager && $total > $perPage): ?>
+            <div class="d-flex justify-content-between align-items-center mt-3 px-3 pb-3">
+                <div class="text-muted" style="font-size:.8rem;">
+                    Showing <?= ($currentPage - 1) * $perPage + 1 ?> to <?= min($currentPage * $perPage, $total) ?> of <?= $total ?> entries
+                </div>
+                <nav>
+                    <ul class="pagination mb-0">
+                        <?php if ($currentPage > 1): ?>
+                        <li class="page-item">
+                            <a class="page-link" href="<?= site_url('ict-planner/consolidation') ?>?<?= http_build_query(array_filter(['status' => $statusFilter, 'q' => $query, 'date_range' => $date_range, 'page' => $currentPage - 1])) ?>">Previous</a>
+                        </li>
+                        <?php endif; ?>
+
+                        <?php
+                        $totalPages = (int) ceil($total / $perPage);
+                        $startPage = max(1, $currentPage - 2);
+                        $endPage = min($totalPages, $currentPage + 2);
+
+                        if ($startPage > 1): ?>
+                            <li class="page-item"><a class="page-link" href="<?= site_url('ict-planner/consolidation') ?>?<?= http_build_query(array_filter(['status' => $statusFilter, 'q' => $query, 'date_range' => $date_range, 'page' => 1])) ?>">1</a></li>
+                            <?php if ($startPage > 2): ?>
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                            <?php endif; ?>
+                        <?php endif; ?>
+
+                        <?php for ($i = $startPage; $i <= $endPage; $i++): ?>
+                            <li class="page-item <?= $i === $currentPage ? 'active' : '' ?>">
+                                <a class="page-link" href="<?= site_url('ict-planner/consolidation') ?>?<?= http_build_query(array_filter(['status' => $statusFilter, 'q' => $query, 'date_range' => $date_range, 'page' => $i])) ?>"><?= $i ?></a>
+                            </li>
+                        <?php endfor; ?>
+
+                        <?php if ($endPage < $totalPages): ?>
+                            <?php if ($endPage < $totalPages - 1): ?>
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                            <?php endif; ?>
+                            <li class="page-item"><a class="page-link" href="<?= site_url('ict-planner/consolidation') ?>?<?= http_build_query(array_filter(['status' => $statusFilter, 'q' => $query, 'date_range' => $date_range, 'page' => $totalPages])) ?>"><?= $totalPages ?></a></li>
+                        <?php endif; ?>
+
+                        <?php if ($currentPage < $totalPages): ?>
+                        <li class="page-item">
+                            <a class="page-link" href="<?= site_url('ict-planner/consolidation') ?>?<?= http_build_query(array_filter(['status' => $statusFilter, 'q' => $query, 'date_range' => $date_range, 'page' => $currentPage + 1])) ?>">Next</a>
+                        </li>
+                        <?php endif; ?>
+                    </ul>
+                </nav>
+            </div>
+            <?php endif; ?>
         </section>
     </div>
 </div>
@@ -126,6 +197,12 @@
     font-weight: 700;
 }
 
+.toolbar-form {
+    gap: 8px;
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
 .modal-content { border-radius: 14px; overflow: hidden; border: 1px solid #e9ecef; background: #fff; }
 .modal-header { background: #536783; border-bottom: none; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; }
 .modal-title { font-size: 1.1rem; font-weight: 700; color: #fff; margin: 0; }
@@ -134,24 +211,143 @@
 .detail-grid { display: grid; grid-template-columns: 170px 1fr; gap: 12px 18px; }
 .key { font-size: .8rem; color: #6c757d; font-weight: 600; }
 .val { font-size: .9rem; color: #212529; word-break: break-word; }
+.remarks-in-modal { margin-top: 18px; }
+.remarks-in-modal__card {
+    background: #f0f4f9;
+    border: 1px solid #c5d9f0;
+    border-radius: 8px;
+    padding: 14px 16px;
+}
+.remarks-in-modal__label { display: flex; align-items: center; gap: 8px; font-size: .7rem; font-weight: 600; color: #2a5c8a; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 6px; }
+.remarks-in-modal__body { font-size: .85rem; color: #334155; line-height: 1.7; }
+
+.date-range-picker-wrapper {
+    width: 42px;
+    flex-shrink: 0;
+}
+
+.date-range-picker-wrapper input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.date-picker-icon-btn {
+    background: #4f6584;
+    border: none;
+    color: #fff;
+    width: 38px;
+    height: 28px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    transition: background-color 0.2s ease;
+}
+
+.date-picker-icon-btn:hover {
+    background: #344863;
+}
+
+.date-picker-icon-btn i {
+    font-size: 0.8rem;
+}
+
+.flatpickr-calendar {
+    font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    border: 1px solid #d9e0ea;
+    border-radius: 10px;
+    box-shadow: 0 12px 26px rgba(15, 23, 42, .1);
+}
+
+.flatpickr-day.selected,
+.flatpickr-day.startRange,
+.flatpickr-day.endRange,
+.flatpickr-day.selected.inRange,
+.flatpickr-day.startRange.inRange,
+.flatpickr-day.endRange.inRange,
+.flatpickr-day.selected:focus,
+.flatpickr-day.startRange:focus,
+.flatpickr-day.endRange:focus,
+.flatpickr-day.selected:hover,
+.flatpickr-day.startRange:hover,
+.flatpickr-day.endRange:hover,
+.flatpickr-day.selected.prevMonthDay,
+.flatpickr-day.startRange.prevMonthDay,
+.flatpickr-day.endRange.prevMonthDay,
+.flatpickr-day.selected.nextMonthDay,
+.flatpickr-day.startRange.nextMonthDay,
+.flatpickr-day.endRange.nextMonthDay {
+    background: #4f6584;
+    border-color: #4f6584;
+}
+
+.flatpickr-day.inRange,
+.flatpickr-day.prevMonthDay.inRange,
+.flatpickr-day.nextMonthDay.inRange,
+.flatpickr-day.today.inRange,
+.flatpickr-day.prevMonthDay.today.inRange,
+.flatpickr-day.nextMonthDay.today.inRange,
+.flatpickr-day:hover,
+.flatpickr-day.prevMonthDay:hover,
+.flatpickr-day.nextMonthDay:hover,
+.flatpickr-day:focus,
+.flatpickr-day.prevMonthDay:focus,
+.flatpickr-day.nextMonthDay:focus {
+    background: rgba(79, 101, 132, 0.15);
+    border-color: rgba(79, 101, 132, 0.15);
+}
+
+.flatpickr-months .flatpickr-month,
+.flatpickr-current-month .flatpickr-monthDropdown-months,
+.flatpickr-current-month input.cur-year {
+    font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 600;
+}
+
+.flatpickr-weekday {
+    font-weight: 600;
+}
+
+.flatpickr-day.today {
+    border-color: #4f6584;
+}
 </style>
+
+<div class="custom-modal" id="endorseModal" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:1060;background:#fff;border-radius:6px;box-shadow:0 18px 40px rgba(15,23,42,.18);min-width:320px;max-width:400px;overflow:hidden;">
+    <div style="background:#536783;color:#fff;padding:12px 14px;font-size:.94rem;font-weight:700;"><i class="fa-solid fa-check-circle me-2" style="color:#4ade80;"></i> Endorse to Director General</div>
+    <div style="padding:14px 14px;font-size:.82rem;color:#1f2a3a;"><p class="mb-0">Are you sure you want to endorse this project to the Director General for approval?</p></div>
+    <div style="padding:8px 12px;border-top:1px solid #e1e6ee;display:flex;justify-content:flex-end;gap:8px;">
+        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="closeCustomModals()">Cancel</button>
+        <form method="post" id="actionEndorseForm" action="" class="d-inline">
+            <?= csrf_field() ?>
+            <button type="submit" class="btn btn-primary btn-sm">Endorse</button>
+        </form>
+    </div>
+</div>
 
 <div class="custom-modal" id="viewProjectModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;z-index:1060;align-items:center;justify-content:center;">
     <div class="modal-dialog modal-dialog-scrollable modal-lg" style="width:100%;max-width:700px;margin:0;">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Project Overview</h5>
+                <h5 class="modal-title"><i class="fa-regular fa-eye me-2"></i> Project Overview</h5>
                 <button type="button" class="btn-close" onclick="closeViewProjectModal()"></button>
             </div>
             <div class="modal-body">
                 <div class="detail-grid">
-                    <div class="key">Title</div><div class="val" id="viewProjectTitle">-</div>
+                    <div class="key">Project Title</div><div class="val" id="viewProjectTitle">-</div>
                     <div class="key">Description</div><div class="val" id="viewProjectDescription">-</div>
                     <div class="key">Budget</div><div class="val" id="viewProjectBudget">-</div>
                     <div class="key">Status</div><div class="val" id="viewProjectStatus">-</div>
                     <div class="key">Department</div><div class="val" id="viewProjectDepartment">-</div>
                     <div class="key">Last Updated</div><div class="val" id="viewProjectUpdated">-</div>
                     <div class="key">Created</div><div class="val" id="viewProjectCreated">-</div>
+                </div>
+                <div class="remarks-in-modal" id="viewProjectRemarksWrap" style="display:none;">
+                    <div class="remarks-in-modal__card">
+                        <div class="remarks-in-modal__label"><i class="fa-solid fa-rotate-left"></i> DG Remarks</div>
+                        <div class="remarks-in-modal__body" id="viewProjectRemarks">-</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -172,9 +368,14 @@ function closeViewProjectModal() {
     document.getElementById('customModalOverlay').onclick = closeCustomModals;
 }
 
+function openEndorseModal(projectId) {
+    document.getElementById('actionEndorseForm').action = '<?= site_url('ict-planner/endorse/') ?>' + projectId;
+    showCustomModal('endorseModal');
+}
+
 function toggleAllCheckboxes(master) {
     var cbs = document.querySelectorAll('.project-checkbox');
-    cbs.forEach(function(cb) { cb.checked = master.checked; });
+    cbs.forEach(function(cb, i) { cb.checked = master.checked; });
     updateBulkBar();
 }
 
@@ -214,7 +415,17 @@ function downloadSelected() {
         showAlertModal('No Selection', 'Please select at least one project to download.');
         return;
     }
-    document.getElementById('batchDownloadForm').submit();
+    cbs.forEach(function(cb, i) {
+        var url = cb.getAttribute('data-url');
+        if (url) {
+            setTimeout(function() {
+                var f = document.createElement('iframe');
+                f.style.display = 'none';
+                f.src = url;
+                document.body.appendChild(f);
+            }, i * 500);
+        }
+    });
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -225,16 +436,62 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById('viewProjectTitle').textContent = project.title || '-';
                 document.getElementById('viewProjectDescription').textContent = project.description || '-';
                 document.getElementById('viewProjectBudget').textContent = project.budget ? '₱' + parseFloat(project.budget).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '-';
-                document.getElementById('viewProjectStatus').textContent = project.status ? project.status.charAt(0).toUpperCase() + project.status.slice(1) : '-';
+                document.getElementById('viewProjectStatus').textContent = project.status ? (project.status === 'resubmitted' ? 'Pending - Resubmitted' : project.status.charAt(0).toUpperCase() + project.status.slice(1)) : '-';
                 document.getElementById('viewProjectDepartment').textContent = project.department || '-';
                 document.getElementById('viewProjectUpdated').textContent = project.updated || '-';
                 document.getElementById('viewProjectCreated').textContent = project.created || '-';
+                var remarks = project.remarks || '';
+                var remarksWrap = document.getElementById('viewProjectRemarksWrap');
+                if (remarks) {
+                    document.getElementById('viewProjectRemarks').textContent = remarks;
+                    remarksWrap.style.display = '';
+                } else {
+                    remarksWrap.style.display = 'none';
+                }
                 showViewProjectModal();
             } catch(e) {
                 showAlertModal('Error', 'Error loading project details.');
             }
         });
     });
+
+    var form = document.querySelector('.toolbar-form');
+    var searchInput = form ? form.querySelector('input[name="q"]') : null;
+    if (searchInput) {
+        searchInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                form.submit();
+            }
+        });
+    }
+
+    var dateRangeInput = document.getElementById('dateRangePicker');
+    var datePickerToggleBtn = document.getElementById('datePickerToggleBtn');
+    if (dateRangeInput && datePickerToggleBtn) {
+        var fp = flatpickr(dateRangeInput, {
+            mode: 'range',
+            dateFormat: 'Y-m-d',
+            position: 'auto',
+            static: false,
+            positionElement: datePickerToggleBtn,
+            onChange: function(selectedDates, dateStr, instance) {
+                if (selectedDates.length === 2) {
+                    form.submit();
+                }
+            }
+        });
+
+        datePickerToggleBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (fp.isOpen) {
+                fp.close();
+            } else {
+                fp.open();
+            }
+        });
+    }
 });
 </script>
 

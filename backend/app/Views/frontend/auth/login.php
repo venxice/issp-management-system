@@ -26,6 +26,7 @@
 
             <form action="<?= site_url('login') ?>" method="post" class="d-grid gap-3">
                 <?= csrf_field() ?>
+                <input type="hidden" name="redirect" value="<?= esc(service('request')->getGet('redirect') ?? session()->get('intended_url') ?? '') ?>">
                 <div>
                     <label class="form-label fw-semibold" for="email">Email</label>
                     <input class="form-control" id="email" name="email" type="email" value="<?= esc(old('email')) ?>" placeholder="Enter your registered email" autocomplete="email" required>
@@ -48,7 +49,8 @@
 
             <div class="divider my-4">OR</div>
 
-            <a class="btn google-btn d-flex align-items-center justify-content-center gap-3" href="<?= site_url('auth/google') ?>">
+            <?php $redirectUrl = service('request')->getGet('redirect') ?? session()->get('intended_url') ?? ''; ?>
+            <a class="btn google-btn d-flex align-items-center justify-content-center gap-3" href="<?= site_url('auth/google' . ($redirectUrl ? '?redirect=' . urlencode($redirectUrl) : '')) ?>">
                 <i class="fa-brands fa-google"></i>
                 <span>Continue with Google</span>
             </a>

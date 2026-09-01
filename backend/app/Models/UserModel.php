@@ -47,6 +47,15 @@ class UserModel extends Model
             ->first();
     }
 
+    public function getUsersByRole(string $roleSlug): array
+    {
+        return $this->select('users.*, roles.name AS role_name, roles.slug AS role_slug')
+            ->join('roles', 'roles.id = users.role_id', 'left')
+            ->where('roles.slug', $roleSlug)
+            ->where('users.status', 'active')
+            ->findAll();
+    }
+
     public function listWithRelationships(): array
     {
         return $this->select('users.*, roles.name AS role_name, roles.slug AS role_slug, departments.name AS department_name, positions.name AS position_name')

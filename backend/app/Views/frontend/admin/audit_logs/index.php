@@ -229,6 +229,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const dateRangeInput = document.getElementById('dateRangePicker');
     const datePickerToggleBtn = document.getElementById('datePickerToggleBtn');
 
+    const searchInput = form?.querySelector('input[name="q"]');
+    if (searchInput) {
+        searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                form.submit();
+            }
+        });
+    }
+
     if (dateRangeInput) {
         const fp = flatpickr(dateRangeInput, {
             mode: 'range',

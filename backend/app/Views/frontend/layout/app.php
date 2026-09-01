@@ -302,10 +302,64 @@ $active = $active ?? '';
             flex: 1;
         }
 
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .topbar-settings-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #fff;
+            text-decoration: none;
+            padding: 8px 15px;
+            border-radius: 9px;
+            background: rgba(255, 255, 255, .12);
+            border: 1px solid rgba(255, 255, 255, .32);
+            font-size: .78rem;
+            font-weight: 600;
+            line-height: 1.1;
+            white-space: nowrap;
+            transition: background-color .15s ease, border-color .15s ease, transform .1s ease, box-shadow .15s ease;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, .18);
+        }
+
+        .topbar-settings-btn i {
+            font-size: .85rem;
+        }
+
+        .topbar-settings-btn:hover {
+            background: rgba(255, 255, 255, .2);
+            border-color: rgba(255, 255, 255, .5);
+            color: #fff;
+        }
+
+        .topbar-settings-btn:active {
+            transform: translateY(1px);
+        }
+
+        .topbar-settings-btn.active {
+            background: #fff;
+            border-color: #fff;
+            color: var(--brand-dark);
+            box-shadow: 0 2px 8px rgba(15, 23, 42, .25);
+        }
+
+        .topbar-divider {
+            width: 1px;
+            height: 26px;
+            background: rgba(255, 255, 255, .22);
+            flex-shrink: 0;
+        }
+
         .user-chip {
             display: flex;
             align-items: center;
             gap: 10px;
+            color: #fff;
+            padding: 0 2px;
         }
 
         .page-title {
@@ -439,7 +493,7 @@ $active = $active ?? '';
             justify-content: center;
             gap: 12px;
             height: 200px;
-            padding: 20px 60px 30px 60px;
+            padding: 35px 60px 10px 60px;
             width: 100%;
             overflow-x: auto;
             overflow-y: visible;
@@ -641,6 +695,13 @@ $active = $active ?? '';
             place-items: center;
             border-radius: 6px;
         }
+        .icon-btn:disabled,
+        .icon-btn.disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+            pointer-events: none;
+            text-decoration: line-through;
+        }
 
         .icon-btn .fa-solid,
         .icon-btn .fa-regular {
@@ -672,30 +733,55 @@ $active = $active ?? '';
 
         .badge-status {
             border: 1px solid transparent;
+            font-size: .7rem;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-weight: 600;
+            line-height: 1.1;
         }
         .badge-status-draft {
-            background: #8896a8;
-            color: #fff;
+            background: #e2e8f0;
+            color: #475569;
         }
         .badge-status-pending {
-            background: #fef7e0;
-            color: #8a6d1e;
+            background: #fef3c7;
+            color: #92400e;
+            border-color: #fde68a;
         }
         .badge-status-approved {
-            background: #4a8c5c;
-            color: #fff;
+            background: #dcfce7;
+            color: #166534;
+            border-color: #bbf7d0;
         }
         .badge-status-rejected {
-            background: #b34a4a;
-            color: #fff;
+            background: #fee2e2;
+            color: #991b1b;
+            border-color: #fecaca;
         }
         .badge-status-submitted {
-            background: #4f6584;
-            color: #fff;
+            background: #e0e7ff;
+            color: #4338ca;
+            border-color: #c7d2fe;
         }
         .badge-status-revision {
-            background: #c97d3b;
-            color: #fff;
+            background: #fef9c3;
+            color: #854d0e;
+            border-color: #fef08a;
+        }
+        .badge-status-endorsed {
+            background: #e8f0fe;
+            color: #2a5c8a;
+            border-color: #c5d9f0;
+        }
+        .badge-status-returned {
+            background: #ffedd5;
+            color: #9a3412;
+            border-color: #fed7aa;
+        }
+        .badge-status-resubmitted {
+            background: #e0e7ff;
+            color: #4338ca;
+            border-color: #c7d2fe;
         }
         .badge-soft {
             background: #edf2f7;
@@ -802,8 +888,12 @@ $active = $active ?? '';
         .activity-summary {
             display: block;
             max-width: 100%;
+            max-height: 3.5em;
+            overflow-y: auto;
             white-space: normal;
             word-wrap: break-word;
+            font-size: inherit;
+            color: inherit;
         }
 
         .table {
@@ -1110,7 +1200,7 @@ $active = $active ?? '';
 
             .css-bar-chart {
                 gap: 8px;
-                padding: 20px 50px 25px 50px;
+                padding: 30px 50px 8px 50px;
                 height: 180px;
             }
 
@@ -1193,7 +1283,7 @@ $active = $active ?? '';
 
             .css-bar-chart {
                 gap: 6px;
-                padding: 20px 40px 20px 40px;
+                padding: 25px 40px 6px 40px;
                 height: 160px;
             }
 
@@ -1287,21 +1377,30 @@ $active = $active ?? '';
                     <div class="page-title"><?= esc($title) ?></div>
                 </div>
             </div>
-            <div class="user-chip">
-                <div class="meta d-none d-sm-block">
-                    <div class="name"><?= esc(session()->get('name')) ?></div>
-                    <div class="role"><?= esc(session()->get('role_name')) ?></div>
+            <div class="topbar-right">
+                <a href="<?= site_url('profile') ?>" class="topbar-settings-btn <?= ($active ?? '') === 'profile' ? 'active' : '' ?>" title="My Account">
+                    <i class="fa-solid fa-gear"></i>
+                    <span class="d-none d-sm-inline">My Account</span>
+                </a>
+                <div class="topbar-divider d-none d-sm-block"></div>
+                <div class="user-chip">
+                    <div class="meta">
+                        <div class="name"><?= esc(session()->get('name')) ?></div>
+                        <div class="role"><?= esc(session()->get('role_name')) ?></div>
+                    </div>
                 </div>
             </div>
         </header>
         <div class="content-wrap">
+            <?= $this->include('frontend/layout/alerts') ?>
             <?= $this->renderSection('content') ?>
-        </div>
-    </main>
+</div>
+</main>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Sidebar Toggle Functionality
@@ -1343,6 +1442,9 @@ document.addEventListener('DOMContentLoaded', function() {
             sidebarClose.addEventListener('click', closeSidebar);
         }
     }
+
+    // Initialize Bootstrap tooltips
+    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => new bootstrap.Tooltip(el));
 
     const navLinks = document.querySelectorAll('.sidebar-nav .nav-link');
     navLinks.forEach(link => {
@@ -1405,7 +1507,18 @@ function closeCustomModals() {
     document.body.style.overflow = '';
 }
 
-window.showConfirmModal = function(message, callback) {
+window.showConfirmModal = function(titleOrMessage, messageOrCallback, maybeCallback) {
+    var title, message, callback;
+    if (typeof messageOrCallback === 'function') {
+        title = 'Confirm';
+        message = titleOrMessage;
+        callback = messageOrCallback;
+    } else {
+        title = titleOrMessage;
+        message = messageOrCallback;
+        callback = maybeCallback;
+    }
+    document.getElementById('confirmModalTitle').textContent = title;
     document.getElementById('confirmMessage').textContent = message;
     const confirmBtn = document.getElementById('confirmModalButton');
     confirmBtn._callback = callback;
@@ -1420,9 +1533,16 @@ window.showConfirmModal = function(message, callback) {
     showCustomModal('confirmModal');
 };
 
-window.showAlertModal = function(title, message) {
+window.showAlertModal = function(title, message, callback) {
     document.getElementById('alertModalLabel').textContent = title;
     document.getElementById('alertMessage').textContent = message;
+    var okBtn = document.querySelector('#alertModal .btn-primary');
+    okBtn.onclick = function() {
+        closeCustomModals();
+        if (typeof callback === 'function') {
+            callback();
+        }
+    };
     showCustomModal('alertModal');
 };
 
@@ -1449,44 +1569,121 @@ window.addEventListener('pageshow', function(e) {
 <script>
 // Auto-save current section to DB (called by Save Changes button)
 window.autoSaveDraft = function() {
+
     var editId = localStorage.getItem('edit_project_id');
-    var csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-    if (!csrfToken) return;
 
-    var keys = ['network-infrastructure-form','enterprise-architecture-form','ict-human-capital-form','information-systems-form','ict-projects-form','performance-measurement-form'];
+    var csrfToken =
+        document
+            .querySelector('meta[name="csrf-token"]')
+            ?.getAttribute('content');
+
+    if (!csrfToken) {
+        return;
+    }
+
+    var keys = [
+        'network-infrastructure-form',
+        'enterprise-architecture-form',
+        'ict-human-capital-form',
+        'information-systems-form',
+        'ict-projects-form',
+        'performance-measurement-form',
+
+        'year1-office-productivity-form',
+        'year1-internal-ict-projects-form',
+        'year1-cross-agency-form',
+        'year1-continuing-costs-form',
+
+        'year2-office-productivity-form',
+        'year2-internal-ict-projects-form',
+        'year2-cross-agency-form',
+        'year2-continuing-costs-form',
+
+        'year3-office-productivity-form',
+        'year3-internal-ict-projects-form',
+        'year3-cross-agency-form',
+        'year3-continuing-costs-form'
+    ];
+
     var data = {};
+
     keys.forEach(function(key) {
+
         try {
+
             var saved = localStorage.getItem(key);
-            if (saved) data[key] = JSON.parse(saved);
-        } catch(e) {}
+
+            if (saved) {
+                data[key] = JSON.parse(saved);
+            } else {
+                data[key] = {};
+            }
+
+        } catch (e) {
+
+            data[key] = {};
+
+        }
+
     });
 
-    fetch('<?= site_url('employee/save-draft') ?>', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest'
-        },
-        body: JSON.stringify({
-            csrf_test_name: csrfToken,
-            form_data: data,
-            id: editId || null
-        })
-    })
-    .then(function(r) { return r.json(); })
-    .then(function(result) {
-        if (result.success && result.id && !editId) {
-            localStorage.setItem('edit_project_id', result.id);
+    var currentPage = window.location.pathname;
+
+        if (currentPage.includes('ict-projects')) {
+
+        var projectTitle =
+            data['ict-projects-form'] &&
+            data['ict-projects-form'].internal_project_title;
+
+        if (!projectTitle || !projectTitle.trim()) {
+
+            if (typeof showAlertModal === 'function') {
+                showAlertModal(
+                    'Validation Error',
+                    'Project title is required. Please go to the ICT Projects section and enter a title before saving.'
+                );
+            }
+
+            return;
         }
-    })
-    .catch(function(err) {
-        console.error('Auto-save to DB failed:', err);
-    });
-};
+
+        fetch('<?= site_url('employee/save-draft') ?>', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': csrfToken
+            },
+            body: JSON.stringify({
+                csrf_test_name: csrfToken,
+                form_data: data,
+                id: editId || null
+            })
+        })
+        .then(function(r) {
+            if (!r.ok) throw new Error('Server returned ' + r.status);
+            return r.json();
+        })
+        .then(function(result) {
+            console.log(result);
+
+            if (result.success && result.id && !editId) {
+                localStorage.setItem('edit_project_id', result.id);
+            }
+        })
+        .catch(function(err) {
+            console.error(err);
+            console.error('Auto-save to DB failed:', err);
+        });
+
+    } // ← CLOSE IF
+
+}; // ← CLOSE autoSaveDraft
 
 // File upload helper — uploads file to server, stores path on the input
 window.uploadFileInput = function(input) {
+
+
     var file = input.files[0];
     if (!file) return;
 
@@ -1504,13 +1701,18 @@ window.uploadFileInput = function(input) {
         statusEl.className = 'upload-status text-info';
     }
 
-    fetch('<?= site_url('employee/upload-file') ?>', {
-        method: 'POST',
-        body: formData,
-        headers: { 'X-Requested-With': 'XMLHttpRequest' }
-    })
+    const uploadUrl = input.dataset.uploadUrl;
+
+fetch(uploadUrl, {
+    method: 'POST',
+    body: formData,
+    headers: {
+        'X-Requested-With': 'XMLHttpRequest'
+    }
+})
     .then(function(r) { return r.json(); })
     .then(function(result) {
+        console.log(result);
         if (result.success) {
             input.setAttribute('data-uploaded-path', result.path);
             input.setAttribute('data-uploaded-name', result.name);
@@ -1540,9 +1742,9 @@ window.showServerFileLink = function(input, filePath) {
     preview.className = 'file-preview';
     preview.setAttribute('data-file-input', input.name);
     var link = document.createElement('a');
-    link.href = '<?= site_url() ?>/' + filePath;
-    link.target = '_blank';
-    link.textContent = filePath.split('/').pop() || 'Download file';
+    link.href = '<?= base_url() ?>/' + filePath;
+    link.download = filePath.split('/').pop();
+    link.textContent = 'Download: ' + (input.getAttribute('data-uploaded-name') || filePath.split('/').pop());
     link.style.display = 'block';
     link.style.padding = '4px 0';
     preview.appendChild(link);
@@ -1571,6 +1773,10 @@ window.showServerFileLink = function(input, filePath) {
         }
     }
 })();
+
+window.navigateToPage = function(url) {
+    window.location.href = url;
+};
 </script>
 </body>
 </html>

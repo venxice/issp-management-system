@@ -2,33 +2,6 @@
 
 <?= $this->section('content') ?>
 <style>
-.breadcrumb-nav {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: .78rem;
-    margin-bottom: 12px;
-}
-.breadcrumb-nav a {
-    color: var(--muted);
-    text-decoration: none;
-    transition: color 0.2s;
-}
-.breadcrumb-nav a:hover {
-    color: var(--brand);
-}
-.breadcrumb-nav .sep {
-    color: #c5ccd6;
-    font-size: .7rem;
-}
-.breadcrumb-nav .current {
-    color: var(--ink);
-    font-weight: 600;
-    max-width: 400px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
 .project-hero {
     background: #fff;
     border: 1px solid #dde4ed;
@@ -37,42 +10,18 @@
     margin-bottom: 20px;
     box-shadow: 0 8px 20px rgba(15,23,42,.04);
 }
-.project-hero__title {
-    font-size: 1.2rem;
-    font-weight: 800;
-    line-height: 1.2;
-    letter-spacing: -.01em;
-    margin: 0 0 14px;
-}
-.project-hero__meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 16px 28px;
-}
-.project-hero__meta-item {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-.project-hero__meta-label {
-    font-size: .7rem;
-    color: var(--muted);
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: .03em;
-}
-.project-hero__meta-value {
-    font-size: .88rem;
-    color: var(--ink);
-    font-weight: 500;
-}
-.project-hero__actions {
-    display: flex;
-    gap: 6px;
-    margin-top: 16px;
-    padding-top: 14px;
-    border-top: 1px solid #eef2f6;
-}
+.project-hero__titles { margin-bottom: 14px; }
+.project-hero__title-row { display: flex; align-items: baseline; gap: 6px; padding: 2px 0; }
+.project-hero__title-label { font-size: .75rem; font-weight: 600; color: #6c757d; flex-shrink: 0; }
+.project-hero__title-value { font-size: .85rem; font-weight: 600; color: var(--ink); line-height: 1.3; }
+.project-hero__meta { display: flex; flex-wrap: wrap; gap: 14px 24px; }
+.project-hero__meta-item { display: flex; flex-direction: column; gap: 2px; }
+.project-hero__meta-label { font-size: .7rem; color: #8898aa; font-weight: 600; text-transform: uppercase; letter-spacing: .03em; }
+.project-hero__meta-value { font-size: .85rem; color: var(--ink); font-weight: 500; }
+.project-hero__actions { display: flex; gap: 6px; margin-top: 16px; padding-top: 14px; border-top: 1px solid #eef2f6; }
+.project-hero__desc { margin-top: 12px; padding-top: 12px; border-top: 1px solid #eef2f6; }
+.project-hero__desc-label { font-size: .7rem; font-weight: 600; color: #8898aa; text-transform: uppercase; letter-spacing: .03em; margin-bottom: 4px; }
+.project-hero__desc-body { font-size: .85rem; color: #475569; line-height: 1.6; }
 .form-section {
     background: #fff;
     border: 1px solid #dde4ed;
@@ -174,6 +123,7 @@
 .sub-header:first-of-type {
     margin-top: 0;
 }
+.group-header { font-size: .75rem; font-weight: 700; color: #3f5673; padding: 3px 0; margin: 14px 0 6px; border-bottom: 1px solid #dde4ed; }
 .cyber-category {
     margin-bottom: 20px;
     padding-bottom: 16px;
@@ -228,7 +178,7 @@
     flex-shrink: 0;
 }
 .cyber-item__icon.checked {
-    color: #166534;
+    color: #2b6cb0;
 }
 .cyber-item__icon.unchecked {
     color: #c5ccd6;
@@ -320,27 +270,95 @@
     padding: 2px 8px;
     border-radius: 4px;
 }
+.checklist-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 4px 0;
+}
+.checklist-item__icon {
+    width: 18px;
+    text-align: center;
+    font-size: .8rem;
+    flex-shrink: 0;
+}
+.checklist-item__icon.checked { color: #2b6cb0; }
+.checklist-item__icon.unchecked { color: #c5ccd6; }
+.checklist-item__label {
+    font-size: .82rem;
+    color: var(--ink);
+    font-weight: 500;
+}
+.checklist-item__label.unchecked { color: #8898aa; }
+.checklist-item__text {
+    font-size: .78rem;
+    color: #536783;
+    font-style: italic;
+    margin-left: 4px;
+}
+.checklist-count {
+    font-weight: 400;
+    color: #8898aa;
+    font-size: .72rem;
+    margin-left: 8px;
+}
+.remarks-card {
+    margin-top: 20px;
+    background: #f0f4f9;
+    border: 1px solid #c5d9f0;
+    border-radius: 10px;
+    padding: 16px 20px;
+}
+.remarks-card__header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: .72rem;
+    font-weight: 600;
+    color: #2a5c8a;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    margin-bottom: 8px;
+}
+.remarks-card__header i { font-size: .82rem; }
+.remarks-card__body {
+    font-size: .85rem;
+    color: #334155;
+    line-height: 1.7;
+}
 </style>
 
-<div class="breadcrumb-nav">
-    <a href="<?= site_url('ict-planner/consolidation') ?>">Consolidation</a>
-    <span class="sep"><i class="fa-solid fa-chevron-right"></i></span>
-    <span class="current"><?= esc($project['title'] ?? 'Untitled') ?></span>
-</div>
 
+<?php
+$ict = $formData['ict-projects-form'] ?? [];
+$intTitle = $ict['internal_project_title'] ?? $project['title'] ?? 'Untitled';
+$intDesc = $ict['internal_description'] ?? $project['description'] ?? '';
+$intBudget = $ict['internal_total_cost'] ?? $project['budget'] ?? 0;
+?>
+<?php
+$statusColors = [
+    'pending'     => ['bg' => '#fef3c7', 'fg' => '#92400e', 'br' => '#fde68a'],
+    'endorsed'    => ['bg' => '#e8f0fe', 'fg' => '#2a5c8a', 'br' => '#c5d9f0'],
+    'approved'    => ['bg' => '#dcfce7', 'fg' => '#166534', 'br' => '#bbf7d0'],
+    'rejected'    => ['bg' => '#fee2e2', 'fg' => '#991b1b', 'br' => '#fecaca'],
+    'returned'    => ['bg' => '#ffedd5', 'fg' => '#9a3412', 'br' => '#fed7aa'],
+    'resubmitted' => ['bg' => '#e0e7ff', 'fg' => '#4338ca', 'br' => '#c7d2fe'],
+];
+$sc = $statusColors[$project['status']] ?? ['bg' => '#f1f5f9', 'fg' => '#475569', 'br' => '#e2e8f0'];
+?>
 <div class="project-hero">
-    <h1 class="project-hero__title"><?= esc($project['title'] ?? 'Untitled') ?></h1>
+    <div class="project-hero__titles">
+        <div class="project-hero__title-row">
+            <span class="project-hero__title-label">Project Title</span>
+            <span class="project-hero__title-value"><?= esc($intTitle) ?></span>
+        </div>
+    </div>
     <div class="project-hero__meta">
         <div class="project-hero__meta-item">
             <span class="project-hero__meta-label">Status</span>
             <span class="project-hero__meta-value">
-                <span class="badge badge-soft" style="font-size:.72rem;padding:4px 12px;
-                    <?php if ($project['status'] === 'pending'): ?>background:#fef7e0;color:#8a6d1e;border-color:#f5e6b8;
-                    <?php elseif ($project['status'] === 'endorsed'): ?>background:#e8f0fe;color:#2a5c8a;border-color:#c5d9f0;
-                    <?php elseif ($project['status'] === 'approved'): ?>background:#e6f4ea;color:#1e6f3f;border-color:#c3e6cb;
-                    <?php elseif ($project['status'] === 'rejected'): ?>background:#fce8e8;color:#a13d3d;border-color:#f0c8c8;
-                    <?php endif; ?>">
-                    <?= esc(ucfirst($project['status'])) ?>
+                <span class="badge badge-soft" style="font-size:.72rem;padding:4px 12px;background:<?= $sc['bg'] ?>;color:<?= $sc['fg'] ?>;border-color:<?= $sc['br'] ?>;">
+                    <?= esc($project['status'] === 'resubmitted' ? 'Pending - Resubmitted' : ucfirst($project['status'])) ?>
                 </span>
             </span>
         </div>
@@ -354,7 +372,7 @@
         </div>
         <div class="project-hero__meta-item">
             <span class="project-hero__meta-label">Budget</span>
-            <span class="project-hero__meta-value">₱<?= number_format((float) ($project['budget'] ?? 0), 2) ?></span>
+            <span class="project-hero__meta-value">₱<?= number_format((float) $intBudget, 2) ?></span>
         </div>
         <div class="project-hero__meta-item">
             <span class="project-hero__meta-label">Submitted Date</span>
@@ -365,9 +383,10 @@
             <span class="project-hero__meta-value"><?= esc($project['updated_at'] ?? $project['created_at'] ?? '-') ?></span>
         </div>
     </div>
-    <?php if ($project['description']): ?>
-    <div style="margin-top:12px;padding-top:12px;border-top:1px solid #eef2f6;font-size:.85rem;color:#4a5568;line-height:1.5;">
-        <?= esc($project['description']) ?>
+    <?php if ($intDesc): ?>
+    <div class="project-hero__desc">
+        <div class="project-hero__desc-label">Description</div>
+        <div class="project-hero__desc-body"><?= esc($intDesc) ?></div>
     </div>
     <?php endif; ?>
     <div class="project-hero__actions">
@@ -375,14 +394,21 @@
             <i class="fa-solid fa-download"></i>
         </a>
         <?php if ($project['status'] === 'pending'): ?>
-            <form method="post" action="<?= site_url('ict-planner/endorse/' . $project['id']) ?>" class="d-inline" onsubmit="return confirm('Endorse this project to Director General for approval?')">
-                <?= csrf_field() ?>
-                <button class="btn btn-outline-primary icon-btn" type="submit" title="Endorse to Director General">
-                    <i class="fa-solid fa-check"></i>
-                </button>
-            </form>
+            <button class="btn btn-outline-primary icon-btn" type="button" title="Endorse to Director General" onclick="openEndorseModal('<?= $project['id'] ?>')">
+                <i class="fa-solid fa-check"></i>
+            </button>
+        <?php else: ?>
+            <button class="btn btn-outline-secondary icon-btn" type="button" title="Endorse to Director General" disabled style="opacity:0.35;cursor:not-allowed;pointer-events:none;">
+                <i class="fa-solid fa-check"></i>
+            </button>
         <?php endif; ?>
     </div>
+    <?php if ($project['status'] === 'returned' && !empty($project['remarks'])): ?>
+    <div class="remarks-card">
+        <div class="remarks-card__header"><i class="fa-solid fa-rotate-left"></i> DG Remarks</div>
+        <div class="remarks-card__body"><?= esc($project['remarks']) ?></div>
+    </div>
+    <?php endif; ?>
 </div>
 
 <?php
@@ -406,21 +432,21 @@ $sectionIcons = [
 
 $fieldLabels = [
     'network-infrastructure-form' => [
-        'dept_network_diagram'      => 'Upload network architecture diagram showing connectivity among attached agencies',
+        'dept_network_diagram'      => 'Network Architecture Diagram',
         'dept_connectivity_type'    => 'Connectivity Type',
         'dept_ipv6_ready'           => 'IPV6 Ready',
         'dept_upload_speed'         => 'Upload Speed',
         'dept_download_speed'       => 'Download Speed',
         'dept_description'          => 'Description',
-        'regional_network_diagram'  => 'Upload network architecture diagram showing connectivity to branches/regional offices',
-        'regional_connectivity_type' => 'Connectivity Type (Regional)',
-        'regional_ipv6_ready'       => 'IPV6 Ready (Regional)',
-        'regional_upload_speed'     => 'Upload Speed (Regional)',
-        'regional_download_speed'   => 'Download Speed (Regional)',
+        'regional_network_diagram'  => 'Network Architecture Diagram',
+        'regional_connectivity_type' => 'Connectivity Type',
+        'regional_ipv6_ready'       => 'IPV6 Ready',
+        'regional_upload_speed'     => 'Upload Speed',
+        'regional_download_speed'   => 'Download Speed',
         'regional_offices_details'  => 'Branch/Regional Offices Details',
     ],
     'enterprise-architecture-form' => [
-        'ea_diagram'                => 'Upload enterprise architecture diagram showing structure and operation',
+        'ea_diagram'                => 'Enterprise Architecture Diagram',
         'ea_description'            => 'Description',
     ],
     'ict-human-capital-form' => [
@@ -464,7 +490,7 @@ $fieldLabels = [
         'pia_1'                     => 'Privacy Impact Assessment (PIA)',
     ],
     'ict-projects-form' => [
-        'internal_project_title'    => 'Project Title',
+        'internal_project_title'    => 'Internal Project Title',
         'internal_description'      => 'Description',
         'internal_objectives'       => 'Objectives',
         'internal_strategic_pip'    => 'Public Investment Program',
@@ -476,7 +502,6 @@ $fieldLabels = [
         'internal_harmonization_1'  => 'National Prioritization',
         'internal_harmonization_2'  => 'Resource Optimization',
         'internal_harmonization_3'  => 'Interoperability Framework',
-        'internal_harmonization_4'  => 'Cross-Agency Collaboration',
         'internal_harmonization_5'  => 'Scalability and Sustainability',
         'internal_start_date'       => 'Start Date',
         'internal_end_date'         => 'End Date',
@@ -486,30 +511,6 @@ $fieldLabels = [
         'internal_implementing_unit' => 'Implementing Unit',
         'internal_total_cost'       => 'Total Cost',
         'internal_funding_source'   => 'Funding Source',
-        'cross_project_title'       => 'Project Title',
-        'cross_description'         => 'Description',
-        'cross_objectives'          => 'Objectives',
-        'cross_lead_agency'         => 'Lead Agency',
-        'cross_implementing_agency' => 'Implementing Agency',
-        'cross_strategic_pip'       => 'Public Investment Program',
-        'cross_strategic_ncp'       => 'National Cybersecurity Plan',
-        'cross_strategic_egov'      => 'E-Government Master Plan',
-        'cross_strategic_pcb'       => 'Program Convergence Budgeting',
-        'cross_strategic_others'    => 'Others (Specify)',
-        'cross_strategic_others_text' => 'Others - Please specify',
-        'cross_harmonization_1'     => 'National Prioritization',
-        'cross_harmonization_2'     => 'Resource Optimization',
-        'cross_harmonization_3'     => 'Interoperability Framework',
-        'cross_harmonization_4'     => 'Cross-Agency Collaboration',
-        'cross_harmonization_5'     => 'Scalability and Sustainability',
-        'cross_start_date'          => 'Start Date',
-        'cross_end_date'            => 'End Date',
-        'cross_year1_deliverables'  => 'Year 1 Deliverables',
-        'cross_year2_deliverables'  => 'Year 2 Deliverables',
-        'cross_year3_deliverables'  => 'Year 3 Deliverables',
-        'cross_implementing_unit'   => 'Implementing Unit',
-        'cross_total_cost'          => 'Total Cost',
-        'cross_funding_source'      => 'Funding Source',
     ],
 ];
 
@@ -584,10 +585,9 @@ $internalProjectFields = [
     'internal_implementing_unit','internal_total_cost','internal_funding_source',
 ];
 
-function getFieldLabel($sectionKey, $fieldName) {
-    global $fieldLabels;
-    if (isset($fieldLabels[$sectionKey][$fieldName])) {
-        return $fieldLabels[$sectionKey][$fieldName];
+function getFieldLabel($sectionKey, $fieldName, $labels) {
+    if (isset($labels[$sectionKey][$fieldName])) {
+        return $labels[$sectionKey][$fieldName];
     }
     return ucwords(str_replace(['_', '-'], ' ', $fieldName));
 }
@@ -605,41 +605,6 @@ function renderCheckValue($val) {
 function isChecked($v) {
     $s = is_array($v) ? '' : (string) $v;
     return trim($s) === '1';
-}
-
-function kpiTableHtml($projectKey, $kpiData, $hierarchyLabels) {
-    if (!is_array($kpiData) || empty($kpiData)) return '';
-    $kpi = $kpiData['kpi'] ?? $kpiData;
-    if (!is_array($kpi)) return '';
-    $levels = ['intermediate' => 'INTERMEDIATE OUTCOME', 'immediate' => 'IMMEDIATE OUTCOME', 'output' => 'OUTPUT'];
-    $cols = ['indicator' => 'Key Performance Indicators', 'baseline' => 'Baseline Data', 'target' => 'Targets', 'method' => 'Data Collection Methods', 'responsibility' => 'Responsibility'];
-    $html = '<table class="view-table"><thead><tr><th>Hierarchy of Targeted Results</th>';
-    foreach ($cols as $c => $cl) $html .= '<th>' . $cl . '</th>';
-    $html .= '</tr></thead><tbody>';
-    $hasData = false;
-    foreach ($levels as $lk => $lv) {
-        $row = $kpi[$lk] ?? [];
-        if (!is_array($row)) continue;
-        $cells = [];
-        $rowHasData = false;
-        foreach ($cols as $ck => $cl) {
-            $v = $row[$ck] ?? '';
-            if (is_array($v) && !empty($v)) { $v = json_encode($v); }
-            $v = trim((string) $v);
-            if ($v !== '') $rowHasData = true;
-            $cells[] = $v;
-        }
-        if (!$rowHasData) continue;
-        $hasData = true;
-        $html .= '<tr><td class="row-label">' . $lv . '</td>';
-        foreach ($cells as $cell) {
-            $html .= '<td>' . ($cell !== '' ? esc($cell) : '<span style="color:#c5ccd6;font-style:italic;">Not provided</span>') . '</td>';
-        }
-        $html .= '</tr>';
-    }
-    if (!$hasData) return '';
-    $html .= '</tbody></table>';
-    return $html;
 }
 
 $firstSection = true;
@@ -705,11 +670,15 @@ foreach ($sectionLabels as $key => $label):
         </div>
 
 <?php elseif ($key === 'network-infrastructure-form'): ?>
-        <div class="sub-header"><i class="fa-solid fa-diagram-project me-1"></i> A.1 LAN/WAN Setup</div>
-        <?php foreach ($lanWanDisplay as $fieldName => $fieldValue):
-            $displayLabel = getFieldLabel($key, $fieldName);
-            $displayValue = is_array($fieldValue) ? json_encode($fieldValue) : (string) $fieldValue;
-            $isEmpty = trim($displayValue) === '' || $displayValue === '[]' || $displayValue === '""';
+        <div class="sub-header"><i class="fa-solid fa-diagram-project me-1"></i> A.1 Department-wide Connectivity</div>
+        <?php
+        $deptFields = array_filter($lanWanDisplay, fn($k) => str_starts_with($k, 'dept_'), ARRAY_FILTER_USE_KEY);
+        $regionalFields = array_filter($lanWanDisplay, fn($k) => str_starts_with($k, 'regional_'), ARRAY_FILTER_USE_KEY);
+        function renderFields($fields, $sectionKey, $fieldLabels) {
+            foreach ($fields as $fieldName => $fieldValue):
+                $displayLabel = getFieldLabel($sectionKey, $fieldName, $fieldLabels);
+                $displayValue = is_array($fieldValue) ? json_encode($fieldValue) : (string) $fieldValue;
+                $isEmpty = trim($displayValue) === '' || $displayValue === '[]' || $displayValue === '""';
         ?>
         <?php if (($fieldName === 'dept_network_diagram' || $fieldName === 'regional_network_diagram') && !$isEmpty): ?>
         <div class="detail-row">
@@ -734,7 +703,29 @@ foreach ($sectionLabels as $key => $label):
             <div class="detail-row__val <?= $isEmpty ? 'empty' : '' ?>"><?= $isEmpty ? 'Not provided' : esc($displayValue) ?></div>
         </div>
         <?php endif; ?>
-        <?php endforeach; ?>
+        <?php
+            endforeach;
+        }
+        $deptConnFields = array_filter($deptFields, fn($k) => $k !== 'dept_network_diagram', ARRAY_FILTER_USE_KEY);
+        ?>
+        <div class="group-header">Connectivity Details</div>
+        <?php renderFields($deptConnFields, $key, $fieldLabels); ?>
+        <?php if (array_key_exists('dept_network_diagram', $deptFields)): ?>
+        <div class="group-header">Network Diagram</div>
+        <?php renderFields(['dept_network_diagram' => $deptFields['dept_network_diagram']], $key, $fieldLabels); ?>
+        <?php endif; ?>
+        <div class="sub-header" style="margin-top:16px;padding-top:12px;border-top:2px solid #e8ecf1;">
+            <i class="fa-solid fa-sitemap me-1"></i> A.1.ii Central Office to Branches/Regional Offices
+        </div>
+        <?php
+        $regionalConnFields = array_filter($regionalFields, fn($k) => $k !== 'regional_network_diagram', ARRAY_FILTER_USE_KEY);
+        ?>
+        <div class="group-header">Connectivity Details</div>
+        <?php renderFields($regionalConnFields, $key, $fieldLabels); ?>
+        <?php if (array_key_exists('regional_network_diagram', $regionalFields)): ?>
+        <div class="group-header">Network Diagram</div>
+        <?php renderFields(['regional_network_diagram' => $regionalFields['regional_network_diagram']], $key, $fieldLabels); ?>
+        <?php endif; ?>
 
         <div class="sub-header" style="margin-top:20px;padding-top:16px;border-top:2px solid #e8ecf1;">
             <i class="fa-solid fa-shield-halved me-1"></i> A.2 Cybersecurity Control Checklist
@@ -766,58 +757,57 @@ foreach ($sectionLabels as $key => $label):
         <?php endforeach; ?>
 
 <?php elseif ($key === 'enterprise-architecture-form'): ?>
-        <div class="form-section-label" style="margin-top:0;">
-        </div>
-        <?php foreach ($fields as $fieldName => $fieldValue):
-            $displayValue = is_array($fieldValue) ? json_encode($fieldValue) : (string) $fieldValue;
-            $isEmpty = trim($displayValue) === '' || $displayValue === '[]' || $displayValue === '""';
+        <?php
+        $eaDiagram = $fields['ea_diagram'] ?? null;
+        $eaDesc = $fields['ea_description'] ?? null;
         ?>
-        <?php if ($fieldName === 'ea_diagram' && !$isEmpty): ?>
-            <?php if (strpos($displayValue, 'data:image/') === 0): ?>
-            <div class="detail-row">
-                <div class="detail-row__key">Upload Enterprise Architecture Diagram</div>
-                <div class="detail-row__val">
-                    <div style="max-width:100%;overflow:hidden;border-radius:8px;border:1px solid #dde4ed;display:inline-block;">
-                        <img src="<?= esc($displayValue) ?>" alt="Enterprise Architecture Diagram" style="max-width:100%;max-height:400px;display:block;">
-                    </div>
-                </div>
-            </div>
-            <?php elseif (strpos($displayValue, 'data:') === 0): ?>
-            <div class="detail-row">
-                <div class="detail-row__key">Upload Enterprise Architecture Diagram</div>
-                <div class="detail-row__val">
-                    <a href="<?= esc($displayValue) ?>" target="_blank" class="btn btn-sm btn-outline-primary">
+        <?php if ($eaDiagram): ?>
+        <div class="group-header">Diagram</div>
+        <div class="detail-row">
+            <div class="detail-row__key"><?= esc(getFieldLabel($key, 'ea_diagram', $fieldLabels)) ?></div>
+            <div class="detail-row__val">
+                <?php
+                $dv = is_array($eaDiagram) ? json_encode($eaDiagram) : (string) $eaDiagram;
+                $ie = trim($dv) === '';
+                if (!$ie):
+                    if (strpos($dv, 'data:image/') === 0): ?>
+                    <a href="<?= esc($dv) ?>" target="_blank" class="btn btn-sm btn-outline-primary">
                         <i class="fa-solid fa-file"></i> View Uploaded File
                     </a>
-                </div>
-            </div>
-            <?php elseif (strpos($displayValue, 'uploads/') === 0): ?>
-            <div class="detail-row">
-                <div class="detail-row__key">Upload Enterprise Architecture Diagram</div>
-                <div class="detail-row__val">
-                    <a href="<?= esc(base_url($displayValue)) ?>" target="_blank" class="btn btn-sm btn-outline-primary">
+                    <?php elseif (strpos($dv, 'data:') === 0 || strpos($dv, 'uploads/') === 0): ?>
+                    <a href="<?= strpos($dv, 'uploads/') === 0 ? esc(base_url($dv)) : esc($dv) ?>" target="_blank" class="btn btn-sm btn-outline-primary">
                         <i class="fa-solid fa-file"></i> View Uploaded File
                     </a>
-                </div>
+                    <?php else: ?>
+                    <?= esc($dv) ?>
+                    <?php endif;
+                else: ?>
+                <span class="detail-row__val empty">Not provided</span>
+                <?php endif; ?>
             </div>
-            <?php else: ?>
-            <div class="detail-row">
-                <div class="detail-row__key">Upload Enterprise Architecture Diagram</div>
-                <div class="detail-row__val"><?= esc($displayValue) ?></div>
-            </div>
-            <?php endif; ?>
-        <?php elseif ($fieldName === 'ea_description'): ?>
-            <div class="detail-row">
-                <div class="detail-row__key">Description</div>
-                <div class="detail-row__val <?= $isEmpty ? 'empty' : '' ?>"><?= $isEmpty ? 'Not provided' : nl2br(esc($displayValue)) ?></div>
-            </div>
+        </div>
         <?php endif; ?>
-        <?php endforeach; ?>
+        <?php if ($eaDesc): ?>
+        <div class="group-header">Description</div>
+        <div class="detail-row">
+            <div class="detail-row__key"><?= esc(getFieldLabel($key, 'ea_description', $fieldLabels)) ?></div>
+            <?php
+            $dv = is_array($eaDesc) ? json_encode($eaDesc) : (string) $eaDesc;
+            $ie = trim($dv) === '';
+            ?>
+            <div class="detail-row__val <?= $ie ? 'empty' : '' ?>"><?= $ie ? 'Not provided' : nl2br(esc($dv)) ?></div>
+        </div>
+        <?php endif; ?>
 
 <?php elseif ($key === 'ict-human-capital-form'): ?>
         <?php
         $hcRows = []; $grandTotal = 0;
-        for ($i = 1; $i <= 4; $i++) {
+        $hcIndices = [];
+        foreach ($fields as $fn => $fv) {
+            if (preg_match('/^position_(\d+)$/', $fn, $m)) $hcIndices[(int) $m[1]] = true;
+        }
+        $hcMax = $hcIndices ? max(array_keys($hcIndices)) : 4;
+        for ($i = 1; $i <= $hcMax; $i++) {
             $pos = (string) ($fields['position_' . $i] ?? '');
             $stat = (string) ($fields['status_' . $i] ?? '');
             $cnt = (string) ($fields['count_' . $i] ?? '');
@@ -828,6 +818,7 @@ foreach ($sectionLabels as $key => $label):
             }
         }
         ?>
+        <div class="group-header">Staffing Table</div>
         <?php if (count($hcRows) > 0): ?>
         <table class="view-table">
             <thead>
@@ -859,15 +850,16 @@ foreach ($sectionLabels as $key => $label):
         </div>
         <?php endif; ?>
         <?php
-        // Display any other HC fields not in rows 1-4
         $extraHC = [];
         foreach ($fields as $fn => $fv) {
             if (!str_starts_with($fn, 'position_') && !str_starts_with($fn, 'status_') && !str_starts_with($fn, 'count_')) {
                 $extraHC[$fn] = $fv;
             }
         }
-        foreach ($extraHC as $fn => $fv):
-            $dl = getFieldLabel($key, $fn);
+        if (count($extraHC) > 0): ?>
+        <div class="group-header">Other Information</div>
+        <?php foreach ($extraHC as $fn => $fv):
+            $dl = getFieldLabel($key, $fn, $fieldLabels);
             $dv = is_array($fv) ? json_encode($fv) : (string) $fv;
             $ie = trim($dv) === '' || $dv === '[]' || $dv === '""';
         ?>
@@ -876,6 +868,7 @@ foreach ($sectionLabels as $key => $label):
             <div class="detail-row__val <?= $ie ? 'empty' : '' ?>"><?= $ie ? 'Not provided' : esc($dv) ?></div>
         </div>
         <?php endforeach; ?>
+        <?php endif; ?>
 
 <?php elseif ($key === 'information-systems-form'): ?>
         <?php
@@ -894,7 +887,7 @@ foreach ($sectionLabels as $key => $label):
             foreach ($secFields as $sf) {
                 if (!array_key_exists($sf, $fields)) continue;
                 $renderedIS[] = $sf;
-                $dl = getFieldLabel($key, $sf);
+                $dl = getFieldLabel($key, $sf, $fieldLabels);
                 $fv = $fields[$sf];
                 $dv = is_array($fv) ? json_encode($fv) : (string) $fv;
                 $ie = trim($dv) === '' || $dv === '[]' || $dv === '""';
@@ -905,12 +898,12 @@ foreach ($sectionLabels as $key => $label):
                 </div>';
             }
             if ($secHasData) {
-                echo '<div class="sub-header">' . esc($secTitle) . '</div>' . $secHtml;
+                echo '<div class="group-header">' . esc($secTitle) . '</div>' . $secHtml;
             }
         }
         foreach ($fields as $fn => $fv) {
             if (in_array($fn, $renderedIS)) continue;
-            $dl = getFieldLabel($key, $fn);
+            $dl = getFieldLabel($key, $fn, $fieldLabels);
             $dv = is_array($fv) ? json_encode($fv) : (string) $fv;
             $ie = trim($dv) === '' || $dv === '[]' || $dv === '""';
         ?>
@@ -922,11 +915,10 @@ foreach ($sectionLabels as $key => $label):
 
 <?php elseif ($key === 'ict-projects-form'): ?>
         <?php
-        $internalFields = []; $crossFields = []; $otherProj = [];
+        $internalFields = []; $otherProj = [];
         foreach ($fields as $fn => $fv) {
             if (str_starts_with($fn, 'internal_')) $internalFields[$fn] = $fv;
-            elseif (str_starts_with($fn, 'cross_')) $crossFields[$fn] = $fv;
-            else $otherProj[$fn] = $fv;
+            elseif (!str_starts_with($fn, 'cross_')) $otherProj[$fn] = $fv;
         }
         ?>
         <?php if (count($internalFields) > 0): ?>
@@ -940,72 +932,55 @@ foreach ($sectionLabels as $key => $label):
             'Deliverables' => ['internal_year1_deliverables','internal_year2_deliverables','internal_year3_deliverables'],
             'Implementation Details' => ['internal_implementing_unit','internal_total_cost','internal_funding_source'],
         ];
+        $checkboxGroups = ['Strategic Alignment', 'Harmonization Framework'];
         foreach ($igroups as $gTitle => $gFields):
-            $gHtml = ''; $gHasData = false;
+            $isCb = in_array($gTitle, $checkboxGroups);
+            $gHtml = ''; $gHasData = false; $cbChecked = 0; $cbTotal = count($gFields);
             foreach ($gFields as $gf) {
-                if (!array_key_exists($gf, $internalFields)) continue;
-                $dl = getFieldLabel($key, $gf);
-                $fv = $internalFields[$gf];
-                $dv = is_array($fv) ? json_encode($fv) : (string) $fv;
-                $ie = trim($dv) === '' || $dv === '[]' || $dv === '""';
-                if (!$ie) $gHasData = true;
-                if ($gf === 'internal_strategic_others') {
-                    $checked = isChecked($fv);
-                    $dv = $checked ? 'Yes' : 'No';
-                    $ie = false;
+                $dl = getFieldLabel($key, $gf, $fieldLabels);
+                if ($isCb) {
+                    $fv = $internalFields[$gf] ?? '';
+                    $checked = $fv === 'on' || $fv === '1';
+                    if ($checked) $cbChecked++;
                     $gHasData = true;
+                    if ($gf === 'internal_strategic_others') {
+                        $ot = $internalFields['internal_strategic_others_text'] ?? '';
+                        $gHtml .= '<div class="checklist-item">
+                            <div class="checklist-item__icon ' . ($checked ? 'checked' : 'unchecked') . '"><i class="fa-solid ' . ($checked ? 'fa-check-circle' : 'fa-circle') . '"></i></div>
+                            <div class="checklist-item__label' . ($checked ? '' : ' unchecked') . '">' . esc($dl) . '</div>
+                            ' . ($checked && trim($ot) !== '' ? '<div class="checklist-item__text">(' . esc($ot) . ')</div>' : '') . '
+                        </div>';
+                    } else {
+                        $gHtml .= '<div class="checklist-item">
+                            <div class="checklist-item__icon ' . ($checked ? 'checked' : 'unchecked') . '"><i class="fa-solid ' . ($checked ? 'fa-check-circle' : 'fa-circle') . '"></i></div>
+                            <div class="checklist-item__label' . ($checked ? '' : ' unchecked') . '">' . esc($dl) . '</div>
+                        </div>';
+                    }
+                } else {
+                    if (!array_key_exists($gf, $internalFields)) continue;
+                    $fv = $internalFields[$gf];
+                    $dv = is_array($fv) ? json_encode($fv) : (string) $fv;
+                    $ie = trim($dv) === '' || $dv === '[]' || $dv === '""';
+                    if (!$ie) $gHasData = true;
+                    $gHtml .= '<div class="detail-row">
+                        <div class="detail-row__key">' . esc($dl) . '</div>
+                        <div class="detail-row__val' . ($ie ? ' empty' : '') . '">' . ($ie ? 'Not provided' : esc($dv)) . '</div>
+                    </div>';
                 }
-                $gHtml .= '<div class="detail-row">
-                    <div class="detail-row__key">' . esc($dl) . '</div>
-                    <div class="detail-row__val' . ($ie ? ' empty' : '') . '">' . ($ie ? 'Not provided' : esc($dv)) . '</div>
-                </div>';
             }
-            if ($gHasData) echo '<div style="font-size:.76rem;font-weight:700;color:var(--muted);margin:8px 0 4px;">' . esc($gTitle) . '</div>' . $gHtml;
+            if ($gHasData) {
+                $gTitleHtml = $isCb ? esc($gTitle) . ' <span class="checklist-count">' . $cbChecked . '/' . $cbTotal . '</span>' : esc($gTitle);
+                echo '<div class="group-header">' . $gTitleHtml . '</div>' . $gHtml;
+            }
         endforeach;
         ?>
         <?php endif; ?>
 
-        <?php if (count($crossFields) > 0): ?>
-        <div class="sub-header" style="<?= count($internalFields) > 0 ? 'margin-top:24px;padding-top:16px;border-top:2px solid #e8ecf1;' : '' ?>">
-            <i class="fa-solid fa-handshake me-1"></i> E.2 Cross-Agency ICT Projects
-        </div>
-        <?php
-        $cgroups = [
-            'Project Details' => ['cross_project_title','cross_description','cross_objectives','cross_lead_agency','cross_implementing_agency'],
-            'Strategic Alignment' => ['cross_strategic_pip','cross_strategic_ncp','cross_strategic_egov','cross_strategic_pcb','cross_strategic_others','cross_strategic_others_text'],
-            'Harmonization Framework' => ['cross_harmonization_1','cross_harmonization_2','cross_harmonization_3','cross_harmonization_4','cross_harmonization_5'],
-            'Duration' => ['cross_start_date','cross_end_date'],
-            'Deliverables' => ['cross_year1_deliverables','cross_year2_deliverables','cross_year3_deliverables'],
-            'Implementation Details' => ['cross_implementing_unit','cross_total_cost','cross_funding_source'],
-        ];
-        foreach ($cgroups as $gTitle => $gFields):
-            $gHtml = ''; $gHasData = false;
-            foreach ($gFields as $gf) {
-                if (!array_key_exists($gf, $crossFields)) continue;
-                $dl = getFieldLabel($key, $gf);
-                $fv = $crossFields[$gf];
-                $dv = is_array($fv) ? json_encode($fv) : (string) $fv;
-                $ie = trim($dv) === '' || $dv === '[]' || $dv === '""';
-                if (!$ie) $gHasData = true;
-                if ($gf === 'cross_strategic_others') {
-                    $checked = isChecked($fv);
-                    $dv = $checked ? 'Yes' : 'No';
-                    $ie = false;
-                    $gHasData = true;
-                }
-                $gHtml .= '<div class="detail-row">
-                    <div class="detail-row__key">' . esc($dl) . '</div>
-                    <div class="detail-row__val' . ($ie ? ' empty' : '') . '">' . ($ie ? 'Not provided' : esc($dv)) . '</div>
-                </div>';
-            }
-            if ($gHasData) echo '<div style="font-size:.76rem;font-weight:700;color:var(--muted);margin:8px 0 4px;">' . esc($gTitle) . '</div>' . $gHtml;
-        endforeach;
-        ?>
-        <?php endif; ?>
+
 
         <?php if (count($otherProj) > 0): ?>
         <?php foreach ($otherProj as $fn => $fv):
-            $dl = getFieldLabel($key, $fn);
+            $dl = getFieldLabel($key, $fn, $fieldLabels);
             $dv = is_array($fv) ? json_encode($fv) : (string) $fv;
             $ie = trim($dv) === '' || $dv === '[]' || $dv === '""';
         ?>
@@ -1018,43 +993,110 @@ foreach ($sectionLabels as $key => $label):
 
 <?php elseif ($key === 'performance-measurement-form'): ?>
         <?php
+        // Support both flat keys (internal_projects[1][kpi][intermediate][indicator])
+        // and nested arrays (internal_projects => [1 => [kpi => [...]]])
+        $pmLevels = ['intermediate' => 'Intermediate Outcome', 'immediate' => 'Immediate Outcome', 'output' => 'Output'];
+        $pmCols = ['indicator' => 'Key Performance Indicators', 'baseline' => 'Baseline Data', 'target' => 'Targets', 'method' => 'Data Collection Method', 'responsibility' => 'Responsibility'];
+
+        // Parse flat keys into structured project data
+        function parsePmFlat($fields, $prefix) {
+            $projects = [];
+            foreach ($fields as $fn => $fv) {
+                if (preg_match('/^' . preg_quote($prefix) . '\[(\d+)\]\[kpi\]\[(\w+)\]\[(\w+)\]$/', $fn, $m)) {
+                    $projects[(int)$m[1]][$m[2]][$m[3]] = $fv;
+                }
+            }
+            return $projects;
+        }
+
         $internalKpi = $fields['internal_projects'] ?? null;
         $crossKpi = $fields['cross_projects'] ?? null;
-        $additionalProjects = [];
-        foreach ($fields as $fn => $fv) {
-            if (str_starts_with($fn, 'projects') || $fn === 'projects') {
-                $additionalProjects[$fn] = $fv;
-            }
-        }
-        $seenKpi = ['internal_projects' => true, 'cross_projects' => true];
-        ?>
-        <?php if ($internalKpi && is_array($internalKpi)):
-            $kpiHtml = kpiTableHtml('internal', $internalKpi, []);
-            if ($kpiHtml): ?>
-        <div class="sub-header"><i class="fa-solid fa-building me-1"></i> F.1 Internal ICT Projects - KPI</div>
-        <?= $kpiHtml ?>
-        <?php endif; endif; ?>
 
-        <?php if ($crossKpi && is_array($crossKpi)):
-            $kpiHtml = kpiTableHtml('cross', $crossKpi, []);
-            if ($kpiHtml): ?>
-        <div class="sub-header" style="margin-top:20px;padding-top:16px;border-top:2px solid #e8ecf1;">
-            <i class="fa-solid fa-handshake me-1"></i> F.2 Cross-Agency ICT Projects - KPI
-        </div>
-        <?= $kpiHtml ?>
-        <?php endif; endif; ?>
+        // If nested structure not found, try flat keys
+        if (!is_array($internalKpi)) {
+            $internalKpi = parsePmFlat($fields, 'internal_projects');
+            $internalKpi = empty($internalKpi) ? null : ['kpi' => reset($internalKpi)];
+        }
+        if (!is_array($crossKpi)) {
+            $crossKpi = parsePmFlat($fields, 'cross_projects');
+            $crossKpi = empty($crossKpi) ? null : ['kpi' => reset($crossKpi)];
+        }
+
+        function renderKpiTable($kpiData) {
+            if (!is_array($kpiData)) return '';
+            $levels = ['intermediate' => 'INTERMEDIATE OUTCOME', 'immediate' => 'IMMEDIATE OUTCOME', 'output' => 'OUTPUT'];
+            $cols = ['indicator' => 'Key Performance Indicators', 'baseline' => 'Baseline Data', 'target' => 'Targets', 'method' => 'Data Collection Method', 'responsibility' => 'Responsibility'];
+            $kpi = $kpiData['kpi'] ?? $kpiData;
+            if (!is_array($kpi) || empty($kpi)) return '';
+            $html = '<table class="view-table"><thead><tr><th>Hierarchy of Targeted Results</th>';
+            foreach ($cols as $cl) $html .= '<th>' . $cl . '</th>';
+            $html .= '</tr></thead><tbody>';
+            $hasData = false;
+            foreach ($levels as $lk => $lv) {
+                $row = $kpi[$lk] ?? [];
+                if (!is_array($row)) continue;
+                $cells = []; $rowHasData = false;
+                foreach ($cols as $ck => $cl) {
+                    $v = $row[$ck] ?? '';
+                    $v = trim((string) (is_array($v) ? json_encode($v) : $v));
+                    if ($v !== '') $rowHasData = true;
+                    $cells[] = $v;
+                }
+                if (!$rowHasData) continue;
+                $hasData = true;
+                $html .= '<tr><td class="row-label">' . $lv . '</td>';
+                foreach ($cells as $cell) {
+                    $html .= '<td>' . ($cell !== '' ? esc($cell) : '<span style="color:#c5ccd6;font-style:italic;">Not provided</span>') . '</td>';
+                }
+                $html .= '</tr>';
+            }
+            if (!$hasData) return '';
+            $html .= '</tbody></table>';
+            return $html;
+        }
+
+        $internalHtml = renderKpiTable($internalKpi);
+        $crossHtml = renderKpiTable($crossKpi);
+        ?>
+        <?php if ($internalHtml): ?>
+        <div class="sub-header"><i class="fa-solid fa-building me-1"></i> F.1 Internal ICT Projects - KPI</div>
+        <?= $internalHtml ?>
+        <?php endif; ?>
 
         <?php
-        // Render additional dynamic projects
-        if (isset($fields['projects']) && is_array($fields['projects'])):
-            foreach ($fields['projects'] as $projIdx => $projData):
-                if (!is_array($projData)) continue;
-                $title = $projData['title'] ?? ('Project ' . $projIdx);
-                $projTitle = is_string($title) ? $title : 'Project ' . $projIdx;
-                $kpiData = $projData['kpi'] ?? [];
+        // Handle additional dynamic projects (projects[2][title], projects[2][kpi][1][hierarchy], etc.)
+        $pmProjects = [];
+        foreach ($fields as $fn => $fv) {
+            if (preg_match('/^projects\[(\d+)\]\[(.+)\]$/', $fn, $m)) {
+                $pmProjects[(int)$m[1]][$m[2]] = $fv;
+            }
+        }
+        // Also check for nested projects array
+        if (empty($pmProjects) && isset($fields['projects']) && is_array($fields['projects'])) {
+            $pmProjects = $fields['projects'];
+        }
+        foreach ($pmProjects as $projIdx => $projData):
+            $title = $projData['title'] ?? ('Project ' . $projIdx);
+            $projTitle = is_string($title) ? $title : 'Project ' . $projIdx;
         ?>
         <div class="kpi-project-title"><?= esc($projTitle) ?></div>
-        <?php if (is_array($kpiData) && !empty($kpiData)): ?>
+        <?php
+            // Collect KPI rows from either flat key or nested structure
+            $kpiRows = [];
+            if (isset($projData['kpi']) && is_array($projData['kpi'])) {
+                $kpiRows = $projData['kpi'];
+            } else {
+                // Parse flat keys: projects[2][kpi][1][hierarchy] => projects[2][kpi][1] => { hierarchy, indicator, ... }
+                $projKpi = [];
+                foreach ($projData as $k => $v) {
+                    if (preg_match('/^kpi\[(\d+)\]\[(\w+)\]$/', $k, $m)) {
+                        $projKpi[(int)$m[1]][$m[2]] = $v;
+                    }
+                }
+                $kpiRows = $projKpi;
+            }
+            if (!empty($kpiRows)):
+        ?>
         <table class="view-table">
             <thead>
                 <tr>
@@ -1067,7 +1109,7 @@ foreach ($sectionLabels as $key => $label):
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($kpiData as $kpiIdx => $kpiRow):
+                <?php foreach ($kpiRows as $kpiRow):
                     if (!is_array($kpiRow)) continue;
                     $h = (string) ($kpiRow['hierarchy'] ?? '');
                     $ind = (string) ($kpiRow['indicator'] ?? '');
@@ -1088,22 +1130,7 @@ foreach ($sectionLabels as $key => $label):
                 <?php endforeach; ?>
             </tbody>
         </table>
-        <?php endif; endforeach; endif; ?>
-
-        <?php
-        // Remaining flat fields
-        foreach ($fields as $fn => $fv) {
-            if (in_array($fn, ['internal_projects', 'cross_projects', 'projects'])) continue;
-            if (str_starts_with($fn, 'projects[')) continue;
-            $dl = getFieldLabel($key, $fn);
-            $dv = is_array($fv) ? json_encode($fv) : (string) $fv;
-            $ie = trim($dv) === '' || $dv === '[]' || $dv === '""';
-        ?>
-        <div class="detail-row">
-            <div class="detail-row__key"><?= esc($dl) ?></div>
-            <div class="detail-row__val <?= $ie ? 'empty' : '' ?>"><?= $ie ? 'Not provided' : esc($dv) ?></div>
-        </div>
-        <?php } ?>
+        <?php endif; endforeach; ?>
 
 <?php endif; ?>
 
@@ -1111,7 +1138,24 @@ foreach ($sectionLabels as $key => $label):
 </div>
 <?php $firstSection = false; endforeach; ?>
 
+<div class="custom-modal" id="endorseModal" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:1060;background:#fff;border-radius:6px;box-shadow:0 18px 40px rgba(15,23,42,.18);min-width:320px;max-width:400px;overflow:hidden;">
+    <div style="background:#536783;color:#fff;padding:12px 14px;font-size:.94rem;font-weight:700;"><i class="fa-solid fa-check-circle me-2" style="color:#4ade80;"></i> Endorse to Director General</div>
+    <div style="padding:14px 14px;font-size:.82rem;color:#1f2a3a;"><p class="mb-0">Are you sure you want to endorse this project to the Director General for approval?</p></div>
+    <div style="padding:8px 12px;border-top:1px solid #e1e6ee;display:flex;justify-content:flex-end;gap:8px;">
+        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="closeCustomModals()">Cancel</button>
+        <form method="post" id="actionEndorseForm" action="" class="d-inline">
+            <?= csrf_field() ?>
+            <button type="submit" class="btn btn-primary btn-sm">Endorse</button>
+        </form>
+    </div>
+</div>
+
 <script>
+function openEndorseModal(projectId) {
+    document.getElementById('actionEndorseForm').action = '<?= site_url('ict-planner/endorse/') ?>' + projectId;
+    showCustomModal('endorseModal');
+}
+
 function toggleSection(header) {
     var body = header.nextElementSibling;
     var toggle = header.querySelector('.form-section__toggle');

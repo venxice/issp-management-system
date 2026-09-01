@@ -131,13 +131,11 @@ class ResourceRequirementsController extends BaseController
         public function store()
         {
 
-        dd($this->request->getPost());
-
         $this->model->save([
-        'year'                  => 1,
+        'year'                  => $this->request->getPost('year') ?? 1,
         'strategic_category'    => $this->request->getPost('strategic_category'),
         'item'                  => $this->request->getPost('item'),
-        'office'       => $this->request->getPost('office'),
+        'office_location'       => $this->request->getPost('office'),
         'uacs_code'           => $this->request->getPost('uacs_code'),
         'fund_source'             => $this->request->getPost('fund_source'),
         'unit_cost'       => $this->request->getPost('unit_cost'),
@@ -160,7 +158,7 @@ public function update()
 
         'strategic_category'    => $this->request->getPost('strategic_category'),
         'item'                  => $this->request->getPost('item'),
-        'office'       => $this->request->getPost('office'),
+        'office_location'       => $this->request->getPost('office'),
         'fund_source'           => $this->request->getPost('fund_source'),
         'unit_cost'             => $this->request->getPost('unit_cost'),
         'physical_target'       => $this->request->getPost('physical_target'),
