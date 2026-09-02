@@ -29,9 +29,8 @@
             </div>
             <div class="status-tabs d-flex align-items-center gap-1 px-3 pt-3 pb-3" style="background:#f8f9fa;border-bottom:1px solid #e9ecef;">
                 <a href="<?= site_url('director-general/approved-projects?' . http_build_query(array_filter(['q' => $query, 'date_range' => $date_range]))) ?>" class="btn btn-sm <?= $statusFilter === '' ? 'btn-primary' : 'btn-outline-secondary' ?>">All</a>
-                <a href="<?= site_url('director-general/approved-projects?' . http_build_query(array_filter(['status' => 'approved', 'q' => $query, 'date_range' => $date_range]))) ?>" class="btn btn-sm <?= $statusFilter === 'approved' ? 'btn-primary' : 'btn-outline-secondary' ?>">Approved (<?= $statusCounts['approved'] ?>)</a>
-                <a href="<?= site_url('director-general/approved-projects?' . http_build_query(array_filter(['status' => 'rejected', 'q' => $query, 'date_range' => $date_range]))) ?>" class="btn btn-sm <?= $statusFilter === 'rejected' ? 'btn-primary' : 'btn-outline-secondary' ?>">Rejected (<?= $statusCounts['rejected'] ?>)</a>
-
+                <a href="<?= site_url('director-general/approved-projects?' . http_build_query(array_filter(['status' => 'approved', 'q' => $query, 'date_range' => $date_range]))) ?>" class="btn btn-sm <?= $statusFilter === 'approved' ? 'btn-success' : 'btn-outline-success' ?>">Approved (<?= $statusCounts['approved'] ?>)</a>
+                <a href="<?= site_url('director-general/approved-projects?' . http_build_query(array_filter(['status' => 'rejected', 'q' => $query, 'date_range' => $date_range]))) ?>" class="btn btn-sm <?= $statusFilter === 'rejected' ? 'btn-danger' : 'btn-outline-danger' ?>">Rejected (<?= $statusCounts['rejected'] ?>)</a>
             </div>
             <div id="bulkBar" class="bulk-bar" style="display:none;">
                 <div class="bulk-bar-inner">
@@ -222,6 +221,35 @@
 .flatpickr-months .flatpickr-month, .flatpickr-current-month .flatpickr-monthDropdown-months, .flatpickr-current-month input.cur-year { font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif; font-weight: 600; }
 .flatpickr-weekday { font-weight: 600; }
 .flatpickr-day.today { border-color: #4f6584; }
+
+.status-tabs .btn-success {
+    --bs-btn-bg: #166534;
+    --bs-btn-border-color: #166534;
+    --bs-btn-hover-bg: #14532d;
+    --bs-btn-hover-border-color: #14532d;
+    --bs-btn-color: #fff;
+}
+.status-tabs .btn-outline-success {
+    --bs-btn-color: #166534;
+    --bs-btn-border-color: #bbf7d0;
+    --bs-btn-hover-bg: #dcfce7;
+    --bs-btn-hover-border-color: #86efac;
+    --bs-btn-hover-color: #14532d;
+}
+.status-tabs .btn-danger {
+    --bs-btn-bg: #991b1b;
+    --bs-btn-border-color: #991b1b;
+    --bs-btn-hover-bg: #7f1d1d;
+    --bs-btn-hover-border-color: #7f1d1d;
+    --bs-btn-color: #fff;
+}
+.status-tabs .btn-outline-danger {
+    --bs-btn-color: #991b1b;
+    --bs-btn-border-color: #fecaca;
+    --bs-btn-hover-bg: #fee2e2;
+    --bs-btn-hover-border-color: #fca5a5;
+    --bs-btn-hover-color: #7f1d1d;
+}
 </style>
 
 <script>
