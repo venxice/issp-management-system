@@ -55,6 +55,8 @@ $routes->group('director-general', ['filter' => 'role:director_general'], static
     $routes->post('approve/(:num)', 'DirectorGeneral\DashboardController::approve/$1');
     $routes->post('reject/(:num)', 'DirectorGeneral\DashboardController::reject/$1');
     $routes->post('return/(:num)', 'DirectorGeneral\DashboardController::return/$1');
+    $routes->get('pending-approval', 'DirectorGeneral\PendingApprovalController::index');
+    $routes->get('approved-projects', 'DirectorGeneral\ApprovedProjectsController::index');
 });
 
 $routes->group('employee', ['filter' => 'role:employee'], static function (RouteCollection $routes): void {

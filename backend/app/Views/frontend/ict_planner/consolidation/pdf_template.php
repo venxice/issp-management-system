@@ -132,9 +132,6 @@ $rY2 = $formData['year2-requirements-form'] ?? [];
 $rY3 = $formData['year3-requirements-form'] ?? [];
 $summaryData = $formData['summary-of-investments-form'] ?? [];
 $batchMode = $batchMode ?? false;
-<<<<<<< Updated upstream
-if (!$batchMode):
-=======
 $scanMode = $scanMode ?? false;
 $pageNumbers = $pageNumbers ?? [];
 
@@ -197,7 +194,6 @@ foreach ($pmProjects as $pk => $pl) {
 foreach ($pmProjects as $pk => $pl): $kpi = is_array($pmParsed[$pk] ?? null) ? ($pmParsed[$pk]['kpi'] ?? $pmParsed[$pk]) : [];
 if (is_array($kpi)) { foreach ($levels as $lk => $lv) { $row = $kpi[$lk] ?? []; if (!is_array($row)) continue; foreach ($cols as $ck => $cl) { if (!isEmpty($row[$ck] ?? '')) { $hasPm = true; break 3; } } } } endforeach;
 $hasRes = !empty($rY1) || !empty($rY2) || !empty($rY3);
->>>>>>> Stashed changes
 ?>
 <!DOCTYPE html>
 <html>
@@ -642,65 +638,7 @@ function renderDiagramPdf($imgSrc, $label) {
     <tr><td colspan="2" class="empty">No internal ICT project data provided.</td></tr>
     <?php endif; ?>
 </table>
-<?php else: ?>
-<table><tr><td class="empty-field" style="text-align:center;">No cross-agency ICT project data provided.</td></tr></table>
-<?php endif; ?>
 
-<<<<<<< Updated upstream
-<!-- F. PERFORMANCE MEASUREMENT FRAMEWORK -->
-<div class="sec">F. PERFORMANCE MEASUREMENT FRAMEWORK</div>
-
-<?php
-$pmProjects = ['internal_projects' => 'INTERNAL ICT PROJECTS', 'cross_projects' => 'CROSS-AGENCY ICT PROJECTS'];
-$levels = ['intermediate' => 'INTERMEDIATE OUTCOME', 'immediate' => 'IMMEDIATE OUTCOME', 'output' => 'OUTPUT'];
-$cols = ['indicator' => 'Key Performance Indicators', 'baseline' => 'Baseline Data', 'target' => 'Targets', 'method' => 'Data Collection Methods', 'responsibility' => 'Responsibility'];
-$hasPm = false;
-
-foreach ($pmProjects as $pk => $pl):
-    $kpData = $pm[$pk] ?? null;
-    $kpi = is_array($kpData) ? ($kpData['kpi'] ?? $kpData) : [];
-    $hasKpi = false;
-    if (is_array($kpi)) {
-        foreach ($levels as $lk => $lv) {
-            $row = $kpi[$lk] ?? [];
-            if (!is_array($row)) continue;
-            foreach ($cols as $ck => $cl) {
-                $cv = v($row[$ck] ?? '');
-                if ($cv !== '') { $hasKpi = true; $hasPm = true; break 2; }
-            }
-        }
-    }
-?>
-
-<div class="subsec2"><?= htmlspecialchars($pl) ?></div>
-<?php if ($hasKpi): ?>
-<div class="subsec-center">KEY PERFORMANCE INDICATORS (KPIs)</div>
-<table>
-    <tr>
-        <th style="width:16%;">Hierarchy of Targeted Results</th>
-        <?php foreach ($cols as $cl): ?>
-        <th><?= htmlspecialchars($cl) ?></th>
-        <?php endforeach; ?>
-    </tr>
-    <?php foreach ($levels as $lk => $lv):
-        $row = $kpi[$lk] ?? [];
-        if (!is_array($row)) continue;
-        $cells = []; $rowHas = false;
-        foreach ($cols as $ck => $cl) {
-            $cv = v($row[$ck] ?? '');
-            if ($cv !== '') $rowHas = true;
-            $cells[] = $cv;
-        }
-        if (!$rowHas) continue;
-    ?>
-    <tr>
-        <td style="font-weight:bold;"><?= htmlspecialchars($lv) ?></td>
-        <?php foreach ($cells as $cell): ?>
-        <td><?= $cell !== '' ? $cell : '<span class="empty-field">-</span>' ?></td>
-        <?php endforeach; ?>
-    </tr>
-    <?php endforeach; ?>
-=======
 <?= scanMarker('part3_d') ?>
 <div class="section-heading">D. PROPOSED INFORMATION SYSTEMS</div>
 <table class="dt dt-d">
@@ -806,7 +744,6 @@ if (is_array($kpi)) { foreach ($levels as $lk => $lv) { $row = $kpi[$lk] ?? []; 
     <?php endforeach; endforeach; ?>
     <tr><td colspan="6" class="gt" style="text-align:right;">GRAND TOTAL</td><td class="r gt"><?= number_format($yrT, 2) ?></td></tr>
     <?php else: ?><tr><td colspan="7" class="empty">No resource requirements data for this year.</td></tr><?php endif; ?>
->>>>>>> Stashed changes
 </table>
 <?php endforeach; ?>
 
