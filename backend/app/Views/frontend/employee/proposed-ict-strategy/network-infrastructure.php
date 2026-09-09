@@ -574,6 +574,29 @@
     background: #6c757d;
     color: #fff;
 }
+
+.network-fields {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 12px 18px !important;
+}
+
+.network-fields > .col-md-6 {
+    width: auto !important;
+    max-width: none !important;
+}
+
+.network-fields > .col-md-12 {
+    width: auto !important;
+    max-width: none !important;
+    grid-column: 1 / -1;
+}
+
+@media (max-width: 768px) {
+    .network-fields > .col-md-6 {
+        width: 100%;
+    }
+}
 </style>
 <style>
 .file-preview {
@@ -640,17 +663,18 @@
                         A.1 Department-wide Connectivity
                     </div>
                     
-                    <div class="row g-3 mb-4">
+                  <div class="row g-3 mb-4 network-fields">
                         <div class="col-md-12">
                             <div class="file-upload-area">
-                                <i class="fa-solid fa-cloud-arrow-up"></i>
-                                <p>Upload network architecture diagram showing connectivity among attached agencies</p>
-                                <div class="upload-wrapper">
-                                    <input type="file" class="form-control mt-2" name="dept_network_diagram" accept="image/*,.pdf" onchange="window.uploadFileInput(this)">
+                            <input type="file"
+       class="form-control mt-2"
+       name="dept_network_diagram"
+       accept="image/*,.jpg"
+       data-upload-url="<?= site_url('employee/upload-file') ?>"
+       onchange="window.uploadFileInput(this)">
                                     <span class="upload-status" style="font-size:.72rem;margin-top:4px;display:block;"></span>
                                 </div>
                             </div>
-                        </div>
                         
                         <div class="col-md-6">
                             <label class="form-label">Connectivity Type</label>
@@ -703,7 +727,12 @@
                                 <i class="fa-solid fa-cloud-arrow-up"></i>
                                 <p>Upload network architecture diagram showing connectivity to branches/regional offices</p>
                                 <div class="upload-wrapper">
-                                    <input type="file" class="form-control mt-2" name="regional_network_diagram" accept="image/*,.pdf" onchange="window.uploadFileInput(this)">
+                                    <input type="file"
+       class="form-control mt-2"
+       name="regional_network_diagram"
+       accept="image/*,.jpg"
+       data-upload-url="<?= site_url('employee/upload-file') ?>"
+       onchange="window.uploadFileInput(this)">
                                     <span class="upload-status" style="font-size:.72rem;margin-top:4px;display:block;"></span>
                                 </div>
                             </div>

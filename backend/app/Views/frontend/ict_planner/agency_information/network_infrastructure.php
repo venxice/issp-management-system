@@ -527,10 +527,16 @@
 }
 
 .control-checkbox {
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
     cursor: pointer;
     accent-color: var(--brand);
+    transition: opacity 0.2s ease;
+}
+
+.control-checkbox:checked {
+    opacity: 0.45;
+    cursor: default;
 }
 
 .control-label {
@@ -636,15 +642,15 @@
                                 <p>Upload network architecture diagram showing connectivity among attached agencies</p>
                                 <div class="upload-wrapper">
                                     <input type="file"
-                                           class="form-control mt-2"
-                                            name="dept_network_diagram"
-                                             accept="image/*,.pdf"
-                                             data-upload-url="<?= site_url(
-                                               session('role_slug') === 'ict_planner'
-                                                ? 'ict-planner/upload-file'
-                                                : 'employee/upload-file'
-                                                                 ) ?>"
-                                          onchange="window.uploadFileInput(this)">
+       class="form-control mt-2"
+       name="dept_network_diagram"
+       accept="image/*,.pdf"
+       data-upload-url="<?= site_url(
+           session('role_slug') === 'employee'
+               ? 'ict-planner/upload-file'
+               : 'employee/upload-file'
+       ) ?>"
+       onchange="window.uploadFileInput(this)">
                                     <span class="upload-status" style="font-size:.72rem;margin-top:4px;display:block;"></span>
                                 </div>
                             </div>
@@ -701,16 +707,16 @@
                                 <i class="fa-solid fa-cloud-arrow-up"></i>
                                 <p>Upload network architecture diagram showing connectivity to branches/regional offices</p>
                                 <div class="upload-wrapper">
-                                    <input type="file"
-                                        class="form-control mt-2"
-                                name="regional_network_diagram"
-                                      accept="image/*,.pdf"
-                                       data-upload-url="<?= site_url(
-                                      session('role_slug') === 'ict_planner'
-                                         ? 'ict-planner/upload-file'
-                                            : 'employee/upload-file'
-                                                             ) ?>"
-                                          onchange="window.uploadFileInput(this)">
+                                   <input type="file"
+       class="form-control mt-2"
+       name="regional_network_diagram"
+       accept="image/*,.pdf"
+       data-upload-url="<?= site_url(
+           session('role_slug') === 'employee'
+               ? 'ict-planner/upload-file'
+               : 'employee/upload-file'
+       ) ?>"
+       onchange="window.uploadFileInput(this)">
                                     <span class="upload-status" style="font-size:.72rem;margin-top:4px;display:block;"></span>
                                 </div>
                             </div>
@@ -1247,6 +1253,20 @@ document.addEventListener('DOMContentLoaded', function() {
         );
 
     });
+
+    // Lock checkbox after it has been checked
+allCheckboxes.forEach(function(checkbox) {
+
+    checkbox.addEventListener('click', function(e) {
+
+        // If already checked, don't allow it to be unchecked
+        if (this.checked) {
+            e.preventDefault();
+        }
+
+    });
+
+});
 
 
     // ==========================================

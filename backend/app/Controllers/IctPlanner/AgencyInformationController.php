@@ -7,12 +7,21 @@ use App\Models\AgencyInformationModel;
 
 class AgencyInformationController extends BaseController
 {
-    private function loadAgencyData(): array
-    {
-        $model = new AgencyInformationModel();
-        $record = $model->getByUser((int) session()->get('user_id'));
-        return $record ?? [];
+    private function loadAgencyData(?int $userId = null): array
+{
+    $model = new AgencyInformationModel();
+
+    if ($userId === null) {
+        $userId = (int) session()->get('user_id');
     }
+
+    $record = $model
+        ->where('created_by', $userId)
+        ->orderBy('id', 'DESC')
+        ->first();
+
+    return $record ?? [];
+}
 
     private function saveSection(array $fields, string $redirectRoute, string $successMessage)
     {
@@ -114,37 +123,57 @@ public function savestrategicConcerns()
 {
     $model = new AgencyInformationModel();
 
-    $ooMfo = $this->request->getPost('concerns_oo_so_mfo') ?? [];
-    $critical = $this->request->getPost('concerns_critical') ?? [];
-    $problem = $this->request->getPost('concerns_problem') ?? [];
-    $intended = $this->request->getPost('concerns_intended_use') ?? [];
+    // Get the complete nested concerns array from the form
+    $concerns = $this->request->getPost('concerns');
 
-    $concerns = [];
-
-    $rowCount = max(
-        count($ooMfo),
-        count($critical),
-        count($problem),
-        count($intended)
-    );
-
-    for ($i = 0; $i < $rowCount; $i++) {
-
-        $concerns[] = [
-            'oo_so_mfo'     => $ooMfo[$i] ?? '',
-            'critical'      => $critical[$i] ?? '',
-            'problem'       => $problem[$i] ?? '',
-            'intended_use'  => $intended[$i] ?? '',
-        ];
+    if (!is_array($concerns)) {
+        $concerns = [];
     }
 
-    $model->upsert((int) session()->get('user_id'), [
-        'strategic_concerns_data' => json_encode($concerns),
-    ]);
+    $userId = (int) session()->get('user_id');
+
+    if ($userId <= 0) {
+        return redirect()
+            ->back()
+            ->with('error', 'User session not found.');
+    }
+
+    // Get existing agency_information record for this user
+    $record = $model
+        ->where('created_by', $userId)
+        ->orderBy('id', 'DESC')
+        ->first();
+
+    // Save the form exactly as submitted
+    $jsonData = json_encode(
+        $concerns,
+        JSON_UNESCAPED_UNICODE |
+        JSON_UNESCAPED_SLASHES
+    );
+
+    if ($record) {
+
+        $model->update(
+            $record['id'],
+            [
+                'strategic_concerns_data' => $jsonData,
+            ]
+        );
+
+    } else {
+
+        $model->insert([
+            'created_by' => $userId,
+            'strategic_concerns_data' => $jsonData,
+        ]);
+    }
 
     return redirect()
         ->to('ict-planner/agency-information/strategic-concerns')
-        ->with('success', 'Strategic concerns saved successfully.');
+        ->with(
+            'success',
+            'Strategic concerns saved successfully.'
+        );
 }
 
     public function networkInfrastructure()

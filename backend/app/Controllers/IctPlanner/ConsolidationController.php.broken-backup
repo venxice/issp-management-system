@@ -368,7 +368,6 @@ $total = $pager->getTotal();
         ? $record
         : [];
 }
-
     /**
      * ============================================================
      * DOWNLOAD SINGLE PDF
@@ -384,15 +383,32 @@ $total = $pager->getTotal();
             );
         }
 
+        /*
+         * Get all saved form data.
+         */
         $formData = $this->extractFormData($project);
 
-        // Resource Requirements are project-specific.
-        $resourceData = $this->loadResourceData((int) $id);
+        /*
+         * IMPORTANT:
+         * Keep this.
+         *
+         * This loads Year 1, Year 2, Year 3 and all
+         * resource summaries for THIS ISSP record.
+         */
+        $resourceData = $this->loadResourceData(
+            (int) $id
+        );
 
-        // Strategic Concerns and E-Government Programs
-        // are maintained at the agency level by the ICT Planner.
-        $agencyData = $this->loadAgencyData();
+        /*
+         * Load agency information belonging to
+         * the user who created the ISSP.
+         */
+       $agencyData = $this->loadAgencyData();
 
+
+        /*
+         * PDF view data.
+         */
         $viewData = [
             'project'      => $project,
             'formData'     => $formData,
@@ -401,29 +417,63 @@ $total = $pager->getTotal();
             'batchMode'    => false,
         ];
 
+        /*
+         * Render HTML.
+         */
         $html = view(
             'frontend/ict_planner/consolidation/pdf_template',
             $viewData
         );
 
+        /*
+         * Dompdf configuration.
+         */
         $options = new Options();
-        $options->set('isRemoteEnabled', true);
-        $options->set('isHtml5ParserEnabled', true);
-        $options->set('defaultFont', 'DejaVu Sans');
+
+        $options->set(
+            'isRemoteEnabled',
+            true
+        );
+
+        $options->set(
+            'isHtml5ParserEnabled',
+            true
+        );
+
+        $options->set(
+            'defaultFont',
+            'DejaVu Sans'
+        );
 
         $dompdf = new Dompdf($options);
 
         $dompdf->loadHtml($html);
-        $dompdf->setPaper('A4', 'landscape');
+
+        /*
+         * PDF template is designed as LANDSCAPE.
+         */
+        $dompdf->setPaper(
+            'A4',
+            'landscape'
+        );
+
         $dompdf->render();
 
+        /*
+         * Safe filename.
+         */
         $title = trim(
             (string) (
-                $project['title'] ?? 'ISSP Submission'
+                $project['title']
+                ?? 'ISSP Submission'
             )
         );
 
-        $filename = preg_replace('/\s+/', '_', $title);
+        $filename = preg_replace(
+            '/\s+/',
+            '_',
+            $title
+        );
 
         $filename = preg_replace(
             '/[^A-Za-z0-9_\-]/',
@@ -435,11 +485,16 @@ $total = $pager->getTotal();
             $filename = 'ISSP_Submission';
         }
 
-        $filename .= '_' . (int) $id . '.pdf';
+        $filename .= '_' . $id . '.pdf';
 
+        /*
+         * Stream PDF.
+         */
         $dompdf->stream(
             $filename,
-            ['Attachment' => true]
+            [
+                'Attachment' => true,
+            ]
         );
 
         exit;
@@ -454,8 +509,15 @@ $total = $pager->getTotal();
     {
         $projectIds = $this->request->getPost('project_ids');
 
+        /*
+         * Accept JSON array as well.
+         */
         if (is_string($projectIds)) {
-            $decoded = json_decode($projectIds, true);
+
+            $decoded = json_decode(
+                $projectIds,
+                true
+            );
 
             if (is_array($decoded)) {
                 $projectIds = $decoded;
@@ -466,6 +528,9 @@ $total = $pager->getTotal();
             $projectIds = [];
         }
 
+        /*
+         * Clean IDs.
+         */
         $projectIds = array_values(
             array_filter(
                 array_map(
@@ -479,6 +544,7 @@ $total = $pager->getTotal();
         );
 
         if (empty($projectIds)) {
+
             return $this->response
                 ->setStatusCode(400)
                 ->setJSON([
@@ -487,146 +553,60 @@ $total = $pager->getTotal();
                 ]);
         }
 
+        /*
+         * Temporary PDF directory.
+         */
         $tempDir = WRITEPATH . 'uploads/issp_batch';
 
         if (!is_dir($tempDir)) {
-            mkdir($tempDir, 0775, true);
+
+            mkdir(
+                $tempDir,
+                0775,
+                true
+            );
         }
 
         $pdfFiles = [];
 
+        /*
+         * ========================================================
+         * IMPORTANT:
+         * Each project gets its OWN:
+         *
+         * - project
+         * - formData
+         * - resourceData
+         * - agencyData
+         *
+         * DO NOT load resourceData before this loop.
+         * ========================================================
+         */
         foreach ($projectIds as $id) {
 
-            $project = $this->loadProject((int) $id);
+            $project = $this->loadProject(
+                (int) $id
+            );
 
             if (!$project) {
                 continue;
             }
 
-            // Project-specific data.
-            $formData = $this->extractFormData($project);
-            $resourceData = $this->loadResourceData((int) $id);
-
-            // Agency-level data.
-            $agencyData = $this->loadAgencyData();
-
-            $viewData = [
-                'project'      => $project,
-                'formData'     => $formData,
-                'resourceData' => $resourceData,
-                'agencyData'   => $agencyData,
-                'batchMode'    => true,
-            ];
-
-            $html = view(
-                'frontend/ict_planner/consolidation/pdf_template',
-                $viewData
+            /*
+             * Project-specific form data.
+             */
+            $formData = $this->extractFormData(
+                $project
             );
 
-            $options = new Options();
-            $options->set('isRemoteEnabled', true);
-            $options->set('isHtml5ParserEnabled', true);
-            $options->set('defaultFont', 'DejaVu Sans');
-
-            $dompdf = new Dompdf($options);
-
-            $dompdf->loadHtml($html);
-            $dompdf->setPaper('A4', 'landscape');
-            $dompdf->render();
-
-            $title = trim(
-                (string) (
-                    $project['title'] ?? 'ISSP Submission'
-                )
+            /*
+             * Project-specific Resource Requirements.
+             *
+             * This is the line that MUST be inside
+             * the foreach loop.
+             */
+            $resourceData = $this->loadResourceData(
+                (int) $id
             );
 
-            $filename = preg_replace(
-                '/\s+/',
-                '_',
-                $title
-            );
-
-            $filename = preg_replace(
-                '/[^A-Za-z0-9_\-]/',
-                '',
-                $filename
-            );
-
-            if (empty($filename)) {
-                $filename = 'ISSP_Submission';
-            }
-
-            $filename .= '_' . (int) $id . '.pdf';
-
-            $pdfPath = $tempDir
-                . DIRECTORY_SEPARATOR
-                . $filename;
-
-            file_put_contents(
-                $pdfPath,
-                $dompdf->output()
-            );
-
-            $pdfFiles[] = $pdfPath;
-        }
-
-        if (empty($pdfFiles)) {
-            return $this->response
-                ->setStatusCode(404)
-                ->setJSON([
-                    'success' => false,
-                    'message' => 'No valid ISSP projects found.',
-                ]);
-        }
-
-        $zipPath = $tempDir
-            . DIRECTORY_SEPARATOR
-            . 'ISSP_Consolidated_'
-            . date('Ymd_His')
-            . '.zip';
-
-        $zip = new \ZipArchive();
-
-        if (
-            $zip->open(
-                $zipPath,
-                \ZipArchive::CREATE | \ZipArchive::OVERWRITE
-            ) !== true
-        ) {
-            return $this->response
-                ->setStatusCode(500)
-                ->setJSON([
-                    'success' => false,
-                    'message' => 'Unable to create ZIP file.',
-                ]);
-        }
-
-        foreach ($pdfFiles as $pdfPath) {
-
-            if (is_file($pdfPath)) {
-                $zip->addFile(
-                    $pdfPath,
-                    basename($pdfPath)
-                );
-            }
-        }
-
-        $zip->close();
-
-        foreach ($pdfFiles as $pdfPath) {
-
-            if (is_file($pdfPath)) {
-                @unlink($pdfPath);
-            }
-        }
-
-        return $this->response
-            ->download(
-                $zipPath,
-                null
-            )
-            ->setFileName(
-                basename($zipPath)
-            );
-    }
-}
+            /*

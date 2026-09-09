@@ -3,6 +3,11 @@ $active ??= '';
 $editId ??= 0;
 $currentPage = current_url();
 $isIsspPage = strpos($currentPage, 'edit-ict-project') !== false;
+$resourceRequirementStatus = $resourceRequirementStatus ?? [
+    1 => false,
+    2 => false,
+    3 => false,
+];
 ?>
 
 <style>
@@ -244,44 +249,39 @@ $isIsspPage = strpos($currentPage, 'edit-ict-project') !== false;
      RESOURCE REQUIREMENTS
      ========================================================= -->
 
-<div class="sidebar-section-title">
-    Resource Requirements
-</div>
-
+<div class="sidebar-section-title">Resource Requirements</div>
 
 <a
-    id="year1RequirementsLink"
     class="nav-link <?= $active === 'year1-requirements' ? 'active' : '' ?>"
-    href="<?= site_url('employee/edit-ict-project/' . $editId . '/year1-requirements') ?>"
+    href="<?= site_url('employee/resource-requirements/year1-requirements/' . (session()->get('edit_project_id') ?: session()->get('issp_record_id'))) ?>"
+    data-resource-route="year1-requirements"
 >
     <span class="status-indicator not-started"></span>
     Year 1 Requirements
 </a>
 
-
 <a
-    id="year2RequirementsLink"
     class="nav-link <?= $active === 'year2-requirements' ? 'active' : '' ?>"
-    href="<?= site_url('employee/edit-ict-project/' . $editId . '/year2-requirements') ?>"
+    href="<?= site_url('employee/resource-requirements/year2-requirements') ?>"
+    data-resource-route="year2-requirements"
 >
     <span class="status-indicator not-started"></span>
     Year 2 Requirements
 </a>
 
-
 <a
-    id="year3RequirementsLink"
     class="nav-link <?= $active === 'year3-requirements' ? 'active' : '' ?>"
-    href="<?= site_url('employee/edit-ict-project/' . $editId . '/year3-requirements') ?>"
+    href="<?= site_url('employee/resource-requirements/year3-requirements') ?>"
+    data-resource-route="year3-requirements"
 >
     <span class="status-indicator not-started"></span>
     Year 3 Requirements
 </a>
 
-
 <a
-    class="nav-link <?= $active === 'summary-of-investments' ? 'active' : '' ?>"
-    href="<?= site_url('employee/edit-ict-project/' . $editId . '/summary-of-investments') ?>"
+    class="nav-link <?= $active === 'general-summary' ? 'active' : '' ?>"
+    href="<?= site_url('employee/resource-requirements/summary-of-investments') ?>"
+    data-resource-route="summary-of-investments"
 >
     <span class="status-indicator not-started"></span>
     Summary of Investments
@@ -309,6 +309,8 @@ $isIsspPage = strpos($currentPage, 'edit-ict-project') !== false;
 
 <script>
 
+window.resourceRequirementDbStatus = <?= json_encode($resourceRequirementStatus) ?>;
+
 /* =========================================================
    EDIT MODE
    ========================================================= */
@@ -318,6 +320,57 @@ const isEditMode =
 
 console.log('EDIT MODE:', isEditMode);
 console.log('EDIT ID:', <?= json_encode($editId) ?>);
+
+
+/* =========================================================
+   RESOURCE REQUIREMENT DB STATUS
+   ========================================================= */
+
+window.resourceRequirementDbStatus =
+    window.resourceRequirementDbStatus || {};
+
+
+/*
+ * Set DB status
+ */
+window.setResourceRequirementDbStatus =
+    function(year, hasRecords) {
+
+        year = parseInt(year, 10);
+
+        if (![1, 2, 3].includes(year)) {
+            return;
+        }
+
+        window.resourceRequirementDbStatus[year] =
+            Boolean(hasRecords);
+
+        if (
+            typeof window.updateStatusIndicators ===
+            'function'
+        ) {
+
+            window.updateStatusIndicators();
+
+        }
+
+    };
+
+
+/*
+ * Get DB status
+ */
+window.hasResourceRequirementDbStatus =
+    function(year) {
+
+        year = parseInt(year, 10);
+
+        return (
+            window.resourceRequirementDbStatus[year] ===
+            true
+        );
+
+    };
 
 
 /* =========================================================
@@ -346,21 +399,25 @@ function collectFormData() {
         'year1-cross-agency-form',
         'year1-continuing-costs-form',
 
+
         'year2-office-productivity-form',
         'year2-internal-ict-projects-form',
         'year2-cross-agency-form',
         'year2-continuing-costs-form',
+
 
         'year3-office-productivity-form',
         'year3-internal-ict-projects-form',
         'year3-cross-agency-form',
         'year3-continuing-costs-form',
 
+
         'summary-of-investments-form'
 
     ];
 
     const data = {};
+
 
     keys.forEach(function(key) {
 
@@ -369,6 +426,7 @@ function collectFormData() {
             const saved =
                 localStorage.getItem(key);
 
+
             if (saved) {
 
                 data[key] =
@@ -376,7 +434,8 @@ function collectFormData() {
 
             }
 
-        } catch (e) {
+        }
+        catch (e) {
 
             console.error(
                 'Error parsing ' + key + ':',
@@ -387,12 +446,15 @@ function collectFormData() {
 
     });
 
+
     console.log(
         'COLLECTED FORM DATA:',
         data
     );
 
+
     return data;
+
 }
 
 
@@ -413,7 +475,9 @@ function saveEditDraft() {
 
 
     const btn =
-        document.getElementById('editSaveBtn');
+        document.getElementById(
+            'editSaveBtn'
+        );
 
 
     if (btn) {
@@ -428,8 +492,12 @@ function saveEditDraft() {
 
     const csrfToken =
         document
-            .querySelector('meta[name="csrf-token"]')
-            ?.getAttribute('content');
+            .querySelector(
+                'meta[name="csrf-token"]'
+            )
+            ?.getAttribute(
+                'content'
+            );
 
 
     const editId =
@@ -442,7 +510,11 @@ function saveEditDraft() {
 
     console.log(
         'FORM DATA:',
-        JSON.stringify(formData, null, 2)
+        JSON.stringify(
+            formData,
+            null,
+            2
+        )
     );
 
 
@@ -505,7 +577,8 @@ function saveEditDraft() {
                 'Draft saved successfully!'
             );
 
-        } else {
+        }
+        else {
 
             showAlertModal(
                 'Error',
@@ -566,13 +639,10 @@ function areAllFormsComplete() {
 
     const sections = {
 
-        /* ---------------------------------------------
-           PROPOSED ICT STRATEGY
-           --------------------------------------------- */
-
         'network-infrastructure-form': {
 
-            label: 'Network Infrastructure',
+            label:
+                'Network Infrastructure',
 
             skip: [
                 'dept_network_diagram',
@@ -584,7 +654,8 @@ function areAllFormsComplete() {
 
         'enterprise-architecture-form': {
 
-            label: 'Enterprise Architecture',
+            label:
+                'Enterprise Architecture',
 
             skip: [
                 'ea_diagram'
@@ -595,7 +666,8 @@ function areAllFormsComplete() {
 
         'ict-human-capital-form': {
 
-            label: 'ICT Human Capital',
+            label:
+                'ICT Human Capital',
 
             skip: []
 
@@ -604,7 +676,8 @@ function areAllFormsComplete() {
 
         'information-systems-form': {
 
-            label: 'Information Systems',
+            label:
+                'Information Systems',
 
             skip: [
                 'interop1_internal_system',
@@ -624,7 +697,8 @@ function areAllFormsComplete() {
 
         'ict-projects-form': {
 
-            label: 'ICT Projects',
+            label:
+                'ICT Projects',
 
             skip: [
                 'internal_strategic_others_text',
@@ -636,7 +710,8 @@ function areAllFormsComplete() {
 
         'performance-measurement-form': {
 
-            label: 'Performance Measurement',
+            label:
+                'Performance Measurement',
 
             skip: [
 
@@ -663,13 +738,14 @@ function areAllFormsComplete() {
         },
 
 
-        /* ---------------------------------------------
+        /* =================================================
            YEAR 1
-           --------------------------------------------- */
+           ================================================= */
 
         'year1-office-productivity-form': {
 
-            label: 'Year 1 - Office Productivity',
+            label:
+                'Year 1 - Office Productivity',
 
             skip: []
 
@@ -677,7 +753,8 @@ function areAllFormsComplete() {
 
         'year1-internal-ict-projects-form': {
 
-            label: 'Year 1 - Internal ICT Projects',
+            label:
+                'Year 1 - Internal ICT Projects',
 
             skip: []
 
@@ -685,7 +762,8 @@ function areAllFormsComplete() {
 
         'year1-cross-agency-form': {
 
-            label: 'Year 1 - Cross Agency ICT Projects',
+            label:
+                'Year 1 - Cross Agency ICT Projects',
 
             skip: []
 
@@ -693,20 +771,22 @@ function areAllFormsComplete() {
 
         'year1-continuing-costs-form': {
 
-            label: 'Year 1 - Continuing Costs',
+            label:
+                'Year 1 - Continuing Costs',
 
             skip: []
 
         },
 
 
-        /* ---------------------------------------------
+        /* =================================================
            YEAR 2
-           --------------------------------------------- */
+           ================================================= */
 
         'year2-office-productivity-form': {
 
-            label: 'Year 2 - Office Productivity',
+            label:
+                'Year 2 - Office Productivity',
 
             skip: []
 
@@ -714,7 +794,8 @@ function areAllFormsComplete() {
 
         'year2-internal-ict-projects-form': {
 
-            label: 'Year 2 - Internal ICT Projects',
+            label:
+                'Year 2 - Internal ICT Projects',
 
             skip: []
 
@@ -722,7 +803,8 @@ function areAllFormsComplete() {
 
         'year2-cross-agency-form': {
 
-            label: 'Year 2 - Cross Agency ICT Projects',
+            label:
+                'Year 2 - Cross Agency ICT Projects',
 
             skip: []
 
@@ -730,20 +812,22 @@ function areAllFormsComplete() {
 
         'year2-continuing-costs-form': {
 
-            label: 'Year 2 - Continuing Costs',
+            label:
+                'Year 2 - Continuing Costs',
 
             skip: []
 
         },
 
 
-        /* ---------------------------------------------
+        /* =================================================
            YEAR 3
-           --------------------------------------------- */
+           ================================================= */
 
         'year3-office-productivity-form': {
 
-            label: 'Year 3 - Office Productivity',
+            label:
+                'Year 3 - Office Productivity',
 
             skip: []
 
@@ -751,7 +835,8 @@ function areAllFormsComplete() {
 
         'year3-internal-ict-projects-form': {
 
-            label: 'Year 3 - Internal ICT Projects',
+            label:
+                'Year 3 - Internal ICT Projects',
 
             skip: []
 
@@ -759,7 +844,8 @@ function areAllFormsComplete() {
 
         'year3-cross-agency-form': {
 
-            label: 'Year 3 - Cross Agency ICT Projects',
+            label:
+                'Year 3 - Cross Agency ICT Projects',
 
             skip: []
 
@@ -767,20 +853,22 @@ function areAllFormsComplete() {
 
         'year3-continuing-costs-form': {
 
-            label: 'Year 3 - Continuing Costs',
+            label:
+                'Year 3 - Continuing Costs',
 
             skip: []
 
         },
 
 
-        /* ---------------------------------------------
+        /* =================================================
            SUMMARY
-           --------------------------------------------- */
+           ================================================= */
 
         'summary-of-investments-form': {
 
-            label: 'Summary of Investments',
+            label:
+                'Summary of Investments',
 
             skip: []
 
@@ -821,7 +909,8 @@ function areAllFormsComplete() {
 
         }
 
-    } catch (e) {
+    }
+    catch (e) {
 
         return {
 
@@ -858,22 +947,27 @@ function areAllFormsComplete() {
 
 
             /*
-             * Resource Requirements use ARRAY data.
-             * Do not treat an empty array as a normal form.
+             * Resource Requirements are handled
+             * separately. Empty categories are allowed.
              */
 
             if (
-                key.indexOf('-office-productivity-form') >= 0 ||
-                key.indexOf('-internal-ict-projects-form') >= 0 ||
-                key.indexOf('-cross-agency-form') >= 0 ||
-                key.indexOf('-continuing-costs-form') >= 0
-            ) {
+                key.indexOf(
+                    '-office-productivity-form'
+                ) >= 0 ||
 
-                /*
-                 * Resource requirements are handled separately.
-                 * Empty sections are allowed here because not
-                 * every category/year necessarily has a row.
-                 */
+                key.indexOf(
+                    '-internal-ict-projects-form'
+                ) >= 0 ||
+
+                key.indexOf(
+                    '-cross-agency-form'
+                ) >= 0 ||
+
+                key.indexOf(
+                    '-continuing-costs-form'
+                ) >= 0
+            ) {
 
                 continue;
 
@@ -1002,10 +1096,6 @@ function areAllFormsComplete() {
 
             for (const field in data) {
 
-                /*
-                 * Ignore CSRF fields
-                 */
-
                 if (
                     field.startsWith('csrf_') ||
                     field === '_token'
@@ -1016,10 +1106,6 @@ function areAllFormsComplete() {
                 }
 
 
-                /*
-                 * Ignore optional fields
-                 */
-
                 if (
                     section.skip.indexOf(field) >= 0
                 ) {
@@ -1028,10 +1114,6 @@ function areAllFormsComplete() {
 
                 }
 
-
-                /*
-                 * Empty strings are invalid
-                 */
 
                 if (
                     typeof data[field] === 'string' &&
@@ -1052,7 +1134,8 @@ function areAllFormsComplete() {
 
             }
 
-        } catch (e) {
+        }
+        catch (e) {
 
             console.error(
                 'Validation error for ' + key + ':',
@@ -1240,7 +1323,8 @@ function submitEditProject() {
 
                     form.submit();
 
-                } else {
+                }
+                else {
 
                     showAlertModal(
                         'Error',
@@ -1297,10 +1381,224 @@ function submitEditProject() {
 
 
 /* =========================================================
+   UPDATE RESOURCE REQUIREMENT STATUS SIDEBAR
+   ========================================================= */
+
+function updateResourceRequirementStatusSidebar(year) {
+
+    year = parseInt(year, 10);
+
+
+    if (![1, 2, 3].includes(year)) {
+
+        return;
+
+    }
+
+
+    const link =
+        document.querySelector(
+            '.app-sidebar [data-resource-year="' +
+            year +
+            '"]'
+        );
+
+
+    if (!link) {
+
+        return;
+
+    }
+
+
+    const indicator =
+        link.querySelector(
+            '.status-indicator'
+        );
+
+
+    if (!indicator) {
+
+        return;
+
+    }
+
+
+    /* =====================================================
+       DATABASE STATUS
+       ===================================================== */
+
+    const hasDbRecord =
+        window.hasResourceRequirementDbStatus(
+            year
+        );
+
+
+    /* =====================================================
+       LOCAL STORAGE STATUS
+       ===================================================== */
+
+    const keys = [
+
+        'year' +
+        year +
+        '-office-productivity-form',
+
+        'year' +
+        year +
+        '-internal-ict-projects-form',
+
+        'year' +
+        year +
+        '-cross-agency-form',
+
+        'year' +
+        year +
+        '-continuing-costs-form'
+
+    ];
+
+
+    let hasLocalData = false;
+
+
+    keys.forEach(function(key) {
+
+        const raw =
+            localStorage.getItem(key);
+
+
+        if (!raw) {
+
+            return;
+
+        }
+
+
+        try {
+
+            const rows =
+                JSON.parse(raw);
+
+
+            if (
+                Array.isArray(rows) &&
+                rows.length > 0
+            ) {
+
+                hasLocalData = true;
+
+            }
+
+        }
+        catch (e) {
+
+            console.error(
+                'Resource requirement parse error:',
+                key,
+                e
+            );
+
+        }
+
+    });
+
+
+    /* =====================================================
+       SAVE FLAG
+       ===================================================== */
+
+    const savedKey =
+        'year' +
+        year +
+        '-requirements-saved';
+
+
+    const isSaved =
+        localStorage.getItem(savedKey) ===
+        'true';
+
+        if (
+    storageKey === 'ict-projects-form' &&
+    isSaved
+) {
+
+    indicator.className =
+        'status-indicator complete';
+
+    return;
+
+}
+
+
+    /* =====================================================
+       DETERMINE STATUS
+       ===================================================== */
+
+    /*
+     * DB record exists
+     * = COMPLETE
+     */
+    if (hasDbRecord) {
+
+        indicator.className =
+            'status-indicator complete';
+
+        return;
+
+    }
+
+
+    /*
+     * Local data + saved
+     * = COMPLETE
+     */
+    if (
+        hasLocalData &&
+        isSaved
+    ) {
+
+        indicator.className =
+            'status-indicator complete';
+
+        return;
+
+    }
+
+
+    /*
+     * Local data only
+     * = IN PROGRESS
+     */
+    if (hasLocalData) {
+
+        indicator.className =
+            'status-indicator in-progress';
+
+        return;
+
+    }
+
+
+    /*
+     * Nothing
+     * = NOT STARTED
+     */
+    indicator.className =
+        'status-indicator not-started';
+
+}
+
+
+/* =========================================================
    UPDATE STATUS INDICATORS
    ========================================================= */
 
 function updateStatusIndicators() {
+
+    /* =====================================================
+       PROPOSED ICT STRATEGY
+       ===================================================== */
 
     document
         .querySelectorAll(
@@ -1332,13 +1630,16 @@ function updateStatusIndicators() {
 
             try {
 
-                const data =
+                const raw =
                     localStorage.getItem(
                         storageKey
                     );
 
 
-                if (!data) {
+                /*
+                 * No saved data
+                 */
+                if (!raw) {
 
                     indicator.className =
                         'status-indicator not-started';
@@ -1348,20 +1649,20 @@ function updateStatusIndicators() {
                 }
 
 
-                const parsed =
-                    JSON.parse(data);
+                const data =
+                    JSON.parse(raw);
 
 
                 const skip =
-                    getSkipFields(storageKey);
+                    getSkipFields(
+                        storageKey
+                    );
 
 
-                let totalReal = 0;
-
-                let emptyReal = 0;
+                let hasData = false;
 
 
-                Object.entries(parsed)
+                Object.entries(data)
                     .forEach(function(entry) {
 
                         const key =
@@ -1371,6 +1672,9 @@ function updateStatusIndicators() {
                             entry[1];
 
 
+                        /*
+                         * Ignore CSRF
+                         */
                         if (
                             key.startsWith('csrf_') ||
                             key === '_token'
@@ -1381,6 +1685,9 @@ function updateStatusIndicators() {
                         }
 
 
+                        /*
+                         * Ignore optional fields
+                         */
                         if (
                             skip.indexOf(key) >= 0
                         ) {
@@ -1390,37 +1697,64 @@ function updateStatusIndicators() {
                         }
 
 
+                        /*
+                         * Strings
+                         */
                         if (
-                            typeof value !== 'string'
+                            typeof value === 'string' &&
+                            value.trim() !== ''
                         ) {
 
-                            return;
+                            hasData = true;
 
                         }
 
 
-                        totalReal++;
-
-
-                        if (
-                            value.trim() === ''
+                        /*
+                         * Arrays
+                         */
+                        else if (
+                            Array.isArray(value) &&
+                            value.length > 0
                         ) {
 
-                            emptyReal++;
+                            hasData = true;
+
+                        }
+
+
+                        /*
+                         * Objects
+                         */
+                        else if (
+                            value !== null &&
+                            typeof value === 'object' &&
+                            Object.keys(value).length > 0
+                        ) {
+
+                            hasData = true;
 
                         }
 
                     });
 
 
-                const filledCount =
-                    totalReal -
-                    emptyReal;
+                const savedKey =
+                    storageKey.replace(
+                        '-form',
+                        '-saved'
+                    );
+
+
+                const isSaved =
+                    localStorage.getItem(
+                        savedKey
+                    ) === 'true';
 
 
                 if (
-                    totalReal > 0 &&
-                    filledCount / totalReal >= 0.8
+                    isSaved &&
+                    hasData
                 ) {
 
                     indicator.className =
@@ -1428,9 +1762,7 @@ function updateStatusIndicators() {
 
                 }
 
-                else if (
-                    filledCount > 0
-                ) {
+                else if (hasData) {
 
                     indicator.className =
                         'status-indicator in-progress';
@@ -1449,6 +1781,7 @@ function updateStatusIndicators() {
 
                 console.error(
                     'Status indicator error:',
+                    storageKey,
                     e
                 );
 
@@ -1465,22 +1798,165 @@ function updateStatusIndicators() {
        RESOURCE REQUIREMENTS
        ===================================================== */
 
-    updateResourceRequirementStatusSidebar(
-        1,
-        'year1RequirementsLink'
+    updateResourceRequirementStatusSidebar(1);
+
+    updateResourceRequirementStatusSidebar(2);
+
+    updateResourceRequirementStatusSidebar(3);
+
+
+    /* =====================================================
+       SUMMARY OF INVESTMENTS
+       ===================================================== */
+
+    updateSimpleStatusSidebar(
+        'summary-of-investments-form',
+        'summary-of-investments-saved'
     );
 
-
-    updateResourceRequirementStatusSidebar(
-        2,
-        'year2RequirementsLink'
-    );
+}
 
 
-    updateResourceRequirementStatusSidebar(
-        3,
-        'year3RequirementsLink'
-    );
+/* =========================================================
+   SUMMARY OF INVESTMENTS STATUS
+   ========================================================= */
+
+function updateSimpleStatusSidebar(
+    storageKey,
+    savedKey
+) {
+
+    const link =
+        document.querySelector(
+            '[data-form-key="' +
+            storageKey +
+            '"]'
+        );
+
+
+    if (!link) {
+
+        return;
+
+    }
+
+
+    const indicator =
+        link.querySelector(
+            '.status-indicator'
+        );
+
+
+    if (!indicator) {
+
+        return;
+
+    }
+
+
+    const raw =
+        localStorage.getItem(
+            storageKey
+        );
+
+
+    let hasData = false;
+
+
+    if (raw) {
+
+        try {
+
+            const data =
+                JSON.parse(raw);
+
+
+            if (
+                data &&
+                typeof data === 'object'
+            ) {
+
+                Object.entries(data)
+                    .forEach(function(entry) {
+
+                        const value =
+                            entry[1];
+
+
+                        if (
+                            typeof value === 'string' &&
+                            value.trim() !== ''
+                        ) {
+
+                            hasData = true;
+
+                        }
+
+                        else if (
+                            Array.isArray(value) &&
+                            value.length > 0
+                        ) {
+
+                            hasData = true;
+
+                        }
+
+                        else if (
+                            value !== null &&
+                            typeof value === 'object' &&
+                            Object.keys(value).length > 0
+                        ) {
+
+                            hasData = true;
+
+                        }
+
+                    });
+
+            }
+
+        }
+        catch (e) {
+
+            console.error(
+                'Summary status error:',
+                e
+            );
+
+        }
+
+    }
+
+
+    const isSaved =
+        localStorage.getItem(
+            savedKey
+        ) === 'true';
+
+
+    if (
+        isSaved &&
+        hasData
+    ) {
+
+        indicator.className =
+            'status-indicator complete';
+
+    }
+
+    else if (hasData) {
+
+        indicator.className =
+            'status-indicator in-progress';
+
+    }
+
+    else {
+
+        indicator.className =
+            'status-indicator not-started';
+
+    }
 
 }
 
@@ -1566,144 +2042,6 @@ function getSkipFields(storageKey) {
 
 
 /* =========================================================
-   RESOURCE REQUIREMENT STATUS
-   ========================================================= */
-
-function updateResourceRequirementStatusSidebar(
-    year,
-    linkId
-) {
-
-    const link =
-        document.getElementById(
-            linkId
-        );
-
-
-    if (!link) {
-
-        return;
-
-    }
-
-
-    const indicator =
-        link.querySelector(
-            '.status-indicator'
-        );
-
-
-    if (!indicator) {
-
-        return;
-
-    }
-
-
-    const keys = [
-
-        'year' +
-        year +
-        '-office-productivity-form',
-
-        'year' +
-        year +
-        '-internal-ict-projects-form',
-
-        'year' +
-        year +
-        '-cross-agency-form',
-
-        'year' +
-        year +
-        '-continuing-costs-form'
-
-    ];
-
-
-    let hasData = false;
-
-
-    keys.forEach(function(key) {
-
-        const value =
-            localStorage.getItem(
-                key
-            );
-
-
-        if (!value) {
-
-            return;
-
-        }
-
-
-        try {
-
-            const rows =
-                JSON.parse(value);
-
-
-            if (
-                Array.isArray(rows) &&
-                rows.length > 0
-            ) {
-
-                hasData = true;
-
-            }
-
-        }
-        catch (e) {
-
-            console.error(
-                'Resource requirement parse error:',
-                key,
-                e
-            );
-
-        }
-
-    });
-
-
-    const saved =
-        localStorage.getItem(
-            'year' +
-            year +
-            '-requirements-saved'
-        );
-
-
-    if (
-        saved === 'true' &&
-        hasData
-    ) {
-
-        indicator.className =
-            'status-indicator complete';
-
-    }
-
-    else if (hasData) {
-
-        indicator.className =
-            'status-indicator in-progress';
-
-    }
-
-    else {
-
-        indicator.className =
-            'status-indicator not-started';
-
-    }
-
-}
-
-
-/* =========================================================
    PAGE LOAD
    ========================================================= */
 
@@ -1718,6 +2056,22 @@ document.addEventListener(
            SIDEBAR NAVIGATION
            ================================================= */
 
+                        if (link.hasAttribute('data-resource-route')) {
+                            const projectId =
+                                localStorage.getItem('edit_project_id') || <?= json_encode(session()->get('edit_project_id') ?: session()->get('issp_record_id')) ?>;
+
+                            const route =
+                                link.getAttribute('data-resource-route');
+
+                            if (projectId && route) {
+                                window.location.href =
+                                    '<?= site_url('employee/resource-requirements') ?>/' +
+                                    route +
+                                    '/' +
+                                    encodeURIComponent(projectId);
+                                return;
+                            }
+                        }
         document
             .querySelectorAll(
                 'a.nav-link[href]'
@@ -1902,17 +2256,21 @@ document.addEventListener(
                             'year1-cross-agency-form',
                             'year1-continuing-costs-form',
 
+
                             'year2-office-productivity-form',
                             'year2-internal-ict-projects-form',
                             'year2-cross-agency-form',
                             'year2-continuing-costs-form',
+
 
                             'year3-office-productivity-form',
                             'year3-internal-ict-projects-form',
                             'year3-cross-agency-form',
                             'year3-continuing-costs-form',
 
+
                             'summary-of-investments-form',
+
 
                             'year1-requirements-saved',
                             'year2-requirements-saved',
@@ -2004,6 +2362,6 @@ document.addEventListener(
             );
 
     }
-});
+);
 
 </script>

@@ -391,7 +391,13 @@
                                 <i class="fa-solid fa-cloud-arrow-up"></i>
                                 <p>Upload enterprise architecture diagram showing structure and operation</p>
                                 <div class="upload-wrapper">
-                                    <input type="file" class="form-control mt-2" name="ea_diagram" accept="image/*,.pdf" onchange="window.uploadFileInput(this)">
+                                    <input type="file"
+                                    class="form-control mt-2"
+                                    name="ea_diagram"
+                                    accept="image/*,.pdf"
+                                    data-upload-url="<?= site_url('employee/upload-file') ?>"
+                                    onchange="window.uploadFileInput(this)"
+                                    >
                                     <span class="upload-status" style="font-size:.72rem;margin-top:4px;display:block;"></span>
                                 </div>
                             </div>

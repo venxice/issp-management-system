@@ -202,19 +202,27 @@ $isIsspPage = strpos($currentPage, 'proposed-ict-strategy') !== false ||
 
 <div class="sidebar-section-title">Resource Requirements</div>
 
-<a class="nav-link <?= $active === 'year1-requirements' ? 'active' : '' ?>" href="<?= site_url('employee/resource-requirements/year1-requirements') ?>">
+<a class="nav-link <?= $active === 'year1-requirements' ? 'active' : '' ?>"
+   href="<?= site_url('employee/resource-requirements/year1-requirements') ?>"
+   data-resource-route="year1-requirements">
     <span class="status-indicator not-started"></span> Year 1 Requirements
 </a>
 
-<a class="nav-link <?= $active === 'year2-requirements' ? 'active' : '' ?>" href="<?= site_url('employee/resource-requirements/year2-requirements') ?>">
+<a class="nav-link <?= $active === 'year2-requirements' ? 'active' : '' ?>"
+   href="<?= site_url('employee/resource-requirements/year2-requirements') ?>"
+   data-resource-route="year2-requirements">
     <span class="status-indicator not-started"></span> Year 2 Requirements
 </a>
 
-<a class="nav-link <?= $active === 'year3-requirements' ? 'active' : '' ?>" href="<?= site_url('employee/resource-requirements/year3-requirements') ?>">
+<a class="nav-link <?= $active === 'year3-requirements' ? 'active' : '' ?>"
+   href="<?= site_url('employee/resource-requirements/year3-requirements') ?>"
+   data-resource-route="year3-requirements">
     <span class="status-indicator not-started"></span> Year 3 Requirements
 </a>
 
-<a class="nav-link <?= $active === 'general-summary' ? 'active' : '' ?>" href="<?= site_url('employee/resource-requirements/summary-of-investments') ?>">
+<a class="nav-link <?= $active === 'general-summary' ? 'active' : '' ?>"
+   href="<?= site_url('employee/resource-requirements/summary-of-investments') ?>"
+   data-resource-route="summary-of-investments">
     <span class="status-indicator not-started"></span> Summary of Investments
 </a>
 
@@ -242,7 +250,7 @@ function updateStatusIndicators() {
     };
 
     var path = window.location.pathname;
-    var isFormPage = path.indexOf('/proposed-ict-strategy/') >= 0 || path.indexOf('/edit-ict-project/') >= 0;
+    var isFormPage = path.indexOf('/proposed-ict-strategy/') >= 0 || path.indexOf('/edit-ict-project/') >= 0 || path.indexOf('/resource-requirements/') >= 0;
     if (!isFormPage) return;
 
     document.querySelectorAll('#isspDropdown .nav-link[data-form-key]').forEach(link => {
@@ -252,6 +260,10 @@ function updateStatusIndicators() {
 
         try {
             const data = localStorage.getItem(storageKey);
+            if (storageKey === 'ict-projects-form' && data) {
+                indicator.className = 'status-indicator complete';
+                return;
+            }
             if (data) {
                 const parsed = JSON.parse(data);
                 var totalReal = 0;
@@ -290,45 +302,72 @@ document.addEventListener('DOMContentLoaded', function() {
         dropdownToggle.addEventListener('click', function(e) {
             e.preventDefault();
         });
+dropdown.querySelectorAll('a.nav-link[href]').forEach(function(link) {
+    link.addEventListener('click', function(e) {
+        e.preventDefault();
 
-        dropdown.querySelectorAll('a.nav-link[href]').forEach(function(link) {
-            link.addEventListener('click', function(e) {
-                e.preventDefault();
-                var path = window.location.pathname;
-                var onFormPage = path.indexOf('proposed-ict-strategy') !== -1 ||
-                                 path.indexOf('resource-requirements') !== -1 ||
-                                 path.indexOf('edit-ict-project') !== -1;
-                if (onFormPage) {
-                    if (typeof window.saveChanges === 'function') {
-                        window.saveChanges(false);
-                    }
-                    setTimeout(function() {
-                        window.location.href = link.href;
-                    }, 100);
-                } else {
-                    if (localStorage.getItem('edit_project_id')) {
-                        // Clear all form keys first to prevent stale draft data
-                        var formKeys = ['network-infrastructure-form','enterprise-architecture-form','ict-human-capital-form','information-systems-form','ict-projects-form','performance-measurement-form'];
-                        formKeys.forEach(function(k) {
-                            localStorage.removeItem(k);
+        var path = window.location.pathname;
+        var onFormPage = path.indexOf('proposed-ict-strategy') !== -1 ||
+                         path.indexOf('resource-requirements') !== -1 ||
+                         path.indexOf('edit-ict-project') !== -1;
+
+        // Resource Requirements must keep the active project ID
+        if (link.href.indexOf('resource-requirements/') !== -1) {
+            var projectId = localStorage.getItem('edit_project_id') || <?= json_encode(session()->get('edit_project_id') ?: session()->get('issp_record_id')) ?>;
+
+            if (projectId) {
+                var separator = link.href.indexOf('?') !== -1 ? '&' : '?';
+                link.href = link.href + separator + 'project_id=' + encodeURIComponent(projectId);
+            }
+        }
+
+        if (onFormPage) {
+            if (typeof window.saveChanges === 'function') {
+                window.saveChanges(false);
+            }
+
+            setTimeout(function() {
+                window.location.href = link.href;
+            }, 100);
+        } else {
+            if (localStorage.getItem('edit_project_id')) {
+                // Clear all form keys first to prevent stale draft data
+                var formKeys = [
+                    'network-infrastructure-form',
+                    'enterprise-architecture-form',
+                    'ict-human-capital-form',
+                    'information-systems-form',
+                    'ict-projects-form',
+                    'performance-measurement-form'
+                ];
+
+                formKeys.forEach(function(k) {
+                    localStorage.removeItem(k);
+                });
+
+                var backup = localStorage.getItem('new-project-backup');
+
+                if (backup) {
+                    try {
+                        var parsed = JSON.parse(backup);
+
+                        Object.keys(parsed).forEach(function(k) {
+                            if (parsed[k]) {
+                                localStorage.setItem(k, parsed[k]);
+                            }
                         });
-                        var backup = localStorage.getItem('new-project-backup');
-                        if (backup) {
-                            // Active edit — restore original new project data
-                            try {
-                                var parsed = JSON.parse(backup);
-                                Object.keys(parsed).forEach(function(k) {
-                                    if (parsed[k]) localStorage.setItem(k, parsed[k]);
-                                });
-                            } catch(e) {}
-                            localStorage.removeItem('new-project-backup');
-                        }
-                        localStorage.removeItem('edit_project_id');
-                    }
-                    window.location.href = link.href;
+                    } catch(e) {}
+
+                    localStorage.removeItem('new-project-backup');
                 }
-            });
-        });
+
+                localStorage.removeItem('edit_project_id');
+            }
+
+            window.location.href = link.href;
+        }
+    });
+});
 
         dropdown.addEventListener('show.bs.collapse', function() {
             const chevron = dropdownToggle.querySelector('.fa-chevron-down');
@@ -397,7 +436,7 @@ function saveDraft() {
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
                      document.querySelector('input[name="csrf_test_name"]')?.value;
 
-    var editId = localStorage.getItem('edit_project_id');
+    var editId = localStorage.getItem('edit_project_id') || <?= json_encode(session()->get('edit_project_id') ?: session()->get('issp_record_id')) ?>;
     fetch('<?= site_url('employee/save-draft') ?>', {
         method: 'POST',
         headers: {
@@ -530,7 +569,7 @@ function submitISSP() {
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
                          document.querySelector('input[name="csrf_test_name"]')?.value;
 
-        var editId = localStorage.getItem('edit_project_id');
+        var editId = localStorage.getItem('edit_project_id') || <?= json_encode(session()->get('edit_project_id') ?: session()->get('issp_record_id')) ?>;
 
         fetch('<?= site_url('employee/save-draft') ?>', {
             method: 'POST',
@@ -576,4 +615,98 @@ function submitISSP() {
         });
     });
 }
+
+/*
+|--------------------------------------------------------------------------
+| RESOURCE REQUIREMENTS PROJECT CONTEXT
+|--------------------------------------------------------------------------
+|
+| Resource Requirements must always use the currently selected
+| ISSP project from localStorage.
+|
+*/
+
+function updateResourceRequirementLinks() {
+    const projectId = localStorage.getItem('edit_project_id') || <?= json_encode(session()->get('edit_project_id') ?: session()->get('issp_record_id')) ?>;
+
+    if (!projectId) {
+        return;
+    }
+
+    document.querySelectorAll('#isspDropdown a.nav-link').forEach(function(link) {
+        const href = link.getAttribute('href');
+
+        if (!href) {
+            return;
+        }
+
+        if (
+            href.includes('year1-requirements') ||
+            href.includes('year2-requirements') ||
+            href.includes('year3-requirements') ||
+            href.includes('summary-of-investments')
+        ) {
+            if (!href.endsWith('/' + projectId)) {
+                link.href = href.replace(/\/$/, '') + '/' + projectId;
+            }
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+
+    const resourceLinks = document.querySelectorAll(
+        '[data-resource-route]'
+    );
+
+    resourceLinks.forEach(function(link) {
+
+        link.addEventListener('click', function(e) {
+
+            const projectId =
+                localStorage.getItem('edit_project_id') || <?= json_encode(session()->get('edit_project_id') ?: session()->get('issp_record_id')) ?>;
+
+            if (!projectId) {
+
+                console.warn(
+                    'No edit_project_id found in localStorage.'
+                );
+
+                return;
+            }
+
+            const route =
+                this.getAttribute('data-resource-route');
+
+            if (!route) {
+                return;
+            }
+
+            e.preventDefault();
+
+            const targetUrl =
+                '<?= site_url('employee/resource-requirements') ?>/' +
+                route +
+                '/' +
+                encodeURIComponent(projectId);
+
+            /*
+             * Keep the existing project context available
+             * while navigating.
+             */
+            localStorage.setItem(
+                'edit_project_id',
+                projectId
+            );
+
+            /*
+             * Navigate using the selected project ID.
+             */
+            window.location.href = targetUrl;
+        });
+
+    });
+
+});
+
 </script>

@@ -672,6 +672,7 @@ window.clearForm = function() {
                 form.querySelectorAll('.file-preview').forEach(el => el.remove());
                 // Clear localStorage
                 localStorage.removeItem('ict-projects-form');
+                localStorage.removeItem('ict-projects-saved');
                 if (typeof updateStatusIndicators === 'function') updateStatusIndicators();
                 console.log('Form cleared');
                 showAlertModal('Success', 'Form has been cleared successfully.');
@@ -772,6 +773,7 @@ function finalizeSave(formDataObj, showAlert) {
     try {
         const jsonStr = JSON.stringify(formDataObj);
         localStorage.setItem('ict-projects-form', jsonStr);
+        localStorage.setItem('ict-projects-saved', 'true');
         
         const verify = localStorage.getItem('ict-projects-form');
         console.log('Save verified:', verify ? 'OK (' + Object.keys(JSON.parse(verify)).length + ' keys)' : 'FAILED');

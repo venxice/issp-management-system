@@ -472,6 +472,12 @@ class DashboardController extends BaseController
                 ]);
             }
 
+            // Keep the newly created/updated project as the active project
+           $id = (int) $id;
+
+            session()->set('edit_project_id', $id);
+            session()->set('issp_record_id', $id);
+
             $action = $id ? 'issp.draft_updated' : 'issp.draft_created';
             $this->writeLog($action, ($id ? 'Updated' : 'Created') . ' ISSP draft #' . $id, $formData['ict-projects-form']['internal_project_title'] ?? '');
 
@@ -490,31 +496,105 @@ class DashboardController extends BaseController
     }
 
     public function editIctProject($id, $section)
-    {
-        $userModel = new UserModel();
-        $currentUser = $userModel->findWithRole((int) session()->get('user_id'));
+{
+    $id = (int) $id;
 
-        $viewMap = [
-            'network-infrastructure'   => 'frontend/employee/proposed-ict-strategy/network-infrastructure',
-            'enterprise-architecture'  => 'frontend/employee/proposed-ict-strategy/enterprise-architecture',
-            'ict-human-capital'        => 'frontend/employee/proposed-ict-strategy/ict-human-capital',
-            'information-systems'      => 'frontend/employee/proposed-ict-strategy/information-systems',
-            'ict-projects'             => 'frontend/employee/proposed-ict-strategy/ict-projects',
-            'performance-measurement'  => 'frontend/employee/proposed-ict-strategy/performance-measurement',
-        ];
-
-        if (!isset($viewMap[$section])) {
-            return redirect()->to(site_url('employee/edit-ict-project/' . $id . '/network-infrastructure'));
-        }
-
-        return view($viewMap[$section], [
-            'title'     => 'Edit ICT Project',
-            'active'    => $section,
-            'currentUser' => $currentUser,
-            'editMode'  => true,
-            'editId'    => (int) $id,
-        ]);
+    if ($id <= 0) {
+        return redirect()->to(site_url('employee/draft-ict-projects'));
     }
+
+    /*
+     * IMPORTANT:
+     * Store the current project ID in session.
+     * Resource Requirements uses this ID when saving.
+     */
+   session()->set('issp_record_id', (int) $id);
+   session()->set('edit_project_id', (int) $id); 
+
+    $userModel = new \App\Models\UserModel();
+
+    $currentUser = $userModel->findWithRole(
+        (int) session()->get('user_id')
+    );
+
+    /*
+     * Proposed ICT Strategy sections
+     */
+    $viewMap = [
+        'network-infrastructure'
+            => 'frontend/employee/proposed-ict-strategy/network-infrastructure',
+
+        'enterprise-architecture'
+            => 'frontend/employee/proposed-ict-strategy/enterprise-architecture',
+
+        'ict-human-capital'
+            => 'frontend/employee/proposed-ict-strategy/ict-human-capital',
+
+        'information-systems'
+            => 'frontend/employee/proposed-ict-strategy/information-systems',
+
+        'ict-projects'
+            => 'frontend/employee/proposed-ict-strategy/ict-projects',
+
+        'performance-measurement'
+            => 'frontend/employee/proposed-ict-strategy/performance-measurement',
+    ];
+
+    /*
+     * Resource Requirements sections
+     *
+     * We redirect to ResourceRequirementsController
+     * because that controller loads the actual DB records.
+     */
+    $resourceRoutes = [
+        'year1-requirements'
+            => 'employee/resource-requirements/year1-requirements',
+
+        'year2-requirements'
+            => 'employee/resource-requirements/year2-requirements',
+
+        'year3-requirements'
+            => 'employee/resource-requirements/year3-requirements',
+
+        'summary-of-investments'
+            => 'employee/resource-requirements/summary-of-investments',
+    ];
+
+    /*
+     * Resource Requirements
+     */
+    if (isset($resourceRoutes[$section])) {
+
+        return redirect()->to(
+            site_url($resourceRoutes[$section] . '/' . $id)
+        );
+    }
+
+    /*
+     * Invalid section
+     */
+    if (!isset($viewMap[$section])) {
+
+        return redirect()->to(
+            site_url(
+                'employee/edit-ict-project/' .
+                $id .
+                '/network-infrastructure'
+            )
+        );
+    }
+
+    return view(
+        $viewMap[$section],
+        [
+            'title'      => 'Edit ICT Project',
+            'active'     => $section,
+            'currentUser'=> $currentUser,
+            'editMode'   => true,
+            'editId'     => $id,
+        ]
+    );
+}
 
     public function loadFormData($id)
     {
@@ -610,15 +690,24 @@ class DashboardController extends BaseController
         }
 
         $resourceModel = new ResourceRequirementModel();
-        $resourceData = [
-            'year1' => $resourceModel->getByYear(1),
-            'year2' => $resourceModel->getByYear(2),
-            'year3' => $resourceModel->getByYear(3),
-            'generalSummary' => $resourceModel->getGeneralSummary(),
-            'fundSource' => $resourceModel->getFundSourceSummary(),
-            'statementOfExpenditure' => $resourceModel->getStatementOfExpenditureSummary(),
-            'objectOfExpenditure' => $resourceModel->getObjectOfExpenditureSummary(),
-        ];
+
+$resourceData = [
+    'year1' => $resourceModel->getByYear(1, $id),
+    'year2' => $resourceModel->getByYear(2, $id),
+    'year3' => $resourceModel->getByYear(3, $id),
+
+    'generalSummary' =>
+        $resourceModel->getGeneralSummary($id),
+
+    'fundSource' =>
+        $resourceModel->getFundSourceSummary($id),
+
+    'statementOfExpenditure' =>
+        $resourceModel->getStatementOfExpenditureSummary($id),
+
+    'objectOfExpenditure' =>
+        $resourceModel->getObjectOfExpenditureSummary($id),
+];
 
         $agencyModel = new AgencyInformationModel();
         $agencyData = $agencyModel->orderBy('id', 'DESC')->first() ?? [];
@@ -640,13 +729,17 @@ class DashboardController extends BaseController
 
         helper('pdf');
 
-        $dompdf = run_with_retry(function () use ($html) {
-            $dp = new \Dompdf\Dompdf();
-            $dp->loadHtml(mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8'));
-            $dp->setPaper('A4', 'landscape');
-            $dp->render();
-            return $dp;
-        });
+       $dompdf = run_with_retry(function () use ($html) {
+    $dp = new \Dompdf\Dompdf();
+
+    // Dompdf supports UTF-8 HTML directly.
+    $dp->loadHtml($html, 'UTF-8');
+
+    $dp->setPaper('A4', 'landscape');
+    $dp->render();
+
+    return $dp;
+});
 
         $filename = 'ISSP_' . preg_replace('/[^a-zA-Z0-9]/', '_', $project['title'] ?? 'submission') . '_' . $id . '.pdf';
 

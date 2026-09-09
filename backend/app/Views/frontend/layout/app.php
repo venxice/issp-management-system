@@ -1567,6 +1567,191 @@ window.addEventListener('pageshow', function(e) {
 <?= $this->renderSection('scripts') ?>
 
 <script>
+
+// ============================================================
+// RESOURCE REQUIREMENTS STATUS
+// ============================================================
+
+window.resourceRequirementDbStatus =
+    window.resourceRequirementDbStatus || {};
+
+window.setResourceRequirementDbStatus = function(year, hasRecords) {
+
+    year = parseInt(year, 10);
+
+    if (![1, 2, 3].includes(year)) {
+        return;
+    }
+
+    window.resourceRequirementDbStatus[year] =
+        Boolean(hasRecords);
+
+    if (
+        typeof window.updateResourceRequirementStatusIndicators ===
+        'function'
+    ) {
+        window.updateResourceRequirementStatusIndicators();
+    }
+};
+
+window.hasResourceRequirementDbStatus = function(year) {
+
+    year = parseInt(year, 10);
+
+    return window.resourceRequirementDbStatus[year] === true;
+};
+
+
+// ============================================================
+// GLOBAL STATUS INDICATOR UPDATE
+// ============================================================
+
+window.updateResourceRequirementStatusIndicators = function() {
+
+    var year1Db = window.hasResourceRequirementDbStatus(1);
+var year2Db = window.hasResourceRequirementDbStatus(2);
+var year3Db = window.hasResourceRequirementDbStatus(3);
+
+var year1Saved = false;
+var year2Saved = false;
+var year3Saved = false;
+
+    // ========================================================
+    // Find status elements
+    // ========================================================
+
+    var statusElements =
+        document.querySelectorAll(
+            '[data-resource-year-status], ' +
+            '.resource-year-status, ' +
+            '[data-year-status]'
+        );
+
+
+    statusElements.forEach(function(el) {
+
+        var year =
+            parseInt(
+                el.dataset.resourceYearStatus ||
+                el.dataset.yearStatus ||
+                '',
+                10
+            );
+
+        if (![1, 2, 3].includes(year)) {
+            return;
+        }
+
+        var hasDbRecord = false;
+        var hasSaved = false;
+
+        if (year === 1) {
+            hasDbRecord = year1Db;
+            hasSaved = year1Saved;
+        }
+
+        if (year === 2) {
+            hasDbRecord = year2Db;
+            hasSaved = year2Saved;
+        }
+
+        if (year === 3) {
+            hasDbRecord = year3Db;
+            hasSaved = year3Saved;
+        }
+
+
+        // Remove previous classes
+        el.classList.remove(
+            'status-green',
+            'status-orange',
+            'text-success',
+            'text-warning'
+        );
+
+
+        // ====================================================
+        // GREEN = saved / has DB records
+        // ORANGE = not yet saved
+        // ====================================================
+
+        if (hasDbRecord) {
+
+            el.classList.add('status-green');
+            el.classList.add('text-success');
+
+            el.style.color = '#198754';
+
+        } else {
+
+            el.classList.add('status-orange');
+            el.classList.add('text-warning');
+
+            el.style.color = '#fd7e14';
+        }
+
+    });
+
+
+    // ========================================================
+    // Also support common sidebar selectors
+    // ========================================================
+
+    [1, 2, 3].forEach(function(year) {
+
+        var hasDbRecord =
+            window.hasResourceRequirementDbStatus(year);
+
+        var isComplete = hasDbRecord;
+
+
+        // Possible status elements
+        var selectors = [
+            '[data-year="' + year + '"].status-indicator',
+            '[data-resource-year="' + year + '"] .status-indicator',
+            '#year' + year + 'Status',
+            '#year' + year + '-status'
+        ];
+
+        selectors.forEach(function(selector) {
+
+            document
+                .querySelectorAll(selector)
+                .forEach(function(el) {
+
+                    el.classList.remove(
+                        'status-green',
+                        'status-orange',
+                        'text-success',
+                        'text-warning'
+                    );
+
+                    if (isComplete) {
+
+                        el.classList.add(
+                            'status-green',
+                            'text-success'
+                        );
+
+                        el.style.color = '#198754';
+
+                    } else {
+
+                        el.classList.add(
+                            'status-orange',
+                            'text-warning'
+                        );
+
+                        el.style.color = '#fd7e14';
+                    }
+
+                });
+        });
+
+    });
+
+};
+
 // Auto-save current section to DB (called by Save Changes button)
 window.autoSaveDraft = function() {
 
@@ -1757,7 +1942,7 @@ window.showServerFileLink = function(input, filePath) {
     if (path.indexOf('/proposed-ict-strategy/') >= 0 && path.indexOf('/edit-ict-project/') < 0) {
         var editId = localStorage.getItem('edit_project_id');
         if (editId) {
-            var formKeys = ['network-infrastructure-form','enterprise-architecture-form','ict-human-capital-form','information-systems-form','ict-projects-form','performance-measurement-form'];
+            var formKeys = ['network-infrastructure-form','enterprise-architecture-form','ict-human-capital-form','information-systems-form','performance-measurement-form'];
             formKeys.forEach(function(k) { localStorage.removeItem(k); });
             var backup = localStorage.getItem('new-project-backup');
             if (backup) {

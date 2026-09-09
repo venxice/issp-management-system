@@ -55,6 +55,8 @@ $routes->group('director-general', ['filter' => 'role:director_general'], static
     $routes->post('approve/(:num)', 'DirectorGeneral\DashboardController::approve/$1');
     $routes->post('reject/(:num)', 'DirectorGeneral\DashboardController::reject/$1');
     $routes->post('return/(:num)', 'DirectorGeneral\DashboardController::return/$1');
+   $routes->get('pending-approval', 'DirectorGeneral\PendingApprovalController::index');
+    $routes->get('approved-projects', 'DirectorGeneral\ApprovedProjectsController::index');
 });
 
 $routes->group('employee', ['filter' => 'role:employee'], static function (RouteCollection $routes): void {
@@ -99,8 +101,7 @@ $routes->group('employee', ['filter' => 'role:employee'], static function (Route
     });
 });
 
-
-      $routes->group('ict-planner', ['filter' => 'role:ict_planner'], static function (RouteCollection $routes): void {
+$routes->group('ict-planner', ['filter' => 'role:ict_planner'], static function (RouteCollection $routes): void {
 
     $routes->get('dashboard', 'IctPlanner\DashboardController::index');
     $routes->get('consolidation', 'IctPlanner\ConsolidationController::index');
@@ -118,28 +119,77 @@ $routes->group('employee', ['filter' => 'role:employee'], static function (Route
         $routes->get('stakeholder-analysis', 'IctPlanner\AgencyInformationController::stakeholderAnalysis');
         $routes->post('stakeholder-analysis/save', 'IctPlanner\AgencyInformationController::saveStakeholderAnalysis');
         $routes->get('strategic-concerns', 'IctPlanner\AgencyInformationController::strategicConcerns');
+        $routes->post('strategic-concerns/save', 'IctPlanner\AgencyInformationController::saveStrategicConcerns');
         $routes->get('network-infrastructure', 'IctPlanner\AgencyInformationController::networkInfrastructure');
+        $routes->post('network-infrastructure/save', 'IctPlanner\AgencyInformationController::savenetworkInfrastructure');
         $routes->get('information-systems-inventory', 'IctPlanner\AgencyInformationController::informationSystemsInventory');
+        $routes->post('information-systems-inventory/save', 'IctPlanner\AgencyInformationController::saveinformationSystemsInventory');
         $routes->get('e-government-programs', 'IctPlanner\AgencyInformationController::eGovernmentPrograms');
+        $routes->post('e-government-programs/save', 'IctPlanner\AgencyInformationController::saveeGovernmentPrograms');
     });
 
   });  
 
 // Resource Requirements Routes
-$routes->group('employee', ['filter' => 'role:employee'], static function (RouteCollection $routes): void {
+$routes->group('employee/resource-requirements', ['filter' => 'role:employee'], static function (RouteCollection $routes): void {
 
-    $routes->group('resource-requirements', static function (RouteCollection $routes): void {
-    $routes->get('year1-requirements', 'Employee\ResourceRequirementsController::year1Requirements');
-    $routes->get('year2-requirements', 'Employee\ResourceRequirementsController::year2Requirements');
-    $routes->get('year3-requirements', 'Employee\ResourceRequirementsController::year3Requirements');
+    // Project-scoped routes
+    $routes->get(
+        'year1-requirements/(:num)',
+        'Employee\ResourceRequirementsController::year1Requirements/$1'
+    );
 
-    $routes->get('summary-of-investments', 'Employee\ResourceRequirementsController::summaryOfInvestments');
+    $routes->get(
+        'year2-requirements/(:num)',
+        'Employee\ResourceRequirementsController::year2Requirements/$1'
+    );
 
-    $routes->post('store', 'Employee\ResourceRequirementsController::store');
-     $routes->post('update', 'Employee\ResourceRequirementsController::update');
-    $routes->get('delete/(:num)', 'Employee\ResourceRequirementsController::delete/$1');
+    $routes->get(
+        'year3-requirements/(:num)',
+        'Employee\ResourceRequirementsController::year3Requirements/$1'
+    );
+
+    $routes->get(
+        'summary-of-investments/(:num)',
+        'Employee\ResourceRequirementsController::summaryOfInvestments/$1'
+    );
+
+    // Existing routes
+    $routes->get(
+        'year1-requirements',
+        'Employee\ResourceRequirementsController::year1Requirements'
+    );
+
+    $routes->get(
+        'year2-requirements',
+        'Employee\ResourceRequirementsController::year2Requirements'
+    );
+
+    $routes->get(
+        'year3-requirements',
+        'Employee\ResourceRequirementsController::year3Requirements'
+    );
+
+    $routes->get(
+        'summary-of-investments',
+        'Employee\ResourceRequirementsController::summaryOfInvestments'
+    );
+
+    $routes->post(
+        'store',
+        'Employee\ResourceRequirementsController::store'
+    );
+
+    $routes->post(
+        'update',
+        'Employee\ResourceRequirementsController::update'
+    );
+
+    $routes->get(
+        'delete/(:num)',
+        'Employee\ResourceRequirementsController::delete/$1'
+    );
 });
-      });
 
 $routes->group('director-general', ['filter' => 'role:director_general'], static function (RouteCollection $routes): void {
     $routes->get('dashboard', 'DashboardController::index');
@@ -148,4 +198,3 @@ $routes->group('director-general', ['filter' => 'role:director_general'], static
 $routes->group('employee', ['filter' => 'role:employee'], static function (RouteCollection $routes): void {
     $routes->get('dashboard', 'DashboardController::index');
 });
-
