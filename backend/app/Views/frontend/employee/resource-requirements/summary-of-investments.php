@@ -48,16 +48,35 @@
 
 </div>
 
-<div class="section-body">
+<?php
+$hasRecords =
+    !empty($generalSummary) ||
+    !empty($fundSourceSummary) ||
+    !empty($statementOfExpenditureSummary) ||
+    !empty($objectOfExpenditureSummary);
+?>
 
-<div class="alert alert-success">
+<?php if ($hasRecords): ?>
 
-<i class="fa fa-check-circle"></i>
+    <div class="alert alert-success">
 
-All totals are consistent across B.1, B.2, and B.3.
+        <i class="fa fa-check-circle"></i>
 
-</div>
+        All totals are consistent across B.1, B.2, and B.3.
 
+    </div>
+
+<?php else: ?>
+
+    <div class="alert alert-info">
+
+        <i class="fa fa-info-circle"></i>
+
+        No resource requirements have been entered yet.
+
+    </div>
+
+<?php endif; ?>
 </div>
 
 </div>
@@ -118,6 +137,16 @@ All totals are consistent across B.1, B.2, and B.3.
             </tr>
 
             <?php endforeach; ?>
+
+            <?php if (empty($generalSummary)): ?>
+
+<tr>
+    <td colspan="5" class="text-center text-muted">
+        No records found.
+    </td>
+</tr>
+
+<?php endif; ?>
 
             </tbody>
 
@@ -196,6 +225,16 @@ $grand += $row['total'];
 
 <?php endforeach; ?>
 
+<?php if (empty($fundSourceSummary)): ?>
+
+<tr>
+    <td colspan="5" class="text-center text-muted">
+        No records found.
+    </td>
+</tr>
+
+<?php endif; ?>
+
 </tbody>
 
 <tfoot>
@@ -272,6 +311,16 @@ $grand += $row['total'];
 </tr>
 
 <?php endforeach; ?>
+
+<?php if (empty($statementOfExpenditureSummary)): ?>
+
+<tr>
+    <td colspan="5" class="text-center text-muted">
+        No records found.
+    </td>
+</tr>
+
+<?php endif; ?>
 
 </tbody>
 

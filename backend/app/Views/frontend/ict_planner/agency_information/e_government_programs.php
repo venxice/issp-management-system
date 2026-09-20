@@ -605,6 +605,19 @@
     accent-color: var(--brand);
 }
 
+.form-check-input {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: var(--brand);
+    transition: opacity 0.2s ease;
+}
+
+.form-check-input:checked {
+    opacity: 0.45;
+    cursor: default;
+}
+
 .control-label {
     font-size: .85rem;
     font-weight: 500;
@@ -1011,9 +1024,7 @@ function updateProgramStatus(id) {
     }
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-
-    document.querySelectorAll('[id^="statusBadge"]').forEach(function(badge) {
+document.addEventListener('DOMContentLoaded', function() {document.querySelectorAll('[id^="statusBadge"]').forEach(function(badge) {
 
         const id = badge.id.replace('statusBadge', '');
 

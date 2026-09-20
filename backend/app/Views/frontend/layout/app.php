@@ -1567,6 +1567,7 @@ window.addEventListener('pageshow', function(e) {
 <?= $this->renderSection('scripts') ?>
 
 <script>
+
 // Auto-save current section to DB (called by Save Changes button)
 window.autoSaveDraft = function() {
 
@@ -1757,7 +1758,7 @@ window.showServerFileLink = function(input, filePath) {
     if (path.indexOf('/proposed-ict-strategy/') >= 0 && path.indexOf('/edit-ict-project/') < 0) {
         var editId = localStorage.getItem('edit_project_id');
         if (editId) {
-            var formKeys = ['network-infrastructure-form','enterprise-architecture-form','ict-human-capital-form','information-systems-form','ict-projects-form','performance-measurement-form'];
+            var formKeys = ['network-infrastructure-form','enterprise-architecture-form','ict-human-capital-form','information-systems-form','performance-measurement-form'];
             formKeys.forEach(function(k) { localStorage.removeItem(k); });
             var backup = localStorage.getItem('new-project-backup');
             if (backup) {

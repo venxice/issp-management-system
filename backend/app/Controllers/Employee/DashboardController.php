@@ -125,39 +125,89 @@ class DashboardController extends BaseController
     }
 
     public function viewFullIctDocument(int $id)
-    {
-        $currentUserId = (int) session()->get('user_id');
-        $isspModel = new ISspRecordModel();
-        $userModel = new UserModel();
+{
+    $currentUserId = (int) session()->get('user_id');
 
-        $project = $isspModel
-            ->select('issp_records.*, departments.name AS department_name, users.name AS created_by_name')
-            ->join('departments', 'departments.id = issp_records.department_id', 'left')
-            ->join('users', 'users.id = issp_records.created_by', 'left')
-            ->where('issp_records.id', $id)
-            ->where('issp_records.created_by', $currentUserId)
-            ->first();
+    $isspModel = new ISspRecordModel();
+    $userModel = new UserModel();
+    $resourceModel = new \App\Models\ResourceRequirementModel();
 
-        if ($project === null) {
-            return redirect()->to('employee/submitted-ict-projects')->with('error', 'Project not found.');
+    $project = $isspModel
+        ->select('issp_records.*, departments.name AS department_name, users.name AS created_by_name')
+        ->join('departments', 'departments.id = issp_records.department_id', 'left')
+        ->join('users', 'users.id = issp_records.created_by', 'left')
+        ->where('issp_records.id', $id)
+        ->where('issp_records.created_by', $currentUserId)
+        ->first();
+
+    if ($project === null) {
+        return redirect()->to('employee/submitted-ict-projects')
+            ->with('error', 'Project not found.');
+    }
+
+    /*
+     * Load main ICT form data.
+     */
+    $formData = [];
+
+    if (!empty($project['form_data'])) {
+        $decoded = json_decode($project['form_data'], true);
+
+        if (is_array($decoded)) {
+            $formData = $decoded;
         }
+    }
 
-        $formData = [];
-        if (!empty($project['form_data'])) {
-            $decoded = json_decode($project['form_data'], true);
-            if (is_array($decoded)) {
-                $formData = $decoded;
-            }
-        }
+    /*
+     * Load Resource Requirements using THIS project ID.
+     * Do not use the current session/localStorage project ID.
+     */
+    $year1Requirements = $resourceModel->getByYear(1, $id);
+    $year2Requirements = $resourceModel->getByYear(2, $id);
+    $year3Requirements = $resourceModel->getByYear(3, $id);
 
-        return view('frontend/employee/submitted-ict-projects/view_full', [
+    /*
+     * Load Summary of Investments for THIS project.
+     */
+    $generalSummary =
+        $resourceModel->getGeneralSummary($id);
+
+    $fundSourceSummary =
+        $resourceModel->getFundSourceSummary($id);
+
+    $statementOfExpenditureSummary =
+        $resourceModel->getStatementOfExpenditureSummary($id);
+
+    $objectOfExpenditureSummary =
+        $resourceModel->getObjectOfExpenditureSummary($id);
+
+    return view(
+        'frontend/employee/submitted-ict-projects/view_full',
+        [
             'title' => 'View Full ICT Document',
             'active' => 'submitted-ict-projects',
             'currentUser' => $userModel->findWithRole($currentUserId),
+
             'project' => $project,
             'formData' => $formData,
-        ]);
-    }
+
+            /*
+             * Resource Requirements
+             */
+            'year1Requirements' => $year1Requirements,
+            'year2Requirements' => $year2Requirements,
+            'year3Requirements' => $year3Requirements,
+
+            /*
+             * Summary of Investments
+             */
+            'generalSummary' => $generalSummary,
+            'fundSourceSummary' => $fundSourceSummary,
+            'statementOfExpenditureSummary' => $statementOfExpenditureSummary,
+            'objectOfExpenditureSummary' => $objectOfExpenditureSummary,
+        ]
+    );
+}
 
     public function resubmitProject(int $id)
     {
@@ -421,100 +471,317 @@ class DashboardController extends BaseController
     }
 
     public function saveDraft()
-    {
-        $this->response->setContentType('application/json');
+{
+    $this->response->setContentType('application/json');
 
-        try {
-            $this->ensureFormDataColumn();
+    try {
 
-            $currentUserId = (int) session()->get('user_id');
-            $isspRecordModel = new ISspRecordModel();
-            $json = $this->request->getJSON(true);
+        $this->ensureFormDataColumn();
 
-            $formData = $json['form_data'] ?? [];
-            $id = $json['id'] ?? null;
+        $currentUserId = (int) session()->get('user_id');
 
-            $title = $formData['ict-projects-form']['internal_project_title'] ?? ($json['title'] ?? '');
-            if (empty(trim($title))) {
-                return $this->response->setJSON([
-                    'success' => false,
-                    'message' => 'Project title is required.'
-                ]);
-            }
+        $isspRecordModel = new ISspRecordModel();
 
-            if ($id) {
-                // Update existing record — preserve status if not a draft
-                $existing = $isspRecordModel->find($id);
-                $newStatus = 'draft';
-                if ($existing && !empty($existing['status']) && $existing['status'] !== 'draft') {
-                    $newStatus = $existing['status'];
-                }
-                $isspRecordModel->update($id, [
-                    'title' => $title,
-                    'description' => $formData['ict-projects-form']['internal_description'] ?? '',
-                    'budget' => $formData['ict-projects-form']['internal_total_cost'] ?? 0,
-                    'form_data' => json_encode($formData),
-                    'status' => $newStatus,
-                    'updated_at' => date('Y-m-d H:i:s'),
-                ]);
-            } else {
-                // Create new draft
-                $id = $isspRecordModel->insert([
-                    'title' => $title,
-                    'description' => $formData['ict-projects-form']['internal_description'] ?? '',
-                    'budget' => $formData['ict-projects-form']['internal_total_cost'] ?? 0,
-                    'department_id' => session()->get('department_id'),
-                    'status' => 'draft',
-                    'created_by' => $currentUserId,
-                    'form_data' => json_encode($formData),
-                    'created_at' => date('Y-m-d H:i:s'),
-                    'updated_at' => date('Y-m-d H:i:s'),
-                ]);
-            }
+        $json = $this->request->getJSON(true);
 
-            $action = $id ? 'issp.draft_updated' : 'issp.draft_created';
-            $this->writeLog($action, ($id ? 'Updated' : 'Created') . ' ISSP draft #' . $id, $formData['ict-projects-form']['internal_project_title'] ?? '');
+        $formData = $json['form_data'] ?? [];
 
-            return $this->response->setJSON([
-                'success' => true,
-                'id' => $id,
-                'message' => 'Draft saved successfully.'
-            ]);
+        $id = isset($json['id']) && $json['id']
+            ? (int) $json['id']
+            : null;
 
-        } catch (\Exception $e) {
+
+        /* =====================================================
+           PROJECT TITLE
+           ===================================================== */
+
+        $title =
+            $formData['ict-projects-form']['internal_project_title']
+            ?? ($json['title'] ?? '');
+
+
+        if (empty(trim((string) $title))) {
+
             return $this->response->setJSON([
                 'success' => false,
-                'message' => 'Error saving draft: ' . $e->getMessage()
+                'message' => 'Project title is required.'
             ]);
+
         }
-    }
 
-    public function editIctProject($id, $section)
-    {
-        $userModel = new UserModel();
-        $currentUser = $userModel->findWithRole((int) session()->get('user_id'));
 
-        $viewMap = [
-            'network-infrastructure'   => 'frontend/employee/proposed-ict-strategy/network-infrastructure',
-            'enterprise-architecture'  => 'frontend/employee/proposed-ict-strategy/enterprise-architecture',
-            'ict-human-capital'        => 'frontend/employee/proposed-ict-strategy/ict-human-capital',
-            'information-systems'      => 'frontend/employee/proposed-ict-strategy/information-systems',
-            'ict-projects'             => 'frontend/employee/proposed-ict-strategy/ict-projects',
-            'performance-measurement'  => 'frontend/employee/proposed-ict-strategy/performance-measurement',
+        /* =====================================================
+           COMMON DATA
+           ===================================================== */
+
+        $commonData = [
+            'title' => $title,
+
+            'description' =>
+                $formData['ict-projects-form']['internal_description']
+                ?? '',
+
+            'budget' =>
+                $formData['ict-projects-form']['internal_total_cost']
+                ?? 0,
+
+            'form_data' =>
+                json_encode($formData),
+
+            /*
+             * IMPORTANT:
+             * Save Draft MUST always make the parent
+             * ISSP record a draft.
+             */
+            'status' => 'draft',
+
+            'updated_at' =>
+                date('Y-m-d H:i:s'),
         ];
 
-        if (!isset($viewMap[$section])) {
-            return redirect()->to(site_url('employee/edit-ict-project/' . $id . '/network-infrastructure'));
+
+        /* =====================================================
+           UPDATE EXISTING PROJECT
+           ===================================================== */
+
+        if ($id) {
+
+            $existing =
+                $isspRecordModel
+                    ->where('id', $id)
+                    ->where('created_by', $currentUserId)
+                    ->first();
+
+
+            if (!$existing) {
+
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Project not found or access denied.'
+                ]);
+
+            }
+
+
+            /*
+             * IMPORTANT:
+             *
+             * We ONLY update the parent ISSP record.
+             *
+             * We DO NOT delete resource requirements.
+             *
+             * Existing Year 1, Year 2 and Year 3 records
+             * remain in resource_requirements.
+             */
+
+            $isspRecordModel->update(
+                $id,
+                $commonData
+            );
+
         }
 
-        return view($viewMap[$section], [
-            'title'     => 'Edit ICT Project',
-            'active'    => $section,
-            'currentUser' => $currentUser,
-            'editMode'  => true,
-            'editId'    => (int) $id,
+
+        /* =====================================================
+           CREATE NEW PROJECT
+           ===================================================== */
+
+        else {
+
+            $departmentId =
+                session()->get('department_id');
+
+
+            $insertData = array_merge(
+                $commonData,
+                [
+                    'department_id' => $departmentId,
+
+                    'created_by' =>
+                        $currentUserId,
+
+                    'created_at' =>
+                        date('Y-m-d H:i:s'),
+                ]
+            );
+
+
+            $id =
+                $isspRecordModel->insert(
+                    $insertData
+                );
+
+
+            if (!$id) {
+
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Failed to create draft project.'
+                ]);
+
+            }
+
+        }
+
+
+        /* =====================================================
+           NORMALIZE PROJECT ID
+           ===================================================== */
+
+        $id = (int) $id;
+
+
+        /* =====================================================
+   DRAFT SAVED
+   Keep DB records, but clear active editing session.
+   ===================================================== */
+
+session()->remove('edit_project_id');
+session()->remove('issp_record_id');
+
+
+        /* =====================================================
+           AUDIT LOG
+           ===================================================== */
+
+        $this->writeLog(
+            'issp.draft_updated',
+            'Saved ISSP draft #' . $id,
+            $formData['ict-projects-form']['internal_project_title']
+                ?? ''
+        );
+
+
+        /* =====================================================
+           RESPONSE
+           ===================================================== */
+
+        return $this->response->setJSON([
+            'success' => true,
+            'id' => $id,
+            'issp_record_id' => $id,
+            'message' => 'Draft saved successfully.'
         ]);
+
+
+    } catch (\Exception $e) {
+
+        log_message(
+            'error',
+            'Save Draft Error: ' . $e->getMessage()
+        );
+
+
+        return $this->response->setJSON([
+            'success' => false,
+            'message' =>
+                'Error saving draft: ' .
+                $e->getMessage()
+        ]);
+
     }
+}
+
+    public function editIctProject($id, $section)
+{
+    $id = (int) $id;
+
+    if ($id <= 0) {
+        return redirect()->to(site_url('employee/draft-ict-projects'));
+    }
+
+    /*
+     * IMPORTANT:
+     * Store the current project ID in session.
+     * Resource Requirements uses this ID when saving.
+     */
+   session()->set('issp_record_id', (int) $id);
+   session()->set('edit_project_id', (int) $id); 
+
+    $userModel = new \App\Models\UserModel();
+
+    $currentUser = $userModel->findWithRole(
+        (int) session()->get('user_id')
+    );
+
+    /*
+     * Proposed ICT Strategy sections
+     */
+    $viewMap = [
+        'network-infrastructure'
+            => 'frontend/employee/proposed-ict-strategy/network-infrastructure',
+
+        'enterprise-architecture'
+            => 'frontend/employee/proposed-ict-strategy/enterprise-architecture',
+
+        'ict-human-capital'
+            => 'frontend/employee/proposed-ict-strategy/ict-human-capital',
+
+        'information-systems'
+            => 'frontend/employee/proposed-ict-strategy/information-systems',
+
+        'ict-projects'
+            => 'frontend/employee/proposed-ict-strategy/ict-projects',
+
+        'performance-measurement'
+            => 'frontend/employee/proposed-ict-strategy/performance-measurement',
+    ];
+
+    /*
+     * Resource Requirements sections
+     *
+     * We redirect to ResourceRequirementsController
+     * because that controller loads the actual DB records.
+     */
+    $resourceRoutes = [
+        'year1-requirements'
+            => 'employee/resource-requirements/year1-requirements',
+
+        'year2-requirements'
+            => 'employee/resource-requirements/year2-requirements',
+
+        'year3-requirements'
+            => 'employee/resource-requirements/year3-requirements',
+
+        'summary-of-investments'
+            => 'employee/resource-requirements/summary-of-investments',
+    ];
+
+    /*
+     * Resource Requirements
+     */
+    if (isset($resourceRoutes[$section])) {
+
+        return redirect()->to(
+            site_url($resourceRoutes[$section] . '/' . $id)
+        );
+    }
+
+    /*
+     * Invalid section
+     */
+    if (!isset($viewMap[$section])) {
+
+        return redirect()->to(
+            site_url(
+                'employee/edit-ict-project/' .
+                $id .
+                '/network-infrastructure'
+            )
+        );
+    }
+
+    return view(
+        $viewMap[$section],
+        [
+            'title'      => 'Edit ICT Project',
+            'active'     => $section,
+            'currentUser'=> $currentUser,
+            'editMode'   => true,
+            'editId'     => $id,
+        ]
+    );
+}
 
     public function loadFormData($id)
     {
@@ -610,15 +877,24 @@ class DashboardController extends BaseController
         }
 
         $resourceModel = new ResourceRequirementModel();
-        $resourceData = [
-            'year1' => $resourceModel->getByYear(1),
-            'year2' => $resourceModel->getByYear(2),
-            'year3' => $resourceModel->getByYear(3),
-            'generalSummary' => $resourceModel->getGeneralSummary(),
-            'fundSource' => $resourceModel->getFundSourceSummary(),
-            'statementOfExpenditure' => $resourceModel->getStatementOfExpenditureSummary(),
-            'objectOfExpenditure' => $resourceModel->getObjectOfExpenditureSummary(),
-        ];
+
+$resourceData = [
+    'year1' => $resourceModel->getByYear(1, $id),
+    'year2' => $resourceModel->getByYear(2, $id),
+    'year3' => $resourceModel->getByYear(3, $id),
+
+    'generalSummary' =>
+        $resourceModel->getGeneralSummary($id),
+
+    'fundSource' =>
+        $resourceModel->getFundSourceSummary($id),
+
+    'statementOfExpenditure' =>
+        $resourceModel->getStatementOfExpenditureSummary($id),
+
+    'objectOfExpenditure' =>
+        $resourceModel->getObjectOfExpenditureSummary($id),
+];
 
         $agencyModel = new AgencyInformationModel();
         $agencyData = $agencyModel->orderBy('id', 'DESC')->first() ?? [];
@@ -640,13 +916,17 @@ class DashboardController extends BaseController
 
         helper('pdf');
 
-        $dompdf = run_with_retry(function () use ($html) {
-            $dp = new \Dompdf\Dompdf();
-            $dp->loadHtml(mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8'));
-            $dp->setPaper('A4', 'landscape');
-            $dp->render();
-            return $dp;
-        });
+       $dompdf = run_with_retry(function () use ($html) {
+    $dp = new \Dompdf\Dompdf();
+
+    // Dompdf supports UTF-8 HTML directly.
+    $dp->loadHtml($html, 'UTF-8');
+
+    $dp->setPaper('A4', 'landscape');
+    $dp->render();
+
+    return $dp;
+});
 
         $filename = 'ISSP_' . preg_replace('/[^a-zA-Z0-9]/', '_', $project['title'] ?? 'submission') . '_' . $id . '.pdf';
 

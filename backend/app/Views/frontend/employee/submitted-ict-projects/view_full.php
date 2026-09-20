@@ -106,6 +106,20 @@
 .view-table td { padding: 8px 10px; border-bottom: 1px solid #e8ecf1; vertical-align: top; }
 .view-table tr:last-child td { border-bottom: none; }
 .view-table .row-label { font-weight: 700; color: var(--brand-dark); background: #f8fafc; white-space: nowrap; width: 1%; }
+.summary-table {
+    width: 100%;
+    table-layout: fixed;
+}
+
+.summary-table th:first-child,
+.summary-table td:first-child {
+    width: 40%;
+}
+
+.summary-table th:not(:first-child),
+.summary-table td:not(:first-child) {
+    width: 15%;
+}
 .kpi-sub-header { font-size: .75rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .02em; padding: 10px 0 6px; margin-top: 12px; border-bottom: 1px solid #eef2f6; }
 .kpi-project-title { font-size: .85rem; font-weight: 700; color: var(--brand-dark); margin: 10px 0 8px; padding: 6px 10px; background: #f8fafc; border-radius: 4px; border-left: 3px solid var(--brand); }
 .info-badge { display: inline-block; background: #e8ecf1; color: var(--muted); font-size: .7rem; font-weight: 600; padding: 2px 8px; border-radius: 4px; }
@@ -187,6 +201,19 @@ $sc = $statusColors[$project['status']] ?? ['bg' => '#f1f5f9', 'fg' => '#475569'
 </div>
 
 <?php
+$resourceRequirementsBySection = [
+    'year1-requirements-form' => $year1Requirements ?? [],
+    'year2-requirements-form' => $year2Requirements ?? [],
+    'year3-requirements-form' => $year3Requirements ?? [],
+];
+
+$summaryTables = [
+    'generalSummary' => $generalSummary ?? [],
+    'fundSourceSummary' => $fundSourceSummary ?? [],
+    'statementOfExpenditureSummary' => $statementOfExpenditureSummary ?? [],
+    'objectOfExpenditureSummary' => $objectOfExpenditureSummary ?? [],
+];
+
 $sectionLabels = [
     'network-infrastructure-form'      => 'A. Network Infrastructure',
     'enterprise-architecture-form'      => 'B. Enterprise Architecture',
@@ -392,7 +419,15 @@ function isChecked($v) {
 
 $firstSection = true;
 foreach ($sectionLabels as $key => $label):
-    $fields = $formData[$key] ?? [];
+
+    if (isset($resourceRequirementsBySection[$key])) {
+        $fields = $resourceRequirementsBySection[$key];
+    } elseif ($key === 'summary-of-investments-form') {
+        $fields = $generalSummary ?? [];
+    } else {
+        $fields = $formData[$key] ?? [];
+    }
+
     if (!is_array($fields)) $fields = [];
     $fields = array_filter($fields, fn($k) => !str_starts_with($k, 'csrf_'), ARRAY_FILTER_USE_KEY);
     $icon = $sectionIcons[$key] ?? 'fa-file';
@@ -417,6 +452,15 @@ foreach ($sectionLabels as $key => $label):
         $totalCount = count($fields);
         $filledCount = 0;
         foreach ($fields as $fv) { if (renderCheckValue($fv) !== '') $filledCount++; }
+   } elseif (
+    $key === 'year1-requirements-form' ||
+    $key === 'year2-requirements-form' ||
+    $key === 'year3-requirements-form'
+) {
+    $yearRows = $resourceRequirementsBySection[$key] ?? [];
+    $totalCount = count($yearRows);
+    $filledCount = count($yearRows);
+   
     } elseif ($key === 'performance-measurement-form') {
         $flatCount = 0; $flatFilled = 0;
         foreach ($fields as $fn => $fv) {
@@ -917,10 +961,218 @@ foreach ($sectionLabels as $key => $label):
         </table>
         <?php endif; endforeach; ?>
 
-<?php endif; ?>
+        <?php elseif (
+            $key === 'year1-requirements-form' ||
+            $key === 'year2-requirements-form' ||
+            $key === 'year3-requirements-form'
+        ): ?>
+
+            <?php
+            $yearRows = $resourceRequirementsBySection[$key] ?? [];
+            ?>
+
+            <?php if (empty($yearRows)): ?>
+
+                <div style="text-align:center;padding:16px;color:#c5ccd6;font-size:.85rem;font-style:italic;">
+                    <i class="fa-regular fa-file me-1"></i>
+                    No resource requirements provided.
+                </div>
+
+            <?php else: ?>
+
+                <?php
+                $groupedRows = [];
+
+                foreach ($yearRows as $row) {
+                    $category = trim((string)($row['strategic_category'] ?? ''));
+                    $type = trim((string)($row['expenditure_type'] ?? ''));
+
+                    $groupKey = $category . '|' . $type;
+
+                    if (!isset($groupedRows[$groupKey])) {
+                        $groupedRows[$groupKey] = [
+                            'category' => $category,
+                            'type' => $type,
+                            'rows' => [],
+                        ];
+                    }
+
+                    $groupedRows[$groupKey]['rows'][] = $row;
+                }
+                ?>
+
+                <?php foreach ($groupedRows as $group): ?>
+
+                    <div class="group-header">
+                        <?= esc($group['category']) ?>
+                        <?php if ($group['type'] !== ''): ?>
+                            — <?= esc($group['type']) ?>
+                        <?php endif; ?>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="view-table">
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th>Office</th>
+                                    <th>Fund Source</th>
+                                    <th>Unit Cost</th>
+                                    <th>Physical Target</th>
+                                    <th>Total Cost</th>
+                                    <th>Object of Expenditure</th>
+                                    <th>UACS Code</th>
+                                    <th>Remarks</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <?php foreach ($group['rows'] as $row): ?>
+                                    <tr>
+                                        <td><?= esc($row['item'] ?? '') ?></td>
+                                        <td><?= esc($row['office'] ?? '') ?></td>
+                                        <td><?= esc($row['fund_source'] ?? '') ?></td>
+
+                                        <td style="text-align:right;">
+                                            ₱<?= number_format(
+                                                (float)($row['unit_cost'] ?? 0),
+                                                2
+                                            ) ?>
+                                        </td>
+
+                                        <td><?= esc($row['physical_target'] ?? '') ?></td>
+
+                                        <td style="text-align:right;">
+                                            ₱<?= number_format(
+                                                (float)($row['total_cost'] ?? 0),
+                                                2
+                                            ) ?>
+                                        </td>
+
+                                        <td><?= esc($row['uacs_code'] ?? '') ?></td>
+                                        <td><?= esc($row['remarks'] ?? '') ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+
+                <?php endforeach; ?>
+
+            <?php endif; ?>
+
+          <?php elseif ($key === 'summary-of-investments-form'): ?>
+
+    <?php
+    $summarySections = [
+        [
+            'title' => 'B.1. General Summary',
+            'data'  => $generalSummary ?? [],
+            'label' => 'strategic_category',
+        ],
+        [
+            'title' => 'B.2. Fund Source',
+            'data'  => $fundSourceSummary ?? [],
+            'label' => 'fund_source',
+        ],
+        [
+            'title' => 'B.3. Statement of Expenditure',
+            'data'  => $statementOfExpenditureSummary ?? [],
+            'label' => 'expenditure_type',
+        ],
+        [
+            'title' => 'B.4. Object of Expenditure',
+            'data'  => $objectOfExpenditureSummary ?? [],
+            'label' => 'uacs_code',
+        ],
+    ];
+    ?>
+
+    <?php foreach ($summarySections as $summary): ?>
+
+        <div class="group-header">
+            <?= esc($summary['title']) ?>
+        </div>
+
+        <?php if (empty($summary['data'])): ?>
+
+            <div style="text-align:center;padding:16px;color:#c5ccd6;font-size:.85rem;font-style:italic;">
+                <i class="fa-regular fa-file me-1"></i>
+                No summary data provided.
+            </div>
+
+        <?php else: ?>
+
+            <div class="table-responsive">
+                <table class="view-table summary-table">
+
+                    <thead>
+                        <tr>
+                            <th><?= esc($summary['label']) ?></th>
+                            <th>Year 1</th>
+                            <th>Year 2</th>
+                            <th>Year 3</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        <?php foreach ($summary['data'] as $row): ?>
+
+                            <tr>
+
+                                <td>
+                                    <?= esc($row[$summary['label']] ?? '') ?>
+                                </td>
+
+                                <td style="text-align:center;">
+                                    ₱<?= number_format(
+                                        (float)($row['year1'] ?? 0),
+                                        2
+                                    ) ?>
+                                </td>
+
+                                <td style="text-align:center;">
+                                    ₱<?= number_format(
+                                        (float)($row['year2'] ?? 0),
+                                        2
+                                    ) ?>
+                                </td>
+
+                                <td style="text-align:center;">
+                                    ₱<?= number_format(
+                                        (float)($row['year3'] ?? 0),
+                                        2
+                                    ) ?>
+                                </td>
+
+                                <td style="text-align:center;">
+                                    ₱<?= number_format(
+                                        (float)($row['total'] ?? 0),
+                                        2
+                                    ) ?>
+                                </td>
+
+                            </tr>
+
+                        <?php endforeach; ?>
+
+                    </tbody>
+
+                </table>
+            </div>
+
+        <?php endif; ?>
+
+    <?php endforeach; ?>
+
+        <?php endif; ?>
 
     </div>
+
 </div>
+
 <?php $firstSection = false; endforeach; ?>
 
 <script>
