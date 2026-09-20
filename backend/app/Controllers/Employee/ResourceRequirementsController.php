@@ -65,7 +65,36 @@ class ResourceRequirementsController extends BaseController
 
         return $id;
     }
+    
+    /*
+|--------------------------------------------------------------------------
+| RESOURCE REQUIREMENT STATUS
+|--------------------------------------------------------------------------
+*/
 
+private function getResourceRequirementStatus(?int $isspRecordId): array
+{
+    $status = [
+        1 => false,
+        2 => false,
+        3 => false,
+    ];
+
+    if ($isspRecordId === null || $isspRecordId <= 0) {
+        return $status;
+    }
+
+    for ($year = 1; $year <= 3; $year++) {
+        $records = $this->model->getByYear(
+            $year,
+            $isspRecordId
+        );
+
+        $status[$year] = !empty($records);
+    }
+
+    return $status;
+}
 
     /*
     |--------------------------------------------------------------------------
@@ -87,6 +116,11 @@ class ResourceRequirementsController extends BaseController
             $isspRecordId
         );
 
+        $resourceRequirementStatus =
+    $this->getResourceRequirementStatus(
+        $isspRecordId
+    );
+
         return view(
             'frontend/employee/resource-requirements/year1-requirements',
             [
@@ -95,6 +129,7 @@ class ResourceRequirementsController extends BaseController
                 'categories'   => $this->categories,
                 'types'        => $this->types,
                 'editId'       => $isspRecordId,
+                'resourceRequirementStatus' => $resourceRequirementStatus,
             ]
         );
     }
@@ -120,6 +155,11 @@ class ResourceRequirementsController extends BaseController
             $isspRecordId
         );
 
+        $resourceRequirementStatus =
+    $this->getResourceRequirementStatus(
+        $isspRecordId
+    );
+
         return view(
             'frontend/employee/resource-requirements/year2-requirements',
             [
@@ -128,6 +168,7 @@ class ResourceRequirementsController extends BaseController
                 'categories'   => $this->categories,
                 'types'        => $this->types,
                 'editId'       => $isspRecordId,
+                'resourceRequirementStatus' => $resourceRequirementStatus,
             ]
         );
     }
@@ -153,6 +194,11 @@ class ResourceRequirementsController extends BaseController
             $isspRecordId
         );
 
+        $resourceRequirementStatus =
+           $this->getResourceRequirementStatus(
+        $isspRecordId
+    );
+
         return view(
             'frontend/employee/resource-requirements/year3-requirements',
             [
@@ -161,6 +207,7 @@ class ResourceRequirementsController extends BaseController
                 'categories'   => $this->categories,
                 'types'        => $this->types,
                 'editId'       => $isspRecordId,
+                'resourceRequirementStatus' => $resourceRequirementStatus,
             ]
         );
     }
@@ -394,6 +441,7 @@ class ResourceRequirementsController extends BaseController
 
             'created_by' =>
                 $userId,
+
         ];
 
         log_message(

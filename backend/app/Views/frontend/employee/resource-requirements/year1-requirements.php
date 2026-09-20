@@ -755,7 +755,7 @@
                                     type="number"
                                     step="0.01"
                                     min="0"
-                                    id="unit_cost"
+                                    id="unit_cost" oninput="window.computeAdd()"
                                     name="unit_cost"
                                     class="form-control"
                                     required>
@@ -772,7 +772,7 @@
                                 <input
                                     type="number"
                                     min="1"
-                                    id="physical_target"
+                                    id="physical_target" oninput="window.computeAdd()"
                                     name="physical_target"
                                     class="form-control"
                                     required>
@@ -820,7 +820,7 @@
                         <button
                             type="button"
                             class="btn btn-primary"
-                            id="saveRequirementBtn">
+                            id="saveRequirementBtn" onclick="window.saveRequirement()">
 
                             Save Resource Requirement
 
@@ -1124,92 +1124,6 @@ const savedRequirements =
 
 /*
 |--------------------------------------------------------------------------
-| DATABASE STATUS
-|--------------------------------------------------------------------------
-|
-| This is the shared status object used by the sidebar.
-|
-| Year 1 = index 1
-|
-*/
-
-window.resourceRequirementDbStatus =
-    window.resourceRequirementDbStatus || {};
-
-
-/*
-|--------------------------------------------------------------------------
-| SET DATABASE STATUS
-|--------------------------------------------------------------------------
-*/
-
-window.setResourceRequirementDbStatus =
-    function(year, hasRecords)
-    {
-        year = parseInt(year, 10);
-
-        if (![1, 2, 3].includes(year)) {
-            return;
-        }
-
-        window.resourceRequirementDbStatus[year] =
-            Boolean(hasRecords);
-
-        if (
-            typeof window.updateResourceRequirementStatusIndicators ===
-            "function"
-        ) {
-            window.updateResourceRequirementStatusIndicators();
-        }
-    };
-
-
-/*
-|--------------------------------------------------------------------------
-| GET DATABASE STATUS
-|--------------------------------------------------------------------------
-*/
-
-window.hasResourceRequirementDbStatus =
-    function(year)
-    {
-        year = parseInt(year, 10);
-
-        return (
-            window.resourceRequirementDbStatus[year] === true
-        );
-    };
-
-
-/*
-|--------------------------------------------------------------------------
-| INITIAL YEAR 1 DATABASE STATUS
-|--------------------------------------------------------------------------
-*/
-
-window.setResourceRequirementDbStatus(
-    1,
-    <?= !empty($requirements) ? 'true' : 'false' ?>
-);
-
-
-console.log(
-    "Year 1 Resource Requirements loaded."
-);
-
-console.log(
-    "Database Requirements:",
-    savedRequirements
-);
-
-console.log(
-    "Year 1 DB Status:",
-    window.hasResourceRequirementDbStatus(1)
-);
-
-
-/*
-|--------------------------------------------------------------------------
 | DOM READY
 |--------------------------------------------------------------------------
 */
@@ -1228,43 +1142,30 @@ document.addEventListener(
                 '[data-bs-toggle="tooltip"]'
             );
 
-        tooltipTriggerList.forEach(
-            function(tooltipTriggerEl)
-            {
-
-                new bootstrap.Tooltip(
-                    tooltipTriggerEl
-                );
-
-            }
-        );
-
-
-        /*
-         * Sidebar status
-         */
-
         if (
-            typeof updateResourceRequirementStatusIndicators ===
-            "function"
+            typeof bootstrap !== "undefined" &&
+            bootstrap.Tooltip
         ) {
 
-            updateResourceRequirementStatusIndicators();
+            tooltipTriggerList.forEach(
+                function(tooltipTriggerEl)
+                {
+                    new bootstrap.Tooltip(
+                        tooltipTriggerEl
+                    );
+                }
+            );
 
         }
-
 
         if (
             typeof updateStatusIndicators ===
             "function"
         ) {
 
-            updateStatusIndicators();
+    updateStatusIndicators();
 
-        }
-
-    }
-);
+}
 
 
 /*
@@ -1316,26 +1217,14 @@ window.clearForm = function()
             );
 
             localStorage.removeItem(
-                "year1-requirements-saved"
-            );
-
-
-            if (
-    typeof updateResourceRequirementStatusIndicators ===
-    "function"
-) {
-
-    updateResourceRequirementStatusIndicators();
-
-}
+    "year1-requirements-saved"
+);
 
 if (
-    typeof updateStatusIndicators ===
+    typeof window.updateStatusIndicators ===
     "function"
 ) {
-
-    updateStatusIndicators();
-
+    window.updateStatusIndicators();
 }
 
 
@@ -1724,63 +1613,77 @@ document.addEventListener(
 |
 */
 
-window.saveChanges = function(
-    showAlert = true
-)
+window.saveChanges = function(showAlert = true)
 {
+    const hasRequirements =
+        Array.isArray(savedRequirements) &&
+        savedRequirements.length > 0;
 
+    if (!hasRequirements) {
+
+        localStorage.removeItem(
+            "year1-requirements-saved"
+        );
+
+        if (
+            typeof updateStatusIndicators === "function"
+        ) {
+            updateStatusIndicators();
+        }
+
+        if (
+            showAlert &&
+            typeof showAlertModal === "function"
+        ) {
+            showAlertModal(
+                "Warning",
+                "Please enter at least one Year 1 Resource Requirement before saving."
+            );
+        }
+
+        return Promise.resolve(false);
+    }
+
+    /*
+     * The actual requirements are already
+     * saved in the database.
+     *
+     * Save Changes only confirms the
+     * current Year 1 section as complete.
+     */
+    if (showAlert === true) {
     localStorage.setItem(
         "year1-requirements-saved",
         "true"
     );
-
-
-   if (
-    typeof updateResourceRequirementStatusIndicators ===
-    "function"
-) {
-
-    updateResourceRequirementStatusIndicators();
-
 }
 
-if (
-    typeof updateStatusIndicators ===
-    "function"
-) {
-
-    updateStatusIndicators();
-
-}
-
-
-    if(
-        showAlert &&
-        typeof showAlertModal ===
-        "function"
+    if (
+        typeof updateStatusIndicators === "function"
     ) {
-
-        showAlertModal(
-            "Success",
-            "Year 1 Resource Requirements saved successfully."
-        );
-
+        updateStatusIndicators();
     }
 
+    if (
+        showAlert &&
+        typeof showAlertModal === "function"
+    ) {
+        showAlertModal(
+            "Success",
+            "Changes saved successfully."
+        );
+    }
 
     return Promise.resolve(true);
-
 };
-
-
 /*
 |--------------------------------------------------------------------------
 | SAVE RESOURCE REQUIREMENT
 |--------------------------------------------------------------------------
 */
-
 window.saveRequirement = function()
 {
+
     const form =
         document.getElementById("addRequirementForm");
 
@@ -1788,43 +1691,177 @@ window.saveRequirement = function()
         document.getElementById("saveRequirementBtn");
 
     if (!form || !saveButton) {
+
         console.error(
             "Add Resource Requirement form not found."
         );
+
         return;
     }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | VALIDATE FORM
+    |--------------------------------------------------------------------------
+    */
 
     if (!form.checkValidity()) {
+
         form.reportValidity();
+
         return;
     }
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | COMPUTE TOTAL
+    |--------------------------------------------------------------------------
+    */
+
     window.computeAdd();
+
 
     const total =
         parseFloat(
             document.getElementById("line_total").value
         ) || 0;
 
+
     if (total <= 0) {
+
         showAlertModal(
             "Error",
             "Please enter a valid Unit Cost and Physical Target."
         );
+
         return;
     }
 
-    const formData = new FormData(form);
+
+    /*
+    |--------------------------------------------------------------------------
+    | GET CURRENT ISSP PROJECT ID
+    |--------------------------------------------------------------------------
+    |
+    | The PHP $editId can be 0 on a fresh Year 1 page even though
+    | the ICT Projects page has already established the project ID
+    | in the browser.
+    |
+    | Try the browser project ID first.
+    |
+    */
+
+    const localStorageProjectId =
+        localStorage.getItem("edit_project_id");
+
+
+    const localStorageIsspRecordId =
+        localStorage.getItem("issp_record_id");
+
+
+    const phpProjectId =
+        "<?= (int) ($editId ?? 0) ?>";
+
+
+    const projectId =
+        (
+            parseInt(localStorageProjectId, 10) > 0
+        )
+            ? localStorageProjectId
+            :
+            (
+                parseInt(localStorageIsspRecordId, 10) > 0
+                    ? localStorageIsspRecordId
+                    :
+                    (
+                        parseInt(phpProjectId, 10) > 0
+                            ? phpProjectId
+                            : ""
+                    )
+            );
+
+
+    console.log(
+        "YEAR 1 project ID sources:",
+        {
+            localStorage_edit_project_id:
+                localStorageProjectId,
+
+            localStorage_issp_record_id:
+                localStorageIsspRecordId,
+
+            php_editId:
+                phpProjectId,
+
+            finalProjectId:
+                projectId
+        }
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | NO PROJECT ID
+    |--------------------------------------------------------------------------
+    */
+
+    if (!projectId || parseInt(projectId, 10) <= 0) {
+
+        console.error(
+            "No valid ISSP project ID found."
+        );
+
+        showAlertModal(
+            "Error",
+            "No active ISSP project selected. Please save the ICT Projects first."
+        );
+
+        return;
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | BUILD FORM DATA
+    |--------------------------------------------------------------------------
+    */
+
+    const formData =
+        new FormData(form);
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | IMPORTANT
+    |--------------------------------------------------------------------------
+    | Override the PHP-rendered 0 with the actual project ID.
+    */
 
     formData.set(
-    "issp_record_id",
-    "<?= (int) ($editId ?? 0) ?>"
-);
+        "issp_record_id",
+        String(projectId)
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | YEAR
+    |--------------------------------------------------------------------------
+    */
 
     formData.set(
         "year",
         "1"
     );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | STRATEGIC CATEGORY
+    |--------------------------------------------------------------------------
+    */
 
     formData.set(
         "strategic_category",
@@ -1833,6 +1870,13 @@ window.saveRequirement = function()
         ).value
     );
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | EXPENDITURE TYPE
+    |--------------------------------------------------------------------------
+    */
+
     formData.set(
         "expenditure_type",
         document.getElementById(
@@ -1840,62 +1884,113 @@ window.saveRequirement = function()
         ).value
     );
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | DEBUG
+    |--------------------------------------------------------------------------
+    */
+
     console.log(
         "Saving Year 1 requirement:",
         Object.fromEntries(formData)
     );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | DISABLE BUTTON
+    |--------------------------------------------------------------------------
+    */
 
     saveButton.disabled = true;
 
     saveButton.innerHTML =
         '<i class="fas fa-spinner fa-spin"></i> Saving...';
 
-   fetch(
-    form.action,
-    {
-        method: "POST",
-        body: formData,
-        headers: {
-            "X-Requested-With": "XMLHttpRequest",
-            "Accept": "application/json"
+
+    /*
+    |--------------------------------------------------------------------------
+    | SEND TO SERVER
+    |--------------------------------------------------------------------------
+    */
+
+    fetch(
+        form.action,
+        {
+            method: "POST",
+
+            body: formData,
+
+            headers: {
+                "X-Requested-With":
+                    "XMLHttpRequest",
+
+                "Accept":
+                    "application/json"
+            }
         }
-    }
-)
-.then(async function(response)
-{
-    const responseText = await response.text();
+    )
 
-    console.log("HTTP STATUS:", response.status);
-    console.log("RAW SERVER RESPONSE:", responseText);
+    .then(async function(response)
+    {
 
-    let data;
+        const responseText =
+            await response.text();
 
-    try {
-        data = JSON.parse(responseText);
-    } catch (error) {
-        throw new Error(
-            "Server did not return JSON. HTTP " +
-            response.status +
-            ". Check the Console for the RAW SERVER RESPONSE."
-        );
-    }
 
-    if (!response.ok) {
-        throw new Error(
-            data.message ||
-            "Server returned HTTP " +
+        console.log(
+            "HTTP STATUS:",
             response.status
         );
-    }
 
-    return data;
-})
+
+        console.log(
+            "RAW SERVER RESPONSE:",
+            responseText
+        );
+
+
+        let data;
+
+
+        try {
+
+            data =
+                JSON.parse(responseText);
+
+        } catch (error) {
+
+            throw new Error(
+                "Server did not return JSON. HTTP " +
+                response.status +
+                ". Check the Console for the RAW SERVER RESPONSE."
+            );
+        }
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.message ||
+                "Server returned HTTP " +
+                response.status
+            );
+        }
+
+
+        return data;
+    })
+
+
     .then(function(data)
     {
+
         console.log(
             "Save response:",
             data
         );
+
 
         if (!data.success) {
 
@@ -1905,49 +2000,123 @@ window.saveRequirement = function()
             );
         }
 
-        /*
-         * DB SAVE SUCCESS
-         */
 
-        localStorage.removeItem(
-            "year1-requirements-saved"
+        /*
+        |--------------------------------------------------------------------------
+        | SAVE SUCCESS
+        |--------------------------------------------------------------------------
+        */
+
+        console.log(
+            "Year 1 Resource Requirement saved successfully.",
+            data
         );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | KEEP PROJECT ID SYNCHRONIZED
+        |--------------------------------------------------------------------------
+        |
+        | The backend also returns the ISSP record ID.
+        |
+        */
+
+        const returnedProjectId =
+            data.issp_record_id ||
+            data.id ||
+            projectId;
+
+
+        if (
+            returnedProjectId &&
+            parseInt(returnedProjectId, 10) > 0
+        ) {
+
+            localStorage.setItem(
+                "edit_project_id",
+                String(returnedProjectId)
+            );
+
+            localStorage.setItem(
+                "issp_record_id",
+                String(returnedProjectId)
+            );
+        }
+
+
+        /*
+|--------------------------------------------------------------------------
+| RESOURCE REQUIREMENT STATUS
+|--------------------------------------------------------------------------
+|
+| A newly added/edited requirement means the current
+| "Save Changes" state is no longer the latest state.
+|
+*/
+
+localStorage.removeItem(
+    "year1-requirements-saved"
+);
+
+        /*
+        |--------------------------------------------------------------------------
+        | SUCCESS MESSAGE
+        |--------------------------------------------------------------------------
+        */
 
         showAlertModal(
             "Success",
             "Resource Requirement saved successfully."
         );
 
+
         /*
-         * Reload page so the newly inserted
-         * database row appears in the list.
-         */
+        |--------------------------------------------------------------------------
+        | RELOAD
+        |--------------------------------------------------------------------------
+        |
+        | This allows the newly inserted database row
+        | to appear immediately.
+        |
+        */
 
         setTimeout(function()
         {
+
             window.location.reload();
 
         }, 500);
+
     })
+
+
     .catch(function(error)
     {
+
         console.error(
             "Save Resource Requirement Error:",
             error
         );
+
 
         showAlertModal(
             "Error",
             error.message ||
             "Unable to save the Resource Requirement."
         );
+
     })
+
+
     .finally(function()
     {
+
         saveButton.disabled = false;
 
         saveButton.innerHTML =
             "Save Resource Requirement";
+
     });
 };
 
@@ -1966,8 +2135,6 @@ document.addEventListener(
             document.getElementById(
                 "saveRequirementBtn"
             );
-
-
         if(saveButton) {
 
             saveButton.addEventListener(
@@ -1976,6 +2143,9 @@ document.addEventListener(
             );
 
         }
+
+    }
+);
 
     }
 );
@@ -2015,6 +2185,26 @@ document.addEventListener(
             );
     }
 );
+
+document.addEventListener("DOMContentLoaded", function () {
+    const editForm = document.getElementById("editRequirementForm");
+
+    if (!editForm) {
+        return;
+    }
+
+    function markYear1AsUnsaved() {
+        localStorage.removeItem("year1-requirements-saved");
+
+        if (typeof updateStatusIndicators === "function") {
+            updateStatusIndicators();
+        }
+    }
+
+    editForm.addEventListener("input", markYear1AsUnsaved);
+
+    editForm.addEventListener("change", markYear1AsUnsaved);
+});
 
 </script>
 

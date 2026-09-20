@@ -751,7 +751,6 @@ if (!function_exists('renderResourceTable')) {
         echo '<th>Physical Target</th>';
         echo '<th>Total Cost</th>';
         echo '<th>UACS Code</th>';
-        echo '<th>Object of Expenditure</th>';
         echo '</tr>';
         echo '</thead>';
         echo '<tbody>';
@@ -778,7 +777,6 @@ if (!function_exists('renderResourceTable')) {
             echo '</td>';
 
             echo '<td>' . v($row['uacs_code'] ?? '') . '</td>';
-            echo '<td>' . v($row['object_of_expenditure'] ?? '') . '</td>';
 
             echo '</tr>';
 
@@ -1084,6 +1082,11 @@ body {
     padding: 0;
 }
 
+.money {
+    font-family: "DejaVu Sans", sans-serif;
+    white-space: nowrap;
+}
+
 .cover-page {
     text-align: center;
     padding-top: 10mm;
@@ -1273,6 +1276,7 @@ table.dt td.c {
 
 table.dt td.r {
     text-align: right;
+    font-family: "DejaVu Sans", sans-serif;
 }
 
 table.dt td.b {

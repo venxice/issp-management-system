@@ -639,18 +639,54 @@ helpIcons.forEach(icon => {
 });
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Show/hide Others textbox for Internal Strategic Alignment
+    // Show/hide textbox for Internal Strategic Alignment
     document.getElementById('internal_strategic_others').addEventListener('change', function() {
         var othersDiv = document.getElementById('internalStrategicOthers');
         othersDiv.style.display = this.checked ? 'block' : 'none';
     });
 
     window.loadSavedData();
-    if (typeof updateStatusIndicators === 'function') updateStatusIndicators();
-    // Retry loading after a short delay in case of async rendering
+
+    if (typeof updateStatusIndicators === 'function') {
+        updateStatusIndicators();
+    }
+
+    
+    const form = document.querySelector('#mainForm');
+
+    if (form) {
+        form.addEventListener('input', function(e) {
+            if (e.target.matches('input:not([type="hidden"]), textarea')) {
+                localStorage.removeItem('ict-projects-saved');
+
+                if (typeof updateStatusIndicators === 'function') {
+                    updateStatusIndicators();
+                }
+            }
+        });
+
+        form.addEventListener('change', function(e) {
+            if (
+                e.target.matches(
+                    'select, input[type="checkbox"], input[type="radio"], input[type="file"]'
+                )
+            ) {
+                localStorage.removeItem('ict-projects-saved');
+
+                if (typeof updateStatusIndicators === 'function') {
+                    updateStatusIndicators();
+                }
+            }
+        });
+    }
+
+    // Retry loading after a short delay
     setTimeout(function() {
         window.loadSavedData();
-        if (typeof updateStatusIndicators === 'function') updateStatusIndicators();
+
+        if (typeof updateStatusIndicators === 'function') {
+            updateStatusIndicators();
+        }
     }, 300);
 });
 
@@ -691,59 +727,458 @@ window.clearForm = function() {
 window.saveChanges = function(showAlert = true) {
     return new Promise(function(resolve) {
         console.log('saveChanges called with showAlert:', showAlert);
+
         try {
             const form = document.querySelector('#mainForm');
-            if (form) {
-                const formData = new FormData(form);
-                const formDataObj = {};
-                const fileReads = [];
-                
-                formData.forEach((value, key) => {
-                    if (value instanceof File && value.name) {
-                        fileReads.push(
-                            new Promise(resolve => {
-                                const reader = new FileReader();
-                                reader.onload = () => {
-                                    const dataUrl = reader.result;
-                                    const b64Idx = dataUrl.indexOf(';base64,');
-                                    if (b64Idx !== -1) {
-                                        const beforeBase64 = dataUrl.substring(0, b64Idx);
-                                        const afterBase64 = dataUrl.substring(b64Idx);
-                                        formDataObj[key] = beforeBase64 + ';name=' + encodeURIComponent(value.name) + afterBase64;
-                                    } else {
-                                        const parts = dataUrl.split(',');
-                                        formDataObj[key] = parts[0] + ';name=' + encodeURIComponent(value.name) + ',' + parts.slice(1).join(',');
-                                    }
-                                    resolve();
-                                };
-                                reader.readAsDataURL(value);
-                            })
-                        );
-                    } else if (value instanceof File) {
-                        // Empty file input — skip (would serialize to {})
-                    } else {
-                        formDataObj[key] = value;
+
+            if (!form) {
+                console.error('Form #mainForm not found');
+
+                if (showAlert) {
+                    showAlertModal('Error', 'Error: Form not found');
+                }
+
+                resolve(false);
+                return;
+            }
+
+            const formData = new FormData(form);
+            const formDataObj = {};
+            const fileReads = [];
+
+            let hasActualData = false;
+
+            formData.forEach((value, key) => {
+
+                if (value instanceof File && value.name) {
+
+                    fileReads.push(
+                        new Promise(function(fileResolve) {
+
+                            const reader = new FileReader();
+
+                            reader.onload = function() {
+
+                                const dataUrl = reader.result;
+
+                                const b64Idx = dataUrl.indexOf(';base64,');
+
+                                if (b64Idx !== -1) {
+
+                                    const beforeBase64 = dataUrl.substring(0, b64Idx);
+                                    const afterBase64 = dataUrl.substring(b64Idx);
+
+                                    formDataObj[key] =
+                                        beforeBase64 +
+                                        ';name=' +
+                                        encodeURIComponent(value.name) +
+                                        afterBase64;
+
+                                } else {
+
+                                    const parts = dataUrl.split(',');
+
+                                    formDataObj[key] =
+                                        parts[0] +
+                                        ';name=' +
+                                        encodeURIComponent(value.name) +
+                                        ',' +
+                                        parts.slice(1).join(',');
+                                }
+
+                                fileResolve();
+                            };
+
+                            reader.onerror = function() {
+                                console.error('Unable to read file:', value.name);
+                                fileResolve();
+                            };
+
+                            reader.readAsDataURL(value);
+                        })
+                    );
+
+                } else if (value instanceof File) {
+
+                    // Empty file input — skip
+
+                } else {
+    formDataObj[key] = value;
+}
+            });
+
+            const continueSave = function() {
+            const visibleFields = Array.from(
+    form.querySelectorAll(
+        'input:not([type="hidden"]), textarea, select'
+    )
+);
+
+const hasActualData = visibleFields.some(function(el) {
+    if (el.type === 'checkbox' || el.type === 'radio') {
+        return el.checked;
+    }
+
+    if (el.type === 'file') {
+        return el.files && el.files.length > 0;
+    }
+
+    return String(el.value || '').trim() !== '';
+});
+
+if (!hasActualData) {
+    localStorage.removeItem('ict-projects-saved');
+
+    if (typeof updateStatusIndicators === 'function') {
+        updateStatusIndicators();
+    }
+
+    if (showAlert) {
+        showAlertModal(
+            'Warning',
+            'Please enter at least one ICT Project detail before saving.'
+        );
+    }
+
+    resolve(false);
+    return;
+}
+                /*
+                 * Merge with previous localStorage data
+                 * so existing uploaded files are preserved.
+                 */
+                const prevData = JSON.parse(
+                    localStorage.getItem('ict-projects-form') || '{}'
+                );
+
+                Object.keys(prevData).forEach(function(key) {
+
+                    const val = prevData[key];
+
+                    if (
+                        typeof val === 'string' &&
+                        (
+                            val.startsWith('data:') ||
+                            val.startsWith('uploads/')
+                        )
+                    ) {
+                        if (
+                            !(key in formDataObj) ||
+                            formDataObj[key] === ''
+                        ) {
+                            formDataObj[key] = val;
+                        }
                     }
                 });
-                
-                if (fileReads.length > 0) {
-                    Promise.all(fileReads).then(() => {
-                        finalizeSave(formDataObj, showAlert);
-                        resolve();
-                    });
-                } else {
-                    finalizeSave(formDataObj, showAlert);
-                    resolve();
+
+                /*
+                 * Remove empty hidden fields.
+                 */
+                Object.keys(formDataObj).forEach(function(key) {
+
+                    if (formDataObj[key] === '') {
+
+                        const el = document.querySelector(
+                            `[name="${key}"]`
+                        );
+
+                        if (el && el.offsetParent === null) {
+                            delete formDataObj[key];
+                        }
+                    }
+                });
+
+                /*
+                 * -------------------------------------------------
+                 * 1. SAVE LOCALLY FIRST
+                 * -------------------------------------------------
+                 */
+                try {
+
+                   localStorage.setItem(
+                 'ict-projects-form',
+                  JSON.stringify(formDataObj)
+                );
+
+                   /*
+                    * Only the actual Save Changes button
+                    * can mark ICT Projects as complete.
+                    *
+                    * saveChanges(false) is used during navigation
+                    * and must NOT turn the status green.
+                    */
+                  if (showAlert === true) {
+                      localStorage.setItem(
+                      'ict-projects-saved',
+                      'true'
+                      );
+                    }
+
+                    console.log(
+                        'ICT Projects localStorage saved successfully.'
+                    );
+
+                    if (
+                        typeof updateStatusIndicators === 'function'
+                    ) {
+                        updateStatusIndicators();
+                    }
+
+                } catch (storageError) {
+
+                    console.error(
+                        'Error saving ICT Projects locally:',
+                        storageError
+                    );
+
+                    if (
+                        storageError.name === 'QuotaExceededError' ||
+                        storageError.code === 22
+                    ) {
+
+                        if (showAlert) {
+                            showAlertModal(
+                                'Error',
+                                'Unable to save: File(s) too large. Please reduce file sizes and try again.'
+                            );
+                        }
+
+                    } else {
+
+                        if (showAlert) {
+                            showAlertModal(
+                                'Error',
+                                'Error saving changes: ' +
+                                storageError.message
+                            );
+                        }
+                    }
+
+                    resolve(false);
+                    return;
                 }
+
+                /*
+                 * -------------------------------------------------
+                 * 2. SAVE TO DATABASE
+                 * -------------------------------------------------
+                 */
+
+                console.log(
+                    'Sending ICT Projects data to server...'
+                );
+
+                console.log(
+                    'ICT Projects payload:',
+                    formDataObj
+                );
+
+                /*
+                 * Get CSRF token from the form.
+                 */
+                const csrfInput = form.querySelector(
+                    'input[name="<?= csrf_token() ?>"]'
+                );
+
+                const csrfToken = csrfInput
+                    ? csrfInput.value
+                    : '';
+
+                fetch(form.action, {
+                    method: 'POST',
+
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                         'X-CSRF-TOKEN': csrfToken
+                      },
+                    body: JSON.stringify(formDataObj)
+                })
+
+                .then(async function(response) {
+
+                    const responseText =
+                        await response.text();
+
+                    console.log(
+                        'ICT Projects HTTP STATUS:',
+                        response.status
+                    );
+
+                    console.log(
+                        'ICT Projects RAW SERVER RESPONSE:',
+                        responseText
+                    );
+
+                    let data;
+
+                    try {
+
+                        data = JSON.parse(responseText);
+
+                    } catch (jsonError) {
+
+                        throw new Error(
+                            'Server did not return JSON. HTTP ' +
+                            response.status
+                        );
+                    }
+
+                    if (!response.ok) {
+
+                        throw new Error(
+                            data.message ||
+                            'Server returned HTTP ' +
+                            response.status
+                        );
+                    }
+
+                    return data;
+                })
+
+                .then(function(data) {
+
+                    console.log(
+                        'ICT Projects server save response:',
+                        data
+                    );
+
+                    if (!data.success) {
+
+                        throw new Error(
+                            data.message ||
+                            'Unable to save ICT Projects.'
+                        );
+                    }
+
+                    /*
+                     * -------------------------------------------------
+                     * 3. GET THE ISSP RECORD ID
+                     * -------------------------------------------------
+                     */
+
+                    const returnedProjectId =
+                        data.issp_record_id ||
+                        data.id ||
+                        null;
+
+                    if (
+                        returnedProjectId &&
+                        Number(returnedProjectId) > 0
+                    ) {
+
+                        const projectId =
+                            String(returnedProjectId);
+
+                        /*
+                         * This is the important part.
+                         *
+                         * Year 1/2/3 will use these IDs.
+                         */
+                        localStorage.setItem(
+                            'issp_record_id',
+                            projectId
+                        );
+
+                        localStorage.setItem(
+                            'edit_project_id',
+                            projectId
+                        );
+
+                        console.log(
+                            'ISSPS Project ID saved to localStorage:',
+                            projectId
+                        );
+
+                    } else {
+
+                        console.warn(
+                            'Server save succeeded but no ISSP project ID was returned.',
+                            data
+                        );
+                    }
+
+                   /*
+ * Only the actual Save Changes button
+ * marks ICT Projects as complete.
+ */
+if (showAlert === true) {
+    localStorage.setItem(
+        'ict-projects-saved',
+        'true'
+    );
+}
+
+                    if (
+                        typeof updateStatusIndicators === 'function'
+                    ) {
+                        updateStatusIndicators();
+                    }
+
+                    if (showAlert) {
+
+                        showAlertModal(
+                            'Success',
+                            'ICT Projects saved successfully.'
+                        );
+                    }
+
+                    resolve(true);
+                })
+
+                .catch(function(error) {
+
+                    console.error(
+                        'ICT Projects server save error:',
+                        error
+                    );
+
+                    /*
+                     * Important:
+                     * LocalStorage remains saved, so the user's
+                     * entered data is NOT lost.
+                     */
+                    if (showAlert) {
+
+                        showAlertModal(
+                            'Error',
+                            error.message ||
+                            'Unable to save ICT Projects to the server.'
+                        );
+                    }
+
+                    resolve(false);
+                });
+            };
+
+            if (fileReads.length > 0) {
+
+                Promise.all(fileReads)
+                    .then(continueSave);
+
             } else {
-                console.error('Form #mainForm not found');
-                if (showAlert) showAlertModal('Error', 'Error: Form not found');
-                resolve();
+
+                continueSave();
             }
+
         } catch (error) {
-            console.error('Error in saveChanges:', error);
-            if (showAlert) showAlertModal('Error', 'Error saving changes: ' + error.message);
-            resolve();
+
+            console.error(
+                'Error in saveChanges:',
+                error
+            );
+
+            if (showAlert) {
+
+                showAlertModal(
+                    'Error',
+                    'Error saving changes: ' +
+                    error.message
+                );
+            }
+
+            resolve(false);
         }
     });
 };
@@ -773,7 +1208,12 @@ function finalizeSave(formDataObj, showAlert) {
     try {
         const jsonStr = JSON.stringify(formDataObj);
         localStorage.setItem('ict-projects-form', jsonStr);
-        localStorage.setItem('ict-projects-saved', 'true');
+        if (showAlert === true) {
+    localStorage.setItem(
+        'ict-projects-saved',
+        'true'
+    );
+}
         
         const verify = localStorage.getItem('ict-projects-form');
         console.log('Save verified:', verify ? 'OK (' + Object.keys(JSON.parse(verify)).length + ' keys)' : 'FAILED');

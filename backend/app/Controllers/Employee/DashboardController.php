@@ -125,39 +125,89 @@ class DashboardController extends BaseController
     }
 
     public function viewFullIctDocument(int $id)
-    {
-        $currentUserId = (int) session()->get('user_id');
-        $isspModel = new ISspRecordModel();
-        $userModel = new UserModel();
+{
+    $currentUserId = (int) session()->get('user_id');
 
-        $project = $isspModel
-            ->select('issp_records.*, departments.name AS department_name, users.name AS created_by_name')
-            ->join('departments', 'departments.id = issp_records.department_id', 'left')
-            ->join('users', 'users.id = issp_records.created_by', 'left')
-            ->where('issp_records.id', $id)
-            ->where('issp_records.created_by', $currentUserId)
-            ->first();
+    $isspModel = new ISspRecordModel();
+    $userModel = new UserModel();
+    $resourceModel = new \App\Models\ResourceRequirementModel();
 
-        if ($project === null) {
-            return redirect()->to('employee/submitted-ict-projects')->with('error', 'Project not found.');
+    $project = $isspModel
+        ->select('issp_records.*, departments.name AS department_name, users.name AS created_by_name')
+        ->join('departments', 'departments.id = issp_records.department_id', 'left')
+        ->join('users', 'users.id = issp_records.created_by', 'left')
+        ->where('issp_records.id', $id)
+        ->where('issp_records.created_by', $currentUserId)
+        ->first();
+
+    if ($project === null) {
+        return redirect()->to('employee/submitted-ict-projects')
+            ->with('error', 'Project not found.');
+    }
+
+    /*
+     * Load main ICT form data.
+     */
+    $formData = [];
+
+    if (!empty($project['form_data'])) {
+        $decoded = json_decode($project['form_data'], true);
+
+        if (is_array($decoded)) {
+            $formData = $decoded;
         }
+    }
 
-        $formData = [];
-        if (!empty($project['form_data'])) {
-            $decoded = json_decode($project['form_data'], true);
-            if (is_array($decoded)) {
-                $formData = $decoded;
-            }
-        }
+    /*
+     * Load Resource Requirements using THIS project ID.
+     * Do not use the current session/localStorage project ID.
+     */
+    $year1Requirements = $resourceModel->getByYear(1, $id);
+    $year2Requirements = $resourceModel->getByYear(2, $id);
+    $year3Requirements = $resourceModel->getByYear(3, $id);
 
-        return view('frontend/employee/submitted-ict-projects/view_full', [
+    /*
+     * Load Summary of Investments for THIS project.
+     */
+    $generalSummary =
+        $resourceModel->getGeneralSummary($id);
+
+    $fundSourceSummary =
+        $resourceModel->getFundSourceSummary($id);
+
+    $statementOfExpenditureSummary =
+        $resourceModel->getStatementOfExpenditureSummary($id);
+
+    $objectOfExpenditureSummary =
+        $resourceModel->getObjectOfExpenditureSummary($id);
+
+    return view(
+        'frontend/employee/submitted-ict-projects/view_full',
+        [
             'title' => 'View Full ICT Document',
             'active' => 'submitted-ict-projects',
             'currentUser' => $userModel->findWithRole($currentUserId),
+
             'project' => $project,
             'formData' => $formData,
-        ]);
-    }
+
+            /*
+             * Resource Requirements
+             */
+            'year1Requirements' => $year1Requirements,
+            'year2Requirements' => $year2Requirements,
+            'year3Requirements' => $year3Requirements,
+
+            /*
+             * Summary of Investments
+             */
+            'generalSummary' => $generalSummary,
+            'fundSourceSummary' => $fundSourceSummary,
+            'statementOfExpenditureSummary' => $statementOfExpenditureSummary,
+            'objectOfExpenditureSummary' => $objectOfExpenditureSummary,
+        ]
+    );
+}
 
     public function resubmitProject(int $id)
     {
@@ -421,79 +471,216 @@ class DashboardController extends BaseController
     }
 
     public function saveDraft()
-    {
-        $this->response->setContentType('application/json');
+{
+    $this->response->setContentType('application/json');
 
-        try {
-            $this->ensureFormDataColumn();
+    try {
 
-            $currentUserId = (int) session()->get('user_id');
-            $isspRecordModel = new ISspRecordModel();
-            $json = $this->request->getJSON(true);
+        $this->ensureFormDataColumn();
 
-            $formData = $json['form_data'] ?? [];
-            $id = $json['id'] ?? null;
+        $currentUserId = (int) session()->get('user_id');
 
-            $title = $formData['ict-projects-form']['internal_project_title'] ?? ($json['title'] ?? '');
-            if (empty(trim($title))) {
-                return $this->response->setJSON([
-                    'success' => false,
-                    'message' => 'Project title is required.'
-                ]);
-            }
+        $isspRecordModel = new ISspRecordModel();
 
-            if ($id) {
-                // Update existing record — preserve status if not a draft
-                $existing = $isspRecordModel->find($id);
-                $newStatus = 'draft';
-                if ($existing && !empty($existing['status']) && $existing['status'] !== 'draft') {
-                    $newStatus = $existing['status'];
-                }
-                $isspRecordModel->update($id, [
-                    'title' => $title,
-                    'description' => $formData['ict-projects-form']['internal_description'] ?? '',
-                    'budget' => $formData['ict-projects-form']['internal_total_cost'] ?? 0,
-                    'form_data' => json_encode($formData),
-                    'status' => $newStatus,
-                    'updated_at' => date('Y-m-d H:i:s'),
-                ]);
-            } else {
-                // Create new draft
-                $id = $isspRecordModel->insert([
-                    'title' => $title,
-                    'description' => $formData['ict-projects-form']['internal_description'] ?? '',
-                    'budget' => $formData['ict-projects-form']['internal_total_cost'] ?? 0,
-                    'department_id' => session()->get('department_id'),
-                    'status' => 'draft',
-                    'created_by' => $currentUserId,
-                    'form_data' => json_encode($formData),
-                    'created_at' => date('Y-m-d H:i:s'),
-                    'updated_at' => date('Y-m-d H:i:s'),
-                ]);
-            }
+        $json = $this->request->getJSON(true);
 
-            // Keep the newly created/updated project as the active project
-           $id = (int) $id;
+        $formData = $json['form_data'] ?? [];
 
-            session()->set('edit_project_id', $id);
-            session()->set('issp_record_id', $id);
+        $id = isset($json['id']) && $json['id']
+            ? (int) $json['id']
+            : null;
 
-            $action = $id ? 'issp.draft_updated' : 'issp.draft_created';
-            $this->writeLog($action, ($id ? 'Updated' : 'Created') . ' ISSP draft #' . $id, $formData['ict-projects-form']['internal_project_title'] ?? '');
 
-            return $this->response->setJSON([
-                'success' => true,
-                'id' => $id,
-                'message' => 'Draft saved successfully.'
-            ]);
+        /* =====================================================
+           PROJECT TITLE
+           ===================================================== */
 
-        } catch (\Exception $e) {
+        $title =
+            $formData['ict-projects-form']['internal_project_title']
+            ?? ($json['title'] ?? '');
+
+
+        if (empty(trim((string) $title))) {
+
             return $this->response->setJSON([
                 'success' => false,
-                'message' => 'Error saving draft: ' . $e->getMessage()
+                'message' => 'Project title is required.'
             ]);
+
         }
+
+
+        /* =====================================================
+           COMMON DATA
+           ===================================================== */
+
+        $commonData = [
+            'title' => $title,
+
+            'description' =>
+                $formData['ict-projects-form']['internal_description']
+                ?? '',
+
+            'budget' =>
+                $formData['ict-projects-form']['internal_total_cost']
+                ?? 0,
+
+            'form_data' =>
+                json_encode($formData),
+
+            /*
+             * IMPORTANT:
+             * Save Draft MUST always make the parent
+             * ISSP record a draft.
+             */
+            'status' => 'draft',
+
+            'updated_at' =>
+                date('Y-m-d H:i:s'),
+        ];
+
+
+        /* =====================================================
+           UPDATE EXISTING PROJECT
+           ===================================================== */
+
+        if ($id) {
+
+            $existing =
+                $isspRecordModel
+                    ->where('id', $id)
+                    ->where('created_by', $currentUserId)
+                    ->first();
+
+
+            if (!$existing) {
+
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Project not found or access denied.'
+                ]);
+
+            }
+
+
+            /*
+             * IMPORTANT:
+             *
+             * We ONLY update the parent ISSP record.
+             *
+             * We DO NOT delete resource requirements.
+             *
+             * Existing Year 1, Year 2 and Year 3 records
+             * remain in resource_requirements.
+             */
+
+            $isspRecordModel->update(
+                $id,
+                $commonData
+            );
+
+        }
+
+
+        /* =====================================================
+           CREATE NEW PROJECT
+           ===================================================== */
+
+        else {
+
+            $departmentId =
+                session()->get('department_id');
+
+
+            $insertData = array_merge(
+                $commonData,
+                [
+                    'department_id' => $departmentId,
+
+                    'created_by' =>
+                        $currentUserId,
+
+                    'created_at' =>
+                        date('Y-m-d H:i:s'),
+                ]
+            );
+
+
+            $id =
+                $isspRecordModel->insert(
+                    $insertData
+                );
+
+
+            if (!$id) {
+
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Failed to create draft project.'
+                ]);
+
+            }
+
+        }
+
+
+        /* =====================================================
+           NORMALIZE PROJECT ID
+           ===================================================== */
+
+        $id = (int) $id;
+
+
+        /* =====================================================
+   DRAFT SAVED
+   Keep DB records, but clear active editing session.
+   ===================================================== */
+
+session()->remove('edit_project_id');
+session()->remove('issp_record_id');
+
+
+        /* =====================================================
+           AUDIT LOG
+           ===================================================== */
+
+        $this->writeLog(
+            'issp.draft_updated',
+            'Saved ISSP draft #' . $id,
+            $formData['ict-projects-form']['internal_project_title']
+                ?? ''
+        );
+
+
+        /* =====================================================
+           RESPONSE
+           ===================================================== */
+
+        return $this->response->setJSON([
+            'success' => true,
+            'id' => $id,
+            'issp_record_id' => $id,
+            'message' => 'Draft saved successfully.'
+        ]);
+
+
+    } catch (\Exception $e) {
+
+        log_message(
+            'error',
+            'Save Draft Error: ' . $e->getMessage()
+        );
+
+
+        return $this->response->setJSON([
+            'success' => false,
+            'message' =>
+                'Error saving draft: ' .
+                $e->getMessage()
+        ]);
+
     }
+}
 
     public function editIctProject($id, $section)
 {

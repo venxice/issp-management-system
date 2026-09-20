@@ -1,16 +1,24 @@
 <?php
+
 $active ??= '';
 $editId ??= 0;
+
 $currentPage = current_url();
-$isIsspPage = strpos($currentPage, 'edit-ict-project') !== false;
-$resourceRequirementStatus = $resourceRequirementStatus ?? [
-    1 => false,
-    2 => false,
-    3 => false,
-];
+
+$isIsspPage =
+    strpos($currentPage, 'edit-ict-project') !== false;
+
+$resourceRequirementStatus =
+    $resourceRequirementStatus ?? [
+        1 => false,
+        2 => false,
+        3 => false,
+    ];
+
 ?>
 
 <style>
+
 .status-indicator {
     width: 16px;
     height: 16px;
@@ -159,6 +167,7 @@ $resourceRequirementStatus = $resourceRequirementStatus ?? [
     color: #fff;
     background: rgba(255, 255, 255, .08);
 }
+
 </style>
 
 
@@ -249,39 +258,60 @@ $resourceRequirementStatus = $resourceRequirementStatus ?? [
      RESOURCE REQUIREMENTS
      ========================================================= -->
 
-<div class="sidebar-section-title">Resource Requirements</div>
+<div class="sidebar-section-title">
+    Resource Requirements
+</div>
+
 
 <a
     class="nav-link <?= $active === 'year1-requirements' ? 'active' : '' ?>"
-    href="<?= site_url('employee/resource-requirements/year1-requirements/' . (session()->get('edit_project_id') ?: session()->get('issp_record_id'))) ?>"
-    data-resource-route="year1-requirements"
+    href="<?= site_url(
+        'employee/resource-requirements/year1-requirements/' .
+        (session()->get('edit_project_id') ?: session()->get('issp_record_id'))
+    ) ?>"
+    data-form-key="year1-requirements-form"
+    data-resource-year="1"
 >
     <span class="status-indicator not-started"></span>
     Year 1 Requirements
 </a>
 
+
 <a
     class="nav-link <?= $active === 'year2-requirements' ? 'active' : '' ?>"
-    href="<?= site_url('employee/resource-requirements/year2-requirements') ?>"
-    data-resource-route="year2-requirements"
+    href="<?= site_url(
+        'employee/resource-requirements/year2-requirements/' .
+        (session()->get('edit_project_id') ?: session()->get('issp_record_id'))
+    ) ?>"
+    data-form-key="year2-requirements-form"
+    data-resource-year="2"
 >
     <span class="status-indicator not-started"></span>
     Year 2 Requirements
 </a>
 
+
 <a
     class="nav-link <?= $active === 'year3-requirements' ? 'active' : '' ?>"
-    href="<?= site_url('employee/resource-requirements/year3-requirements') ?>"
-    data-resource-route="year3-requirements"
+    href="<?= site_url(
+        'employee/resource-requirements/year3-requirements/' .
+        (session()->get('edit_project_id') ?: session()->get('issp_record_id'))
+    ) ?>"
+    data-form-key="year3-requirements-form"
+    data-resource-year="3"
 >
     <span class="status-indicator not-started"></span>
     Year 3 Requirements
 </a>
 
+
 <a
     class="nav-link <?= $active === 'general-summary' ? 'active' : '' ?>"
-    href="<?= site_url('employee/resource-requirements/summary-of-investments') ?>"
-    data-resource-route="summary-of-investments"
+    href="<?= site_url(
+        'employee/resource-requirements/summary-of-investments/' .
+        (session()->get('edit_project_id') ?: session()->get('issp_record_id'))
+    ) ?>"
+    data-form-key="summary-of-investments-form"
 >
     <span class="status-indicator not-started"></span>
     Summary of Investments
@@ -309,7 +339,7 @@ $resourceRequirementStatus = $resourceRequirementStatus ?? [
 
 <script>
 
-window.resourceRequirementDbStatus = <?= json_encode($resourceRequirementStatus) ?>;
+
 
 /* =========================================================
    EDIT MODE
@@ -318,59 +348,16 @@ window.resourceRequirementDbStatus = <?= json_encode($resourceRequirementStatus)
 const isEditMode =
     <?= !empty($editId) && $editId > 0 ? 'true' : 'false' ?>;
 
-console.log('EDIT MODE:', isEditMode);
-console.log('EDIT ID:', <?= json_encode($editId) ?>);
+console.log(
+    'EDIT MODE:',
+    isEditMode
+);
 
+console.log(
+    'EDIT ID:',
+    <?= json_encode($editId) ?>
+);
 
-/* =========================================================
-   RESOURCE REQUIREMENT DB STATUS
-   ========================================================= */
-
-window.resourceRequirementDbStatus =
-    window.resourceRequirementDbStatus || {};
-
-
-/*
- * Set DB status
- */
-window.setResourceRequirementDbStatus =
-    function(year, hasRecords) {
-
-        year = parseInt(year, 10);
-
-        if (![1, 2, 3].includes(year)) {
-            return;
-        }
-
-        window.resourceRequirementDbStatus[year] =
-            Boolean(hasRecords);
-
-        if (
-            typeof window.updateStatusIndicators ===
-            'function'
-        ) {
-
-            window.updateStatusIndicators();
-
-        }
-
-    };
-
-
-/*
- * Get DB status
- */
-window.hasResourceRequirementDbStatus =
-    function(year) {
-
-        year = parseInt(year, 10);
-
-        return (
-            window.resourceRequirementDbStatus[year] ===
-            true
-        );
-
-    };
 
 
 /* =========================================================
@@ -394,26 +381,11 @@ function collectFormData() {
         'performance-measurement-form',
 
 
-        'year1-office-productivity-form',
-        'year1-internal-ict-projects-form',
-        'year1-cross-agency-form',
-        'year1-continuing-costs-form',
-
-
-        'year2-office-productivity-form',
-        'year2-internal-ict-projects-form',
-        'year2-cross-agency-form',
-        'year2-continuing-costs-form',
-
-
-        'year3-office-productivity-form',
-        'year3-internal-ict-projects-form',
-        'year3-cross-agency-form',
-        'year3-continuing-costs-form',
-
-
+        // Resource Requirements
+        'year1-requirements-form',
+        'year2-requirements-form',
+        'year3-requirements-form',
         'summary-of-investments-form'
-
     ];
 
     const data = {};
@@ -645,8 +617,11 @@ function areAllFormsComplete() {
                 'Network Infrastructure',
 
             skip: [
+
                 'dept_network_diagram',
+
                 'regional_network_diagram'
+
             ]
 
         },
@@ -658,7 +633,9 @@ function areAllFormsComplete() {
                 'Enterprise Architecture',
 
             skip: [
+
                 'ea_diagram'
+
             ]
 
         },
@@ -680,6 +657,7 @@ function areAllFormsComplete() {
                 'Information Systems',
 
             skip: [
+
                 'interop1_internal_system',
                 'interop1_external_system',
                 'online_link_1',
@@ -690,6 +668,7 @@ function areAllFormsComplete() {
                 'platform_1',
                 'database_1',
                 'storage_1'
+
             ]
 
         },
@@ -701,8 +680,10 @@ function areAllFormsComplete() {
                 'ICT Projects',
 
             skip: [
+
                 'internal_strategic_others_text',
                 'cross_strategic_others_text'
+
             ]
 
         },
@@ -892,10 +873,16 @@ function areAllFormsComplete() {
 
 
         if (
+
             !ictProjects ||
+
             !ictProjects.internal_project_title ||
-            typeof ictProjects.internal_project_title !== 'string' ||
+
+            typeof ictProjects.internal_project_title !==
+                'string' ||
+
             ictProjects.internal_project_title.trim() === ''
+
         ) {
 
             return {
@@ -948,10 +935,11 @@ function areAllFormsComplete() {
 
             /*
              * Resource Requirements are handled
-             * separately. Empty categories are allowed.
+             * separately.
              */
 
             if (
+
                 key.indexOf(
                     '-office-productivity-form'
                 ) >= 0 ||
@@ -967,6 +955,7 @@ function areAllFormsComplete() {
                 key.indexOf(
                     '-continuing-costs-form'
                 ) >= 0
+
             ) {
 
                 continue;
@@ -1018,8 +1007,12 @@ function areAllFormsComplete() {
 
 
                     if (
-                        typeof pos === 'string' &&
+
+                        typeof pos ===
+                            'string' &&
+
                         pos.trim() !== ''
+
                     ) {
 
                         hasAnyRow = true;
@@ -1039,12 +1032,17 @@ function areAllFormsComplete() {
 
                         if (
 
-                            typeof stat !== 'string' ||
+                            typeof stat !==
+                                'string' ||
+
                             stat.trim() === '' ||
 
                             (
-                                typeof cnt !== 'string' &&
-                                typeof cnt !== 'number'
+                                typeof cnt !==
+                                    'string' &&
+
+                                typeof cnt !==
+                                    'number'
                             ) ||
 
                             String(cnt).trim() === ''
@@ -1097,8 +1095,11 @@ function areAllFormsComplete() {
             for (const field in data) {
 
                 if (
+
                     field.startsWith('csrf_') ||
+
                     field === '_token'
+
                 ) {
 
                     continue;
@@ -1116,8 +1117,12 @@ function areAllFormsComplete() {
 
 
                 if (
-                    typeof data[field] === 'string' &&
+
+                    typeof data[field] ===
+                        'string' &&
+
                     data[field].trim() === ''
+
                 ) {
 
                     return {
@@ -1381,236 +1386,26 @@ function submitEditProject() {
 
 
 /* =========================================================
-   UPDATE RESOURCE REQUIREMENT STATUS SIDEBAR
+   UNIFIED STATUS INDICATORS
    ========================================================= */
 
-function updateResourceRequirementStatusSidebar(year) {
+window.updateStatusIndicators =
+    function() {
+    console.log('UPDATE STATUS FUNCTION RUNNING');
 
-    year = parseInt(year, 10);
-
-
-    if (![1, 2, 3].includes(year)) {
-
-        return;
-
-    }
-
-
-    const link =
-        document.querySelector(
-            '.app-sidebar [data-resource-year="' +
-            year +
-            '"]'
-        );
-
-
-    if (!link) {
-
-        return;
-
-    }
-
-
-    const indicator =
-        link.querySelector(
-            '.status-indicator'
-        );
-
-
-    if (!indicator) {
-
-        return;
-
-    }
-
-
-    /* =====================================================
-       DATABASE STATUS
-       ===================================================== */
-
-    const hasDbRecord =
-        window.hasResourceRequirementDbStatus(
-            year
-        );
-
-
-    /* =====================================================
-       LOCAL STORAGE STATUS
-       ===================================================== */
-
-    const keys = [
-
-        'year' +
-        year +
-        '-office-productivity-form',
-
-        'year' +
-        year +
-        '-internal-ict-projects-form',
-
-        'year' +
-        year +
-        '-cross-agency-form',
-
-        'year' +
-        year +
-        '-continuing-costs-form'
-
-    ];
-
-
-    let hasLocalData = false;
-
-
-    keys.forEach(function(key) {
-
-        const raw =
-            localStorage.getItem(key);
-
-
-        if (!raw) {
-
-            return;
-
-        }
-
-
-        try {
-
-            const rows =
-                JSON.parse(raw);
-
-
-            if (
-                Array.isArray(rows) &&
-                rows.length > 0
-            ) {
-
-                hasLocalData = true;
-
-            }
-
-        }
-        catch (e) {
-
-            console.error(
-                'Resource requirement parse error:',
-                key,
-                e
+        const sidebarLinks =
+            document.querySelectorAll(
+                'a.nav-link[data-form-key]'
             );
 
-        }
 
-    });
-
-
-    /* =====================================================
-       SAVE FLAG
-       ===================================================== */
-
-    const savedKey =
-        'year' +
-        year +
-        '-requirements-saved';
+        console.log(
+            'Unified status links found:',
+            sidebarLinks.length
+        );
 
 
-    const isSaved =
-        localStorage.getItem(savedKey) ===
-        'true';
-
-        if (
-    storageKey === 'ict-projects-form' &&
-    isSaved
-) {
-
-    indicator.className =
-        'status-indicator complete';
-
-    return;
-
-}
-
-
-    /* =====================================================
-       DETERMINE STATUS
-       ===================================================== */
-
-    /*
-     * DB record exists
-     * = COMPLETE
-     */
-    if (hasDbRecord) {
-
-        indicator.className =
-            'status-indicator complete';
-
-        return;
-
-    }
-
-
-    /*
-     * Local data + saved
-     * = COMPLETE
-     */
-    if (
-        hasLocalData &&
-        isSaved
-    ) {
-
-        indicator.className =
-            'status-indicator complete';
-
-        return;
-
-    }
-
-
-    /*
-     * Local data only
-     * = IN PROGRESS
-     */
-    if (hasLocalData) {
-
-        indicator.className =
-            'status-indicator in-progress';
-
-        return;
-
-    }
-
-
-    /*
-     * Nothing
-     * = NOT STARTED
-     */
-    indicator.className =
-        'status-indicator not-started';
-
-}
-
-
-/* =========================================================
-   UPDATE STATUS INDICATORS
-   ========================================================= */
-
-function updateStatusIndicators() {
-
-    /* =====================================================
-       PROPOSED ICT STRATEGY
-       ===================================================== */
-
-    document
-        .querySelectorAll(
-            '.app-sidebar .nav-link[data-form-key]'
-        )
-        .forEach(function(link) {
-
-            const storageKey =
-                link.getAttribute(
-                    'data-form-key'
-                );
-
+        sidebarLinks.forEach(function(link) {
 
             const indicator =
                 link.querySelector(
@@ -1618,126 +1413,154 @@ function updateStatusIndicators() {
                 );
 
 
+            if (!indicator) {
+                return;
+            }
+
+
+           /* =================================================
+   RESOURCE REQUIREMENT STATUS
+   ================================================= */
+
+const resourceYear =
+    link.getAttribute('data-resource-year');
+
+if (resourceYear) {
+
+    const year =
+        parseInt(resourceYear, 10);
+
+    if ([1, 2, 3].includes(year)) {
+
+        /*
+         * MAIN SAVE CHANGES = GREEN
+         */
+        const saved =
+            localStorage.getItem(
+                'year' + year + '-requirements-saved'
+            ) === 'true';
+
+        if (saved) {
+
+            indicator.className =
+                'status-indicator complete';
+
+            return;
+        }
+
+
+        /*
+         * UNSAVED LOCAL DATA = ORANGE
+         */
+        const keys = [
+            'year' + year + '-office-productivity-form',
+            'year' + year + '-internal-ict-projects-form',
+            'year' + year + '-cross-agency-form',
+            'year' + year + '-continuing-costs-form'
+        ];
+
+        let hasLocalData = false;
+
+        keys.forEach(function(key) {
+
+            const raw =
+                localStorage.getItem(key);
+
+            if (!raw) {
+                return;
+            }
+
+            try {
+
+                const parsed =
+                    JSON.parse(raw);
+
+                if (
+                    Array.isArray(parsed) &&
+                    parsed.length > 0
+                ) {
+                    hasLocalData = true;
+                }
+
+            }
+            catch (e) {
+
+                console.error(
+                    'Resource requirement parse error:',
+                    key,
+                    e
+                );
+
+            }
+
+        });
+
+
+        if (hasLocalData) {
+
+            indicator.className =
+                'status-indicator in-progress';
+
+            return;
+        }
+
+
+        indicator.className =
+            'status-indicator not-started';
+
+        return;
+    }
+}
+           
+
+
+            /* =================================================
+               SUMMARY OF INVESTMENTS
+               ================================================= */
+
             if (
-                !indicator ||
-                !storageKey
+                link.getAttribute(
+                    'data-form-key'
+                ) ===
+                'summary-of-investments-form'
             ) {
+
+                const saved =
+                    localStorage.getItem(
+                        'summary-of-investments-saved'
+                    );
+
+
+                if (saved === 'true') {
+
+                    indicator.className =
+                        'status-indicator complete';
+
+                }
+                else {
+
+                    indicator.className =
+                        'status-indicator not-started';
+
+                }
+
 
                 return;
 
             }
 
 
-            try {
+            /* =================================================
+               PROPOSED ICT STRATEGY
+               ================================================= */
 
-                const raw =
-                    localStorage.getItem(
-                        storageKey
-                    );
-
-
-                /*
-                 * No saved data
-                 */
-                if (!raw) {
-
-                    indicator.className =
-                        'status-indicator not-started';
-
-                    return;
-
-                }
+            const storageKey =
+                link.getAttribute(
+                    'data-form-key'
+                );
 
 
-                const data =
-                    JSON.parse(raw);
-
-
-                const skip =
-                    getSkipFields(
-                        storageKey
-                    );
-
-
-                let hasData = false;
-
-
-                Object.entries(data)
-                    .forEach(function(entry) {
-
-                        const key =
-                            entry[0];
-
-                        const value =
-                            entry[1];
-
-
-                        /*
-                         * Ignore CSRF
-                         */
-                        if (
-                            key.startsWith('csrf_') ||
-                            key === '_token'
-                        ) {
-
-                            return;
-
-                        }
-
-
-                        /*
-                         * Ignore optional fields
-                         */
-                        if (
-                            skip.indexOf(key) >= 0
-                        ) {
-
-                            return;
-
-                        }
-
-
-                        /*
-                         * Strings
-                         */
-                        if (
-                            typeof value === 'string' &&
-                            value.trim() !== ''
-                        ) {
-
-                            hasData = true;
-
-                        }
-
-
-                        /*
-                         * Arrays
-                         */
-                        else if (
-                            Array.isArray(value) &&
-                            value.length > 0
-                        ) {
-
-                            hasData = true;
-
-                        }
-
-
-                        /*
-                         * Objects
-                         */
-                        else if (
-                            value !== null &&
-                            typeof value === 'object' &&
-                            Object.keys(value).length > 0
-                        ) {
-
-                            hasData = true;
-
-                        }
-
-                    });
-
+            if (storageKey) {
 
                 const savedKey =
                     storageKey.replace(
@@ -1746,29 +1569,18 @@ function updateStatusIndicators() {
                     );
 
 
-                const isSaved =
+                const savedValue =
                     localStorage.getItem(
                         savedKey
-                    ) === 'true';
+                    );
 
 
-                if (
-                    isSaved &&
-                    hasData
-                ) {
+                if (savedValue === 'true') {
 
                     indicator.className =
                         'status-indicator complete';
 
                 }
-
-                else if (hasData) {
-
-                    indicator.className =
-                        'status-indicator in-progress';
-
-                }
-
                 else {
 
                     indicator.className =
@@ -1777,192 +1589,14 @@ function updateStatusIndicators() {
                 }
 
             }
-            catch (e) {
-
-                console.error(
-                    'Status indicator error:',
-                    storageKey,
-                    e
-                );
-
-
-                indicator.className =
-                    'status-indicator not-started';
-
-            }
 
         });
 
-
-    /* =====================================================
-       RESOURCE REQUIREMENTS
-       ===================================================== */
-
-    updateResourceRequirementStatusSidebar(1);
-
-    updateResourceRequirementStatusSidebar(2);
-
-    updateResourceRequirementStatusSidebar(3);
-
-
-    /* =====================================================
-       SUMMARY OF INVESTMENTS
-       ===================================================== */
-
-    updateSimpleStatusSidebar(
-        'summary-of-investments-form',
-        'summary-of-investments-saved'
-    );
-
-}
+    };
 
 
 /* =========================================================
-   SUMMARY OF INVESTMENTS STATUS
-   ========================================================= */
-
-function updateSimpleStatusSidebar(
-    storageKey,
-    savedKey
-) {
-
-    const link =
-        document.querySelector(
-            '[data-form-key="' +
-            storageKey +
-            '"]'
-        );
-
-
-    if (!link) {
-
-        return;
-
-    }
-
-
-    const indicator =
-        link.querySelector(
-            '.status-indicator'
-        );
-
-
-    if (!indicator) {
-
-        return;
-
-    }
-
-
-    const raw =
-        localStorage.getItem(
-            storageKey
-        );
-
-
-    let hasData = false;
-
-
-    if (raw) {
-
-        try {
-
-            const data =
-                JSON.parse(raw);
-
-
-            if (
-                data &&
-                typeof data === 'object'
-            ) {
-
-                Object.entries(data)
-                    .forEach(function(entry) {
-
-                        const value =
-                            entry[1];
-
-
-                        if (
-                            typeof value === 'string' &&
-                            value.trim() !== ''
-                        ) {
-
-                            hasData = true;
-
-                        }
-
-                        else if (
-                            Array.isArray(value) &&
-                            value.length > 0
-                        ) {
-
-                            hasData = true;
-
-                        }
-
-                        else if (
-                            value !== null &&
-                            typeof value === 'object' &&
-                            Object.keys(value).length > 0
-                        ) {
-
-                            hasData = true;
-
-                        }
-
-                    });
-
-            }
-
-        }
-        catch (e) {
-
-            console.error(
-                'Summary status error:',
-                e
-            );
-
-        }
-
-    }
-
-
-    const isSaved =
-        localStorage.getItem(
-            savedKey
-        ) === 'true';
-
-
-    if (
-        isSaved &&
-        hasData
-    ) {
-
-        indicator.className =
-            'status-indicator complete';
-
-    }
-
-    else if (hasData) {
-
-        indicator.className =
-            'status-indicator in-progress';
-
-    }
-
-    else {
-
-        indicator.className =
-            'status-indicator not-started';
-
-    }
-
-}
-
-
-/* =========================================================
-   GET OPTIONAL / SKIPPED FIELDS
+   OPTIONAL / SKIPPED FIELDS
    ========================================================= */
 
 function getSkipFields(storageKey) {
@@ -2040,7 +1674,6 @@ function getSkipFields(storageKey) {
 
 }
 
-
 /* =========================================================
    PAGE LOAD
    ========================================================= */
@@ -2049,6 +1682,11 @@ document.addEventListener(
     'DOMContentLoaded',
     function() {
 
+    
+        /*
+         * Initial unified status update
+         */
+
         updateStatusIndicators();
 
 
@@ -2056,22 +1694,6 @@ document.addEventListener(
            SIDEBAR NAVIGATION
            ================================================= */
 
-                        if (link.hasAttribute('data-resource-route')) {
-                            const projectId =
-                                localStorage.getItem('edit_project_id') || <?= json_encode(session()->get('edit_project_id') ?: session()->get('issp_record_id')) ?>;
-
-                            const route =
-                                link.getAttribute('data-resource-route');
-
-                            if (projectId && route) {
-                                window.location.href =
-                                    '<?= site_url('employee/resource-requirements') ?>/' +
-                                    route +
-                                    '/' +
-                                    encodeURIComponent(projectId);
-                                return;
-                            }
-                        }
         document
             .querySelectorAll(
                 'a.nav-link[href]'
@@ -2093,16 +1715,7 @@ document.addEventListener(
                          * Save current form to localStorage.
                          * Do not mark it completed.
                          */
-
-                        if (
-                            typeof window.saveChanges ===
-                            'function'
-                        ) {
-
-                            window.saveChanges(false);
-
-                        }
-
+                                        
 
                         setTimeout(
                             function() {
@@ -2168,7 +1781,7 @@ document.addEventListener(
 
 
                     /*
-                     * Save everything to DB first
+                     * Save everything to DB first.
                      */
 
                     fetch(
@@ -2210,7 +1823,9 @@ document.addEventListener(
                     .then(function(response) {
 
                         return response.ok
+
                             ? response.json()
+
                             : Promise.reject(
                                 new Error(
                                     'Save failed: ' +
@@ -2347,6 +1962,11 @@ document.addEventListener(
 
                         }
 
+
+                        /*
+                         * Clear edit project ID from
+                         * browser storage.
+                         */
 
                         localStorage.removeItem(
                             'edit_project_id'

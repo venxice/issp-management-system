@@ -202,28 +202,47 @@ $isIsspPage = strpos($currentPage, 'proposed-ict-strategy') !== false ||
 
 <div class="sidebar-section-title">Resource Requirements</div>
 
-<a class="nav-link <?= $active === 'year1-requirements' ? 'active' : '' ?>"
-   href="<?= site_url('employee/resource-requirements/year1-requirements') ?>"
-   data-resource-route="year1-requirements">
-    <span class="status-indicator not-started"></span> Year 1 Requirements
+<a
+    class="nav-link <?= $active === 'year1-requirements' ? 'active' : '' ?>"
+    href="<?= site_url('employee/resource-requirements/year1-requirements/' . (session()->get('edit_project_id') ?: session()->get('issp_record_id'))) ?>"
+    data-form-key="year1-requirements-form"
+    data-resource-year="1"
+    data-resource-route="year1-requirements"
+>
+    <span class="status-indicator not-started"></span>
+    Year 1 Requirements
 </a>
 
-<a class="nav-link <?= $active === 'year2-requirements' ? 'active' : '' ?>"
-   href="<?= site_url('employee/resource-requirements/year2-requirements') ?>"
-   data-resource-route="year2-requirements">
-    <span class="status-indicator not-started"></span> Year 2 Requirements
+<a
+    class="nav-link <?= $active === 'year2-requirements' ? 'active' : '' ?>"
+    href="<?= site_url('employee/resource-requirements/year2-requirements/' . (session()->get('edit_project_id') ?: session()->get('issp_record_id'))) ?>"
+    data-form-key="year2-requirements-form"
+    data-resource-year="2"
+    data-resource-route="year2-requirements"
+>
+    <span class="status-indicator not-started"></span>
+    Year 2 Requirements
 </a>
 
-<a class="nav-link <?= $active === 'year3-requirements' ? 'active' : '' ?>"
-   href="<?= site_url('employee/resource-requirements/year3-requirements') ?>"
-   data-resource-route="year3-requirements">
-    <span class="status-indicator not-started"></span> Year 3 Requirements
+<a
+    class="nav-link <?= $active === 'year3-requirements' ? 'active' : '' ?>"
+    href="<?= site_url('employee/resource-requirements/year3-requirements/' . (session()->get('edit_project_id') ?: session()->get('issp_record_id'))) ?>"
+    data-form-key="year3-requirements-form"
+    data-resource-year="3"
+    data-resource-route="year3-requirements"
+>
+    <span class="status-indicator not-started"></span>
+    Year 3 Requirements
 </a>
 
-<a class="nav-link <?= $active === 'general-summary' ? 'active' : '' ?>"
-   href="<?= site_url('employee/resource-requirements/summary-of-investments') ?>"
-   data-resource-route="summary-of-investments">
-    <span class="status-indicator not-started"></span> Summary of Investments
+<a
+    class="nav-link <?= $active === 'summary-of-investments' ? 'active' : '' ?>"
+    href="<?= site_url('employee/resource-requirements/summary-of-investments/' . (session()->get('edit_project_id') ?: session()->get('issp_record_id'))) ?>"
+    data-form-key="summary-of-investments-form"
+    data-resource-route="summary-of-investments"
+>
+    <span class="status-indicator not-started"></span>
+    Summary of Investments
 </a>
 
 
@@ -259,12 +278,78 @@ function updateStatusIndicators() {
         if (!indicator || !storageKey) return;
 
         try {
-            const data = localStorage.getItem(storageKey);
-            if (storageKey === 'ict-projects-form' && data) {
-                indicator.className = 'status-indicator complete';
-                return;
-            }
-            if (data) {
+           const data = localStorage.getItem(storageKey);
+
+/*
+ * RESOURCE REQUIREMENTS
+ *
+ * Each year becomes green only after
+ * its own Save Changes sets the saved flag.
+ */
+if (
+    storageKey === 'year1-requirements-form' ||
+    storageKey === 'year2-requirements-form' ||
+    storageKey === 'year3-requirements-form'
+) {
+    var resourceYear = storageKey.match(/^year([123])-requirements-form$/);
+    var savedKey = resourceYear
+        ? 'year' + resourceYear[1] + '-requirements-saved'
+        : null;
+
+    if (savedKey && localStorage.getItem(savedKey) === 'true') {
+        indicator.className = 'status-indicator complete';
+    } else {
+        indicator.className = 'status-indicator not-started';
+    }
+
+    return;
+}
+
+
+/*
+ * SUMMARY OF INVESTMENTS
+ *
+ * Summary is automatically green when
+ * at least one Resource Requirements year
+ * has been saved.
+ *
+ * No separate Save Changes is needed.
+ */
+if (storageKey === 'summary-of-investments-form') {
+    var year1Complete =
+        localStorage.getItem('year1-requirements-saved') === 'true';
+
+    var year2Complete =
+        localStorage.getItem('year2-requirements-saved') === 'true';
+
+    var year3Complete =
+        localStorage.getItem('year3-requirements-saved') === 'true';
+
+    if (year1Complete || year2Complete || year3Complete) {
+        indicator.className = 'status-indicator complete';
+    } else {
+        indicator.className = 'status-indicator not-started';
+    }
+
+    return;
+}
+
+/*
+ * ICT PROJECTS
+ *
+ * Green only after the user clicks Save Changes.
+ */
+if (storageKey === 'ict-projects-form') {
+    if (localStorage.getItem('ict-projects-saved') === 'true') {
+        indicator.className = 'status-indicator complete';
+    } else {
+        indicator.className = 'status-indicator not-started';
+    }
+
+    return;
+}
+
+if (data) {
                 const parsed = JSON.parse(data);
                 var totalReal = 0;
                 var emptyReal = 0;
@@ -404,8 +489,15 @@ function collectFormData() {
         'ict-human-capital-form',
         'information-systems-form',
         'ict-projects-form',
-        'performance-measurement-form'
+        'performance-measurement-form',
+
+        // Resource Requirements
+        'year1-requirements-form',
+        'year2-requirements-form',
+        'year3-requirements-form',
+        'summary-of-investments-form'
     ];
+    
     const data = {};
     keys.forEach(function(key) {
         try {
@@ -455,11 +547,43 @@ function saveDraft() {
         return r.json();
     })
     .then(data => {
-        if (data.success) {
-            localStorage.clear();
-            showAlertModal('Success', 'Draft saved successfully!');
-            window.location.href = '<?= site_url('employee/draft-ict-projects') ?>';
-        } else {
+      if (data.success) {
+    // Clear only the active project/edit state and form cache
+    localStorage.removeItem('edit_project_id');
+    localStorage.removeItem('issp_record_id');
+
+    localStorage.removeItem('ict-projects-form');
+    localStorage.removeItem('ict-projects-saved');
+
+    // Clear Year 1 / 2 / 3 resource requirement form cache
+    [
+        'year1-office-productivity-form',
+        'year1-internal-ict-projects-form',
+        'year1-cross-agency-form',
+        'year1-continuing-costs-form',
+        'year1-requirements-saved',
+
+        'year2-office-productivity-form',
+        'year2-internal-ict-projects-form',
+        'year2-cross-agency-form',
+        'year2-continuing-costs-form',
+        'year2-requirements-saved',
+
+        'year3-office-productivity-form',
+        'year3-internal-ict-projects-form',
+        'year3-cross-agency-form',
+        'year3-continuing-costs-form',
+        'year3-requirements-saved',
+
+        'summary-of-investments-form',
+        'summary-of-investments-saved'
+    ].forEach(function(key) {
+        localStorage.removeItem(key);
+    });
+
+    showAlertModal('Success', 'Draft saved successfully!');
+    window.location.href = '<?= site_url('employee/draft-ict-projects') ?>';
+} else {
             showAlertModal('Error', 'Error saving draft: ' + (data.message || 'Please try again.'));
             saveDraftBtn.disabled = false;
             saveDraftBtn.innerHTML = '<i class="fa-solid fa-floppy-disk me-2"></i>Save as Draft';
